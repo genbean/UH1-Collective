@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LED</class>
+ <widget class="QWidget" name="LED">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>495</width>
+    <height>44</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::Shape::Box</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Sunken</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,3,1,3,3">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="pushButton_LEDNumber">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton:checked {
+    background-color: green;
+    color: palette(button-text);
+}
+QPushButton:disabled {
+    color: palette(button-text);
+}</string>
+        </property>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+       <widget class="QCheckBox" name="checkBox_HostControlled">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>External</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="AltSpinBox" name="spinBox_InputNumber">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="correctionMode">
+         <enum>QAbstractSpinBox::CorrectionMode::CorrectToNearestValue</enum>
+        </property>
+        <property name="maximum">
+         <number>128</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="CenteredCBox" name="comboBox_Function"/>
+      </item>
+      <item>
+       <widget class="CenteredCBox" name="comboBox_Timer"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AltSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>altspinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CenteredCBox</class>
+   <extends>QComboBox</extends>
+   <header>centered_cbox.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
