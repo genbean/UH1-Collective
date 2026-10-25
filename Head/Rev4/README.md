@@ -1,6 +1,6 @@
 # UH-1 "Huey" head, Rev 4: one piece again
 
-Rev 4 is head Rev 3 (`../Rev3`) with the neck block and the trigger mount built back into the box, so the head is **one print**. Everything else is Rev 3's as it stands now:
+Rev 4 is head Rev 3 (no longer in the repository) with the neck block and the trigger mount built back into the box, so the head is **one print**. Everything else is Rev 3's as it stands now:
 - the tube centred across the box;
 - GOV RPM 19 mm in from the left edge;
 - the faux friction knob under the box;
@@ -16,9 +16,9 @@ The switches, gears, AS5600 seat and wiring are unchanged. The throttle has no i
 
 | | |
 |---|---|
-| **One piece** | The box, the neck, the friction knob, the tube boss with its 25.2 mm press-fit bore and the tapped hole for the tube's set screw, the ceiling's O-ring groove, stop groove, the pinion pocket, the AS5600 pod and the trigger mount are all one part, `HueyHeadR4-Body.stl` (157 cm³). |
+| **One piece** | The box, the neck, the friction knob, the tube boss with its 25.2 mm press-fit bore and the tapped hole for the tube's set screw, the ceiling's O-ring groove, stop groove, the pinion pocket, the AS5600 pod and the trigger mount are all one part, `HueyHeadR4-Body.stl` (166 cm³). |
 | **Gone** | Everything that held the neck block in the box: its two ears and front screws, the rear-wall bosses, the two bottom screws, the key and the notch in the bottom. The trigger mount's tenon and screw are gone too. That's five M3 × 12 screws fewer than Rev 3. |
-| **Tube depth** | The tube bore is 32.7 mm deep (20 mm + 1/2 in), up a column that carries the boss on up, so the press fit has 63 % more length. The tube is cut 491 mm: 12.7 mm longer than before for this bore, and 8 mm more for the base's deeper socket, so the head sits at the same height. The cross hole is still 10 mm below the tube's top end. |
+| **Tube depth** | The tube bore is 32.7 mm deep (20 mm + 1/2 in), up a column that carries the boss on up, so the press fit has 63 % more length. The tube is the whole 500 mm, uncut: 12.7 mm longer than before for this bore, and 17.3 mm more for the base's deeper socket, so the head sits at the same height. The cross hole is still 10 mm below the tube's top end. |
 | **Tube set screw** | The screw kit has no M5 longer than 20 mm, so the M5 × 40 cross bolt and its nut slot are gone. An M5 × 8 set screw, in a tapped hole in the boss's front, pins the tube through the front wall of its 5.2 mm cross hole. It goes in from the front with the lower panel off. |
 | **Screws** | Every screw and nut but one is from the two kits: see [Screws](#screws). The trigger's M3 × 25 pivot comes from the NIULUNBAO M3 countersunk set ([Amazon B0BYXS4BTF](https://www.amazon.com/dp/B0BYXS4BTF): M3 × 20–40). |
 | **Starter trigger** | Its mount is laid out square to the rear wall, so it prints with the head, standing on the bed. Nothing reaches past the rear wall's plane. The switch's leads drop into a groove under the mount and go up one straight round hole into the box. An adjustable stop makes sure the switch always clicks. See [Starter trigger](#starter-trigger). |
@@ -34,9 +34,9 @@ The switches, gears, AS5600 seat and wiring are unchanged. The throttle has no i
 
 ![The friction knob](renders/HueyHeadR4_Knob.png)
 
-The knob is modelled on the UH-1's throttle friction knob, and it's the same as Rev 3's. From the bottom up:
-- a 56 mm fluted wheel: 12 deep round flutes between rounded lobes;
-- a 45° flank in to a plain 44 mm band, 6 mm tall, where the real one carries its THROTTLE INCREASE / FRICTION INCREASE label;
+The knob is modelled on the UH-1's throttle friction knob. Its wheel profile and flutes are measured off `throttle_friction_knob.stl` from [UH-1 Huey Helicopter Collective](https://www.thingiverse.com/thing:4284120) by **hotpretzel**, licensed under [Creative Commons Attribution-NonCommercial](https://creativecommons.org/licenses/by-nc/4.0/). So the knob, and `HueyHeadR4-Body.stl`, which carries it, are for non-commercial use only. From the bottom up:
+- a 56 mm bulging wheel with 12 round flutes (11.2 mm wide, 22.35 mm radius at the bottom) cut straight down its side, leaving narrow lands between them;
+- the wheel runs out into a plain 44 mm band, 4.7 mm tall, where the real one carries its THROTTLE INCREASE / FRICTION INCREASE label;
 - a 45° chamfer up into the neck.
 
 It is 22 mm tall and doesn't turn. Its top sits 1.5 mm under the sloping bottom where they come closest, at the front right. The grip sits 22 mm lower on the tube than it did before the knob.
@@ -84,7 +84,38 @@ The only bend in the route is in the open, where the leads turn from the groove 
 
 ## Controls, throttle and wiring
 
-The same as Rev 3, with no idle return: the grip's 74° lug runs 181° between the groove's two hard stops and stays where you leave it. The grip's teeth are filled solid over the 139° that never reaches the pinion, and the lug stands on that. See [`../Rev3/README.md`](../Rev3/README.md#throttle) and [`../Rev3/README.md`](../Rev3/README.md#controls). The throttle AS5600 goes on **AX4 (J14)** with **DIR to GND** and is programmed with **PROG4**.
+### Throttle
+
+- **Travel:** 180° from the idle stop to full open, rolling the grip away from you (181° with the lug's 1° of slack). There is no idle return and no cutoff range: the grip stays where you leave it, held by the friction collar.
+- **Stops:** the grip's 74° stop lug (15.35–17.15 mm out, 5.2 mm tall) runs in a 255° groove in the ceiling, and the groove's two ends are the hard stops.
+- **Gears:** a 32-tooth grip gear drives a 20-tooth pinion, 1.6:1, so the grip's 180° is 288° at the AS5600's magnet.
+- **Filled teeth:** the grip only ever turns 181°, so only about 221° of its 32 teeth can reach the pinion: the travel plus 22° either side. The other 139° is filled solid out to the tooth tips, and the stop lug stands on that. The filled part clears the pinion's tips by more than 1 mm at every angle.
+- **Backlash:** each gear tooth is thinned by 0.1 mm (`BACKLASH` in `throttle_r4.py`), which leaves about 0.75° of play at the grip.
+
+### Controls
+
+| Panel | Control | Part | HeliSR input |
+|---|---|---|---|
+| Lower | GOV RPM INCR / DECR | APEM 637H/2 toggle, (ON)-OFF-(ON) | IN1 / IN2 |
+| Lower | LDG LT EXT / OFF / RETR | APEM 639H/2 toggle, ON-OFF-ON | IN3 / IN4 |
+| Lower | SEARCH CONT EXT / RETR / L / R | The 4-way hat ([`Hat/README.md`](Hat/README.md)): 4 × TE 1825910-6 tact switches | IN9 – IN12 |
+| Lower | STOP REL | Same Sky PB4-M-BK-D-67 push button | IN13 |
+| Upper | SL ON / OFF / STOW | APEM 639H/2 toggle, ON-OFF-ON | IN5 / IN6 |
+| Upper | LDG LT ON / OFF | APEM 636H/2 toggle, ON-ON | IN7 |
+| Behind the grip | Starter trigger | TE 1825910-6 tact switch in the trigger mount | IN14 |
+| Throttle | Twist grip | AS5600 module | AX4 |
+| Base | Collective | AS5600 module in the MkIII base | AX1 |
+
+IN8, IN15, IN16, AX2 and AX3 are spare.
+
+### Wiring and programming
+
+The throttle AS5600 goes on **AX4 (J14)** of the HeliSR Rev 3.0 board, with **DIR to GND**, and is programmed with **PROG4**. With the upper panel off, PROG4 is at the top of the board.
+1. Roll the grip to the idle stop, hold it there and press PROG4 for about a second.
+2. Roll it to full open and press PROG4 again.
+3. AX4 should now follow the grip: 0 at the idle stop and full scale at full open. Set the sim's idle point a little above 0.
+
+Until it's programmed, AX4 reads full scale whatever the grip does.
 
 
 ### The grip floats on O-rings
@@ -109,19 +140,29 @@ All STLs are in the head's own frame, so they open assembled. In the slicer, tur
 | Part | File | Lay it on | Notes |
 |---|---|---|---|
 | **Head** | `HueyHeadR4-Body.stl` | its **rear wall** (outside face) | **Tree supports**, on build plate and on the model, for the neck, the friction knob, the inside of the neck and the tube bore (they lie about 20° off horizontal), and the 50 mm bridge over the wire slot. Paint them on with support enforcers if you'd rather leave the rest bare. The trigger mount needs none: its lugs stand on the bed and its faces are bridges. Keep supports out of the switch's pocket, the groove under the mount and the leads' hole. 4 walls, 25 % infill, in the filament you printed the grip bearing coupons with. |
-| Lower panel | `HueyHeadR4-LowerPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | White labels on a P1S with AMS, as in [Rev 3](../Rev3/README.md#white-labels-on-a-p1s-with-ams) |
-| Upper panel | `HueyHeadR4-UpperPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | As Rev 3 |
+| Lower panel | `HueyHeadR4-LowerPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | White labels on a P1S with AMS (see below) |
+| Upper panel | `HueyHeadR4-UpperPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | As the lower panel |
 | Trigger | `HueyHeadR4-Trigger.stl` | either flat side | Tap the hole through its arm M3, for the pull stop |
 | Hat cap | `HueyHeadR4-Hat-Cap.stl` | its flat base | Terraced Huey knob; glued onto the rocker plate's legs |
 | Hat rocker plate | `HueyHeadR4-Hat-RockerPlate.stl` | legs down, boss up | Its 4 legs are part of it |
 | Hat bezel | `HueyHeadR4-Hat-Bezel.stl` | front face down | |
-| Throttle grip | `HueyHeadR4-ThrottleGrip.stl` | upright, bottom end down (gear and lug up) | 25.8 mm bore, clear of the tube, with two O-ring grooves inside. Their roofs are 45°, so it needs no supports |
+| Throttle grip | `HueyHeadR4-ThrottleGrip.stl` | upright, bottom end down (gear and lug up) | Built from the MkII grip of [DIY Helicopter Collective Hall Effect](https://www.thingiverse.com/thing:5226353) by **Gazmac52** ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)) (`../source/MkII-Grip-bore-relieved-25mm.stl`). 25.8 mm bore, clear of the tube, with two O-ring grooves inside. Their roofs are 45°, so it needs no supports |
 | Friction collar | `HueyHeadR4-FrictionCollar.stl` | bottom face down (O-ring groove up) | |
 | Pinion | `HueyHeadR4-Pinion.stl` | flat | The magnet shaft slides into its hex (4.6 mm across flats, 0.15 over the shaft) |
 | Magnet shaft | `HueyHeadR4-MagnetShaft.stl` | cap face down | |
 | Sensor seat coupon | `HueyHeadR4-SensorSeatCoupon.stl` | the same way round as it sits in the head printed on its rear wall | Optional: try your AS5600 module in it first |
 | Grip bearing coupons | `HueyHeadR4-GripBearingCoupons.stl` | flat, labels up | Optional: the 25.2 ring checks the head's tube bore on the carbon tube. The grip rides on O-rings now |
 | O-ring coupon | `HueyHeadR4-ORingCoupon.stl` | upright, like the grip | A 7 mm slice of the grip's bore with one O-ring groove, cut exactly as the grip's (about 2 g). Fit a greased O-ring and slide it on the carbon tube before printing the grip: it should turn with a light, even drag, with no plastic touching the tube |
+
+### White labels on a P1S with AMS
+
+The labels are recessed 0.6 mm into each panel's face. The `-WhiteText` file is a separate body that fills that recess exactly. Because the panels print face down, white is only needed for the first three layers.
+
+1. In Bambu Studio, import the `-Black` and `-WhiteText` files for one panel together (select both files). When it asks whether to load them as a single object with multiple parts, choose **Yes**.
+2. In the object list, right-click the text part and set its filament to the white slot. Leave the body on black.
+3. Press **F** (lay on face) and click the panel's front face.
+4. Use 0.2 mm layers with a 0.2 mm first layer. White then covers layers 1–3 and the rest is black. Leave the prime tower on.
+5. The textured PEI plate gives the panels a crinkle finish like the real ones.
 
 The 4-way hat is new in Rev 4 and needs no MkII parts: see [`Hat/README.md`](Hat/README.md) for how it goes together.
 
@@ -145,11 +186,14 @@ Every screw and nut but one is from two kits: the AvrestYPT countersunk kit ([Am
 | Tube | M5 × 8 set screw, from the boss's front | M5 thread tapped in the boss; the tip goes through the tube's front hole | 1 |
 | Trigger pivot | M3 × 25 countersunk, **from the NIULUNBAO M3 set (the kits stop at 20 mm)**, from the left-hand lug's countersink | through the trigger, 8 mm into M3 thread tapped through the right-hand lug; the tip stays inside | 1 |
 | Trigger pull stop | M3 × 4 set screw, from behind the trigger's arm | M3 thread tapped through the arm; its tip meets the mount (see [Setting the stop](#starter-trigger)) | 1 |
+| Pull stop seat | M2 × 8 countersunk, from the kit, head flush with the mount's face under the spring pocket | M2 thread tapped by hand in a 1.6 mm pilot (8.5 mm deep) behind a 90° countersink; the stop screw's tip bears on its head, not on plastic | 1 |
 | Friction collar | M4 × 12 countersunk, head 2 mm into the ear | M4 nut in the other ear's pocket | 1 |
 
 Not screws, but bought with them: the throttle's four O-rings, **24 mm ID × 2 mm** (28 mm OD) nitrile O-ring, ×4: FOCMKEAS, 50 for $6.89 ([Amazon B0BWWBTL4N](https://www.amazon.com/dp/B0BWWBTL4N)). See [The grip floats on O-rings](#the-grip-floats-on-o-rings).
 
 ![The panel screws](renders/HueyHeadR4_Screws_Panels.png)
+
+![The pull stop's seat: the countersunk M2 hole in the mount's face, then the screw in place (red), then from below](renders/HueyHeadR4_StopSeat.png)
 
 ![Lower panel off: the set screws](renders/HueyHeadR4_Screws_Inside.png)
 
@@ -161,7 +205,24 @@ Not screws, but bought with them: the throttle's four O-rings, **24 mm ID × 2 m
 
 ## Bought
 
-The same as Rev 3 ([`../Rev3/README.md`](../Rev3/README.md#bought)), but every screw and nut is from the two kits above, apart from the trigger's M3 × 25 countersunk pivot: no M5 × 40 bolt, no M3 × 10s or socket-cap screws. The BOM in `../../BOM` lists Rev 4's head.
+The list for the whole collective, with part numbers and prices for the board, head and base, is `../../BOM/Heli_Collective_Final_BOM.xlsx` (it now lists head Rev 5). Every screw and nut is from the two kits above, apart from the trigger's M3 × 25 countersunk pivot.
+
+| Item | Qty | Notes |
+|---|---|---|
+| 25 × 23 mm carbon tube, **500 mm** | 1 | The MkIII base's tube (`../../Base`). Use it whole, uncut, and drill a 5.2 mm hole through its **front wall only**, 10 mm below its top end, for the set screw's tip |
+| Screws and nuts | | See [Screws](#screws) |
+| O-ring, 24 mm ID × 2 mm (28 mm OD), nitrile (FOCMKEAS, [Amazon B0BWWBTL4N](https://www.amazon.com/dp/B0BWWBTL4N), 50 for $6.89) | 4 | Two in the grip's bore, one in the friction collar, one in the ceiling's groove. See [The grip floats on O-rings](#the-grip-floats-on-o-rings) |
+| Bivar SRS-4-4MM spacers (Digi-Key SRS-4-4MM-ND) | 4 | Between the rear wall and the HeliSR board |
+| Pen spring, up to 4 mm across | 1 | The trigger return (cut to about 13 mm) |
+| AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | The throttle's; its ~4 × 2 mm magnet goes in the shaft's cap |
+| APEM 639H/2 toggle, ON-OFF-ON (Digi-Key 679-1223-ND) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
+| APEM 637H/2 toggle, (ON)-OFF-(ON) (679-1219-ND) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
+| APEM 636H/2 toggle, ON-ON (679-1217-ND) | 1 | LDG LT ON (IN7) |
+| Same Sky PB4-M-BK-D-67 push button (2223-PB4-M-BK-D-67-ND) | 1 | STOP REL (IN13) |
+| TE 1825910-6 tact switch, 6 × 6 mm (450-1650-ND) | 5 | SEARCH CONT hat (IN9–IN12) and starter trigger (IN14) |
+| HeliSR Rev 3.0 board with its Pro Micro and JST cables | 1 | `../../PCB/HeliSR_Rev3.0`; the throttle module goes on AX4 (J14) |
+| Hot glue | a dab | Holds the AS5600 module at the front of its grooves |
+| Ballast, steel or lead | ~50 g | Only if the base's gas strut lifts too much |
 
 ## Assembly
 
@@ -190,7 +251,7 @@ With the lower panel off, everything inside the box goes in through its open fro
    6. Slide the trigger in from behind between the lugs, pressing the spring in. Fit the M3 × 25 countersunk pivot from the left, through the trigger, into the right-hand lug.
    7. Set the stop: see [Setting the stop](#starter-trigger).
 7. **Tube:**
-   1. Cut the carbon tube to 491 mm and drill its 5.2 mm cross hole.
+   1. Use the carbon tube whole (500 mm, uncut) and drill its 5.2 mm cross hole.
    2. Grease the four O-rings lightly. Roll one into each groove inside the grip. Slide the friction collar on (groove up), roll an O-ring down the tube into the collar's groove, then slide the grip on (gear up). Roll the fourth O-ring onto the tube just above the grip: the groove in the head's ceiling takes it as the head goes on.
    3. Route the USB cable and the base sensor's lead up through the tube.
 8. **Head onto the tube:**
@@ -198,7 +259,14 @@ With the lower panel off, everything inside the box goes in through its open fro
    2. Press the head down onto the tube until the tube stops at the lip, rocking the grip a few degrees so its gear meshes with the pinion. Turn it until the tube's cross hole lines up with the hole in the boss's front.
    3. Turn the M5 × 8 set screw into the boss's front until its tip is in the tube's hole, about 1.4 mm under the boss's surface. Keep the cables clear of the hole inside the tube.
 9. **Friction:** push the grip up until it meets the head. It stops softly on the ceiling's O-ring. Slide the friction collar up until the O-rings give the feel you want, and tighten its M4 × 12.
-10. **HeliSR board, switches, wiring, panels and search hat:** as in Rev 3, steps 11–13, with M3 × 12 countersunk screws in the panels.
+10. **HeliSR board:**
+    1. Plug the Pro Micro into its sockets.
+    2. Fit the board upright in the upper box, components to the front, USB end down, on four M3 × 12 screws from outside the rear wall and through the spacers. The nuts go on the front.
+    3. Bring the USB cable up through the wire slot and plug it in from below.
+11. **Switches and wiring:**
+    1. Fit the toggles and the STOP REL button into the panels, and build the 4-way hat into the lower panel's carrier (see [`Hat/README.md`](Hat/README.md)).
+    2. Wire everything to the board (see [Controls](#controls)): the AS5600 to AX4 (J14), the starter to IN14.
+12. **Panels:** screw them on, M3 × 12 countersunk into the corner columns, then glue the hat's cap onto the rocker plate's legs.
 
 ## Checked in CAD
 
@@ -245,7 +313,7 @@ python huey_head_r4.py stl
 python throttle_r4.py ../source/MkII-Grip-bore-relieved-25mm.stl stl
 ```
 
-Both scripts stand alone; they don't import Rev 3's. `huey_head_r4.py` needs `numpy`, `trimesh`, `manifold3d` and `fonttools`. `throttle_r4.py` also needs `cadquery`, and its parts are the same as Rev 3's.
+Both scripts stand alone. `huey_head_r4.py` needs `numpy`, `trimesh`, `manifold3d` and `fonttools`. The labels use Routed Gothic Narrow, bundled in `../../fonts/routed-gothic` (SIL OFL 1.1). `throttle_r4.py` also needs `cadquery`.
 
 Settings you're likely to change in `huey_head_r4.py`:
 - the friction knob: `KNOB_*`;
