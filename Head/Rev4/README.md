@@ -18,9 +18,9 @@ The switches, gears, AS5600 seat and wiring are unchanged. The throttle has no i
 |---|---|
 | **One piece** | The box, the neck, the friction knob, the tube boss with its 25.2 mm press-fit bore and the tapped hole for the tube's set screw, the ceiling's O-ring groove, stop groove, the pinion pocket, the AS5600 pod and the trigger mount are all one part, `HueyHeadR4-Body.stl` (157 cm³). |
 | **Gone** | Everything that held the neck block in the box: its two ears and front screws, the rear-wall bosses, the two bottom screws, the key and the notch in the bottom. The trigger mount's tenon and screw are gone too. That's five M3 × 12 screws fewer than Rev 3. |
-| **Tube depth** | The tube bore is 32.7 mm deep (20 mm + 1/2 in), up a column that carries the boss on up, so the press fit has 63 % more length. The tube is cut 483 mm, 12.7 mm longer than before, so the head sits at the same height. The cross hole is still 10 mm below the tube's top end. |
+| **Tube depth** | The tube bore is 32.7 mm deep (20 mm + 1/2 in), up a column that carries the boss on up, so the press fit has 63 % more length. The tube is cut 491 mm: 12.7 mm longer than before for this bore, and 8 mm more for the base's deeper socket, so the head sits at the same height. The cross hole is still 10 mm below the tube's top end. |
 | **Tube set screw** | The screw kit has no M5 longer than 20 mm, so the M5 × 40 cross bolt and its nut slot are gone. An M5 × 8 set screw, in a tapped hole in the boss's front, pins the tube through the front wall of its 5.2 mm cross hole. It goes in from the front with the lower panel off. |
-| **Screws** | Every screw and nut but one is from the two kits: see [Screws](#screws). The trigger's M3 × 25 pivot is bought separately. |
+| **Screws** | Every screw and nut but one is from the two kits: see [Screws](#screws). The trigger's M3 × 25 pivot comes from the NIULUNBAO M3 countersunk set ([Amazon B0BYXS4BTF](https://www.amazon.com/dp/B0BYXS4BTF): M3 × 20–40). |
 | **Starter trigger** | Its mount is laid out square to the rear wall, so it prints with the head, standing on the bed. Nothing reaches past the rear wall's plane. The switch's leads drop into a groove under the mount and go up one straight duct into the box. An adjustable stop makes sure the switch always clicks. See [Starter trigger](#starter-trigger). |
 | **Printing** | The head prints on its rear wall, like Rev 2's body. That leaves the neck, the knob and the tube bore about 20° off horizontal, so they need tree supports, and the press-fit bore needs a test fit (see [Printing](#printing)). |
 
@@ -112,7 +112,9 @@ All STLs are in the head's own frame, so they open assembled. In the slicer, tur
 | Lower panel | `HueyHeadR4-LowerPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | White labels on a P1S with AMS, as in [Rev 3](../Rev3/README.md#white-labels-on-a-p1s-with-ams) |
 | Upper panel | `HueyHeadR4-UpperPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | As Rev 3 |
 | Trigger | `HueyHeadR4-Trigger.stl` | either flat side | Tap the hole through its arm M3, for the pull stop |
-| Search hat | `HueyHeadR4-SearchHat.stl` | its flat bottom ring | Glues over the MkII thumbstick |
+| Hat cap | `HueyHeadR4-Hat-Cap.stl` | its flat base | Terraced Huey knob; glued onto the rocker plate's legs |
+| Hat rocker plate | `HueyHeadR4-Hat-RockerPlate.stl` | legs down, boss up | Its 4 legs are part of it |
+| Hat bezel | `HueyHeadR4-Hat-Bezel.stl` | front face down | |
 | Throttle grip | `HueyHeadR4-ThrottleGrip.stl` | upright, bottom end down (gear and lug up) | 25.8 mm bore, clear of the tube, with two O-ring grooves inside. Their roofs are 45°, so it needs no supports |
 | Friction collar | `HueyHeadR4-FrictionCollar.stl` | bottom face down (O-ring groove up) | |
 | Pinion | `HueyHeadR4-Pinion.stl` | flat | The magnet shaft slides into its hex (4.6 mm across flats, 0.15 over the shaft) |
@@ -121,7 +123,7 @@ All STLs are in the head's own frame, so they open assembled. In the slicer, tur
 | Grip bearing coupons | `HueyHeadR4-GripBearingCoupons.stl` | flat, labels up | Optional: the 25.2 ring checks the head's tube bore on the carbon tube. The grip rides on O-rings now |
 | O-ring coupon | `HueyHeadR4-ORingCoupon.stl` | upright, like the grip | A 7 mm slice of the grip's bore with one O-ring groove, cut exactly as the grip's (about 2 g). Fit a greased O-ring and slide it on the carbon tube before printing the grip: it should turn with a light, even drag, with no plastic touching the tube |
 
-Also print the MkII 4-way hat parts from the original project's head files: `4way_Cover`, `Bezel`, a `ThumbStick` and `StickRetainer`.
+The 4-way hat is new in Rev 4 and needs no MkII parts: see [`Hat/README.md`](Hat/README.md) for how it goes together.
 
 **The tube bore.** It's drawn at 25.23 mm, the 25.2 coupon's size. The coupon printed with its axis vertical, but here the bore prints lying down, so it comes out less round and has support scars. Clean the supports out, then try the carbon tube. Ream or sand the bore until the tube presses in firmly. If it's loose, a wrap of tape on the tube's end takes up the play, and the M5 set screw holds it either way.
 
@@ -141,7 +143,7 @@ Every screw and nut but one is from two kits: the AvrestYPT countersunk kit ([Am
 | Lower and upper panels | M3 × 12 countersunk | M3 thread tapped in the corner columns (50 mm deep pilots) | 8 |
 | HeliSR board | M3 × 12 countersunk, from outside the rear wall | through a 4 mm spacer and the board, M3 nut on the board's front | 4 |
 | Tube | M5 × 8 set screw, from the boss's front | M5 thread tapped in the boss; the tip goes through the tube's front hole | 1 |
-| Trigger pivot | M3 × 25 countersunk, **bought separately (not in the kits)**, from the left-hand lug's countersink | through the trigger, 8 mm into M3 thread tapped through the right-hand lug; the tip stays inside | 1 |
+| Trigger pivot | M3 × 25 countersunk, **from the NIULUNBAO M3 set (the kits stop at 20 mm)**, from the left-hand lug's countersink | through the trigger, 8 mm into M3 thread tapped through the right-hand lug; the tip stays inside | 1 |
 | Trigger pull stop | M3 × 4 set screw, from behind the trigger's arm | M3 thread tapped through the arm; its tip meets the mount (see [Setting the stop](#starter-trigger)) | 1 |
 | Friction collar | M4 × 12 countersunk, head 2 mm into the ear | M4 nut in the other ear's pocket | 1 |
 
@@ -188,7 +190,7 @@ With the lower panel off, everything inside the box goes in through its open fro
    6. Slide the trigger in from behind between the lugs, pressing the spring in. Fit the M3 × 25 countersunk pivot from the left, through the trigger, into the right-hand lug.
    7. Set the stop: see [Setting the stop](#starter-trigger).
 7. **Tube:**
-   1. Cut the carbon tube to 483 mm and drill its 5.2 mm cross hole.
+   1. Cut the carbon tube to 491 mm and drill its 5.2 mm cross hole.
    2. Grease the four O-rings lightly. Roll one into each groove inside the grip. Slide the friction collar on (groove up), roll an O-ring down the tube into the collar's groove, then slide the grip on (gear up). Roll the fourth O-ring onto the tube just above the grip: the groove in the head's ceiling takes it as the head goes on.
    3. Route the USB cable and the base sensor's lead up through the tube.
 8. **Head onto the tube:**
@@ -239,7 +241,7 @@ Not yet printed or test-fitted.
 
 ```bash
 cd Head/Rev4
-python huey_head_r4.py "<path to MkII-HeadFront.stl>" stl
+python huey_head_r4.py stl
 python throttle_r4.py ../source/MkII-Grip-bore-relieved-25mm.stl stl
 ```
 
