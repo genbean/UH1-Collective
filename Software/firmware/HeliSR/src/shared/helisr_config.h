@@ -35,7 +35,7 @@
 /* ------------------------------------------------------------- versions -- */
 
 #define HSR_FIRMWARE_VERSION      0x0100   // 1.0.0, shown in the configurator
-#define HSR_CONFIG_VERSION        1        // bump whenever dev_config_t changes
+#define HSR_CONFIG_VERSION        2        // bump whenever dev_config_t or its defaults change
 #define HSR_BOARD_ID              0x30     // HeliSR Rev 3.0
 
 /* --------------------------------------------------------------- limits -- */
@@ -70,14 +70,19 @@
 #define HSR_SPARE_ANALOG_MASK     0x01D4   // pins 4, 6, 8, 9, 10
 #define HSR_SPARE_PWM_MASK        0x0198   // pins 5, 6, 9, 10
 
-/* Raw analog readings are 12-bit (16 x 10-bit samples / 4). */
+/* Raw analog readings are 12-bit (16 x 10-bit samples / 4). The PC test
+   program overrides this to FreeJoy's 4095 when comparing with FreeJoy. */
+#ifndef HSR_RAW_MAX
 #define HSR_RAW_MAX               4092
+#endif
 
-/* Output axis values, as in FreeJoy. */
+/* Output axis values, as in FreeJoy. FreeJoy runs on a 32-bit CPU; on the
+   AVR an int is 16 bits, so anything wider than int16 is spelled out as int32. */
 #define AXIS_MIN_VALUE            (-32767)
 #define AXIS_MAX_VALUE            (32767)
-#define AXIS_CENTER_VALUE         (AXIS_MIN_VALUE + (AXIS_MAX_VALUE - AXIS_MIN_VALUE) / 2)
-#define AXIS_FULLSCALE            (AXIS_MAX_VALUE - AXIS_MIN_VALUE + 1)
+#define AXIS_CENTER_VALUE         0
+#define AXIS_FULLSCALE            ((int32_t)AXIS_MAX_VALUE - AXIS_MIN_VALUE + 1)    // 65535
+#define AXIS_SPAN                 ((int32_t)AXIS_MAX_VALUE - AXIS_MIN_VALUE)        // 65534
 
 #pragma pack(push, 1)
 
@@ -273,7 +278,7 @@ typedef struct
 {
 	int8_t          input_num;
 	uint8_t         type: 3;
-	uint8_t         timer: 4;           // FreeJoy uses a signed 4-bit field; values are 0-3
+	uint8_t         timer: 4;           // blink timer 0-3 (led_timer_ms); 15 (FreeJoy's signed -1) = steady
 	uint8_t         reserved: 1;
 } led_config_t;
 
@@ -324,6 +329,47 @@ typedef struct
 } params_report_t;
 
 #pragma pack(pop)
+
+/* ------------------------------------------------- shared rules ---------- */
+
+/* Hat number (1-4) of a POV direction button type, or 0. As in FreeJoy, POV
+   direction buttons are reported only through their hat; POV centre buttons
+   are ordinary buttons. */
+static inline uint8_t hsr_pov_of(uint8_t type)
+{
+	if (type >= POV1_UP && type <= POV1_LEFT) return 1;
+	if (type >= POV2_UP && type <= POV2_LEFT) return 2;
+	if (type >= POV3_UP && type <= POV3_LEFT) return 3;
+	if (type >= POV4_UP && type <= POV4_LEFT) return 4;
+	return 0;
+}
+
+/* Whether a logical button appears in the joystick report. Reported buttons
+   are packed in order: the first reported logical button is button 1. */
+static inline uint8_t hsr_button_reported(const button_t *b)
+{
+	return b->physical_num >= 0 && !b->is_disabled && !hsr_pov_of(b->type);
+}
+
+static inline uint8_t hsr_reported_buttons(const dev_config_t *cfg)
+{
+	uint8_t n = 0;
+	for (uint8_t i = 0; i < HSR_MAX_BUTTONS; i++) n += hsr_button_reported(&cfg->buttons[i]);
+	return n;
+}
+
+/* Hats in use (bit 0 = hat 1): those with a direction button on an input.
+   Used hats are reported in order, so hat 2 alone is the report's only hat. */
+static inline uint8_t hsr_pov_mask(const dev_config_t *cfg)
+{
+	uint8_t mask = 0;
+	for (uint8_t i = 0; i < HSR_MAX_BUTTONS; i++)
+	{
+		uint8_t pov = hsr_pov_of(cfg->buttons[i].type);
+		if (pov && cfg->buttons[i].physical_num >= 0) mask |= (uint8_t)(1 << (pov - 1));
+	}
+	return mask;
+}
 
 /* ----------------------------------------------------- layout checks ------ */
 

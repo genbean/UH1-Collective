@@ -59,11 +59,12 @@ void settings_defaults(dev_config_t *cfg)
 		a->calib_center = AXIS_CENTER_VALUE;
 		a->calib_max = AXIS_MAX_VALUE;
 		a->out_enabled = (i < HSR_AX_INPUTS);
-		a->source_main = (i < HSR_AX_INPUTS) ? (axis_source_t)i : SOURCE_NO;
+		a->source_main = (i < HSR_AX_INPUTS) ? (axis_source_t)i : (axis_source_t)SOURCE_NO;
 		for (uint8_t p = 0; p < 11; p++) a->curve_shape[p] = (int8_t)(p * 20 - 100);
 		a->resolution = 15;
 		a->button1 = a->button2 = a->button3 = -1;
 		a->divider = 50;
+		a->prescaler = 100;
 		a->button1_type = AXIS_BUTTON_DOWN;
 		a->button2_type = AXIS_BUTTON_RESET;
 		a->button3_type = AXIS_BUTTON_UP;
@@ -73,9 +74,16 @@ void settings_defaults(dev_config_t *cfg)
 	for (uint8_t i = 0; i < HSR_MAX_BUTTONS; i++)
 		cfg->buttons[i].physical_num = (i < HSR_SR_INPUTS) ? (int8_t)(HSR_PHYS_SR_FIRST + i) : -1;
 
+	for (uint8_t i = 0; i < HSR_MAX_AXES; i++) cfg->axes_to_buttons[i].points[1] = 255;
 	for (uint8_t i = 0; i < HSR_MAX_SHIFTS; i++) cfg->shift_config[i].button = -1;
-	for (uint8_t i = 0; i < HSR_MAX_LEDS; i++) cfg->leds[i].input_num = -1;
+	for (uint8_t i = 0; i < HSR_MAX_ENCODERS; i++) cfg->encoders[i] = ENCODER_CONF_2x;
+	for (uint8_t i = 0; i < HSR_MAX_LEDS; i++)
+	{
+		cfg->leds[i].input_num = -1;
+		cfg->leds[i].timer = 15;        // steady
+	}
 	for (uint8_t i = 0; i < HSR_MAX_PWM; i++) cfg->led_pwm_config[i].duty_cycle = 50;
+	for (uint8_t i = 0; i < 4; i++) cfg->led_timer_ms[i] = 50 * (i + 1);
 }
 
 uint8_t settings_load(void)

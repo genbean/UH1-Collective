@@ -1,6 +1,6 @@
 # Plan: a FreeJoy fork for the Pro Micro + HeliSR
 
-Status: **draft for review, 2026-10-24.** Nothing has been built or downloaded yet.
+Status, 2026-10-24: **phases 0-3 are done.** See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results) and [Phase 3 results](#phase-3-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
 
 ## Goal
 
@@ -51,7 +51,7 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
 
 ## How it fits together
 
-- **One shared settings definition** (`shared/config.h`) is compiled into both the firmware and the app. Compile-time checks on its size and field positions, for both the AVR and the PC, stop the two from ever disagreeing.
+- **One shared settings definition** (`firmware/HeliSR/src/shared/helisr_config.h`, plus `helisr_protocol.h`) is compiled into both the firmware and the app. It sits inside the sketch so the Arduino IDE can still build the sketch on its own; the configurator includes it by relative path. Compile-time checks on its size and field positions, for both the AVR and the PC, stop the two from ever disagreeing.
 - **USB:**
   - A custom Arduino plug-in USB module provides the joystick, plus a settings channel with its own IN and OUT endpoints. The Arduino core's HID library ignores data sent to the device, so it can't be used for the settings channel.
   - The same module answers the device and string descriptor requests, so the name and product ID come from EEPROM without patching the Arduino core. This was checked in core 1.8.8.
@@ -114,3 +114,171 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
 1. **Name: HeliSR.** The app is "HeliSR Configurator", and the firmware and default USB name are "HeliSR". Users can rename the device in the app.
 2. **Spare Pro Micro pins: yes, if they fit.** That means direct buttons, extra analog axes, and LEDs / PWM backlight, with a Pro Micro pin page in the app. If phase 1 shows the flash is too tight, they're dropped and the docs say so.
 3. **Qt download: approved.** At phase 4, install official Qt + MinGW binaries with aqtinstall (no Qt account needed), into a folder outside the project.
+
+## Phase 1 results
+
+All builds are clean (no warnings in HeliSR code) with arduino-cli and Arduino AVR core 1.8.8.
+
+**The firmware foundation**, built and working end to end in software:
+- the USB module: joystick plus settings channel, a joystick layout built from the settings, and the USB name, IDs and serial number from EEPROM;
+- the shift-register and interrupt-driven ADC drivers, and the spare pins;
+- EEPROM settings with a checksum;
+- the settings protocol, including read, write, commit, defaults, live data and bootloader entry;
+- simple button and axis processing.
+
+| Build | Flash (of 28,672) | RAM (of 2,560) |
+|---|---|---|
+| 16 MHz, no USB serial (release default) | 11,044 B (38 %) | 1,146 B (44 %) |
+| 16 MHz, with USB serial | 11,844 B (41 %) | 1,256 B (49 %) |
+| 8 MHz, no USB serial | 11,044 B (38 %) | 1,146 B (44 %) |
+
+The settings block is 652 bytes, the biggest single RAM user. It fits in EEPROM with 362 bytes to spare.
+
+**FreeJoy's feature code compiled for the AVR as it is** (64 buttons, 8 axes, 8 encoders), to see what phase 2 costs:
+
+| Module | Code | RAM |
+|---|---|---|
+| buttons.c | ~5.2 KB | ~740 B (button state: 5 B × 64 physical + 5 B × 64 logical) |
+| analog.c | ~9.9 KB | ~1,300 B (filter buffers 320, sensors 304, coefficient tables 280 in RAM, dead-band 128, axis buttons 120) |
+| axis_to_buttons.c | ~0.8 KB | – |
+| encoders.c | ~2.2 KB | 96 B |
+| **Total** | **~18.2 KB** | **~2.1 KB** |
+
+Taken as is, that doesn't fit: about 29 KB of flash and about 3.3 KB of RAM. The cuts below bring it to an estimated **~24–25 KB flash (85–90 %) and ~2.1–2.2 KB RAM**, leaving roughly 3–4 KB of flash and 350–450 B for the stack.
+
+**Verdict: go,** with these porting rules for phase 2:
+1. **Drop what the HeliSR can't use.** That means FreeJoy's sensor paths (TLE, MCP, MLX, ADS1115, I²C AS5600, AS5048), its STM32 ADC/DMA setup (`AxesInit` is 1.8 KB), matrices and hardware-timer encoders. This saves about 4 KB.
+2. **No floating point.** `ShapeFunc` and the dead-band code use `float`, which pulls in the soft-float library (about 1–2 KB). Use integer maths.
+3. **16-bit `int`.** FreeJoy assumes a 32-bit int, so every intermediate wider than int16 must be an explicit `int32_t`. The phase 1 compile already caught this in the axis constants. Even int32 has limits: the full-range calibration product overflows it (found on hardware), so keep FreeJoy's half-range `map3` structure.
+4. **Constant tables go in `PROGMEM`** (filter coefficients, encoder tables): about 300 B of RAM.
+5. **Smaller state.**
+   - Button timestamps: `uint16_t` milliseconds, not `int32_t`, which saves about 250 B.
+   - Only the 27 real digital inputs keep debounce state.
+   - Filter buffers sized to what is actually used.
+6. **Measure after each module.** Spare levers if needed:
+   - leave out the USB serial port (already the release default);
+   - cut the encoder count;
+   - cut the logical buttons from 64 to 48;
+   - cut the output axes from 8 to 6.
+
+   Each lever is documented if it's used.
+
+**The spare pins fit** (buttons, analog, LEDs, PWM): their code is in the foundation already, and costs a few hundred bytes.
+
+### Tested on a bare Pro Micro, 2026-10-24
+
+The board was the user's OSOYOO USB-C clone. It came with a factory sketch enumerating as an Arduino Micro (2341:8037), and its bootloader enumerates as 2341:0037. There was no HeliSR board, so the inputs were floating. The tools are in `firmware/test/`:
+- `hsr-usb-test.ps1` talks to the settings channel and the joystick through Windows' own HID and joystick APIs.
+- `hsr-flash-via-bootloader.ps1` flashes the way the configurator will.
+
+| Check | Result |
+|---|---|
+| First flash over the factory sketch's serial port | ✅ |
+| Enumeration | ✅ 1B4F:9206, v1.00, manufacturer and product "HeliSR", serial `HSR30AABCC1` from the unique ID. Composite device: a "HID-compliant game controller" and a "HID-compliant vendor-defined device" (plus COM port in the serial build) |
+| Joystick layout | ✅ 4 axes and 16 buttons (11-byte report); Windows' joystick API agrees |
+| Joystick data | ✅ raw reports and the joystick API match the live data |
+| INFO, READ, PARAMS | ✅ |
+| WRITE + COMMIT (rename to "HeliSR Test Box") | ✅ CRC checked, saved (2.2 s when every byte changes), watchdog restart, new name enumerated, "settings from EEPROM" = 1, unique ID kept |
+| COMMIT with a wrong CRC | ✅ refused with ERR_CRC, nothing saved |
+| DEFAULTS + COMMIT | ✅ |
+| ADC sampling | ✅ floating AX pins read 0; a test build with pull-ups (`-DHSR_TEST_AX_PULLUPS`) read 4087–4088 |
+| Bootloader entry over the settings channel, then flashing with avrdude | ✅ bootloader port after ~1.25 s; 11,168 B written and verified in 1.6 s. Works from the release build (no serial port) too |
+| Settings survive a reflash | ✅ (avrdude `-D` doesn't erase EEPROM) |
+
+**Bugs found and fixed while testing:**
+- Reports were sent only on change, so a program opening the joystick later saw nothing. Reports now go out every exchange period, as FreeJoy does, and GET_REPORT for the joystick input report is answered.
+- **Calibration overflow:** `(v − min) × 65534` exceeds int32 when the range is full width, so full-scale input came out as minimum. Fixed with clamping plus uint32. FreeJoy avoids this by mapping each half around the centre (`map3`), and the port must keep that.
+
+**Still to check on a real HeliSR:** the shift-register inputs, AS5600 or pot axes, the spare pins, and ADC noise with real sensors.
+
+## Phase 2 results
+
+FreeJoy's button, axis, axis-to-button, encoder and LED logic is ported (`buttons.cpp`, `axes.cpp`, `leds.cpp`), following the porting rules. Each file's header lists its changes from FreeJoy.
+
+**Design changes:**
+- **One pass over the logical buttons** in place of FreeJoy's physical x logical double loop, which would be 4,096 iterations per scan on the AVR. The behaviour is the same.
+- **Timestamps and maths:** 16-bit timestamps, integer maths only, and constant tables in flash.
+- **Shared report rules:** `hsr_button_reported()`, `hsr_reported_buttons()` and `hsr_pov_mask()` live in `helisr_config.h`, so the USB descriptor, the report and the configurator can't disagree. As in FreeJoy, POV direction buttons are reported only through their hat, and reported buttons are packed in order.
+- **New `SWITCH_CENTER` type** (on while an input and the next are both off).
+
+**FreeJoy bugs fixed in passing:**
+- **Trim limit:** the lower trim limit (`MIN - value`, where FreeJoy wrote `value + MIN`).
+- **Sequential buttons:** their start-up missed groups when there were three or more.
+- **Encoder slots:** index -1 reads for unused encoder slots.
+- **Dead band:** a dynamic-dead-band variance that could overflow.
+- **Delayed buttons:** one whose delay ran out during a slow pass now still gets its press.
+
+**Settings version 2.** Phase 1's defaults lacked fields phase 2 depends on (prescaler 100, LED timers, encoder mode), so the version was bumped. EEPROM saved by phase 1 is rejected and the defaults load.
+
+| Build | Flash (of 28,672) | RAM (of 2,560) |
+|---|---|---|
+| 16 MHz, no USB serial (release) | 20,256 B (70 %) | 2,042 B (80 %) |
+| 16 MHz, with USB serial (development) | 21,052 B (73 %) | 2,154 B (84 %) |
+| 8 MHz, no USB serial | 20,256 B (70 %) | 2,042 B (80 %) |
+
+Far below the 24-25 KB estimate, leaving about 8 KB of flash. RAM went from 2,166 to 2,042 B by moving tables to flash and sharing one packet buffer.
+
+**Stack, measured on the Pro Micro.** Start-up paints the free RAM, and INFO reports the bytes the stack has never reached. Through enumeration, settings transfers, a save-and-restart and processing, that's **224-254 B never touched**: about 290 B used at peak, leaving about 225 B of margin in the release build. The development build has about 110 B less margin. Keep an eye on this if features are added.
+
+**Longest processing pass:** 3.9 ms, which includes USB interrupts during enumeration.
+
+### Found on hardware: an Arduino core bug
+
+Every millisecond, the AVR core's start-of-frame interrupt calls `USB_Flush(CDC_TX)` with `CDC_TX` = endpoint 3. It does this even when the USB serial port is compiled out. In the release build, endpoint 3 was the settings channel's OUT endpoint, so any command waiting there for more than about 1 ms was thrown away. Phase 1 mostly got away with it because its loop was fast; phase 2's longer passes lost up to 75 % of commands.
+
+Fixed by ordering the endpoints so endpoint 3 is the settings IN endpoint, where the flush is harmless, and by sending each joystick report in one `USB_Send` call. The workaround is documented in `usb_helisr.cpp`. After the fix: 200/200 commands answered at about 4.7 ms each, 0 dropped. INFO now also reports commands received, replies dropped and the longest pass, for diagnosis.
+
+### Tested on the Pro Micro (`firmware/test/hsr-logic-test.ps1`)
+
+The test uses settings that drive features from inputs present on a bare board. It checks the report byte for byte and the exact read-back, then restores the factory settings. All checks passed:
+- inverted button, and the `SWITCH_CENTER` button;
+- axis-to-button ranges, also driving a hat;
+- inverted axis, curve point, and the "equal" axis function;
+- descriptor layout: 16 buttons, 4 axes, 1 hat, a 12-byte report;
+- Windows' joystick API agreeing with all of it;
+- PWM and single-LED outputs run without fault (not observable without hardware).
+
+**Not yet exercised on hardware** (they need real switches, or the PC tests in phase 3): toggle and pulse types, delay and press timers, radio and sequential buttons, shift layers, encoders, trim and centre buttons, filters, dynamic dead band and spare-pin inputs.
+
+**Behaviour to document for users:** while the configurator reads or writes settings, the joystick pauses for 2 s (as in FreeJoy).
+
+## Phase 3 results
+
+The firmware's own logic files (`buttons.cpp`, `axes.cpp`, `leds.cpp`, `pipeline.cpp`, `joy_layout.cpp`, `settings.cpp`) are compiled, unchanged, into a PC test program (`firmware/test/host/`) and driven one millisecond per pass. Three layers of checking:
+
+1. **Scenario tests:** 192 checks, one scenario per feature, with timings derived from FreeJoy's rules. They're built with GCC's undefined-behaviour checks in trap mode, so a signed overflow stops the test.
+2. **Comparison with FreeJoy's own code:** FreeJoy's `buttons.c`, `encoders.c`, `axis_to_buttons.c` and `analog.c` are compiled for the PC, unmodified (the build needs a FreeJoy checkout), and run in lockstep with HeliSR on random settings and random inputs. **2,000 of 2,000 random setups were identical**: about six million passes in which logical buttons, physical inputs, reported buttons, hats, shift state and all 8 axes matched on every pass. The default run is 400 setups.
+3. **The same scenarios on the Pro Micro:** the test firmware (`build.ps1 -Test`) adds two commands that run one pass with inputs and time from the PC. `hsr-lockstep.ps1` replays the PC's trace. **56 of 56 scenarios (58,979 passes, including 10 random setups) were identical on the AVR and the PC**, which covers 16-bit `int` arithmetic and avr-libc's float.
+
+**What the comparison found in the port** (all fixed, so the port now behaves as FreeJoy does):
+- **Processing order:** logical buttons are processed in FreeJoy's order (by physical input, shifted mappings first), worked out once at start-up. Order matters where buttons share state: hat bits, radio and sequential groups.
+- **Unused axes:** an axis with no source still runs through calibration and reports a constant, as in FreeJoy. Only axes nothing can observe are skipped.
+- **Offset wrap:** the magnet-offset wrap uses FreeJoy's 4095, not 4096.
+- **Sequential toggles:** their start-up ignores buttons with no input.
+- **Axis buttons:** the prescaler sees the previous pass's button states, and trim takes at most one step up and one down per pass (FreeJoy's order and if/else chain).
+- **Resolution:** the resolution step keeps FreeJoy's float calculation. An integer version differed by a count now and then, which a prescaler or axis-to-button boundary could magnify. It costs about 1 KB of flash.
+
+**FreeJoy bugs found, kept fixed in HeliSR, each with a test that fails on FreeJoy's behaviour:**
+- **Stuck delay:** a button with a delay timer that isn't processed during its press window (its input's shift layer is off) stays in DELAY for good in FreeJoy, and never responds again.
+- **Trim at the bottom:** FreeJoy stores `value + MIN` as the lower trim limit, so the axis jumps back up.
+- **Dynamic dead band:** FreeJoy's 32-bit variance sum wraps, and it freezes a moving axis for a few passes after a jump.
+- **Also found:** reads of `buttons[-1]` for unused encoder slots, and `raw_buttons_data[-1]` for encoder inputs with no input assigned. The comparison's random settings avoid those cases.
+
+`HSR_FREEJOY_EXACT`, used only in the comparison build, brings these bugs back so the comparison can demand identical results.
+
+**Stack.** The phase 3 changes first pushed the peak to about 355 B, leaving only 96 B free. Four changes brought it back:
+- 16-bit axis values between stages;
+- interface descriptors sent from a 9-byte buffer inside the USB interrupt;
+- the report built in place, with no copies;
+- one function per settings command.
+
+With them, `out_axis_data` went too. Measured on the Pro Micro: **237-257 B never used** in the release build, and 217 B in the test firmware through the whole lockstep run.
+
+| Build | Flash (of 28,672) | RAM (of 2,560) |
+|---|---|---|
+| 16 MHz, no USB serial (release) | 21,398 B (74 %) | 2,093 B (81 %) |
+| Test firmware | 21,916 B (76 %) | 2,094 B (81 %) |
+
+**Toolchain:** MinGW-w64 g++ 13.1 from Qt's mirror, installed with aqtinstall to `%USERPROFILE%\Qt\Tools\mingw1310_64`. The same toolchain builds the configurator in phase 4.
+
+**Still to check on a real HeliSR:** the shift-register inputs, real sensors, the spare pins, and ADC noise. All the logic itself has now been verified on the AVR.
