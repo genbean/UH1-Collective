@@ -1,6 +1,6 @@
 # UH-1 "Huey" head, Rev 3: the neck as its own part
 
-Rev 3 is head Rev 2 (`..`) rebuilt so that every part prints cleanly, without support. The outline, switches, throttle and wiring are Rev 2's. What changes is how the head holds the tube:
+Rev 3 is head Rev 2 (since removed from the repository) rebuilt so that every part prints cleanly, without support. The outline, switches, throttle and wiring are Rev 2's. What changes is how the head holds the tube:
 
 - **The neck is now its own part, the neck block.** It holds:
   - the neck and the tube boss, with the 25.2 mm press-fit bore;
@@ -64,14 +64,6 @@ Changes made 2026-10-23, taking two things from Rev 4 (`../Rev4`):
 | **Wires** | Solder the wires to the pin row, then slide the module in **with the pin row on its front edge** (in Rev 2 it was the far edge). The wires go straight up through the open middle, out of the top of the pod. They then run across the back of the lower box to the wire slot, and on to AX4 (J14). |
 | **Magnet shaft** | It now has a 4.15 mm pin under its hex end. The pin goes through the pinion's hex hole into a 4.3 mm bearing hole in the floor of the pinion pocket. The pinion now turns on two bearings 10 mm apart, instead of one 3 mm web. |
 | **Coupon** | `HueyHeadR3-SensorSeatCoupon.stl` is an 8 mm slice of the neck block across the grooves: 1.3 cm³, about 1.6 g. Print it upside down, like the block, and slide your AS5600 module through it before printing the whole block. If the module binds, raise `BOARD_CLR` or `GROOVE_H` in `huey_head_r3.py`. If it rattles, lower them. |
-
-### Rev 2's sensor seat
-
-The defects you marked were in Rev 2's body STL (`../stl/HueyHead-Body.stl`).
-- **Red:** the module's near edge went in through a 3 mm slot in the boss's side, and thin flaps of the boss wall covered part of both openings. The pinion was meant to go up the neck, not in from the front, but the slot was cramped and hard to find.
-- **Orange:** once the module was in, nothing held down either edge. The far edge was left open for the wires, and the near edge had 1.4 mm of play in its slot.
-
-Rev 2's STLs still have both faults. Rev 3 doesn't.
 
 ## Throttle
 

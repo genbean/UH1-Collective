@@ -396,6 +396,6 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
 **Also in this phase:** only the 5 V / 16 MHz Pro Micro is supported now (decision 4). The release ships one firmware file, `HeliSR_16MHz.hex`.
 
 **Still open:**
-- **The old `Firmware/HeliCollective` sketch:** retire it, or keep it as a minimal option? That's your call.
+- **The old `Firmware/HeliCollective` sketch:** retired and removed from the repository.
 - **The repository's top-level README** is only a title.
 - **Not verified on hardware yet (phase 6):** the documented wiring and the AS5600 steps.
