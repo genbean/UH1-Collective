@@ -116,6 +116,7 @@ def carrier():
 def lower_panel_new():
     """The lower panel with the new hat's carrier instead of the MkII hat. (huey_head_r5.lower_panel less its hat lines.)"""
     p = prism(h.LOWER_PANEL, -h.PANEL_T, 0)
+    p -= h.outline_chamfers(h.LOWER_PANEL, -h.PANEL_T, -1.0, h.PANEL_CHAMFER)
     opening = h.BODY.offset(-h.WALL, mf.JoinType.Miter)
     holes = [(x, z, 7.2) for x, z in h.COLUMNS] + [(*h.GOV, h.NUT_RELIEF["toggle"]), (*h.LDG_EXT, h.NUT_RELIEF["toggle"]),
                                                    (*h.STOP_REL, h.NUT_RELIEF["pb4"]), (*SEARCH, 2 * h.HAT_R + 1.0)]
