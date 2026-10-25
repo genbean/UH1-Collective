@@ -1,66 +1,45 @@
 # HeliSR software
 
-Firmware and a configuration app for a **Pro Micro (ATmega32U4) on a HeliSR Rev 3.0 board**. They work in any collective, throttle, button box or panel. This is a fork of [FreeJoy](https://github.com/FreeJoy-Team/FreeJoy), licensed under the GPL-3; see [NOTICE.md](NOTICE.md).
+Firmware and a setup app that turn a **Pro Micro on a HeliSR Rev 3.0 board** into a USB game controller. They aren't tied to this project's UH-1 collective: use them in any collective, throttle, button box or panel.
 
-**Status: under construction.** Phases 0-5 of [PLAN.md](PLAN.md) are done. The firmware has FreeJoy's button, axis, encoder and LED features. Its logic is tested on the PC, matches FreeJoy's own code exactly on random settings, and gives identical results on a Pro Micro. HeliSR Configurator sets it up, saves profiles and flashes it, and `packaging/` builds a Windows installer with everything bundled. All of it is tested with a bare Pro Micro; nothing has been tested on a HeliSR board yet.
+- **16 switch inputs** (IN1–IN16) and **4 analog inputs** (AX1–AX4) on the board, plus 11 spare Pro Micro pins for more buttons, analog axes, LEDs or PWM backlighting.
+- **64 buttons, 8 axes, 4 hats** as Windows and games see them. Plain buttons, latching toggles, pulses for toggle switches, a button for the middle of ON-OFF-ON switches, radio and sequential buttons, 8 rotary encoders, and 5 shift layers.
+- **Axes:** calibration, smoothing, dead bands, curves, combined axes, axes driven by buttons, and up to 12 button ranges per axis (detents, a throttle cutoff).
+- **AS5600 sensors:** a helper for programming their range with the board's PROG buttons.
+- **Works straight away:** with no setup, IN1–IN16 are buttons 1–16 and AX1–AX4 are four axes.
+- **HeliSR Configurator** (Windows 10/11) reads and writes the settings, saves them as profiles, and flashes the firmware itself, with no Arduino IDE needed.
 
-| Folder | What's in it |
+## Getting started
+
+1. Download **HeliSR Configurator** from the [Releases](https://github.com/genbean/Heli-Collective/releases) page.
+2. Follow the **[Quick start](docs/quick-start.md)**: install, flash the Pro Micro, check it works, set it up.
+
+## Documentation
+
+| Page | |
 |---|---|
-| `firmware/HeliSR/` | The firmware, an Arduino sketch |
-| `firmware/HeliSR/src/shared/` | The settings layout and USB protocol, shared with the configurator |
-| `firmware/build.ps1` | Builds the firmware (see below) |
-| `firmware/test/` | Development test tools for a Pro Micro: the settings channel and joystick (`hsr-usb-test.ps1`), flashing through the bootloader command (`hsr-flash-via-bootloader.ps1`), a logic test (`hsr-logic-test.ps1`), and the lockstep replay of the PC tests (`hsr-lockstep.ps1`, needs `build.ps1 -Test`). Shared helpers are in `hsr-usb-lib.ps1`. |
-| `firmware/test/host/` | The PC tests: the firmware's logic compiled for the PC, the scenario tests, and the comparison with FreeJoy's own code (`run-host-tests.ps1`) |
-| `configurator/` | HeliSR Configurator, forked from FreeJoyConfiguratorQt: setup, profiles, flashing, a command-line mode. See [configurator/README.md](configurator/README.md) |
-| `packaging/` | Builds the Windows installer and portable zip (`build-release.ps1`), and the release checklist. See [packaging/README.md](packaging/README.md) |
+| [Quick start](docs/quick-start.md) | From a bare Pro Micro to a working controller |
+| [User guide](docs/user-guide.md) | Every page and setting of HeliSR Configurator, and its command line |
+| [Flashing](docs/flashing.md) | First flash, updates, recovery and troubleshooting |
+| [AS5600 sensors](docs/as5600.md) | Preparing, wiring and programming AS5600 angle sensors |
+| [Profiles](docs/profiles.md) | Saving setups, and the examples, including the **UH-1 collective** |
+| [Development](docs/development.md) | Building the firmware, the app and a release; how they talk; tests |
 
-## Building the firmware
+The board itself (schematic, PCB, connectors) is documented in [`PCB/HeliSR_Rev3.0`](../PCB/HeliSR_Rev3.0/README.md). Its "MMJoy2 setup" section is out of date: this software replaces MMJoy2.
 
-You need the Arduino IDE 2.x, with "Arduino AVR Boards" installed (it comes with the IDE). Then, in PowerShell:
+## What you need
 
-```powershell
-cd Software\firmware
-.\build.ps1             # 5 V / 16 MHz Pro Micro
-.\build.ps1 -Mhz8       # 3.3 V / 8 MHz Pro Micro
-.\build.ps1 -Serial     # also include the Arduino USB serial port (for development)
-```
+- A HeliSR Rev 3.0 board with a **5 V / 16 MHz Pro Micro** (ATmega32U4; the SparkFun board or a clone). The 3.3 V / 8 MHz Pro Micro isn't supported.
+- 64-bit Windows 10 or 11 for HeliSR Configurator. Once set up, the board works as a standard USB game controller on any system.
 
-The `.hex` files land in `firmware\build\<variant>\`.
+## Licence and credits
 
-## Building the configurator
+The HeliSR firmware and HeliSR Configurator are free software under the **GNU General Public License v3 or later** ([LICENSE](LICENSE)). They are modified versions of **[FreeJoy](https://github.com/FreeJoy-Team/FreeJoy)** and **[FreeJoyConfiguratorQt](https://github.com/FreeJoy-Team/FreeJoyConfiguratorQt)** by the FreeJoy team, ported to the Pro Micro and the HeliSR board. HeliSR isn't made or supported by the FreeJoy team. [NOTICE.md](NOTICE.md) lists the changes from FreeJoy and the third-party components; [`packaging/THIRD-PARTY-NOTICES.txt`](packaging/THIRD-PARTY-NOTICES.txt) covers what the installer ships (Qt, avrdude, the MinGW runtime).
 
-See [configurator/README.md](configurator/README.md): Qt 6 with MinGW, then `qmake` and `mingw32-make`.
+## Status
 
-## Building a release
+The firmware and app are complete and tested on a bare Pro Micro:
+- The firmware's logic matches FreeJoy's own code on thousands of random setups.
+- Settings, flashing and the installer are tested end to end.
 
-`packaging\build-release.ps1` builds both firmware variants and the configurator, and packs them with Qt, avrdude and the licences into `HeliSR-Configurator-x.y.z-Setup.exe` and a portable zip. See [packaging/README.md](packaging/README.md).
-
-## What the board reports with no settings
-
-- IN1–IN16 are buttons 1–16.
-- AX1, AX2, AX3 and AX4 are the X, Y, Z and Rx axes.
-- The device is called "HeliSR".
-
-## Testing
-
-On the PC (needs MinGW-w64 g++, for example Qt's: `aqt install-tool windows desktop tools_mingw1310 qt.tools.win64_mingw1310`):
-
-```powershell
-cd Software\firmware\test\host
-.\run-host-tests.ps1                               # scenario tests of the firmware's logic
-.\run-host-tests.ps1 -FreeJoy <FreeJoy checkout>   # also compare with FreeJoy's own code
-```
-
-On a Pro Micro, the same scenarios in lockstep with the PC:
-
-```powershell
-cd Software\firmware
-.\build.ps1 -Test                                  # then flash build\noserial-test\HeliSR.ino.hex
-cd test
-.\host\run-host-tests.ps1 -Trace host\build\trace.txt -Random 10
-.\hsr-lockstep.ps1 -Trace host\build\trace.txt
-```
-
-Flash the normal build afterwards: the test firmware ignores the board's inputs once a lockstep run has started.
-
-The configurator has its own tests: `HeliSRConfigurator --ui-test 200` puts random settings through every page and back, and with a board connected `--roundtrip` and `--ui-device-test` write, read back and restore its settings.
+Testing on built HeliSR boards with real switches and sensors comes next ([PLAN.md](PLAN.md), phase 6).

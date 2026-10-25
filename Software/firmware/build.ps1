@@ -2,12 +2,12 @@
 #   .\build.ps1                 5 V / 16 MHz Pro Micro, without the USB serial port
 #   .\build.ps1 -Serial         with the Arduino USB serial port (for development:
 #                               lets the Arduino IDE upload without a RST double-tap)
-#   .\build.ps1 -Mhz8           3.3 V / 8 MHz Pro Micro
 #   .\build.ps1 -Test           test firmware: the PC drives the logic in lockstep
 #                               (test\hsr-lockstep.ps1); not for normal use
 #   .\build.ps1 -Port COM5      build and upload
 # The .hex lands in Software\firmware\build\<variant>\.
-param([string]$Port, [switch]$Serial, [switch]$Mhz8, [switch]$Test)
+# HeliSR supports the 5 V / 16 MHz Pro Micro only.
+param([string]$Port, [switch]$Serial, [switch]$Test)
 
 $ErrorActionPreference = 'Stop'
 $cli = Join-Path $env:LOCALAPPDATA 'Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe'
@@ -17,7 +17,6 @@ $sketch = Join-Path $PSScriptRoot 'HeliSR'
 if ($Serial) { $variant = 'serial'; $flags = '-DHSR_USB_SERIAL=1' }
 else         { $variant = 'noserial'; $flags = '-DCDC_DISABLED' }
 $clock = '16000000L'
-if ($Mhz8) { $variant = "$variant-8mhz"; $clock = '8000000L' }
 if ($Test) { $variant = "$variant-test"; $flags = "$flags -DHSR_TEST_STEP" }
 $out = Join-Path $PSScriptRoot "build\$variant"
 # Each variant keeps its own build cache: arduino-cli fails to clean a shared

@@ -14,13 +14,13 @@ The setup app for the HeliSR firmware: a Pro Micro (ATmega32U4) on a HeliSR Rev 
 | **LED/PWM** | On/off LEDs on spare pins, following a logical button; PWM on pins 5, 6, 9, 10, fixed or following an axis |
 | **Advanced Settings** | USB name, VID/PID and report rate; **firmware flashing** (the connected board over USB, or a Pro Micro without HeliSR firmware); language and theme |
 
-Profiles (`.cfg`) save a whole setup to a file, in `Documents\HeliSR\configs` by default.
+Profiles (`.cfg`) save a whole setup to a file, in `Documents\HeliSR\configs` by default. The app copies the example profiles from `profiles\` next to it into `Documents\HeliSR\configs\examples`. The user documentation is in [`../docs`](../docs).
 
 ## Flashing
 
 The app restarts a HeliSR board into the Pro Micro's bootloader over USB, finds the bootloader's serial port and runs **avrdude**. A Pro Micro without HeliSR firmware gets a 1200-baud "touch" on its serial port (an Arduino sketch's port), or you double-tap its RST pin when asked.
 
-avrdude is looked for in `avrdude\` next to the app (the installer puts it there), then in the Arduino IDE's packages, then on the PATH. The release firmware is looked for in `firmware\HeliSR_16MHz.hex` and `firmware\HeliSR_8MHz.hex` next to the app; any other `.hex` can be picked by hand.
+avrdude is looked for in `avrdude\` next to the app (the installer puts it there), then in the Arduino IDE's packages, then on the PATH. The release firmware is looked for in `firmware\HeliSR_16MHz.hex` next to the app; any other `.hex` can be picked by hand.
 
 ## Command line
 
@@ -34,6 +34,7 @@ HeliSRConfigurator --write-defaults             factory settings
 HeliSRConfigurator --params 5                   live readings for 5 seconds
 HeliSRConfigurator --flash HeliSR_16MHz.hex     update the connected board's firmware
 HeliSRConfigurator --flash-new HeliSR_16MHz.hex [--port COM5]   a Pro Micro without HeliSR firmware
+HeliSRConfigurator --save-defaults new.cfg      the factory settings as a profile (no board needed)
 ```
 
 Add `--device 2` to pick the second of several boards. Development tests:
@@ -41,6 +42,7 @@ Add `--device 2` to pick the second of several boards. Development tests:
 ```
 HeliSRConfigurator --roundtrip                  write, read back and compare, then restore (needs a board)
 HeliSRConfigurator --ui-test 200 [--seed n]     random settings through every page and back
+HeliSRConfigurator --ui-test-file a.cfg b.cfg   profiles through every page and back
 HeliSRConfigurator --ui-device-test             the window's Write and Read buttons with a board
 ```
 

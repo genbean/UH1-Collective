@@ -52,6 +52,11 @@ Thanks to the FreeJoy team for publishing their work under a free licence.
 - FreeJoyConfiguratorQt's Inno Setup script moved to `packaging/HeliSRConfigurator.iss` and rewritten for HeliSR: its own AppId, per-user install, the bundled firmware and avrdude.
 - `packaging/build-release.ps1` (new) builds the release; `packaging/licenses/LGPL-3.0.txt` is the FSF's text, unmodified.
 
+**2026-10-25 (phase 7)**
+- Only the 5 V / 16 MHz Pro Micro is supported: the 8 MHz firmware build, and the flasher's choice of builds, are removed.
+- `docs/` (new): quick start, user guide, flashing, AS5600 and profile guides, and development notes, written for HeliSR.
+- `profiles/` (new): example profiles, including the UH-1 collective, and the script that makes them. The app copies them to `Documents\HeliSR\configs\examples` (`main.cpp`); `--save-defaults` and `--ui-test-file` added to the command line.
+
 ## Third-party components
 
 - **Arduino AVR core** (the firmware is built on it), https://github.com/arduino/ArduinoCore-avr. LGPL-2.1 or later. `usb_helisr.cpp` follows its HID library's descriptor handling.

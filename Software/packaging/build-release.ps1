@@ -1,4 +1,4 @@
-# Builds a HeliSR release: both firmware builds, HeliSR Configurator with Qt
+# Builds a HeliSR release: the firmware, HeliSR Configurator with Qt
 # deployed next to it, avrdude, the licences, an Inno Setup installer and a
 # portable zip.
 #   .\build-release.ps1
@@ -63,19 +63,14 @@ New-Item -ItemType Directory -Force $stage, $output | Out-Null
 # --------------------------------------------------------------- firmware --
 $firmware = Join-Path $software 'firmware'
 if (-not $SkipFirmware) {
-    Step 'Firmware, 16 MHz'
+    Step 'Firmware'
     & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $firmware 'build.ps1')
-    Check 'Firmware build (16 MHz)'
-    Step 'Firmware, 8 MHz'
-    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $firmware 'build.ps1') -Mhz8
-    Check 'Firmware build (8 MHz)'
+    Check 'Firmware build'
 }
 New-Item -ItemType Directory -Force (Join-Path $stage 'firmware') | Out-Null
-foreach ($f in @(@('noserial', 'HeliSR_16MHz.hex'), @('noserial-8mhz', 'HeliSR_8MHz.hex'))) {
-    $hex = Join-Path $firmware "build\$($f[0])\HeliSR.ino.hex"
-    Need $hex 'Firmware .hex (run without -SkipFirmware)'
-    Copy-Item $hex (Join-Path $stage "firmware\$($f[1])")
-}
+$hex = Join-Path $firmware 'build\noserial\HeliSR.ino.hex'
+Need $hex 'Firmware .hex (run without -SkipFirmware)'
+Copy-Item $hex (Join-Path $stage 'firmware\HeliSR_16MHz.hex')
 
 # ----------------------------------------------------------- configurator --
 Step 'HeliSR Configurator'
@@ -112,6 +107,10 @@ Copy-Item (Join-Path $AvrdudeDir 'LICENSE.txt') (Join-Path $lic 'GPL-2.0.txt')
 Copy-Item (Join-Path $MinGWDir 'licenses\gcc\COPYING.RUNTIME') (Join-Path $lic 'GCC-RUNTIME-EXCEPTION.txt')
 Copy-Item (Join-Path $MinGWDir 'licenses\winpthreads\COPYING') (Join-Path $lic 'winpthreads-COPYING.txt')
 Copy-Item (Join-Path $here 'THIRD-PARTY-NOTICES.txt'), (Join-Path $here 'README.txt') $stage
+
+# example profiles (the app copies them to Documents\HeliSR\configs\examples)
+New-Item -ItemType Directory -Force (Join-Path $stage 'profiles') | Out-Null
+Copy-Item (Join-Path $software 'profiles\*.cfg') (Join-Path $stage 'profiles')
 Copy-Item (Join-Path $software 'NOTICE.md') $stage
 
 # ------------------------------------------------------------- packages --

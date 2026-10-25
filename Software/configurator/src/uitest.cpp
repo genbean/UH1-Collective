@@ -1,6 +1,7 @@
 #include "uitest.h"
 #include <QCoreApplication>
 #include <QElapsedTimer>
+#include <QFileInfo>
 #include <QPushButton>
 #include <QRandomGenerator>
 #include <QThread>
@@ -9,6 +10,7 @@
 #include <cstring>
 #include "deviceconfig.h"
 #include "global.h"
+#include "configtofile.h"
 #include "helisrboard.h"
 #include "mainwindow.h"
 #include "shared/helisr_defaults.h"
@@ -309,11 +311,38 @@ int deviceTest(MainWindow &window, QRandomGenerator &rng)
     out(same ? "Original settings restored: OK" : "FAIL: restored settings differ");
     return diffs == 0 && same ? 0 : 1;
 }
+
+
+// Shows settings on every page and writes them back; returns the bytes that changed.
+QStringList throughPages(MainWindow &window, dev_config_t expected)
+{
+    gEnv.pDeviceConfig->config = expected;
+    window.UiReadFromConfig();
+    settle();
+
+    // anything a page doesn't write keeps this pattern and shows up below
+    memset(&gEnv.pDeviceConfig->config, 0x5A, sizeof(dev_config_t));
+    window.UiWriteToConfig(false);
+    dev_config_t got = gEnv.pDeviceConfig->config;
+
+    normalize(expected);
+    normalize(got);
+    const uint8_t *e = reinterpret_cast<const uint8_t *>(&expected);
+    const uint8_t *g = reinterpret_cast<const uint8_t *>(&got);
+    QStringList diffs;
+    for (int off = 0; off < int(sizeof(dev_config_t)); ++off) {
+        if (e[off] != g[off]) {
+            diffs << QStringLiteral("  %1: expected 0x%2, got 0x%3").arg(describe(off))
+                         .arg(e[off], 2, 16, QChar('0')).arg(g[off], 2, 16, QChar('0'));
+        }
+    }
+    return diffs;
+}
 }
 
 bool UiTest::isUiTestCommand(const QStringList &args)
 {
-    return args.contains("--ui-test") || args.contains("--ui-device-test");
+    return args.contains("--ui-test") || args.contains("--ui-device-test") || args.contains("--ui-test-file");
 }
 
 int UiTest::run(MainWindow &window, const QStringList &args)
@@ -338,29 +367,29 @@ int UiTest::run(MainWindow &window, const QStringList &args)
     if (args.contains("--ui-device-test")) {
         return deviceTest(window, rng);
     }
+    // profiles: every file named after --ui-test-file, until the next option
+    int f = args.indexOf("--ui-test-file");
+    if (f >= 0) {
+        int failedFiles = 0, files = 0;
+        for (int k = f + 1; k < args.size() && args[k].startsWith("--") == false; ++k, ++files) {
+            dev_config_t expected;
+            hsr_config_defaults(&expected);
+            if (ConfigToFile::loadDeviceConfigFromFile(nullptr, args[k], expected) == false) {
+                out("FAIL: couldn't load " + args[k]);
+                failedFiles++;
+                continue;
+            }
+            QStringList diffs = throughPages(window, expected);
+            out(QStringLiteral("%1: %2").arg(QFileInfo(args[k]).fileName(),
+                                             diffs.isEmpty() ? "unchanged through the pages" : "CHANGED"));
+            for (int d = 0; d < qMin(int(diffs.size()), 25); ++d) out(diffs[d]);
+            failedFiles += !diffs.isEmpty();
+        }
+        return failedFiles || files == 0 ? 1 : 0;
+    }
     int failed = 0;
     for (int n = 0; n < count; ++n) {
-        dev_config_t expected = randomConfig(rng);
-        gEnv.pDeviceConfig->config = expected;
-        window.UiReadFromConfig();
-        settle();
-
-        // anything a page doesn't write keeps this pattern and shows up below
-        memset(&gEnv.pDeviceConfig->config, 0x5A, sizeof(dev_config_t));
-        window.UiWriteToConfig(false);
-        dev_config_t got = gEnv.pDeviceConfig->config;
-
-        normalize(expected);
-        normalize(got);
-        const uint8_t *e = reinterpret_cast<const uint8_t *>(&expected);
-        const uint8_t *g = reinterpret_cast<const uint8_t *>(&got);
-        QStringList diffs;
-        for (int off = 0; off < int(sizeof(dev_config_t)); ++off) {
-            if (e[off] != g[off]) {
-                diffs << QStringLiteral("  %1: expected 0x%2, got 0x%3").arg(describe(off))
-                             .arg(e[off], 2, 16, QChar('0')).arg(g[off], 2, 16, QChar('0'));
-            }
-        }
+        QStringList diffs = throughPages(window, randomConfig(rng));
         if (diffs.isEmpty()) {
             continue;
         }

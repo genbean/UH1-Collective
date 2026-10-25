@@ -59,6 +59,7 @@ Type: filesandordirs; Name: "{app}\styles"
 Type: filesandordirs; Name: "{app}\imageformats"
 Type: filesandordirs; Name: "{app}\iconengines"
 Type: filesandordirs; Name: "{app}\firmware"
+Type: filesandordirs; Name: "{app}\profiles"
 
 [Files]
 Source: "{#StageDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

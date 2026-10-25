@@ -13,6 +13,7 @@
 //   HeliSRConfigurator --flash <file.hex>         update the connected device's firmware
 //   HeliSRConfigurator --flash-new <file.hex> [--port COMx]   flash a Pro Micro without HeliSR firmware
 //   HeliSRConfigurator --roundtrip                write, read back and compare, then restore
+//   HeliSRConfigurator --save-defaults <file.cfg>   the factory settings as a profile (no device)
 // Add --device <n> (from 1) to pick one of several boards.
 namespace Cli
 {
