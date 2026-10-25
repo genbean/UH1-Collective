@@ -1,4 +1,5 @@
-# UH-1 "Huey" collective switch box, Rev 4: Rev 3 (`../Rev3`) with the neck block and trigger mount built back into the box.
+# UH-1 "Huey" collective switch box, Rev 4: Rev 3 (no longer in the repository) with the neck block and trigger mount
+# built back into the box.
 #
 # The box is Rev 2's: the lower box follows the real lower panel all the way round, diagonal bottom edge included, 55 mm
 # deep, with the upper box on top. The 25 mm tube runs up through the throttle grip into a short round neck, and an M5
@@ -34,14 +35,15 @@ import trimesh
 import manifold3d as mf
 from fontTools.ttLib import TTFont
 from fontTools.pens.basePen import BasePen
-from fontTools.varLib import instancer
 
 SEG = 96
 CLR = 0.2                       # added to switch cutouts: FDM holes print undersize
 WALL = 2.5
 PANEL_T = 2.5                   # panels are the same thickness as the MkII face
 ENGRAVE = 0.6                   # label depth
-FONT = "C:/Windows/Fonts/bahnschrift.ttf"   # DIN-style; instanced to SemiBold Condensed
+# Routed Gothic Narrow (Darren Embry, SIL Open Font License 1.1, bundled in ../../fonts): a digitized Leroy lettering
+# template, the closest free match to the engraved military lettering on the real UH-1 panels
+FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "fonts", "routed-gothic", "routed-gothic-narrow.ttf")
 
 # Lower box: the real UH-1 lower panel is 107 x 75 mm, 50 mm high on the left with a diagonal bottom edge, and the
 # box follows that outline.
@@ -169,7 +171,7 @@ class FlatPen(BasePen):
         self.cur = []
 
 
-_font = instancer.instantiateVariableFont(TTFont(FONT), {"wght": 600, "wdth": 75})
+_font = TTFont(FONT)
 _gs, _cmap, _hmtx = _font.getGlyphSet(), _font.getBestCmap(), _font["hmtx"]
 _CAP = _font["OS/2"].sCapHeight
 
@@ -467,24 +469,34 @@ PY = TY + CENTRES * np.sin(np.radians(SPIN))
 NECK_D, NECK_BORE = 37.8, 34.8   # the knurl is 37.1; the bore clears the 34 mm gear tips
 GRIP_NECK_D = 33.4
 # Faux friction knob, after the UH-1's (part of the head, round the neck just under the box). From the bottom up: a
-# fluted wheel, KNOB_FLUTES deep round flutes between rounded lobes, the lobes' bottoms rounded off; a 45 degree
-# flank in to a plain band, where the real one carries its THROTTLE INCREASE / FRICTION INCREASE label; and a 45
-# degree chamfer up into the neck. Every overhang is 45 degrees or less with the neck pointing up, as the Rev 3 neck
-# block prints. It doesn't turn. Its top is level, KNOB_CLR under the sloping bottom where they come closest (front
-# right), so the neck shows above it, more toward the back left.
-KNOB_D, KNOB_BAND_D = 56.0, 44.0                 # across the lobes, and the band
-KNOB_BAND, KNOB_LOBE, KNOB_ROUND = 6.0, 2.0, 5.0     # heights: band, straight part of the lobes, their rounded bottoms
-KNOB_FLUTES, KNOB_FLUTE_D, KNOB_CORE_D = 12, 8.0, 44.7   # flutes: count, width, and the core they cut down to
-KNOB_FLANK = (KNOB_D - KNOB_BAND_D) / 2          # 45 degree flank from the lobes in to the band
+# bulging wheel with KNOB_FLUTES deep round flutes cut straight down its side, leaving narrow lands between them (the
+# wheel's profile and the flutes are measured off throttle_friction_knob.stl from hotpretzel's UH-1 Huey Helicopter
+# Collective, https://www.thingiverse.com/thing:4284120, CC BY-NC: this knob, and the body that carries it, are for
+# non-commercial use only); the wheel runs out into a
+# plain band, where the real one carries its THROTTLE INCREASE / FRICTION INCREASE label; and a 45 degree chamfer up into
+# the neck. It doesn't turn. Its top is level, KNOB_CLR under the sloping bottom where they come closest (front right),
+# so the neck shows above it, more toward the back left.
+KNOB_BAND_D = 44.0
+KNOB_WHEEL = [(23.3, 0.0), (24.12, 0.3), (24.85, 0.6), (25.52, 1.0), (26.4, 1.75), (27.16, 2.75), (27.62, 3.75),
+              (27.87, 4.75), (27.94, 5.75), (27.82, 6.75), (27.51, 7.75), (26.97, 8.75), (26.09, 9.75), (24.55, 10.75),
+              (23.3, 11.75), (22.69, 12.75), (22.4, 13.75), (22.36, 14.3)]      # (radius, height above the knob's bottom)
+KNOB_D = 2 * max(r for r, _ in KNOB_WHEEL)       # across the lands
+KNOB_WHEEL_H = KNOB_WHEEL[-1][1]
+KNOB_FLUTES, KNOB_FLUTE_D, KNOB_FLUTE_R = 12, 11.2, 22.35   # count, width, and the radius the flute bottoms reach
+KNOB_BAND = 4.7                                  # height of the plain band
 KNOB_CHAMFER = (KNOB_BAND_D - NECK_D) / 2        # 45 degree chamfer from the band up into the neck
-KNOB_H = KNOB_ROUND + KNOB_LOBE + KNOB_FLANK + KNOB_BAND + KNOB_CHAMFER
+KNOB_H = KNOB_WHEEL_H + KNOB_BAND + KNOB_CHAMFER
 KNOB_CLR = 1.5
 
 
 def _knob_drop(r):
     """How far under the knob's top (at the neck) its top surface is at radius r."""
     rn, rb = NECK_D / 2, KNOB_BAND_D / 2
-    return r - rn if r <= rb else KNOB_CHAMFER + KNOB_BAND + (r - rb)
+    if r <= rb:
+        return r - rn
+    up = [(KNOB_WHEEL[-1][0], KNOB_WHEEL[-1][1])] + [p for p in reversed(KNOB_WHEEL) if p[1] < KNOB_WHEEL[-1][1] and p[1] >= 5.75]
+    rr, zz = zip(*up)
+    return KNOB_H - float(np.interp(r, rr, zz)) if r > rr[0] else KNOB_CHAMFER + KNOB_BAND + (r - rb)
 
 
 def _knob_top():
@@ -609,6 +621,9 @@ SPRING_D = 4.2                        # spring pockets, for a pen spring up to 4
 SPRING_DEPTH = (5.0, 3.0)             # pocket depths in the mount and in the trigger
 STOP_SCREW = (SPRING[0], TACT[1] - 2.6, 4.0)   # (x, z, length) of the pull stop: a kit M3 x 4 grub screw, in a
                                       # pilot through the arm (tap it M3), turned in from behind
+# Where the pull stop's tip meets the mount's face, a kit M2 x 8 countersunk screw sits flush, so the set screw bears on
+# steel and not on plastic: a 90 degree countersink (head, 0.2 mm clearance, and its depth) and an M2 pilot (tap it by hand)
+STOP_SEAT = (4.2, 1.6, 8.5)           # countersink diameter at the face, M2 pilot diameter, pilot depth from the face
 MOUNT_Z0 = TACT[1] - TACT_POCKET[1] / 2 - 1.5   # the mount's bottom; near the neck it meets the knob
 KNOB_GAP = 1.0
 PAD = (44.25, -17.75)                 # the finger pad's top front corner, where Rev 4's first trigger had it: its tip is
@@ -857,12 +872,16 @@ def xcyl(y, z, d, x0, x1, d1=None):
     return mf.Manifold.cylinder(x1 - x0, d / 2, (d if d1 is None else d1) / 2, SEG).rotate((0, 90, 0)).translate((x0, y, z))
 
 
+def _knob_outline(z0, rin):
+    """(radius, z) points of the knob's outline, unfluted, from the bottom on the inside round to the top on the inside."""
+    zw = z0 + KNOB_WHEEL_H
+    rb, rn = KNOB_BAND_D / 2, NECK_D / 2
+    return [(rin, z0)] + [(r, z0 + z) for r, z in KNOB_WHEEL] + [(rb, zw + KNOB_WHEEL[-1][0] - rb), (rb, zw + KNOB_BAND), (rn, KNOB_TOP), (rin, KNOB_TOP)]
+
+
 def knob_envelope(grow):
     """Head frame: the friction knob's outline without its flutes, grown by grow."""
-    r, rb, rn = KNOB_D / 2, KNOB_BAND_D / 2, NECK_D / 2
-    zf = NECK_BOT + KNOB_ROUND + KNOB_LOBE
-    zb = zf + KNOB_FLANK
-    prof = cs([(0.0, NECK_BOT), (r, NECK_BOT), (r, zf), (rb, zb), (rb, zb + KNOB_BAND), (rn, KNOB_TOP), (0.0, KNOB_TOP)])
+    prof = cs(_knob_outline(NECK_BOT, 0.0))
     prof = prof.offset(grow, mf.JoinType.Round) ^ rect(0.0, -BIG, BIG, BIG)
     return mf.Manifold.revolve(prof, 180).translate((TX, TY, 0.0))
 
@@ -922,6 +941,11 @@ def trigger_mount():
     m -= box(tx - sx, yp - FLOOR - 0.1, tz - s1, tx + sx, yp + 0.1, tz - s0)
     # return spring: a pen spring between this pocket and the one in the trigger holds the trigger released
     m -= ycyl(SPRING[0], SPRING[1], SPRING_D, MOUNT_FACE - SPRING_DEPTH[0], MOUNT_FACE + 0.1)
+    # the pull stop's seat: the stop screw's tip meets the face here; a countersunk M2 screw in this hole sits flush
+    cd, pd, pdepth = STOP_SEAT
+    sx, sz = STOP_SCREW[0], STOP_SCREW[1]
+    m -= ycyl(sx, sz, pd, MOUNT_FACE - pdepth, MOUNT_FACE + 0.1)
+    m -= ycyl(sx, sz, pd, MOUNT_FACE - cd / 2 + pd / 2, MOUNT_FACE + 0.5, cd + 1.0)
     return tilt(m)                                     # solid with the friction knob where they meet: no gap
 
 
@@ -956,34 +980,19 @@ def trigger():
 
 
 def friction_knob():
-    """Head frame: the faux friction knob, part of the head."""
-    r, rb, rn, ri = KNOB_D / 2, KNOB_BAND_D / 2, NECK_D / 2, NECK_BORE / 2 + 0.5    # ri: inside the neck's wall, to fuse
+    """Head frame: the faux friction knob, part of the head: a bulging wheel with KNOB_FLUTES round flutes cut down its
+    side, a plain band and the chamfer up into the neck (see KNOB_WHEEL)."""
+    ri = NECK_BORE / 2 + 0.5                            # inside the neck's wall, to fuse
     z0 = NECK_BOT
-    zl = z0 + KNOB_ROUND                                # the lobes' rounded bottoms end here...
-    zf = zl + KNOB_LOBE                                 # ...their straight part here, where the flank starts
-    zb = zf + KNOB_FLANK                                # band
-    zc = zb + KNOB_BAND                                 # chamfer
-    rr = KNOB_CORE_D / 2 + 1.0                          # the rounded bottom starts just outside the flutes' core
-    t = np.radians(np.linspace(0.0, 90.0, 13))
-    arc = [(rr + (r - rr) * np.sin(a), zl - KNOB_ROUND * np.cos(a)) for a in t]
-    prof = cs([(ri, z0)] + arc + [(r, zf), (rb, zb), (rb, zc), (rn - 0.3, KNOB_TOP + 0.3), (ri, KNOB_TOP + 0.3)])
-    k = mf.Manifold.revolve(prof, 180).translate((TX, TY, 0.0))
+    pts = _knob_outline(z0, ri)
+    pts[-2] = (NECK_D / 2 - 0.3, KNOB_TOP + 0.3)
+    pts[-1] = (ri, KNOB_TOP + 0.3)
+    k = mf.Manifold.revolve(cs(pts), 180).translate((TX, TY, 0.0))
     fr = KNOB_FLUTE_D / 2
-    for a in np.radians(np.arange(KNOB_FLUTES) * 360.0 / KNOB_FLUTES + 0.5 * 360.0 / KNOB_FLUTES):
-        rc = KNOB_CORE_D / 2 + fr                       # flute axis: the flute bottoms just reach the core
-        k -= zcyl(TX + rc * np.cos(a), TY + rc * np.sin(a), KNOB_FLUTE_D, z0 - 1.0, zb, 48)
-        # chamfer where each flute meets the outside of the lobes: a triangular prism along each of the two edges
-        ex = (r * r + rc * rc - fr * fr) / (2 * rc)
-        ey = np.sqrt(r * r - ex * ex)
-        for sg in (1, -1):
-            e = np.array([ex, sg * ey])
-            th, ph = np.arctan2(e[1], e[0]), np.arctan2(e[1], e[0] - rc)
-            t1 = sg * np.array([-np.sin(th), np.cos(th)])
-            t2 = sg * np.array([-np.sin(ph), np.cos(ph)])
-            tri = [e + CHAMFER * t1, e + CHAMFER * t2, e + 2 * CHAMFER * e / np.linalg.norm(e)]
-            ca, sa = np.cos(a), np.sin(a)
-            tri = [(TX + ca * q[0] - sa * q[1], TY + sa * q[0] + ca * q[1]) for q in tri]
-            k -= zprism(cs(tri), z0 - 1.0, zf)
+    rc = KNOB_FLUTE_R + fr                              # the flutes' axes: their bottoms reach KNOB_FLUTE_R
+    flute = mf.Manifold.cylinder(KNOB_WHEEL_H + 2.0, fr, fr, 64).translate((0, 0, -1.0))
+    for a in np.radians(np.arange(KNOB_FLUTES) * 360.0 / KNOB_FLUTES):
+        k -= flute.translate((TX + rc * np.cos(a), TY + rc * np.sin(a), z0))
     return k
 
 

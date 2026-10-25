@@ -83,20 +83,37 @@ def main():
     v = ((h.neck_cuts() - env) ^ keep).volume()
     print(f"{'neck cuts outside the solid':34s} {v:9.2f} mm3 {'OK' if v < TOL else 'BREAKS OUT'}")
     bad += v >= TOL
-    # the switches clear the neck block's cuts by 1 mm (so nothing is left as a skin over the pod or the bores)
+    # the switches clear the neck block's cuts and the AS5600 board by 1 mm (so nothing is left as a skin over the bores)
     # (the AS5600's way in from the front is left out: the module goes in before the lower panel)
-    m = h.MODULE / 2 + h.BOARD_CLR
-    seated = h.zprism(h.module_xs(-m, m, -m, m), h.BOARD_Z - 0.5, h.BOARD_Z + h.GROOVE_H + 0.5)   # the module in its grooves
-    cuts = (h.neck_cuts() - h.module_seat()) + seated
+    m = h.MODULE / 2
+    seated = h.zprism(h.module_xs(-m, m, -m, m), h.BOARD_Z, h.BOARD_Z + 1.6)   # the module board itself, in its grooves
+    cuts = (h.neck_cuts() - h.module_seat() - h.pocket_window()) + seated   # the window into the pinion pocket opens into
+    # the STOP REL recess on purpose
     grown = {"GOV": toggle_body(*h.GOV, 0.0, 1.0), "LDG_EXT": toggle_body(*h.LDG_EXT, 0.0, 1.0),
              "STOP_REL": ycyl(*h.STOP_REL, 14.0, 0, 17.0) + ycyl(*h.STOP_REL, 20.0, 0, 4.0)}
     for k, m in grown.items():
         v = (tilt(m) ^ cuts).volume()
         if v > TOL:
             bad += 1
-            print(f"OVERLAP {k} with the neck cuts + 1 mm {v:.2f} mm3")
+            print(f"OVERLAP {k} (grown 1 mm) with the neck cuts or the AS5600 board {v:.2f} mm3")
+    bad += labels()
     bad += leads_hole(body)
     print("all clear" if not bad else f"{bad} problem(s)")
+
+
+def labels():
+    """Every label clears the screw heads, the toggles' 14 mm nuts, the hat's cap and the STOP REL button's 17.6 mm bezel by 0.5 mm,
+    and the panel's edge by 1 mm."""
+    c = h.circle
+    low = [c(h.PANEL_CSK[0] + 1.0, x, z) for x, z in h.COLUMNS] + [c(14.0, *h.GOV), c(14.0, *h.LDG_EXT),
+                                                             c(2 * max(hat_r5.BEZ_R, hat_r5.CAP_R) + 1.0, *h.SEARCH), c(h.PB4_BEZEL_D + 1.0, *h.STOP_REL)]
+    up = [c(h.PANEL_CSK[0] + 1.0, x, z) for x, z in h.UPPER_COLUMNS] + [c(14.0, *h.SL), c(14.0, *h.LDG_ON)]
+    bad = 0
+    for name, lab, holes, outline in (("lower", h.lower_labels(), low, h.LOWER_PANEL), ("upper", h.upper_labels(), up, h.UPPER_PANEL)):
+        a = sum((lab ^ x).area() for x in holes) + (lab - outline.offset(-1.0, mf.JoinType.Miter)).area()
+        print(f"{name + ' panel labels clear':34s} {a:9.2f} mm2 {'OK' if a < 0.01 else 'CROWDED'}")
+        bad += a >= 0.01
+    return bad
 
 
 def leads_hole(body):
@@ -120,10 +137,11 @@ def leads_hole(body):
         return np.vstack([hf(p0 + np.outer(ts, d) + r * (np.cos(g) * a + np.sin(g) * b))
                           for g in np.linspace(0, 2 * np.pi, n, endpoint=False)])
 
-    B = tm(body)
-    S0 = tm((tilt(h.body()) + h.neck_solid() + h.trigger_mount()) - h.neck_cuts())
-    NC = tm(h.neck_cuts())
-    cav = tm(h.interior())
+    near = tilt(box(hx - 20.0, 20.0, h.MOUNT_Z0 - 10.0, hx + 20.0, h.YC + 2.0, h.MOUNT_Z0 + hl + 20.0))   # only round the
+    B = tm(body ^ near)                                                  # hole: the threads make the whole body's mesh huge
+    S0 = tm(((tilt(h.body()) + h.neck_solid() + h.trigger_mount()) - h.neck_cuts()) ^ near)
+    NC = tm(h.neck_cuts() ^ near)
+    cav = tm(h.interior() ^ near)
     bad = 0
     ok = not B.contains(ring(hd / 2 - 0.05, np.arange(-2.5, hl, 0.5))).any()
     print(f"{'leads hole open, groove to end':34s} {'OK' if ok else 'BLOCKED'}")

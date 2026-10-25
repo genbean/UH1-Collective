@@ -1,4 +1,4 @@
-# UH-1 head Rev 5: Rev 4's SEARCH CONT 4-way hat, with a 22 mm cap (Rev 4: 28 mm) to suit the real panel. Replaces the MkII thumbstick hat (4way_Cover, Bezel, ThumbStick,
+# UH-1 head Rev 5: Rev 4's SEARCH CONT 4-way hat, unchanged but for its printed M3 thread. Replaces the MkII thumbstick hat (4way_Cover, Bezel, ThumbStick,
 # StickRetainer) and the ringed search hat with a pyramid cap on a rocker plate that presses four TE 1825910-6 tact
 # switches. It sits where the MkII hat did (SEARCH in huey_head_r5.py) and fits the same 24 mm hole in the panel's plug.
 #
@@ -68,11 +68,11 @@ FLARE_D, FLARE_H = 5.6, 0.6
 POCKET_D, POCKET_H = 7.0, 0.7
 
 # ---- cap
-CAP_R, CAP_SKIRT, CAP_SLOPE = 11.0, 0.8, 30.0   # Rev 4: 14 mm; 22 mm across, as on the real panel
-CAP_TERRACES, CAP_H = 9, 5.0                 # Rev 4: 11, 6.0 (the same terrace pitch on the smaller cap)
-CAP_BASE = 2.0                         # a plain round side under the terraces (Rev 4: none): on the smaller cap the legs'
-                                       # sockets reach out near the rim, and this keeps 1 mm over them
-LEG_SOCKET = 2.4
+CAP_R, CAP_SKIRT, CAP_SLOPE = 14.0, 0.8, 30.0
+CAP_TERRACES, CAP_H = 11, 6.0
+LEG_SOCKET = 1.8                       # how far the legs go into the cap (Rev 4: 2.4, which left 0.2 mm of cap over the sockets' outer
+                                       # edges); the legs are as much shorter
+SOCKET_D = LEG_D + 0.25                # the cap's sockets for the legs (Rev 4: 4.1, too tight a fit)
 Y_CAPB = Y_BF - 1.4                    # the cap's underside
 
 
@@ -122,7 +122,7 @@ def lower_panel_new():
     p += prism(h.plug(opening, holes), -0.01, h.PLUG_H)
     p -= prism(h.toggle_cut(*h.GOV) + h.toggle_cut(*h.LDG_EXT) + h.large_pb_cut(*h.STOP_REL), -h.PANEL_T - 1, h.PLUG_H + 1)
     for x, z in h.COLUMNS:
-        p -= h.csk(x, z, -h.PANEL_T, +1)
+        p -= h.csk(x, z, -h.PANEL_T, +1, h.PANEL_CSK)
     p -= ycyl(SEARCH[0], SEARCH[1], 2 * BORE_R, -h.PANEL_T - 1, 0.01)
     p += carrier().translate((SEARCH[0], 0, SEARCH[1]))
     return h.inlay(p, h.lower_labels(), -h.PANEL_T)
@@ -149,7 +149,7 @@ def plate():
     arms = arms.offset(-0.8, mf.JoinType.Round).offset(0.8, mf.JoinType.Round)
     p = prism(arms, Y_PF, Y_PR)
     p += ycyl(0, 0, BOSS_D, Y_PR - 0.01, Y_PR + BOSS_L)
-    p -= ycyl(0, 0, 2.5, Y_PF - 1, Y_PR + BOSS_L + 1)             # M3 set screw pilot, tapped
+    p -= h.ythread(0, 0, 3, Y_PF - 1, Y_PR + BOSS_L + 1)          # the M3 set screw's thread
     for k in range(4):
         x, z = PITCH * np.sin(np.radians(90 * k)), PITCH * np.cos(np.radians(90 * k))
         p += ycyl(x, z, LEG_D, Y_CAPB - LEG_SOCKET + 0.1, Y_PF + 0.01)
@@ -161,9 +161,9 @@ def plate():
 def cap():
     """Huey SEARCH CONT knob: a flanged round cone of CAP_TERRACES terraces on a parabolic profile (steep at the centre,
     flattening toward the rim, as the real knob), with a centre pin. Prints base down, so every terrace is narrower than
-    the one under it. Four 3.1 mm sockets in the underside take the plate's legs."""
+    the one under it. Four SOCKET_D sockets in the underside take the plate's legs."""
     y0 = Y_CAPB
-    z0 = CAP_SKIRT + 0.35 + CAP_BASE
+    z0 = CAP_SKIRT + 0.35
     r_rim, r_c = CAP_R - 1.0, 1.5                                   # first terrace's outer edge, and the top's radius
     def zp(u):                                                      # u = 1 at the rim, 0 at the centre
         return CAP_H * (0.5 * (1 - u) ** 2 + 0.5 * (1 - u))
@@ -180,7 +180,7 @@ def cap():
     body = mf.Manifold.revolve(prof, 160).rotate((90, 0, 0)).translate((0, y0, 0))      # z (up) -> -y (toward the thumb)
     for k in range(4):
         x, zz = PITCH * np.sin(np.radians(90 * k)), PITCH * np.cos(np.radians(90 * k))
-        body -= ycyl(x, zz, LEG_D + 0.1, y0 - LEG_SOCKET, y0 + 0.1)
+        body -= ycyl(x, zz, SOCKET_D, y0 - LEG_SOCKET, y0 + 0.1)
     return body
 
 
