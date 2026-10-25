@@ -36,14 +36,15 @@ import trimesh
 import manifold3d as mf
 from fontTools.ttLib import TTFont
 from fontTools.pens.basePen import BasePen
-from fontTools.varLib import instancer
 
 SEG = 96
 CLR = 0.2                       # added to switch cutouts: FDM holes print undersize
 WALL = 2.5
 PANEL_T = 2.5                   # panels are the same thickness as the MkII face
 ENGRAVE = 0.6                   # label depth
-FONT = "C:/Windows/Fonts/bahnschrift.ttf"   # DIN-style; instanced to SemiBold Condensed
+# Routed Gothic Narrow (Darren Embry, SIL Open Font License 1.1, bundled in ../../fonts): a digitized Leroy lettering
+# template, the closest free match to the engraved military lettering on the real UH-1 panels
+FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "fonts", "routed-gothic", "routed-gothic-narrow.ttf")
 
 # Lower box: the real UH-1 lower panel (measured by the user) is 85 mm wide, 69.01 mm tall on the right and 47.03 mm on
 # the left. Its bottom edge runs 13 mm flat from the left corner, then a 51.8 mm diagonal, then 25 mm flat to the right
@@ -124,6 +125,38 @@ def zcyl(x, y, d, z0, z1, seg=SEG):
     return mf.Manifold.cylinder(z1 - z0, d / 2, d / 2, seg).translate((x, y, z0))
 
 
+# Printed threads: every hole a screw of M3 or larger threads into is cut with its ISO metric thread (right hand), opened
+# THREAD_CLR all round because FDM holes print small, so no tap is needed.
+THREAD_CLR = 0.15
+THREADS = {3: 0.5, 4: 0.7, 5: 0.8}         # coarse pitch, by nominal size
+
+
+def thread_cut(d, length, seg=32):
+    """The void of an ISO metric internal thread, nominal d, along +z from 0 to length: the basic profile (H = 0.866 P;
+    the nut's crests are flat at the minor diameter over P/4, its roots at the major diameter over P/8, with 30 degree
+    flanks between), made as a section that turns once per pitch as it rises."""
+    p = THREADS[d]
+    h = 0.866025 * p
+    r_maj, r_min = d / 2 + THREAD_CLR, d / 2 - 5 * h / 8 + THREAD_CLR
+    pts = []
+    for i in range(seg):
+        a = 2 * np.pi * i / seg
+        u = abs(((i / seg) + 0.5) % 1.0 - 0.5) * p               # axial distance from the middle of a crest, 0 .. P/2
+        f = np.clip((u - p / 8) / (p / 2 - p / 16 - p / 8), 0.0, 1.0)
+        r = r_min + (r_maj - r_min) * f
+        pts.append((r * np.cos(a), r * np.sin(a)))
+    turns = length / p
+    return mf.Manifold.extrude(cs(pts), length, int(np.ceil(turns * 12)), 360.0 * turns)
+
+
+def ythread(x, z, d, y0, y1):
+    return thread_cut(d, y1 - y0).rotate((-90, 0, 0)).translate((x, y0, z))
+
+
+def xthread(y, z, d, x0, x1):
+    return thread_cut(d, x1 - x0).rotate((0, 90, 0)).translate((x0, y, z))
+
+
 def load(path):
     m = trimesh.load(path, process=True)
     return mf.Manifold(mf.Mesh(vert_properties=np.asarray(m.vertices, np.float32),
@@ -177,7 +210,7 @@ class FlatPen(BasePen):
         self.cur = []
 
 
-_font = instancer.instantiateVariableFont(TTFont(FONT), {"wght": 600, "wdth": 75})
+_font = TTFont(FONT)
 _gs, _cmap, _hmtx = _font.getGlyphSet(), _font.getBestCmap(), _font["hmtx"]
 _CAP = _font["OS/2"].sCapHeight
 
@@ -236,16 +269,23 @@ def large_pb_cut(x, z):
 # holes the screws thread into are 2.5 mm pilots, sized to tap M3.
 CSK_D, CSK_HOLE = 6.9, 3.4
 CSK_DEPTH = (CSK_D - CSK_HOLE) / 2                 # 1.75 mm
+# The panels' screws are M3 x 16 countersunk (kit), threaded M3 PANEL_THREAD deep from the panel's back (a kit M3 x 20
+# fits too), the columns solid behind that.
+PANEL_CSK = (CSK_D, CSK_HOLE)
+PANEL_THREAD = 20.0
 
 
-def csk(x, z, y_face, inward):
-    """Countersunk M3 clearance hole through a 2.5 mm part whose outer face is at y_face; inward is +1 or -1."""
+def csk(x, z, y_face, inward, size=(CSK_D, CSK_HOLE)):
+    """Countersunk clearance hole (M3 unless size gives the countersink and hole diameters) through a 2.5 mm part
+    whose outer face is at y_face; inward is +1 or -1."""
+    d, dh = size
+    depth = (d - dh) / 2
     y_in = y_face + inward * 3.0
-    hole = ycyl(x, z, CSK_HOLE, min(y_face, y_in) - 1, max(y_face, y_in) + 1)
+    hole = ycyl(x, z, dh, min(y_face, y_in) - 1, max(y_face, y_in) + 1)
     if inward > 0:
-        cone = ycyl(x, z, CSK_D + 1.0, y_face - 0.5, y_face + CSK_DEPTH, CSK_HOLE)
+        cone = ycyl(x, z, d + 1.0, y_face - 0.5, y_face + depth, dh)
     else:
-        cone = ycyl(x, z, CSK_HOLE, y_face - CSK_DEPTH, y_face + 0.5, CSK_D + 1.0)
+        cone = ycyl(x, z, dh, y_face - depth, y_face + 0.5, d + 1.0)
     return hole + cone
 
 
@@ -266,28 +306,29 @@ BACK = BODY + UPPER_IN                       # outline of the rear wall
 DIAGONAL = (panel_uv(DIAG_U[0], PANEL_HL), panel_uv(DIAG_U[1], PANEL_HR))   # the bottom edge the tube comes up through, (x, z) at each end
 
 # Panel corner screws, into columns that run back to the rear wall.
-COLUMNS = [panel_uv(4.5, 4.5), panel_uv(PANEL_W - 4.5, 4.5), panel_uv(PANEL_W - 4.5, PANEL_HR - 4.5),
+COLUMNS = [panel_uv(4.0, 4.0), panel_uv(PANEL_W - 4.0, 4.0),     # the top two 0.5 mm nearer their corners, clear of the GOV and LDG LT labels
+           panel_uv(PANEL_W - 4.5, PANEL_HR - 4.5),
            panel_uv(4.5, PANEL_HL - 4.5)]
-# The upper panel's SL toggle is only 11.2 mm in from its left edge, so its body covers that edge's two corners: the
-# top-left screw moves in between the two toggles, and the bottom-left one drops to the floor, under the toggle's body.
-# The middle one would run into the HeliSR board, so it stops UPPER_MID_DEPTH behind the panel, hanging from the top.
-UPPER_COLUMNS = [(UX0 + 25.25, UZ1 - 4.5), (UX1 - 4.5, UZ1 - 4.5), (UX1 - 4.5, UZ0 + 3.0), (UX0 + 4.5, UZ0 + 3.0)]
-UPPER_MID_DEPTH = 26.0
+UPPER_COLUMNS = [(UX0 + 4.5, UZ1 - 4.5), (UX1 - 4.5, UZ1 - 4.5), (UX1 - 4.5, UZ0 + 4.5), (UX0 + 4.5, UZ0 + 4.5)]
+
 
 # Each panel has a raised plug on its back that drops inside the box walls, so side knocks go into the walls
 # rather than the screws. Reliefs keep it clear of the columns and the switch nuts.
 PLUG_H, PLUG_CLR = 1.8, 0.25
 NUT_RELIEF = {"toggle": (15.0, 30.4), "pb4": 20.0}   # the bodies sit against the panel (w x h: a rectangle)
 
-# Switch positions (u, v from the panel's top left), measured off the user's drawing of the real UH-1 panels. The
-# search hat is 1.8 mm lower than drawn: its carrier's drum clears the lower box's top wall, and SEARCH CONT fits over
-# its bezel.
-GOV = panel_uv(13.9, 22.5)          # 0.5 mm right of drawn, so its body clears the top-left screw column (by 0.4 mm)
-SEARCH = panel_uv(42.5, 16.0)
-LDG_EXT = panel_uv(69.6, 21.5)        # 1 mm higher than drawn, to clear the AS5600 module's pin row under its lugs
+# Switch positions (u, v from the panel's top left), after the user's drawing of the real UH-1 panels, with the user's
+# rules: each panel's two toggles are mirror images about its centre line (the same height, the same distance from each
+# side), and the search hat is centred between the lower two: across the panel and at their height. The lower toggles are 14.4 mm in from the sides (the
+# drawing's 13.4 and 15.4, averaged). The upper ones are 15.7 mm in, the drawing's LDG LT ON: any closer to the side and
+# their bodies hit the panel screws' columns in the corners.
+TOGGLE_IN, UPPER_TOGGLE_IN = 14.4, 15.7
+GOV = panel_uv(TOGGLE_IN, 22.5)
+LDG_EXT = panel_uv(PANEL_W - TOGGLE_IN, 22.5)
+SEARCH = ((GOV[0] + LDG_EXT[0]) / 2, GOV[1])     # midway between the two toggles
 STOP_REL = panel_uv(70.8, 49.9)     # in the ENGINE IDLE ring
-SL = (UX0 + 11.2, UZ1 - 19.1)
-LDG_ON = (UX0 + 39.3, UZ1 - 19.1)
+SL = (UX0 + UPPER_TOGGLE_IN, UZ1 - 19.1)
+LDG_ON = (UX1 - UPPER_TOGGLE_IN, UZ1 - 19.1)
 
 # Rib along the front of the upper box's floor: the upper panel's bottom edge bears on it when the panel is
 # pushed in. Its back face is chamfered at 45 degrees so it prints off the floor.
@@ -358,9 +399,10 @@ HELISR_HOLES = [(HELISR_IN, HELISR_IN), (HELISR_SIZE[0] - HELISR_IN, HELISR_IN),
                 (HELISR_IN, HELISR_SIZE[1] - HELISR_IN), (HELISR_SIZE[0] - HELISR_IN, HELISR_SIZE[1] - HELISR_IN)]
 HELISR_MOUNTS = [(HELISR_X0 + yb, HELISR_Z0 + xb) for xb, yb in HELISR_HOLES]
 # Slot through the floor between the boxes for the USB plug and all the wires from the lower box: across the upper box
-# between its panel-screw columns (1 mm clear of each), and from the rear wall to 25 mm in front of it, clear of the
-# plug's overmold. Its front edge is a 50 mm bridge when the body prints.
-WIRE_SLOT = (UX0 + 4.5 + 3.2 + 1.0, UX1 - 4.5 - 3.2 - 1.0, YB - 25.0, YB)   # x0, x1, y0, y1
+# between its panel-screw columns (1 mm clear of each), and from the rear wall forward to 1.5 mm behind the rib the
+# upper panel's bottom edge bears on (Rev 4: only 25 mm in front of the rear wall). Its front edge is a bridge when the
+# body prints.
+WIRE_SLOT = (UX0 + 4.5 + 3.2 + 1.0, UX1 - 4.5 - 3.2 - 1.0, UY + RIB_D + WALL + 1.5, YB)   # x0, x1, y0, y1
 
 
 # ---------------------------------------------------------------- parts
@@ -388,39 +430,65 @@ def arc_text(s, h, cx, cz, r, top=True, gap=0.15):
     return c
 
 
+# Every label belongs to one switch and is placed by its offset from that switch's centre (du across, dv down, mm),
+# so it moves with the switch. The layout is the real head's (the user's photo): GOV stacked, INCR, and RPM stacked
+# across the top over the GOV toggle, DECR under it; LDG LT and EXT over the other toggle, OFF stacked down its outer
+# side, RETR under it (the two toggles' rows mirror each other); SEARCH CONT and EXT over the hat, a double-headed
+# arrow under it, from side to side, and RETR below; STOP and REL stacked left of the ENGINE IDLE ring.
+LABEL_H = 3.0
+GOV_LABELS = [("vtext", "GOV", -5.6, -19.3), ("text", "INCR", 0.0, -14.6), ("vtext", "RPM", 5.6, -19.3),
+              ("text", "DECR", 0.0, 12.0)]
+LDG_EXT_LABELS = [("text", "LDG LT", 0.0, -18.8), ("text", "EXT", 0.0, -14.6), ("vtext", "OFF", 10.3, -6.0),
+                  ("text", "RETR", 0.0, 12.0)]
+SEARCH_LABELS = [("small", "SEARCH CONT", 0.0, -20.0), ("small", "EXT", 0.0, -16.0), ("arrow", None, 18.0, 15.8),
+                 ("text", "RETR", 0.0, 20.0)]           # round the 28 mm cap: EXT over it, the arrow and RETR under it
+PB4_BEZEL_D = 17.6                              # Same Sky PB4: the cap's bezel in front of the panel (datasheet, 7.2 mm proud)
+ENGINE_IDLE_R = PB4_BEZEL_D / 2 + 0.6 + 2.3 / 2  # ENGINE / IDLE's middle radius: the 2.3 mm letters clear the bezel by 0.6 mm
+STOP_REL_LABELS = [("vtext", "STOP", -16.9, -5.8), ("vtext", "REL", -13.5, -3.7), ("arc", "ENGINE", ENGINE_IDLE_R, True),
+                   ("arc", "IDLE", ENGINE_IDLE_R, False)]
+SL_LABELS = [("text", "SL", 0.0, -15.6), ("text", "ON", 0.0, -11.4), ("text", "STOW", 0.0, 15.0)]
+LDG_ON_LABELS = [("text", "LDG LT", 0.0, -15.6), ("text", "ON", 0.0, -11.4), ("text", "OFF", 0.0, 15.0)]
+VSTEP = 3.6                                     # stacked letters: 3 mm tall, 0.6 mm apart
+
+
+def one_arrow(x0, x1, z, w=0.6, head=1.8):
+    """Single arrow from x0 pointing to x1."""
+    s = 1.0 if x1 > x0 else -1.0
+    shaft = rect(min(x0, x1 - s * head), z - w / 2, max(x0, x1 - s * head), z + w / 2)
+    return shaft + cs([(x1, z), (x1 - s * head * 1.4, z + head * 0.7), (x1 - s * head * 1.4, z - head * 0.7)][::int(s)])
+
+
+def switch_labels(sw, labels, h=LABEL_H, step=VSTEP):
+    """One switch's labels, placed by their offsets from the switch at sw (box frame x, z)."""
+    x, z = sw
+    c = mf.CrossSection()
+    for kind, s, du, dv in labels:
+        if kind == "text":
+            c += text(s, h, x + du, z - dv)
+        elif kind == "small":
+            c += text(s, 2.6, x + du, z - dv)
+        elif kind == "vtext":
+            c += vtext(s, h, x + du, z - dv, step=step)
+        elif kind == "arrow":                        # double-headed, du either side of the centre
+            c += arrow(x - du, x + du, z - dv)
+        elif kind == "arrow_l":                      # out to the left, starting du from the centre, 5 mm long
+            c += one_arrow(x - du, x - du - 5.0, z - dv)
+        elif kind == "arrow_r":
+            c += one_arrow(x + du, x + du + 5.0, z - dv)
+        elif kind == "arc":                          # du is the radius, dv whether it's over the top
+            c += arc_text(s, 2.3, x, z, du, top=dv)
+    return c
+
+
 def lower_labels():
-    u = lambda a, b: panel_uv(a, b)
-    h, step = 3.0, 4.2
-    gx, sx = GOV[0] - X0, SEARCH[0] - X0
-    lx, px = LDG_EXT[0] - X0, STOP_REL[0] - X0
-    pz = ZT - STOP_REL[1]
-    return (
-        # after the real panel: GOV stacked up the left edge and RPM right of the switch, INCR and DECR above and below
-        vtext("GOV", h, *u(3.6, 12.5), step=5.5) + vtext("RPM", h, *u(gx + 11.2, 11.5), step=step)
-        + text("INCR", h, *u(gx, 9.8)) + text("DECR", h, *u(gx, 35.3))
-        + text("SEARCH CONT", 2.6, *u(sx, 2.0))
-        # RETR under the hat's cap, with the L / R arrow between, longer than the cap is wide (there is no room for EXT
-        # over it, under SEARCH CONT)
-        + text("L", h, *u(sx - 15.0, 30.8)) + text("R", h, *u(sx + 15.0, 30.8))
-        + arrow(u(sx - 17.5, 0)[0], u(sx + 17.5, 0)[0], u(0, 34.6)[1]) + text("RETR", h, *u(sx, 38.6))
-        + text("LDG LT", h, *u(lx, 3.3)) + text("FWD", h, *u(lx, 7.6)) + text("DOWN", h, *u(lx, 35.3))
-        + vtext("ON", h, *u(81.0, 17.5), step=step)
-        # STOP and REL side by side, left of the ENGINE IDLE ring
-        + vtext("STOP", h, *u(px - 23.0, 44.0), step=step) + vtext("REL", h, *u(px - 18.6, 46.1), step=step)
-        + arc_text("ENGINE", 2.3, STOP_REL[0], STOP_REL[1], 8.4) + arc_text("IDLE", 2.3, STOP_REL[0], STOP_REL[1], 8.4, top=False)
-    )
+    return (switch_labels(GOV, GOV_LABELS) + switch_labels(LDG_EXT, LDG_EXT_LABELS)
+            + switch_labels(SEARCH, SEARCH_LABELS) + switch_labels(STOP_REL, STOP_REL_LABELS))
 
 
 def upper_labels():
-    h = 3.0
-    ux = lambda a: UX0 + a
-    uz = lambda b: UZ1 - b
-    sx, lx = SL[0] - UX0, LDG_ON[0] - UX0
-    return (
-        text("SL", h, ux(sx), uz(4.5)) + text("ON", h, ux(sx), uz(8.6)) + text("STOW", h, ux(sx), uz(33.4))
-        + text("LDG LT", h, ux(lx), uz(4.5)) + text("ON", h, ux(lx), uz(8.6)) + text("OFF", h, ux(lx), uz(33.4))
-        + vtext("OFF", h, ux(26.0), uz(15.0), step=4.6)
-    )
+    # the stacked OFF between the two toggles belongs to both: it sits on the panel's centre line, level with them
+    return (switch_labels(SL, SL_LABELS) + switch_labels(LDG_ON, LDG_ON_LABELS)
+            + vtext("OFF", LABEL_H, (SL[0] + LDG_ON[0]) / 2, SL[1] + 4.1, step=4.6))
 
 
 REAR_CHAMFER = 1.0                    # on the rear wall's outline: a little bigger, as the first layers' relief where the head sits on the bed
@@ -473,11 +541,10 @@ def body():
     # panel screw columns, blind at the rear wall
     for x, z in COLUMNS:
         b += ycyl(x, z, 6.4, 0, YB)
-        b -= ycyl(x, z, 2.5, -1, YB - 1.0)
-    for i, (x, z) in enumerate(UPPER_COLUMNS):
-        y1 = UY + UPPER_MID_DEPTH if i == 0 else YB
-        b += ycyl(x, z, 6.4, UY, y1)
-        b -= ycyl(x, z, 2.5, UY - 1, y1 - 1.0)
+        b -= ythread(x, z, 3, -0.5, PANEL_THREAD)
+    for x, z in UPPER_COLUMNS:
+        b += ycyl(x, z, 6.4, UY, YB)
+        b -= ythread(x, z, 3, UY - 0.5, UY + PANEL_THREAD)
     # rib under the upper panel's bottom edge, the same height as the walls so the panel's plug sits on it
     rib = cs([(UY, UZ0 - 0.01), (UY + RIB_D + WALL, UZ0 - 0.01), (UY + RIB_D, UZ0 + WALL), (UY, UZ0 + WALL)])
     b += _side(rib, UX0 + WALL - 0.01, UX1 - WALL + 0.01)
@@ -514,7 +581,9 @@ NECK_D, NECK_BORE = 37.8, 34.8   # the knurl is 37.1; the bore clears the 34 mm 
 GRIP_NECK_D = 33.4
 # Faux friction knob, after the UH-1's (part of the head, round the neck just under the box). From the bottom up: a
 # bulging wheel with KNOB_FLUTES deep round flutes cut straight down its side, leaving narrow lands between them (the
-# wheel's profile and the flutes are measured off the user's own throttle_friction_knob.stl); the wheel runs out into a
+# wheel's profile and the flutes are measured off throttle_friction_knob.stl from hotpretzel's UH-1 Huey Helicopter
+# Collective, https://www.thingiverse.com/thing:4284120, CC BY-NC: this knob, and the body that carries it, are for
+# non-commercial use only); the wheel runs out into a
 # plain band, where the real one carries its THROTTLE INCREASE / FRICTION INCREASE label; and a 45 degree chamfer up into
 # the neck. It doesn't turn. Its top is level, KNOB_CLR under the sloping bottom where they come closest (front right),
 # so the neck shows above it, more toward the back left.
@@ -591,7 +660,10 @@ BOSS_TOP = CEILING + 22.0        # top of the boss, the pod and the solid behind
 TUBE_TOP = TUBE_END + 2.0        # top of the lip: the tube's bore runs past BOSS_TOP, up a column of the same boss
 TALL_D = BOSS_D - 0.2            # the boss carried up, 0.1 mm in all round (the same radius leaves coincident faces)
 CABLE_D = 20.0                   # opening through the lip for the USB cable and the base sensor's lead
-BOLT_Z = TUBE_END - 10.0         # the tube's set screw, along y (drill the tube 5.2 mm across, 10 mm from its top)
+BOLT_Z = TUBE_END - 10.0         # the tube's set screw (drill the tube 5.2 mm across, 10 mm from its top)
+SCREW_ANGLE = 0.0                # the set screw points this many degrees left of straight ahead: 0, straight ahead, as
+                                 # in Rev 4. The hat's recess opens in front of its hole, so it goes in through the hat's
+                                 # opening with the lower panel off; its thread is all in solid boss
 GRUB_L = 8.0                     # M5 x 8 set screw (set-screw kit) in an M5 thread tapped in the boss's front
 GRUB_TIP = TY - TUBE_OD / 2 + 0.9   # its tip, through the tube's front wall, 0.1 short of the wall's inside
 # The pinion fills its 6 mm pocket to 0.2 mm off the floor and the ceiling, so it has 0.4 mm of end play (it had 1.2),
@@ -693,14 +765,35 @@ def lower_volume():
     return tilt(prism(BODY, 0, YC))
 
 
+WIRE_ROOM = 5.0                       # room left behind the toggles' lugs and the PB4's terminals for the soldered wires
+TOGGLE_CLR = {"GOV": 2.5, "LDG_EXT": 1.5}   # how far the neck is cut clear of each lower toggle's body, all round: as
+                                      # much as keeps 1.2 mm of wall to the bores, the pocket and the set screw's hole. Past
+                                      # 1.5 mm, LDG LT's cut would start shortening the AS5600's hold-down tabs at their front
+PB4_DEPTH = 16.5                      # the neck is cut this far behind the panel at STOP REL (+ 0.5 clearance): its terminals
+                                      # end at 15.6, and any deeper the cut comes within 1.2 mm of the pinion's pocket, so bend
+                                      # the terminals over, or run the wires off them sideways
+LDG_BACK_LIFT = 2.0                   # behind the toggles both cuts run on back to the rear wall (the face the head prints
+                                      # on); LDG LT's starts this much higher there, keeping 1.2 mm over the AS5600's tabs
+HAT_DEPTH = 8.0 + WIRE_ROOM           # the neck is cut this far behind the panel at the hat (its tact switches' legs end at 8)
+
+
 def switch_bodies(grow=0.0):
-    """Box frame: what the lower panel's switches put behind it. APEM 600H toggles 14.65 x 29.7 mm and 26 mm deep
-    with their lugs straight; the PB4 is 11.85 mm across and 18.7 mm long overall; the hat's tact switches only
-    put their legs a few mm behind the carrier."""
+    """Box frame: what the lower panel's switches put behind it, with room for their wires: APEM 600H toggles 14.65 x
+    29.7 mm and 26 mm deep with their lugs straight, and WIRE_ROOM behind the lugs, grown by TOGGLE_CLR; the PB4 (datasheet: 11.85 mm across,
+    11.5 mm deep and 4.1 mm terminals, its nut on the thread behind the panel), to PB4_DEPTH; the
+    hat's carrier and tact switches, to HAT_DEPTH."""
     g = grow
-    t = lambda x, z: box(x - 7.35 - g, 0, z - 14.85 - g, x + 7.35 + g, 26.0 + g, z + 14.85 + g)
-    return (t(*GOV) + t(*LDG_EXT) + ycyl(*STOP_REL, 12.0 + 2 * g, 0, 16.0 + g) + ycyl(*STOP_REL, 18.0 + 2 * g, 0, 3.0 + g)
-            + ycyl(*SEARCH, 2 * HAT_R + 2 * g, 0, 7.0 + g))
+    t = lambda x, z, c: box(x - 7.35 - c, 0, z - 14.85 - c, x + 7.35 + c, 26.0 + WIRE_ROOM + c, z + 14.85 + c)
+    def back(x, z, c, lift):                                          # on back to the rear wall
+        return box(x - 7.35 - c, 26.0, z - 14.85 - c + lift, x + 7.35 + c, YB + 1.0, z + 14.85 + c)
+    cg, cl = max(g, TOGGLE_CLR["GOV"]), max(g, TOGGLE_CLR["LDG_EXT"])
+    return (t(*GOV, cg) + back(*GOV, cg, 0.0) + t(*LDG_EXT, cl) + back(*LDG_EXT, cl, cl + LDG_BACK_LIFT) + ycyl(*STOP_REL, 12.0 + 2 * g, 0, PB4_DEPTH + g)
+            + ycyl(*STOP_REL, 18.0 + 2 * g, 0, 3.0 + g) + ycyl(*SEARCH, 2 * HAT_R + 2 * g, 0, HAT_DEPTH + g))
+
+
+def set_screw_axis(m):
+    """Head frame: m, drawn along +y through (TX, z) as if the set screw pointed straight ahead, turned to SCREW_ANGLE."""
+    return m.translate((-TX, -TY, 0.0)).rotate((0.0, 0.0, -SCREW_ANGLE)).translate((TX, TY, 0.0))
 
 
 def interior(y0=-1.0, grow=0.0):
@@ -775,7 +868,17 @@ def neck_solid():
     fill = box(TX - BOSS_D / 2, TY, NECK_BOT, PX - POD_IN / 2 - POD_WALL + 0.5, BIG, BOSS_TOP)   # solid behind the boss
     n = ((boss + pod + fill) ^ inner) + flare() + neck_cyl()
     column = zcyl(TX, TY, TALL_D, BOSS_TOP - 1.0, TUBE_TOP) ^ inner         # the tube's extra depth
-    n = (((n ^ box(-BIG, -BIG, -BIG, BIG, BIG, BOSS_TOP + 0.01)) + column)) - tilt(switch_bodies(0.5))   # clear of the panel's switches
+    n = (((n ^ box(-BIG, -BIG, -BIG, BIG, BIG, BOSS_TOP + 0.01)) + column))
+    # No air between the neck block and the rear wall: the head prints on that wall, so anything over air would print
+    # on supports, which are weaker than infill. Each convex piece is swept straight back to the wall (box +y), inside
+    # the box; the cuts (switches, the AS5600's way in, the pocket window, the leads' hole) come after.
+    # Each is capped again at its own top afterwards, square to the tube, as before: the sweep would carry it up.
+    below = lambda z: box(-BIG, -BIG, -BIG, BIG, BIG, z)
+    back = lambda m, z: mf.Manifold.batch_hull([m, m.translate(tuple(80.0 * YDIR))]) ^ inner ^ below(z)
+    top = below(BOSS_TOP + 0.01)
+    n += (back(boss ^ top, BOSS_TOP + 0.01) + back(pod ^ top, BOSS_TOP + 0.01) + back(flare() ^ top, BOSS_TOP + 0.01)
+          + back(neck_cyl() ^ top, BOSS_TOP + 0.01) + back(column, TUBE_TOP))
+    n -= tilt(switch_bodies(0.5))                         # clear of the panel's switches and their wires
     return n + friction_knob()
 
 
@@ -798,6 +901,19 @@ def module_seat():
     return k
 
 
+POCKET_WINDOW_W = 12.0                # a window from the back of the STOP REL recess into the pinion's pocket, this wide
+
+
+def pocket_window():
+    """Head frame: a rectangular window from the bottom of the STOP REL recess back into the pinion's pocket, the
+    pocket's full height and POCKET_WINDOW_W wide, centred on the button. The head prints on its rear wall, so this is
+    the pocket's roof on the bed: the window lets its supports be picked out, and shows the pinion."""
+    x, z = STOP_REL
+    back = tilt(box(x - POCKET_WINDOW_W / 2, PB4_DEPTH - 0.5, z - 6.5, x + POCKET_WINDOW_W / 2, YB, z + 6.5))
+    band = box(-BIG, -BIG, GEAR_Z[0] - 0.5, BIG, PY, CEILING)          # the pocket's height, no further back than the pinion
+    return back ^ band
+
+
 def neck_cuts():
     k = zcyl(TX, TY, NECK_BORE, NECK_BOT - 1, CEILING)                   # the grip's way up through the neck
     k += zcyl(TX, TY, TUBE_BORE, CEILING - 0.1, TUBE_END)               # tube bore; the tube end stops at the lip
@@ -813,9 +929,10 @@ def neck_cuts():
     k += zcyl(PX, PY, PIN_BORE, zp - PIN_DEPTH, zp + 0.1)
     k += mf.Manifold.cylinder(0.7, PIN_BORE / 2, PIN_BORE / 2 + 0.7, SEG).translate((PX, PY, zp - 0.6))
     k += module_seat()
+    k += pocket_window()
     # The tube's set screw: an M5 pilot (4.2 mm, tap it M5) from the boss's front into the bore. The screw goes in with
     # the lower panel off and its tip pins the tube through the front wall's hole; the tube is pressed in as well.
-    k += ycyl(TX, BOLT_Z, 4.2, TY - BOSS_D / 2 - 3.0, TY - TUBE_BORE / 2 + 0.3)
+    k += set_screw_axis(ythread(TX, BOLT_Z, 5, TY - BOSS_D / 2 - 3.0, TY - TUBE_BORE / 2 + 0.3))   # threaded M5
     return k
 
 
@@ -876,7 +993,7 @@ def lower_panel(front):
     p += prism(plug(opening, holes), -0.01, PLUG_H)
     p -= prism(toggle_cut(*GOV) + toggle_cut(*LDG_EXT) + large_pb_cut(*STOP_REL), -PANEL_T - 1, PLUG_H + 1)
     for x, z in COLUMNS:
-        p -= csk(x, z, -PANEL_T, +1)
+        p -= csk(x, z, -PANEL_T, +1, PANEL_CSK)
     # MkII 4-way hat: cut-out, tact switch carrier and all, moved from the MkII face to SEARCH CONT
     sx, sz = HAT_SRC
     hat = front ^ ycyl(sx, sz, 2 * HAT_R, 0, 6.0)
@@ -892,7 +1009,7 @@ def upper_panel():
     p += prism(plug(opening, holes), UY - 0.01, UY + PLUG_H)
     p -= prism(toggle_cut(*SL) + toggle_cut(*LDG_ON), UY - PANEL_T - 1, UY + PLUG_H + 1)
     for x, z in UPPER_COLUMNS:
-        p -= csk(x, z, UY - PANEL_T, +1)
+        p -= csk(x, z, UY - PANEL_T, +1, PANEL_CSK)
     return inlay(p, upper_labels(), UY - PANEL_T)
 
 
@@ -974,7 +1091,7 @@ def trigger_mount():
     # pivot: an M3 x 25 countersunk screw from the left lug's outside, through the trigger, into a pilot right through
     # the right lug; it threads in 8 mm and its tip stays 0.9 mm inside
     m -= xcyl(py, pz, CSK_D + 1.0, x0 - 0.5, x0 + CSK_DEPTH, CSK_HOLE) + xcyl(py, pz, PIVOT_D[0], x0 - 1.0, x0 + LUG + 0.01)
-    m -= xcyl(py, pz, PIVOT_D[1], x1 - LUG - 0.01, MOUNT_X1 + 1.0)
+    m -= xthread(py, pz, 3, x1 - LUG - 0.01, MOUNT_X1 + 1.0)                    # threaded M3
     # the switch's pocket, its cover flush with the face, and the slots through its floor for the two rows of legs
     yp = MOUNT_FACE - TACT_BODY
     m -= box(tx - TACT_POCKET[0] / 2, yp, tz - TACT_POCKET[1] / 2, tx + TACT_POCKET[0] / 2, MOUNT_FACE + 0.1,
@@ -1018,7 +1135,7 @@ def trigger():
     t -= xcyl(py, pz, PIVOT_D[0], x0 - 1.0, x1 + 1.0)
     # return spring pocket, facing the one in the mount; the pull stop's pilot, right through the arm
     t -= ycyl(SPRING[0], SPRING[1], SPRING_D, ya - 1.0, ya + SPRING_DEPTH[1])
-    t -= ycyl(STOP_SCREW[0], STOP_SCREW[1], 2.5, ya - 1.0, yb + 1.0)
+    t -= ythread(STOP_SCREW[0], STOP_SCREW[1], 3, ya - 1.0, yb + 1.0)            # threaded M3
     return tilt(t)
 
 

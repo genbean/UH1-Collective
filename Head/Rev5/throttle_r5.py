@@ -350,13 +350,14 @@ def refs():
     m = h.MODULE / 2
     d, t = h.MAGNET
     rot = lambda s: s.rotate(V(h.PX, h.PY, 0), V(h.PX, h.PY, 1), h.MODULE_ROT)
+    SA, CA = np.sin(np.radians(h.SCREW_ANGLE)), np.cos(np.radians(h.SCREW_ANGLE))   # the set screw's way in, toward the tube
     return {
         "tube": cyl(h.TUBE_OD / 2, h.TUBE_END - 200, h.TUBE_END).cut(cyl(h.TUBE_OD / 2 - 1, h.TUBE_END - 201, h.TUBE_END + 1))
-                .cut(cq.Solid.makeCylinder(2.6, 40, V(h.TX, h.TY - 20, h.BOLT_Z), V(0, 1, 0))),
+                .cut(cq.Solid.makeCylinder(2.6, 40, V(h.TX - 20 * SA, h.TY - 20 * CA, h.BOLT_Z), V(SA, CA, 0))),
         "module": rot(box(h.PX - m, h.PX + m, h.PY - m, h.PY + m, h.BOARD_Z, h.BOARD_Z + 1.6)),
         "chip": rot(box(h.PX - 2.5, h.PX + 2.5, h.PY - 3.1, h.PY + 3.1, h.CHIP_FACE, h.BOARD_Z)),
         "magnet": cyl(d / 2, h.CAP[1] + h.CAP_UP - t, h.CAP[1] + h.CAP_UP, h.PX, h.PY),
-        "m5_grub": cq.Solid.makeCylinder(2.1, h.GRUB_L, V(h.TX, h.GRUB_TIP - h.GRUB_L, h.BOLT_Z), V(0, 1, 0)),
+        "m5_grub": cq.Solid.makeCylinder(2.1, h.GRUB_L, V(h.TX - (h.TY - h.GRUB_TIP + h.GRUB_L) * SA, h.TY - (h.TY - h.GRUB_TIP + h.GRUB_L) * CA, h.BOLT_Z), V(SA, CA, 0)),
     }
 
 
