@@ -5,7 +5,6 @@
 #include <QFileInfo>
 #include <QGridLayout>
 #include <QLabel>
-#include <QMessageBox>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QToolButton>
@@ -13,9 +12,8 @@
 
 #include <QDebug>
 
-// the installer puts the release firmware here, next to the app
-static const char *const FIRMWARE_16MHZ = "/firmware/HeliSR_16MHz.hex";
-static const char *const FIRMWARE_8MHZ = "/firmware/HeliSR_8MHz.hex";
+// the installer puts the release firmware here, next to the app (5 V / 16 MHz Pro Micro)
+static const char *const FIRMWARE_FILE = "/firmware/HeliSR_16MHz.hex";
 static const int BOOTLOADER_WAIT_MS = 10000;
 static const int DOUBLE_TAP_WAIT_MS = 20000;
 
@@ -87,20 +85,15 @@ void Flasher::fillFirmwareList()
 {
     int current = m_firmware->currentIndex();
     m_firmware->clear();
-    QString dir = QCoreApplication::applicationDirPath();
-    struct { QString text; QString file; } items[] = {
-        {tr("HeliSR for a 5 V / 16 MHz Pro Micro"), dir + FIRMWARE_16MHZ},
-        {tr("HeliSR for a 3.3 V / 8 MHz Pro Micro"), dir + FIRMWARE_8MHZ},
-    };
-    for (auto &item : items) {
-        bool found = QFileInfo::exists(item.file);
-        m_firmware->addItem(found ? item.text : item.text + " " + tr("(not found)"), found ? item.file : QString());
-    }
+    QString file = QCoreApplication::applicationDirPath() + FIRMWARE_FILE;
+    QString text = tr("HeliSR (5 V / 16 MHz Pro Micro)");
+    bool found = QFileInfo::exists(file);
+    m_firmware->addItem(found ? text : text + " " + tr("(not found)"), found ? file : QString());
     m_firmware->addItem(tr("Another .hex file..."), QString("*"));
     if (current >= 0) {
         m_firmware->setCurrentIndex(current);
-    } else if (m_firmware->itemData(0).toString().isEmpty()) {
-        m_firmware->setCurrentIndex(2);
+    } else if (found == false) {
+        m_firmware->setCurrentIndex(1);
     }
 }
 
@@ -120,17 +113,10 @@ void Flasher::deviceConnected(bool isConnect, const hsr_info_t *info)
 {
     m_connected = isConnect;
     if (isConnect && info && info->firmware_version) {
-        m_deviceMhz = info->cpu_mhz;
         QString ver = QStringLiteral("%1.%2.%3").arg(info->firmware_version >> 8).arg((info->firmware_version >> 4) & 0xF)
                           .arg(info->firmware_version & 0xF);
         m_deviceLabel->setText(tr("Connected device: HeliSR firmware v%1, %2 MHz Pro Micro.").arg(ver).arg(info->cpu_mhz));
-        // offer the matching build
-        int want = info->cpu_mhz == 8 ? 1 : 0;
-        if (m_firmware->itemData(want).toString().isEmpty() == false) {
-            m_firmware->setCurrentIndex(want);
-        }
     } else if (isConnect == false) {
-        m_deviceMhz = 0;
         m_deviceLabel->setText(tr("No HeliSR device connected."));
     }
     m_flashButton->setEnabled(isConnect && m_avr->isBusy() == false);
@@ -146,20 +132,6 @@ QString Flasher::chooseHexFile()
     QString file = m_firmware->currentData().toString();
     if (file == "*") {
         file = QFileDialog::getOpenFileName(this, tr("Open firmware"), QString(), tr("Firmware (*.hex)"));
-    }
-    if (file.isEmpty()) {
-        return QString();
-    }
-    // an 8 MHz build on a 16 MHz board (or the other way round) has no working USB until reflashed
-    int fileMhz = file.endsWith(FIRMWARE_8MHZ) ? 8 : file.endsWith(FIRMWARE_16MHZ) ? 16 : 0;
-    if (m_deviceMhz && fileMhz && fileMhz != m_deviceMhz) {
-        if (QMessageBox::warning(this, tr("Clock speed"),
-                                 tr("The connected Pro Micro runs at %1 MHz, but this firmware is for %2 MHz. Its USB won't "
-                                    "work until it's flashed again with a double tap on RST. Flash anyway?")
-                                     .arg(m_deviceMhz).arg(fileMhz),
-                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
-            return QString();
-        }
     }
     return file;
 }

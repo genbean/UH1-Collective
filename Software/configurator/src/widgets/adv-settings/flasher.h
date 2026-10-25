@@ -48,7 +48,6 @@ private:
     AvrFlasher *m_avr;
     QString m_hexFile;
     bool m_connected = false;
-    int m_deviceMhz = 0;
 
     QLabel *m_deviceLabel;
     QLabel *m_fileLabel;

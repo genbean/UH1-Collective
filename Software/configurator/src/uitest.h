@@ -9,6 +9,7 @@ class MainWindow;
 // written back from the pages; every byte must come back unchanged.
 //   HeliSRConfigurator --ui-test [count] [--seed n]
 //   HeliSRConfigurator --ui-device-test [--seed n]   (Write and Read buttons with a device)
+//   HeliSRConfigurator --ui-test-file <profile.cfg> ...     (profiles through the pages)
 namespace UiTest
 {
     bool isUiTestCommand(const QStringList &args);

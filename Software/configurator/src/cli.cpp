@@ -22,7 +22,7 @@
 namespace
 {
 const QStringList COMMANDS = {"--info", "--read", "--write", "--write-defaults", "--params", "--flash",
-                              "--flash-new", "--roundtrip", "--help"};
+                              "--flash-new", "--roundtrip", "--save-defaults", "--help"};
 
 void out(const QString &text)
 {
@@ -277,6 +277,19 @@ int Cli::run(const QStringList &args)
         out("HeliSR Configurator " APP_VERSION);
         out("  --info | --read <file.cfg> | --write <file.cfg> | --write-defaults | --params [s]");
         out("  --flash <file.hex> | --flash-new <file.hex> [--port COMx] | --roundtrip   [--device <n>]");
+        out("  --save-defaults <file.cfg>   (no device needed)");
+        return 0;
+    }
+    if (args.contains("--save-defaults")) {
+        QString file = value("--save-defaults");
+        if (file.isEmpty()) {
+            out("--save-defaults needs a file name");
+            return 2;
+        }
+        dev_config_t cfg;
+        hsr_config_defaults(&cfg);
+        ConfigToFile::saveDeviceConfigToFile(QFileInfo(file).absoluteFilePath(), cfg);
+        out("Saved the factory settings to " + file);
         return 0;
     }
     if (args.contains("--flash-new")) {

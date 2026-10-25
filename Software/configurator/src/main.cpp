@@ -62,6 +62,20 @@ int main(int argc, char *argv[])
         dir.mkpath("configs");
     }
 
+    // the example profiles that come with the app, where Load config from file
+    // opens; an example you've edited (newer than the app's) is left alone
+    QDir examples(QCoreApplication::applicationDirPath() + "/profiles");
+    if (examples.exists() && docLoc.isEmpty() == false) {
+        dir.mkpath("configs/examples");
+        for (const QFileInfo &src : examples.entryInfoList(QStringList() << "*.cfg", QDir::Files)) {
+            QFileInfo dst(docLoc + "configs/examples/" + src.fileName());
+            if (dst.exists() == false || dst.lastModified() < src.lastModified()) {
+                QFile::remove(dst.absoluteFilePath());
+                QFile::copy(src.absoluteFilePath(), dst.absoluteFilePath());
+            }
+        }
+    }
+
     QSettings appSettings(docLoc + "HeliSRSettings.conf", QSettings::IniFormat);
 
     DeviceConfig deviceConfig;

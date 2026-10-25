@@ -1,6 +1,6 @@
 # Plan: a FreeJoy fork for the Pro Micro + HeliSR
 
-Status, 2026-10-25: **phases 0-5 are done.** See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results), [Phase 4 results](#phase-4-results) and [Phase 5 results](#phase-5-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
+Status, 2026-10-25: **phases 0-5 and 7 are done**; phase 6 waits for the built boards. See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results), [Phase 4 results](#phase-4-results), [Phase 5 results](#phase-5-results) and [Phase 7 results](#phase-7-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
 
 ## Goal
 
@@ -47,7 +47,7 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
 
 **Not possible on Rev 3.0** (left out of the app): matrices, more than 16 physical inputs, I²C or SPI sensors and ADCs (including digital AS5600 reading), and fast hardware encoders. LEDs, PWM and RGB are only possible on the spare pins (decision 2).
 
-**Other Pro Micros:** the 3.3 V / 8 MHz Pro Micro gets its own .hex, which costs little. The RP2040 Pro Micro is a different chip and is out of scope, but the firmware's hardware layer is kept separate so a port stays possible.
+**Other Pro Micros:** only the 5 V / 16 MHz Pro Micro is supported (decision 4, 2026-10-25). The RP2040 Pro Micro is a different chip and is out of scope, but the firmware's hardware layer is kept separate so a port stays possible.
 
 ## How it fits together
 
@@ -114,6 +114,7 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
 1. **Name: HeliSR.** The app is "HeliSR Configurator", and the firmware and default USB name are "HeliSR". Users can rename the device in the app.
 2. **Spare Pro Micro pins: yes, if they fit.** That means direct buttons, extra analog axes, and LEDs / PWM backlight, with a Pro Micro pin page in the app. If phase 1 shows the flash is too tight, they're dropped and the docs say so.
 3. **Qt download: approved.** At phase 4, install official Qt + MinGW binaries with aqtinstall (no Qt account needed), into a folder outside the project.
+4. **5 V / 16 MHz Pro Micro only (2026-10-25).** The 3.3 V / 8 MHz build was dropped: you don't need it, the wrong build leaves a board without USB until it's reflashed, and an AS5600 at 3.3 V needs different module preparation from the board README's.
 
 ## Phase 1 results
 
@@ -327,7 +328,7 @@ FreeJoyConfiguratorQt is now **HeliSR Configurator** (`configurator/`, see its R
 **Contents** (37 MB installed):
 - the app and Qt 6.8.3, from windeployqt: 4 Qt DLLs and 6 plugins, no translations, no software OpenGL, no network plugins;
 - the MinGW runtime;
-- `firmware\HeliSR_16MHz.hex` and `HeliSR_8MHz.hex`, both 21,398 B; the builds differ, as they should;
+- `firmware\HeliSR_16MHz.hex` (21,398 B); an 8 MHz build was also shipped at first and then dropped (decision 4);
 - `avrdude\`, the Arduino IDE's avrdude 8.0.0-arduino1: one 32-bit exe that needs only Windows' own DLLs;
 - the licences (GPL-3, LGPL-3, GPL-2, the GCC runtime exception, winpthreads), `THIRD-PARTY-NOTICES.txt`, `NOTICE.md` and a quick-start `README.txt`.
 
@@ -354,5 +355,47 @@ FreeJoyConfiguratorQt is now **HeliSR Configurator** (`configurator/`, see its R
 **Still open:**
 - **avrdude source:** each GitHub release must carry avrdude's source next to the binary (GPL-2); the release checklist in `packaging/README.md` says what to attach.
 - **Code signing:** the installer isn't signed, so SmartScreen warns the first time; the user guide (phase 7) should explain "More info → Run anyway".
-- **Not tested:** the 8 MHz firmware on a 3.3 V Pro Micro (none here); flashing a factory-fresh Pro Micro (`--flash-new`).
+- **Not tested:** flashing a factory-fresh Pro Micro (`--flash-new`).
 - **No GitHub Actions workflow yet** (optional).
+
+## Phase 7 results
+
+Documentation for people building their own, without help:
+
+| Page | What it covers |
+|---|---|
+| `README.md` | What HeliSR is, getting started, the documentation index, licence and credits |
+| `docs/quick-start.md` | Install (including SmartScreen), first flash, checking it works (`joy.cpl`), wiring, first setup |
+| `docs/user-guide.md` | Every page and setting, every button type (as the firmware actually behaves: timers, shifts, hats, encoders, radio and sequential buttons), axis buttons and functions, several boards, the command line |
+| `docs/flashing.md` | How flashing works, new boards, updates, recovery with a double tap, troubleshooting, avrdude by hand |
+| `docs/as5600.md` | OUT-pin programming, module preparation (R4, R1, DIR), wiring, the helper step by step, the UH-1's two sensors, troubleshooting |
+| `docs/profiles.md` | Profiles, and the three examples with their button tables |
+| `docs/development.md` | Folders, builds, how the app and firmware talk, all the tests, remaking the profiles |
+
+The board README's "MMJoy2 setup" section is out of date, but that folder is frozen, so the docs say so instead of changing it.
+
+**Example profiles** (`profiles/`, made by `make_profiles.py` from the factory-settings profile, which `--save-defaults` writes):
+- **Default (16 buttons, 4 axes):** the factory settings.
+- **UH-1 collective (HeliSR head):** the Huey head's controls from `Head/README.md`, with buttons for the middle positions of the ON-OFF-ON switches and for LDG LT OFF. The collective (AX1) is Z and the throttle (AX4) is Rz. A throttle-cutoff button covers the bottom 7 %. Named "UH-1 Collective".
+- **Button box:** every button type, with two encoders, a hat and a shift layer.
+
+The installer ships them, and the app copies them to `Documents\HeliSR\configs\examples` (an edited copy is left alone).
+
+**Checked:**
+- each profile goes through every page unchanged (`--ui-test-file`);
+- on the Pro Micro, each was written, read back identical, and gave the layout Windows' joystick API reports:
+
+  | Profile | Buttons | Axes | Hat |
+  |---|---|---|---|
+  | UH-1 | 17 | 2 | – |
+  | Button box | 16 | 0 | 1 |
+  | Default | 16 | 4 | – |
+
+- the rebuilt installer installs the profiles, the first run copies them, and the uninstall is clean.
+
+**Also in this phase:** only the 5 V / 16 MHz Pro Micro is supported now (decision 4). The release ships one firmware file, `HeliSR_16MHz.hex`.
+
+**Still open:**
+- **The old `Firmware/HeliCollective` sketch:** retire it, or keep it as a minimal option? That's your call.
+- **The repository's top-level README** is only a title.
+- **Not verified on hardware yet (phase 6):** the documented wiring and the AS5600 steps.
