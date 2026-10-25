@@ -151,7 +151,7 @@ def plate():
     for k in range(4):
         x, z = PITCH * np.sin(np.radians(90 * k)), PITCH * np.cos(np.radians(90 * k))
         p += ycyl(x, z, LEG_D, Y_CAPB - LEG_SOCKET + 0.1, Y_PF + 0.01)
-        p += ycyl(x, z, LEG_D, Y_PF - FLARE_H, Y_PF + 0.01, FLARE_D)       # fillet at the root
+        p += ycyl(x, z, LEG_D, Y_PF - FLARE_H, Y_PF + 0.01, FLARE_D) ^ prism(arms, Y_PF - FLARE_H - 1, Y_PF + 0.01)   # fillet at the root, cut off where it would overhang the arm's edge
     return p
 
 

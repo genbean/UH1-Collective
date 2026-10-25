@@ -17,7 +17,7 @@ heads centre the halves, and each bearing's inner race clamps its two half trunn
 Both cable bores are half-round channels in each half, so the cables are laid in before closing it:
     axial  - right through both trunnions along the pivot axis (13 mm)
     radial - from the socket bottom along the tube axis until it meets the axial bore (13 mm)
-The hose clamp on the socket mouth holds the two halves together there; the M4 lock screw pins the tube.
+The hose clamp on the socket mouth holds the two halves together there; there is no tube lock screw.
 
 Travel: fixed down-stop at 0 deg (screw under the socket boss). Up-stop adjustable 30-40 deg:
 a stop block clamps anywhere along an arc slot in the graduated quadrant behind the pivot,
@@ -99,12 +99,14 @@ FELT_T = 1.5
 SHOE_T = 5.5
 KNOB_X, KNOB_Y = -45.0, 22.0
 HINGE_X, HINGE_Z = 45.0, -4.0
-# friction knob: an M5 x 20 countersunk screw, its head glued into the printed knob, runs down through the spring and
-# the shoe's front tab (top at z = 5) into an M5 nut slid into a slot just under the knob tower's top (z = -1)
+# friction knob: an M5 x 16 hex-head bolt (ISO 4017), its head in a hex pocket moulded into the printed knob so the knob
+# turns it, runs down through the spring and the shoe's front tab (top at z = 5) into an M5 nut slid into a slot just
+# under the knob tower's top (z = -1)
 SPRING_SEAT = 2.0                # the spring sits in a 10.6 mm recess this deep in the shoe's tab
 SPRING_FIT = 6.5                 # fitted spring length
 KNOB_Z0 = 5.0 - SPRING_SEAT + SPRING_FIT      # the knob's underside (9.5)
-KNOB_HEAD_Z = KNOB_Z0 + 3.0      # top of the screw's head, inside the knob: the screw ends at z = -7.5
+KNOB_HEAD_Z = KNOB_Z0 + 3.0      # top of the bolt's head, inside the knob: the M5 x 16 ends at z = -7.0
+KNOB_BOLT = (16.0, 3.5)          # the friction bolt: length under the head, head height (ISO 4017 M5: 8 mm across flats)
 KNOB_D, KNOB_H, KNOB_FLUTES = 28.0, 10.0, 10
 FN_NUT_Z = -3.2                  # the nut's top face, pulled up against its slot's roof
 
@@ -502,8 +504,9 @@ def shoe():
 
 
 def friction_knob():
-    """printed knob on the M5 x 20 friction screw: the screw's head is glued into its countersink (a hex key still
-    reaches the head through the top), and a spigot under it centres the spring. Prints top face down."""
+    """printed knob on the M5 x 16 hex-head friction bolt: the head sits in a hex pocket moulded into the knob, open at the
+    top, so turning the knob turns the bolt (a spanner or socket still reaches the head), and a spigot under it centres
+    the spring. Prints top face down."""
     z0, z1 = KNOB_Z0, KNOB_Z0 + KNOB_H
     r = KNOB_D / 2
     k = cyl(r, (KNOB_X, KNOB_Y, z0), (KNOB_X, KNOB_Y, z1)).fuse(cyl(3.7, (KNOB_X, KNOB_Y, z0 - 1.5), (KNOB_X, KNOB_Y, z0 + 0.1)))
@@ -512,7 +515,8 @@ def friction_knob():
     for i in range(KNOB_FLUTES):
         x, y = on_circle(r + 1.0, (i + 0.5) * 360 / KNOB_FLUTES)
         k = k.cut(cyl(2.5, (KNOB_X + x, KNOB_Y + y, z0 - 1), (KNOB_X + x, KNOB_Y + y, z1 + 1)))
-    k = k.cut(csk_hole(5, (KNOB_X, KNOB_Y, KNOB_HEAD_Z), (0, 0, -1), 10, out=z1 - KNOB_HEAD_Z + 1))
+    k = k.cut(hexprism(M5_HEAD_AF, (KNOB_X, KNOB_Y, KNOB_HEAD_Z - KNOB_BOLT[1] - 0.1), (KNOB_X, KNOB_Y, z1 + 1)))   # head
+    k = k.cut(cyl(M5_CLR_R, (KNOB_X, KNOB_Y, z0 - 2), (KNOB_X, KNOB_Y, KNOB_HEAD_Z)))                              # shank
     return k.clean()
 
 

@@ -34,7 +34,7 @@ Limits: the plate can only go back 0.1 mm at the centre (the set screw's rear en
 
 ## Parts
 
-Bezel 1.6 mm thick, with a 7 mm pocket on its underside around each leg for the leg's flare. Legs 4 mm, flared to 5.6 mm over the last 0.6 mm at the plate, so they are strong printed standing up.
+Bezel 1.6 mm thick, with a 7 mm pocket on its underside around each leg for the leg's flare. Legs 4 mm, flared to 5.6 mm over the last 0.6 mm at the plate, so they are strong printed standing up. The flare is trimmed to the arm's outline, so it never overhangs the end of an arm.
 
 Panel (hat carrier built in), bezel, rocker plate (legs included), cap, 4 x M2 x 8 countersunk, 1 x M3 x 4 set screw, 4 TE 1825910-6. Print the cap base down, the plate with its legs down on the bed with its boss up (the legs hold it up, no supports), the bezel front face down. The panel prints face down like the others; the carrier needs no support.
 
