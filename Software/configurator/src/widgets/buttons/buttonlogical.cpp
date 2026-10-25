@@ -17,7 +17,8 @@ ButtonLogical::ButtonLogical(int buttonIndex, QWidget *parent)
     m_currentState = false;
     m_debugState = false;
     ui->label_LogicalButtonNumber->setNum(m_buttonIndex + 1);
-    ui->spinBox_PhysicalButtonNumber->installEventFilter(this);
+    ui->comboBox_PhysicalInput->addItem("-", -1);
+    ui->comboBox_PhysicalInput->installEventFilter(this);
 }
 
 ButtonLogical::~ButtonLogical()
@@ -43,6 +44,11 @@ void ButtonLogical::initialization()
 //        }
         ui->comboBox_ButtonFunction->addItem(m_logicFunctionList[i].guiName);
         m_logicFunc_enumIndex.push_back(m_logicFunctionList[i].deviceEnumIndex);
+        if (m_logicFunctionList[i].deviceEnumIndex == SWITCH_CENTER) {
+            ui->comboBox_ButtonFunction->setItemData(i, tr("On while its input and the next input (for example IN5 and IN6) "
+                                                           "are both off: the middle position of an ON-OFF-ON switch."),
+                                                     Qt::ToolTipRole);
+        }
     }
     for (int i = 0; i < SHIFT_COUNT; i++) {
         ui->comboBox_ShiftIndex->addItem(m_shiftList[i].guiName);
@@ -54,22 +60,26 @@ void ButtonLogical::initialization()
 
     connect(ui->comboBox_ButtonFunction, SIGNAL(currentIndexChanged(int)),
             this, SLOT(functionIndexChanged(int)));
-    connect(ui->spinBox_PhysicalButtonNumber, SIGNAL(valueChanged(int)),
-            this, SLOT(editingOnOff(int)));
+    connect(ui->comboBox_PhysicalInput, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &ButtonLogical::physicalInputChanged);
+    physicalInputChanged(ui->comboBox_PhysicalInput->currentIndex());
 }
 
-void ButtonLogical::setMaxPhysButtons(int maxPhysButtons)
+void ButtonLogical::setPhysicalInputs(const QVector<HsrBoard::PhysInput> &inputs)
 {
-    ui->spinBox_PhysicalButtonNumber->setMaximum(maxPhysButtons);
-}
-
-void ButtonLogical::setSpinBoxOnOff(int maxPhysButtons)
-{
-    if (maxPhysButtons > 0) {
-        ui->spinBox_PhysicalButtonNumber->setEnabled(true);
-    } else {
-        ui->spinBox_PhysicalButtonNumber->setEnabled(false);
+    QComboBox *cb = ui->comboBox_PhysicalInput;
+    int current = cb->currentData().toInt();
+    {
+        QSignalBlocker blocker(cb);
+        cb->clear();
+        cb->addItem("-", -1);
+        for (const HsrBoard::PhysInput &in : inputs) {
+            cb->addItem(in.name, in.phys);
+        }
+        int index = cb->findData(current);
+        cb->setCurrentIndex(index < 0 ? 0 : index);
     }
+    physicalInputChanged(cb->currentIndex());
 }
 
 void ButtonLogical::functionIndexChanged(int index)
@@ -79,9 +89,9 @@ void ButtonLogical::functionIndexChanged(int index)
     m_functionPrevType = type;
 }
 
-void ButtonLogical::editingOnOff(int value)
+void ButtonLogical::physicalInputChanged(int index)
 {
-    if (value > 0 && ui->spinBox_PhysicalButtonNumber->isEnabled()) {
+    if (ui->comboBox_PhysicalInput->itemData(index).toInt() >= 0) {
         ui->checkBox_IsInvert->setEnabled(true);
         ui->checkBox_IsDisable->setEnabled(true);
         ui->comboBox_ButtonFunction->setEnabled(true);
@@ -133,9 +143,12 @@ void ButtonLogical::setButtonState(bool state)
     }
 }
 
-void ButtonLogical::setPhysicButton(int buttonIndex)
+void ButtonLogical::setPhysicButton(int phys)
 {
-    ui->spinBox_PhysicalButtonNumber->setValue(buttonIndex + 1); // +1 !!!!
+    int index = ui->comboBox_PhysicalInput->findData(phys);
+    if (index >= 0) {
+        ui->comboBox_PhysicalInput->setCurrentIndex(index);
+    }
 }
 
 int ButtonLogical::currentFocus() const
@@ -170,10 +183,10 @@ bool ButtonLogical::eventFilter(QObject *obj, QEvent *event)
     Q_UNUSED(obj)
     if (m_autoPhysButEnabled) {
         if (event->type() == QEvent::FocusIn) {
-            ui->spinBox_PhysicalButtonNumber->setStyleSheet("background-color: rgba(0, 120, 215, 200); color: rgb(255, 255, 255)");
+            ui->comboBox_PhysicalInput->setStyleSheet("background-color: rgba(0, 120, 215, 200); color: rgb(255, 255, 255)");
             m_currentFocus = m_buttonIndex;
         } else if (event->type() == QEvent::FocusOut){
-            ui->spinBox_PhysicalButtonNumber->setStyleSheet("");
+            ui->comboBox_PhysicalInput->setStyleSheet("");
             m_currentFocus = -1;
         }
     }
@@ -184,7 +197,8 @@ void ButtonLogical::readFromConfig()
 {
     button_t *button = &gEnv.pDeviceConfig->config.buttons[m_buttonIndex];
     // physical
-    ui->spinBox_PhysicalButtonNumber->setValue(button->physical_num + 1); // +1 !!!!
+    int index = ui->comboBox_PhysicalInput->findData(int(button->physical_num));
+    ui->comboBox_PhysicalInput->setCurrentIndex(index < 0 ? 0 : index);
     // isDisable
     ui->checkBox_IsDisable->setChecked(button->is_disabled);
     // isInvert
@@ -219,7 +233,7 @@ void ButtonLogical::writeToConfig()
 {
     button_t *button = &gEnv.pDeviceConfig->config.buttons[m_buttonIndex];
 
-    button->physical_num = ui->spinBox_PhysicalButtonNumber->value() - 1; // -1 !!!!
+    button->physical_num = int8_t(ui->comboBox_PhysicalInput->currentData().toInt());
     button->is_disabled = ui->checkBox_IsDisable->isChecked();
     button->is_inverted = ui->checkBox_IsInvert->isChecked();
 

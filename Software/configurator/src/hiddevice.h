@@ -2,9 +2,16 @@
 #define HIDDEVICE_H
 
 #include <QObject>
+#include <QStringList>
+#include <atomic>
 #include <mutex>
+#include <string>
 #include "hidapi.h"
 
+// Talks to HeliSR devices over their settings channel (a vendor-defined HID
+// collection, usage page 0xFF00). processData() runs in its own thread: it
+// keeps the device list up to date, polls the live data, and carries out the
+// read, write and bootloader requests the UI makes.
 class HidDevice : public QObject
 {
     Q_OBJECT
@@ -12,10 +19,7 @@ class HidDevice : public QObject
 public:
     void getConfigFromDevice();
     void sendConfigToDevice();
-    void sendLedState(uint32_t bitmask);
-
-    bool enterToFlashMode();
-    void flashFirmware(const QByteArray *firmware);
+    void enterBootloader();
 
     void setIsFinish(bool isFinish);
     void setSelectedDevice(int deviceNumber);
@@ -26,58 +30,44 @@ public slots:
 signals:
     void deviceDisconnected();
     void deviceConnected();
-    void flasherConnected();
-    void paramsPacketReceived(bool firmwareCompatible);
+    //! INFO answered: whether this configurator understands the device's settings
+    void deviceInfoReceived(bool compatible);
+    void paramsPacketReceived();
 
     void configReceived(bool isSuccess);
     void configSent(bool isSuccess);
+    //! the device acknowledged the bootloader command and is restarting into it
+    void bootloaderStarted(bool isSuccess);
 
-    void hidDeviceList(const QList<QPair<bool, QString>> &deviceNames);
-
-    void flasherFound(bool isFound);
-    void flashStatus(int status, int percent);
+    void hidDeviceList(const QStringList &deviceNames);
 
 private:
     struct Device
     {
         ushort vid;
         ushort pid;
-        std::wstring serNum;
         std::string path;
-
-        Device (const hid_device_info *hid) {
-            this->vid = hid->vendor_id;
-            this->pid = hid->product_id;
-            this->serNum = hid->serial_number;
-            this->path = hid->path;
-        }
-
-        void operator = (const hid_device_info *hid) {
-            this->vid = hid->vendor_id;
-            this->pid = hid->product_id;
-            this->serNum = hid->serial_number;
-            this->path = hid->path;
-        }
+        QString name;
     };
-    QList<Device> m_hidDevicesList;  // should be thread safe
+    QList<Device> m_hidDevicesList;     // guarded by m_mutex
 
-    hid_device *m_paramsRead;
-    hid_device *m_joyRead;
+    enum Work { WORK_PARAMS, WORK_READ, WORK_WRITE, WORK_BOOTLOADER };
+    std::atomic<int> m_currentWork{WORK_PARAMS};
+    std::atomic<bool> m_isFinish{false};
+    std::atomic<bool> m_listChanged{false};
 
-    uint32_t m_ledState = 0;
+    hid_device *m_device = nullptr;
+    bool m_compatible = false;
+    int m_selectedDevice = -1;          // guarded by m_mutex
 
-    int m_selectedDevice = -1;
-    int m_currentWork;
-    bool m_oldFirmwareSelected;
-    bool m_isFinish = false;
-
-    void readConfigFromDevice(uint8_t *buffer);
-    void writeConfigToDevice(uint8_t *buffer);
-    void flashFirmwareToDevice();
-
-    QList<QPair<bool, QString>> m_deviceNames;
-    QByteArray m_flasherPath;
-    const QByteArray *m_firmware;
+    bool transact(uint8_t cmd, uint8_t index, const void *data, int len, uint8_t *reply,
+                  int timeoutMs = 250, int tries = 3);
+    bool readInfo();
+    bool readParams();
+    bool readConfigFromDevice();
+    bool writeConfigToDevice();
+    bool startBootloader();
+    void closeDevice();
 
     mutable std::mutex m_mutex;
 };

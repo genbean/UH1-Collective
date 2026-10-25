@@ -6,6 +6,7 @@
 
 #include "deviceconfig.h"
 #include "global.h"
+#include "helisrboard.h"
 //#include <QThread>
 
 #define TIMER_COUNT 4 // "NO timer" + count
@@ -27,12 +28,13 @@ public:
 
     void initialization();
 
-    void setMaxPhysButtons(int maxPhysButtons);
-    void setSpinBoxOnOff(int maxPhysButtons);
+    //! the physical inputs that exist now; keeps the current choice if it still exists
+    void setPhysicalInputs(const QVector<HsrBoard::PhysInput> &inputs);
 
     void setButtonState(bool setState);
 
-    void setPhysicButton(int buttonIndex);
+    //! select a physical input by its number
+    void setPhysicButton(int phys);
     void setAutoPhysBut(bool enabled);
     int currentFocus() const;
 
@@ -45,7 +47,7 @@ signals:
     void functionTypeChanged(button_type_t current, button_type_t previous, int buttonIndex);
 
 private slots:
-    void editingOnOff(int value);
+    void physicalInputChanged(int index);
     void functionIndexChanged(int index);
 
 protected:
@@ -89,6 +91,7 @@ private:
         {TOGGLE_SWITCH,        tr("Toggle switch ON/OFF")},
         {TOGGLE_SWITCH_ON,     tr("Toggle switch ON")},
         {TOGGLE_SWITCH_OFF,    tr("Toggle switch OFF")},
+        {SWITCH_CENTER,        tr("Switch center")},
         {POV1_UP,              tr("POV1 Up")},
         {POV1_RIGHT,           tr("POV1 Right")},
         {POV1_DOWN,            tr("POV1 Down")},

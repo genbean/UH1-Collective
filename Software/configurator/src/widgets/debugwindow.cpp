@@ -22,9 +22,9 @@ DebugWindow::DebugWindow(QWidget *parent)
 
     QString docLoc = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     if (docLoc.isEmpty() == false) {
-        docLoc+= "/FreeJoy/";
+        docLoc+= "/HeliSR/";
     }
-    QSettings s(docLoc + "FreeJoySettings.conf", QSettings::IniFormat);
+    QSettings s(docLoc + "HeliSRSettings.conf", QSettings::IniFormat);
 
     s.beginGroup("OtherSettings");
     ui->checkBox_WriteLog->setChecked(s.value("LogEnabled", "false").toBool());
@@ -84,7 +84,7 @@ void DebugWindow::printMsg(const QString &msg)
 
     if (m_writeToFile) {
         QString date(QDateTime::currentDateTime().toString("YYYY-MM-DDTHH:MM"));
-        QFile file(gEnv.pAppSettings->fileName().remove("FreeJoySettings.conf") + "log/" + "FJLog" + date + ".txt");
+        QFile file(gEnv.pAppSettings->fileName().remove("HeliSRSettings.conf") + "log/" + "HSRLog" + date + ".txt");
         if (!file.open(QIODevice::WriteOnly | QIODevice::Append)) {
             qWarning() << "cant open file";
             return;

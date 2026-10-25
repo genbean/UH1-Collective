@@ -9,7 +9,7 @@ CONFIG += static \
 
 RC_ICONS = Images/icon.ico
 
-TARGET = FreeJoyQt
+TARGET = HeliSRConfigurator
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -23,17 +23,17 @@ WIN_DESKTOP
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+# the firmware's shared settings and protocol headers (shared/helisr_*.h)
+INCLUDEPATH += "../../firmware/HeliSR/src"
+
 INCLUDEPATH +="widgets" \
     "widgets/adv-settings" \
     "widgets/axes" \
     "widgets/axes-curves" \
+    "widgets/board" \
     "widgets/buttons" \
     "widgets/encoders" \
-    "widgets/led" \
-    "widgets/pins" \
-    "widgets/shift-reg" \
-    "widgets/color" \
-    "widgets/led_rgb"
+    "widgets/led"
 
 SOURCES += \
     mainwindow_style.cpp \
@@ -41,28 +41,22 @@ SOURCES += \
     widgets/axes-curves/axescurvesbutton.cpp \
     widgets/axes-curves/axescurvesprofiles.cpp \
     widgets/centered_cbox.cpp \
+    avrflasher.cpp \
+    cli.cpp \
     configtofile.cpp \
     converter.cpp \
     deviceconfig.cpp \
-    firmwareupdater.cpp \
+    helisrboard.cpp \
     hiddevice.cpp \
     main.cpp \
     mainwindow.cpp \
     mousewheelguard.cpp \
-    reportconverter.cpp \
-    stm_main.c \
-    widgets/color/colorcells.cpp \
-    widgets/color/colorpicker.cpp \
-    widgets/color/colorvalueslider.cpp \
-    widgets/color/colorwheel.cpp \
+    uitest.cpp \
     widgets/infolabel.cpp \
-    widgets/led_rgb/ledfunction.cpp \
-    widgets/led_rgb/ledrgb.cpp \
-    widgets/led_rgb/ledrgbconfig.cpp \
-    widgets/pins/pintypehelper.cpp \
     widgets/selectfolder.cpp \
     widgets/switchbutton.cpp \
     widgets/adv-settings/advancedsettings.cpp \
+    widgets/adv-settings/flasher.cpp \
     widgets/axes/axes.cpp \
     widgets/axes/axesconfig.cpp \
     widgets/axes-curves/axescurves.cpp \
@@ -70,54 +64,45 @@ SOURCES += \
     widgets/axes-curves/axescurvesplot.cpp \
     widgets/axes/axesextended.cpp \
     widgets/axes/axestobuttonsslider.cpp \
+    widgets/board/as5600helper.cpp \
+    widgets/board/boardconfig.cpp \
     widgets/buttons/buttonconfig.cpp \
     widgets/buttons/buttonlogical.cpp \
     widgets/buttons/buttonphysical.cpp \
-    widgets/pins/currentconfig.cpp \
     widgets/debugwindow.cpp \
     widgets/encoders/encoders.cpp \
     widgets/encoders/encodersconfig.cpp \
-    widgets/adv-settings/flasher.cpp \
     widgets/led/led.cpp \
-    widgets/led/ledconfig.cpp \
-    widgets/pins/pincombobox.cpp \
-    widgets/pins/pinconfig.cpp \
-    widgets/pins/pinsbluepill.cpp \
-    widgets/pins/pinscontrlite.cpp \
-    widgets/shift-reg/shiftregisters.cpp \
-    widgets/shift-reg/shiftregistersconfig.cpp
+    widgets/led/ledconfig.cpp
 
 HEADERS += \
     widgets/altspinbox.h \
     widgets/axes-curves/axescurvesbutton.h \
     widgets/axes-curves/axescurvesprofiles.h \
     widgets/centered_cbox.h \
+    ../../firmware/HeliSR/src/shared/helisr_config.h \
+    ../../firmware/HeliSR/src/shared/helisr_defaults.h \
+    ../../firmware/HeliSR/src/shared/helisr_protocol.h \
+    avrflasher.h \
+    cli.h \
     common_defines.h \
     common_types.h \
     configtofile.h \
     converter.h \
     deviceconfig.h \
-    firmwareupdater.h \
     global.h \
+    helisrboard.h \
     hidapi.h \
     hiddevice.h \
     mainwindow.h \
     mousewheelguard.h \
-    reportconverter.h \
-    stm_main.h \
-    widgets/color/colorcells.h \
-    widgets/color/colorpicker.h \
-    widgets/color/colorvalueslider.h \
-    widgets/color/colorwheel.h \
+    uitest.h \
     widgets/infolabel.h \
-    widgets/led_rgb/ledfunction.h \
-    widgets/led_rgb/ledrgb.h \
-    widgets/led_rgb/ledrgbconfig.h \
-    widgets/pins/pintypehelper.h \
     widgets/selectfolder.h \
     widgets/switchbutton.h \
     version.h \
     widgets/adv-settings/advancedsettings.h \
+    widgets/adv-settings/flasher.h \
     widgets/axes/axes.h \
     widgets/axes/axesconfig.h \
     widgets/axes-curves/axescurves.h \
@@ -125,22 +110,16 @@ HEADERS += \
     widgets/axes-curves/axescurvesplot.h \
     widgets/axes/axesextended.h \
     widgets/axes/axestobuttonsslider.h \
+    widgets/board/as5600helper.h \
+    widgets/board/boardconfig.h \
     widgets/buttons/buttonconfig.h \
     widgets/buttons/buttonlogical.h \
     widgets/buttons/buttonphysical.h \
-    widgets/pins/currentconfig.h \
     widgets/debugwindow.h \
     widgets/encoders/encoders.h \
     widgets/encoders/encodersconfig.h \
-    widgets/adv-settings/flasher.h \
     widgets/led/led.h \
-    widgets/led/ledconfig.h \
-    widgets/pins/pincombobox.h \
-    widgets/pins/pinconfig.h \
-    widgets/pins/pinsbluepill.h \
-    widgets/pins/pinscontrlite.h \
-    widgets/shift-reg/shiftregisters.h \
-    widgets/shift-reg/shiftregistersconfig.h
+    widgets/led/ledconfig.h
 
 FORMS += \
     mainwindow.ui \
@@ -155,24 +134,12 @@ FORMS += \
     widgets/buttons/buttonconfig.ui \
     widgets/buttons/buttonlogical.ui \
     widgets/buttons/buttonphysical.ui \
-    widgets/color/colorpicker.ui \
-    widgets/led_rgb/ledfunction.ui \
-    widgets/led_rgb/ledrgbconfig.ui \
-    widgets/pins/currentconfig.ui \
     widgets/debugwindow.ui \
     widgets/encoders/encoders.ui \
     widgets/encoders/encodersconfig.ui \
-    widgets/adv-settings/flasher.ui \
     widgets/led/led.ui \
     widgets/led/ledconfig.ui \
-    widgets/pins/pincombobox.ui \
-    widgets/pins/pinconfig.ui \
-    widgets/pins/pinsbluepill.ui \
-    widgets/pins/pinscontrlite.ui \
-    widgets/pins/pintypehelper.ui \
-    widgets/selectfolder.ui \
-    widgets/shift-reg/shiftregisters.ui \
-    widgets/shift-reg/shiftregistersconfig.ui
+    widgets/selectfolder.ui
 
 TRANSLATIONS += \
     FreeJoyQt_ru.ts \
@@ -197,7 +164,7 @@ linux {
 
 win32 {
     RC_FILE = winapp.rc
-    LIBS += -lhid -lsetupapi
+    LIBS += -lhid -lsetupapi -ladvapi32
     SOURCES += \
         windows/hidapi.c
 }

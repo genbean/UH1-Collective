@@ -2,8 +2,8 @@
 #include "version.h"
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, BUILD_VERSION
-PRODUCTVERSION  MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, BUILD_VERSION
+FILEVERSION     MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, 0
+PRODUCTVERSION  MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION, 0
 FILEOS          VOS_NT_WINDOWS32
 FILETYPE        VFT_APP
 BEGIN
@@ -13,12 +13,12 @@ BEGIN
         BEGIN
             VALUE "FileVersion",      APP_VERSION
             VALUE "ProductVersion",   APP_VERSION
-            VALUE "FileDescription",  "FreeJoyConfiguratorQt"
-            VALUE "ProductName",      "FreeJoyConfiguratorQt"
-            VALUE "InternalName",     "FreeJoyConfiguratorQt"
-            VALUE "OriginalFilename", "FreeJoyQt.exe"
-            VALUE "CompanyName",      "FreeJoy Team"
-            VALUE "LegalCopyright",   "Copyright © FreeJoy Team"
+            VALUE "FileDescription",  "HeliSR Configurator"
+            VALUE "ProductName",      "HeliSR Configurator"
+            VALUE "InternalName",     "HeliSRConfigurator"
+            VALUE "OriginalFilename", "HeliSRConfigurator.exe"
+            VALUE "CompanyName",      "HeliSR contributors"
+            VALUE "LegalCopyright",   "(C) HeliSR contributors; based on FreeJoyConfiguratorQt (C) FreeJoy Team. GPL-3.0"
         END
     END
     BLOCK "VarFileInfo"

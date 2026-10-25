@@ -15,6 +15,8 @@
 #include "global.h"
 GlobalEnvironment gEnv;
 #include "deviceconfig.h"
+#include "cli.h"
+#include "uitest.h"
 
 // Get the default Qt message handler.
 static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(nullptr);
@@ -40,7 +42,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     #endif
     //qputenv("QT_SCALE_FACTOR", "0.8");
-    qRegisterMetaType<QList<QPair<bool, QString>> >();
+
 
     QElapsedTimer time;
     time.start();
@@ -51,7 +53,7 @@ int main(int argc, char *argv[])
 
     QString docLoc = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
     if (docLoc.isEmpty() == false) {
-        docLoc+= "/FreeJoy/";
+        docLoc+= "/HeliSR/";
     }
 
     QDir dir(docLoc);
@@ -60,7 +62,21 @@ int main(int argc, char *argv[])
         dir.mkpath("configs");
     }
 
-    QSettings appSettings(docLoc + "FreeJoySettings.conf", QSettings::IniFormat);
+    // the example profiles that come with the app, where Load config from file
+    // opens; an example you've edited (newer than the app's) is left alone
+    QDir examples(QCoreApplication::applicationDirPath() + "/profiles");
+    if (examples.exists() && docLoc.isEmpty() == false) {
+        dir.mkpath("configs/examples");
+        for (const QFileInfo &src : examples.entryInfoList(QStringList() << "*.cfg", QDir::Files)) {
+            QFileInfo dst(docLoc + "configs/examples/" + src.fileName());
+            if (dst.exists() == false || dst.lastModified() < src.lastModified()) {
+                QFile::remove(dst.absoluteFilePath());
+                QFile::copy(src.absoluteFilePath(), dst.absoluteFilePath());
+            }
+        }
+    }
+
+    QSettings appSettings(docLoc + "HeliSRSettings.conf", QSettings::IniFormat);
 
     DeviceConfig deviceConfig;
     QTranslator translator;
@@ -113,7 +129,14 @@ int main(int argc, char *argv[])
     }
     appSettings.endGroup();
 
+    if (Cli::isCliCommand(a.arguments())) {
+        return Cli::run(a.arguments());
+    }
+
     MainWindow w;
+    if (UiTest::isUiTestCommand(a.arguments())) {
+        return UiTest::run(w, a.arguments());
+    }
 
     qDebug() << "Application startup time =" << gEnv.pApp_start_time->elapsed() << "ms";
     w.show();

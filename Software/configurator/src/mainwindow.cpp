@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QKeyEvent>
@@ -17,25 +18,15 @@
 #include "common_types.h"
 #include "global.h"
 #include "deviceconfig.h"
+#include "helisrboard.h"
 #include "version.h"
+#include "shared/helisr_defaults.h"
 
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , m_deviceChanged(false)
-//    , m_thread(new QThread)
-//    , m_hidDeviceWorker(new HidDevice())
-//    , m_threadGetSendConfig(new QThread)
-//    , m_pinConfig(new PinConfig(this))
-//    , m_buttonConfig(new ButtonConfig(this))
-//    , m_ledConfig(new LedConfig(this))
-//    , m_encoderConfig(new EncodersConfig(this))
-//    , m_shiftRegConfig(new ShiftRegistersConfig(this))
-//    , m_axesConfig(new AxesConfig(this))
-//    , m_axesCurvesConfig(new AxesCurvesConfig(this))
-//    , m_advSettings(new AdvancedSettings(this))
 {
     qDebug()<<"main + member initialize time ="<< gEnv.pApp_start_time->elapsed() << "ms";
     QElapsedTimer timer;
@@ -45,22 +36,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     QMainWindow::setWindowIcon(QIcon(":/Images/icon-32.png"));
 
-    // firmware version
-    setWindowTitle(tr("FreeJoy Configurator") + " v" + APP_VERSION);
+    // app version
+    setWindowTitle(tr("HeliSR Configurator") + " v" + APP_VERSION);
 
     // load application config
     loadAppConfig();
 
     m_thread = new QThread;
     m_hidDeviceWorker = new HidDevice();
-    m_threadGetSendConfig = new QThread;
 
     qDebug()<<"before add widgets ="<< timer.restart() << "ms";
                                             //////////////// ADD WIDGETS ////////////////
-    // add pin widget
-    m_pinConfig = new PinConfig(this);
-    ui->layoutV_tabPinConfig->addWidget(m_pinConfig);
-    qDebug()<<"pin config load time ="<< timer.restart() << "ms";
+    // add board widget (replaces FreeJoy's pin page)
+    m_boardConfig = new BoardConfig(this);
+    ui->layoutV_tabPinConfig->addWidget(m_boardConfig);
+    qDebug()<<"board config load time ="<< timer.restart() << "ms";
     // add button widget
     m_buttonConfig = new ButtonConfig(this);
     ui->layoutV_tabButtonConfig->addWidget(m_buttonConfig);
@@ -73,10 +63,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_axesCurvesConfig = new AxesCurvesConfig(this);
     ui->layoutV_tabAxesCurvesConfig->addWidget(m_axesCurvesConfig);
     qDebug()<<"curves config load time ="<< timer.restart() << "ms";
-    // add shift registers widget
-    m_shiftRegConfig = new ShiftRegistersConfig(this);
-    ui->layoutV_tabShiftRegistersConfig->addWidget(m_shiftRegConfig);
-    qDebug()<<"shift config load time ="<< timer.restart() << "ms";
     // add encoders widget
     m_encoderConfig = new EncodersConfig(this);
     ui->layoutV_tabEncodersConfig->addWidget(m_encoderConfig);
@@ -85,9 +71,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_ledConfig = new LedConfig(this);
     ui->layoutV_tabLedConfig->addWidget(m_ledConfig);
     qDebug()<<"led config load time ="<< timer.restart() << "ms";
-    // host-controlled LED mask -> HID device
-    // Use DirectConnection because HidDevice worker thread has no event loop
-    connect(m_ledConfig, &LedConfig::hostLedMaskChanged, m_hidDeviceWorker, &HidDevice::sendLedState, Qt::DirectConnection);
     // add advanced settings widget
     m_advSettings = new AdvancedSettings(this);
     ui->layoutV_tabAdvSettings->addWidget(m_advSettings);
@@ -111,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     // хз так или сверху исключать?
     ui->comboBox_HidDeviceList->setFocusPolicy(Qt::WheelFocus);
     ui->comboBox_Configs->setFocusPolicy(Qt::WheelFocus);
-    for (auto &&comBox: m_pinConfig->findChildren<QComboBox *>())
+    for (auto &&comBox: m_boardConfig->findChildren<QComboBox *>())
     {
             comBox->setFocusPolicy(Qt::WheelFocus);
     }
@@ -125,32 +108,15 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
                                             //////////////// SIGNASL-SLOTS ////////////////
-    // get/send config
-    connect(this, &MainWindow::getConfigDone, this, &MainWindow::configReceived);
-    connect(this, &MainWindow::sendConfigDone, this, &MainWindow::configSent);
-
-
-    // buttons pin changed
-    connect(m_pinConfig, &PinConfig::totalButtonsValueChanged, m_buttonConfig, &ButtonConfig::setUiOnOff);
-    // LEDs changed
-    connect(m_pinConfig, &PinConfig::totalLEDsValueChanged, m_ledConfig, &LedConfig::spawnLeds);
-    connect(m_pinConfig, &PinConfig::ledPwmSelected, m_ledConfig, &LedConfig::ledPwmSelected);
-    connect(m_pinConfig, &PinConfig::ledRgbSelected, m_ledConfig, &LedConfig::ledRgbSelected);
+    // spare pins or axis ranges changed
+    connect(m_boardConfig, &BoardConfig::pinsChanged, this, &MainWindow::scheduleBoardUpdate);
+    connect(m_axesConfig, &AxesConfig::a2bCountChanged, this, &MainWindow::scheduleBoardUpdate);
+    // too many axis ranges
+    connect(m_boardConfig, &BoardConfig::limitReached, this, &MainWindow::updateReadWriteButtons);
+    // AS5600 helper measured a range
+    connect(m_boardConfig, &BoardConfig::applyCalibration, this, &MainWindow::applyCalibration);
     // encoder changed
     connect(m_buttonConfig, &ButtonConfig::encoderInputChanged, m_encoderConfig, &EncodersConfig::encoderInputChanged);
-    // fast encoder
-    connect(m_pinConfig, &PinConfig::fastEncoderSelected, m_encoderConfig, &EncodersConfig::fastEncoderSelected);
-    // shift registers
-    connect(m_pinConfig, &PinConfig::shiftRegSelected, m_shiftRegConfig, &ShiftRegistersConfig::shiftRegSelected);
-    // a2b count
-    connect(m_axesConfig, &AxesConfig::a2bCountChanged, m_pinConfig, &PinConfig::a2bCountChanged);
-    // shift reg buttons count shiftRegsButtonsCount
-    connect(m_shiftRegConfig, &ShiftRegistersConfig::shiftRegButtonsCountChanged,
-            m_pinConfig, &PinConfig::shiftRegButtonsCountChanged);
-    // buttonts/LEDs limit reached
-    connect(m_pinConfig, &PinConfig::limitReached, this, &MainWindow::blockWRConfigToDevice);
-    // axes source changed//axesSourceChanged
-    connect(m_pinConfig, &PinConfig::axesSourceChanged, m_axesConfig, &AxesConfig::addOrDeleteMainSource);
     // language changed
     connect(m_advSettings, &AdvancedSettings::languageChanged, this, &MainWindow::languageChanged);
     // theme changed
@@ -158,15 +124,11 @@ MainWindow::MainWindow(QWidget *parent)
     // font changed
     connect(m_advSettings, &AdvancedSettings::fontChanged, this, &MainWindow::setFont);
 
-
-    // enter flash mode clicked
-    connect(m_advSettings->flasher(), &Flasher::flashModeClicked, this, &MainWindow::deviceFlasherController);
-    // flasher found
-    connect(m_hidDeviceWorker, &HidDevice::flasherFound, m_advSettings->flasher(), &Flasher::flasherFound);
-    // start flash
-    connect(m_advSettings->flasher(), &Flasher::startFlash, this, &MainWindow::deviceFlasherController);
-    // flash status
-    connect(m_hidDeviceWorker, &HidDevice::flashStatus, m_advSettings->flasher(), &Flasher::flashStatus);
+    // flasher: restart the device into its bootloader (the worker picks the request up)
+    connect(m_advSettings->flasher(), &Flasher::enterBootloaderRequested, this, [this] {
+        m_hidDeviceWorker->enterBootloader();
+    });
+    connect(m_hidDeviceWorker, &HidDevice::bootloaderStarted, m_advSettings->flasher(), &Flasher::bootloaderStarted);
     // set selected hid device
     connect(ui->comboBox_HidDeviceList, SIGNAL(currentIndexChanged(int)),
                 this, SLOT(hidDeviceListChanged(int)));
@@ -179,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_hidDeviceWorker, &HidDevice::paramsPacketReceived, this, &MainWindow::getParamsPacket);
     connect(m_hidDeviceWorker, &HidDevice::deviceConnected, this, &MainWindow::showConnectDeviceInfo);
     connect(m_hidDeviceWorker, &HidDevice::deviceDisconnected, this, &MainWindow::hideConnectDeviceInfo);
-    connect(m_hidDeviceWorker, &HidDevice::flasherConnected, this, &MainWindow::flasherConnected);
+    connect(m_hidDeviceWorker, &HidDevice::deviceInfoReceived, this, &MainWindow::deviceInfoReceived);
     connect(m_hidDeviceWorker, &HidDevice::hidDeviceList, this, &MainWindow::hidDeviceList);
 
 
@@ -204,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent)
         themeChanged(false);
     }
 
+    updateReadWriteButtons();
     m_thread->start();
 
     qDebug()<<"after widgets load time ="<< timer.elapsed() << "ms";
@@ -214,13 +177,10 @@ MainWindow::~MainWindow()
 {
     saveAppConfig();
     m_hidDeviceWorker->setIsFinish(true);
-    m_hidDeviceWorker->deleteLater();
     m_thread->quit();
-    m_thread->deleteLater();
     m_thread->wait();
-    m_threadGetSendConfig->quit();
-    m_threadGetSendConfig->deleteLater();
-    m_threadGetSendConfig->wait();
+    delete m_hidDeviceWorker;
+    m_thread->deleteLater();
     delete ui;
 }
 
@@ -228,17 +188,11 @@ MainWindow::~MainWindow()
 
 
                                               ///////////////////// device reports /////////////////////
-// device connected
+// device opened; INFO follows
 void MainWindow::showConnectDeviceInfo()
 {
-    if (ui->comboBox_HidDeviceList->itemData(ui->comboBox_HidDeviceList->currentIndex()).toInt() != 1) {
-        m_deviceChanged = true;
-    } else {
-        // for old(1.6-) firmware
-        blockWRConfigToDevice(true);
-        ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(168, 168, 0);");
-    }
-    m_advSettings->flasher()->deviceConnected(true);
+    ui->label_DeviceStatus->setText(tr("Connected"));
+    ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(0, 128, 0);");
 }
 
 // device disconnected
@@ -246,8 +200,11 @@ void MainWindow::hideConnectDeviceInfo()
 {
     ui->label_DeviceStatus->setText(tr("Disconnected"));
     ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(160, 0, 0);");
-    blockWRConfigToDevice(true);
+    m_deviceReady = false;
+    m_transferring = false;
+    updateReadWriteButtons();
     m_advSettings->flasher()->deviceConnected(false);
+    m_boardConfig->setDeviceConnected(false);
     // debug window
     if (m_debugWindow) {
         m_debugWindow->resetPacketsCount();
@@ -260,66 +217,45 @@ void MainWindow::hideConnectDeviceInfo()
     });
 }
 
-// flasher connected
-void MainWindow::flasherConnected()
+QString MainWindow::firmwareVersionText() const
 {
-    ui->label_DeviceStatus->setText(tr("Connected"));
-    ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(0, 128, 0);");
-    blockWRConfigToDevice(true);
-    m_advSettings->flasher()->deviceConnected(false);
-    if (m_debugWindow) {
-        m_debugWindow->resetPacketsCount();
+    uint16_t v = gEnv.pDeviceConfig->info.firmware_version;
+    return QStringLiteral("v%1.%2.%3").arg(v >> 8).arg((v >> 4) & 0xF).arg(v & 0xF);
+}
+
+// the device answered INFO: its firmware, and whether its settings match this app's
+void MainWindow::deviceInfoReceived(bool compatible)
+{
+    const hsr_info_t &info = gEnv.pDeviceConfig->info;
+    m_advSettings->flasher()->deviceConnected(true, &info);
+    m_deviceReady = compatible;
+    m_boardConfig->setDeviceConnected(compatible);
+    if (compatible) {
+        ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(0, 128, 0);");
+        ui->label_DeviceStatus->setText(tr("Device firmware") + " " + firmwareVersionText());
+    } else {
+        ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(168, 168, 0);");
+        if (info.firmware_version) {
+            ui->label_DeviceStatus->setText(tr("Firmware %1 doesn't match this app: flash it (Advanced Settings)")
+                                                .arg(firmwareVersionText()));
+        } else {
+            ui->label_DeviceStatus->setText(tr("No answer from the device"));
+        }
     }
-    if (ui->pushButton_ReadConfig->isEnabled() == false) {
-        m_axesCurvesConfig->deviceStatus(false);
-    }
+    updateReadWriteButtons();
 }
 
 // add/delete hid devices to/from combobox
-void MainWindow::hidDeviceList(const QList<QPair<bool, QString>> &deviceNames)
+void MainWindow::hidDeviceList(const QStringList &deviceNames)
 {
-    if (deviceNames.size() == 0) {
-        ui->comboBox_HidDeviceList->clear();
-        return;
-    } else {
-        ui->comboBox_HidDeviceList->clear();
-        for (int i = 0; i < deviceNames.size(); ++i) {
-            if (deviceNames[i].first) {
-                // for old firmware
-                ui->comboBox_HidDeviceList->addItem("ONLY FLASH " + deviceNames[i].second, 1);
-            } else {
-                ui->comboBox_HidDeviceList->addItem(deviceNames[i].second);
-            }
-        }
-    }
+    ui->comboBox_HidDeviceList->clear();
+    ui->comboBox_HidDeviceList->addItems(deviceNames);
 }
 
-// received device report
-void MainWindow::getParamsPacket(bool firmwareCompatible)
+// received live data
+void MainWindow::getParamsPacket()
 {
-    if (m_deviceChanged) {
-        if (firmwareCompatible == false) {
-            blockWRConfigToDevice(true);
-            ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(168, 168, 0);");
-            ui->label_DeviceStatus->setText(tr("Incompatible Firmware"));
-        } else {
-            if (m_pinConfig->limitIsReached() == false) {
-                blockWRConfigToDevice(false);
-            }
-            ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(0, 128, 0);");
-            // set firmware version
-            QString str = QString::number(gEnv.pDeviceConfig->paramsReport.firmware_version, 16);
-            if (str.size() == 4) {
-                ui->label_DeviceStatus->setText(tr("Device firmware") + " v" + str[0] + "." + str[1] + "." + str[2] + "b" + str[3]);
-            }
-        }
-        m_deviceChanged = false;
-    }
-
-    // update button state without delay. fix gamepad_report.raw_button_data[0]
-    // из-за задержки может не ловить изменения первых физических 64 кнопок или оставшихся.
-    // Например, может подряд попасться gamepad_report.raw_button_data[0] = 0
-    // и не видеть оставшиеся физические 64 кнопки.
+    // update button state without delay
     if(ui->tab_ButtonConfig->isVisible() == true || m_debugWindow) {
         m_buttonConfig->buttonStateChanged();
     }
@@ -331,6 +267,8 @@ void MainWindow::getParamsPacket(bool firmwareCompatible)
     }
     else if (timer.elapsed() > 17)    // update UI every 17ms(~60fps)
     {
+        // always: the AS5600 helper watches for PROG presses even when its page is hidden
+        m_boardConfig->updateLiveData();
         if(ui->tab_LED->isVisible() == true) {
             m_ledConfig->setLedsState();
         }
@@ -346,70 +284,81 @@ void MainWindow::getParamsPacket(bool firmwareCompatible)
     if (m_debugWindow) {
         m_debugWindow->devicePacketReceived();
     }
-
-    // debug tab
-#ifdef QT_DEBUG
-
-#endif
 }
 
-// Flasher controller
-void MainWindow::deviceFlasherController(bool isStartFlash)
-{        // херня? mb QtConcurrent::run()
-    // так оставить или как read/write а bool через сигнал?
-    QEventLoop loop; // static?
-    QObject context;
-    context.moveToThread(m_threadGetSendConfig);
-    connect(m_threadGetSendConfig, &QThread::started, &context, [&]() {
-        qDebug()<<"Start flasher controller";
-        if (isStartFlash == true){
-            qDebug()<<"Start flash";
-            m_hidDeviceWorker->flashFirmware(m_advSettings->flasher()->fileArray());
-        } else {
-            qDebug()<<"Enter to flash mode";
-            m_hidDeviceWorker->enterToFlashMode();
-        }
-        qDebug()<<"Flasher controller finished";
-        loop.quit();
-    });
-    m_threadGetSendConfig->start();
-    loop.exec();
-    m_threadGetSendConfig->quit();
-    m_threadGetSendConfig->wait();
+
+                                            /////////////////////    BOARD    /////////////////////
+// Several changes can arrive at once (every axis's range count while a config
+// loads), so the dependent pages are rebuilt once, from the event loop.
+void MainWindow::scheduleBoardUpdate()
+{
+    if (m_boardUpdatePending == false) {
+        m_boardUpdatePending = true;
+        QTimer::singleShot(0, this, &MainWindow::applyBoardUpdate);
+    }
+}
+
+void MainWindow::applyBoardUpdate()
+{
+    if (m_boardUpdatePending == false) {
+        return;
+    }
+    m_boardUpdatePending = false;
+    const pin_func_t *pins = m_boardConfig->pins();
+    QVector<int> a2b = m_axesConfig->a2bCounts();
+    m_boardConfig->setA2bCounts(a2b);
+    m_buttonConfig->setPhysicalInputs(HsrBoard::physicalInputs(pins, a2b.constData()));
+    m_axesConfig->setAvailableSources(pins);
+    m_ledConfig->setPins(pins);
+}
+
+void MainWindow::applyCalibration(int analogSource, int rawMin, int rawMax)
+{
+    int n = m_axesConfig->applyCalibration(analogSource, rawMin, rawMax);
+    QString source = HsrBoard::analogSourceName(analogSource);
+    if (n == 0) {
+        QMessageBox::information(this, tr("Calibration"),
+                                 tr("No axis uses %1 yet. Choose it as an axis source on the Axes Config page, then apply again.").arg(source));
+    } else {
+        QMessageBox::information(this, tr("Calibration"),
+                                 tr("The calibration of %1 axis/axes using %2 is set. Write the config to the device to keep it.")
+                                     .arg(n).arg(source));
+    }
 }
 
 
                                             /////////////////////    CONFIG SLOTS    /////////////////////
 void MainWindow::UiReadFromConfig()
 {
-    // read pin config
-    m_pinConfig->readFromConfig();
+    // read board config (spare pins)
+    m_boardConfig->readFromConfig();
+    // the axis sources and LED rows must match the pins just read
+    applyBoardUpdate();
     // read axes config
     m_axesConfig->readFromConfig();
     // read axes curves config
     m_axesCurvesConfig->readFromConfig();
-    // read shift registers config
-    m_shiftRegConfig->readFromConfig();
     // read encoder config
     m_encoderConfig->readFromConfig();
     // read LED config
     m_ledConfig->readFromConfig();
     // read adv.settings config
     m_advSettings->readFromConfig();
+    // the buttons' input lists must match the pins and ranges just read
+    applyBoardUpdate();
     // read button config
     m_buttonConfig->readFromConfig();
 }
 
-void MainWindow::UiWriteToConfig()
+void MainWindow::UiWriteToConfig(bool removeName)
 {
-    // write pin config
-    m_pinConfig->writeToConfig();
+    applyBoardUpdate();
+    // write board config
+    m_boardConfig->writeToConfig();
     // write axes config
     m_axesConfig->writeToConfig();
     // write axes curves config
     m_axesCurvesConfig->writeToConfig();
-    // write shift registers config
-    m_shiftRegConfig->writeToConfig();
     // write encoder config
     m_encoderConfig->writeToConfig();
     // write LED config
@@ -418,15 +367,22 @@ void MainWindow::UiWriteToConfig()
     m_advSettings->writeToConfig();
     // write button config
     m_buttonConfig->writeToConfig();
-    // remove device name from registry. sometimes windows does not update the name in gaming devices and has to be deleted in the registry
+    if (removeName) {
+        removeOemName();
+    }
+}
+
+// remove device name from registry. sometimes windows does not update the name in gaming devices and has to be deleted in the registry
+void MainWindow::removeOemName()
+{
 #ifdef Q_OS_WIN
         qDebug()<<"Remove device OEMName from registry";
         QString path("HKEY_CURRENT_USER\\System\\CurrentControlSet\\Control\\MediaProperties\\PrivateProperties\\Joystick\\OEM\\VID_%1&PID_%2");
         QString path2("HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\MediaProperties\\PrivateProperties\\Joystick\\OEM\\VID_%1&PID_%2");
-        QSettings(path.arg(QString::number(gEnv.pDeviceConfig->config.vid, 16), QString::number(gEnv.pDeviceConfig->config.pid, 16)),
-                  QSettings::NativeFormat).remove("OEMName");
-        QSettings(path2.arg(QString::number(gEnv.pDeviceConfig->config.vid, 16), QString::number(gEnv.pDeviceConfig->config.pid, 16)),
-                  QSettings::NativeFormat).remove("OEMName");
+        QString vid = QString::number(gEnv.pDeviceConfig->config.vid, 16).toUpper().rightJustified(4, '0');
+        QString pid = QString::number(gEnv.pDeviceConfig->config.pid, 16).toUpper().rightJustified(4, '0');
+        QSettings(path.arg(vid, pid), QSettings::NativeFormat).remove("OEMName");
+        QSettings(path2.arg(vid, pid), QSettings::NativeFormat).remove("OEMName");
 #endif
 }
 
@@ -460,6 +416,7 @@ void MainWindow::finalInitialization()
 
     // select config comboBox // should be after "// load config files"
     connect(ui->comboBox_Configs, &QComboBox::currentTextChanged, this, &MainWindow::curCfgFileChanged);
+    m_initialized = true;
 }
 
 // current cfg file changed
@@ -495,32 +452,20 @@ void MainWindow::configReceived(bool success)
         // curves pointer activated
         m_axesCurvesConfig->deviceStatus(true);
 
-        // set firmware version
-        QString str = QString::number(gEnv.pDeviceConfig->config.firmware_version, 16);
-        if (str.size() == 4) {
-            ui->label_DeviceStatus->setText(tr("Device firmware") + " v" + str[0] + "." + str[1] + "." + str[2] + "b" + str[3] + " ✔");
-        }
+        ui->label_DeviceStatus->setText(tr("Device firmware") + " " + firmwareVersionText() + " ✔");
 
         ui->pushButton_ReadConfig->setText(tr("Received"));
         ui->pushButton_ReadConfig->setStyleSheet(m_buttonDefaultStyle + "color: rgb(235, 235, 235); background-color: rgb(0, 128, 0);");
-        QTimer::singleShot(1500, this, [&] {
-            ui->pushButton_ReadConfig->setStyleSheet(m_buttonDefaultStyle);
-            ui->pushButton_ReadConfig->setText(button_default_text);
-            if (ui->comboBox_HidDeviceList->currentIndex() >= 0){
-                blockWRConfigToDevice(false);
-            }
-        });
     } else {
         ui->pushButton_ReadConfig->setText(tr("Error"));
         ui->pushButton_ReadConfig->setStyleSheet(m_buttonDefaultStyle + "color: rgb(235, 235, 235); background-color: rgb(200, 0, 0);");
-        QTimer::singleShot(1500, this, [&] {
-            ui->pushButton_ReadConfig->setStyleSheet(m_buttonDefaultStyle);
-            ui->pushButton_ReadConfig->setText(button_default_text);
-            if (ui->comboBox_HidDeviceList->currentIndex() >= 0) {
-                blockWRConfigToDevice(false);
-            }
-        });
     }
+    QTimer::singleShot(1500, this, [&] {
+        ui->pushButton_ReadConfig->setStyleSheet(m_buttonDefaultStyle);
+        ui->pushButton_ReadConfig->setText(button_default_text);
+        m_transferring = false;
+        updateReadWriteButtons();
+    });
 }
 
 // slot after sending the config
@@ -533,45 +478,28 @@ void MainWindow::configSent(bool success)
 
     if (success == true)
     {
+        // the device saved the settings and restarts with them
         ui->pushButton_WriteConfig->setText(tr("Sent"));
         ui->pushButton_WriteConfig->setStyleSheet(m_buttonDefaultStyle + "color: white; background-color: rgb(0, 128, 0);");
-
-        QTimer::singleShot(1500, this, [&] {
-            ui->pushButton_WriteConfig->setStyleSheet(m_buttonDefaultStyle);
-            ui->pushButton_WriteConfig->setText(button_default_text);
-            if (ui->comboBox_HidDeviceList->currentIndex() >= 0){
-                blockWRConfigToDevice(false);
-            }
-        });
     } else {
         ui->pushButton_WriteConfig->setText(tr("Error"));
         ui->pushButton_WriteConfig->setStyleSheet(m_buttonDefaultStyle + "color: white; background-color: rgb(200, 0, 0);");
-
-        QTimer::singleShot(1500, this, [&] {
-            ui->pushButton_WriteConfig->setStyleSheet(m_buttonDefaultStyle);
-            ui->pushButton_WriteConfig->setText(button_default_text);
-            if (ui->comboBox_HidDeviceList->currentIndex() >= 0){
-                blockWRConfigToDevice(false);
-            }
-        });
     }
+    QTimer::singleShot(1500, this, [&] {
+        ui->pushButton_WriteConfig->setStyleSheet(m_buttonDefaultStyle);
+        ui->pushButton_WriteConfig->setText(button_default_text);
+        m_transferring = false;
+        updateReadWriteButtons();
+    });
 
-    // remove device name from registry. sometimes windows does not update the name in gaming devices and has to be deleted in the registry
-#ifdef Q_OS_WIN
-        qDebug()<<"Remove device OEMName from registry";
-        QString path("HKEY_CURRENT_USER\\System\\CurrentControlSet\\Control\\MediaProperties\\PrivateProperties\\Joystick\\OEM\\VID_%1&PID_%2");
-        QString path2("HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\MediaProperties\\PrivateProperties\\Joystick\\OEM\\VID_%1&PID_%2");
-        QSettings(path.arg(QString::number(gEnv.pDeviceConfig->config.vid, 16), QString::number(gEnv.pDeviceConfig->config.pid, 16)),
-                  QSettings::NativeFormat).remove("OEMName");
-        QSettings(path2.arg(QString::number(gEnv.pDeviceConfig->config.vid, 16), QString::number(gEnv.pDeviceConfig->config.pid, 16)),
-                  QSettings::NativeFormat).remove("OEMName");
-#endif
+    removeOemName();
 }
 
-void MainWindow::blockWRConfigToDevice(bool block)
+void MainWindow::updateReadWriteButtons()
 {
-    ui->pushButton_ReadConfig->setDisabled(block);
-    ui->pushButton_WriteConfig->setDisabled(block);
+    bool ready = m_deviceReady && m_transferring == false;
+    ui->pushButton_ReadConfig->setEnabled(ready);
+    ui->pushButton_WriteConfig->setEnabled(ready && m_boardConfig->limitIsReached() == false);
 }
 
 
@@ -619,11 +547,10 @@ void MainWindow::languageChanged(const QString &language)
         return;
     }
 
-    m_pinConfig->retranslateUi();
+    m_boardConfig->retranslateUi();
     m_buttonConfig->retranslateUi();
     m_ledConfig->retranslateUi();
     m_encoderConfig->retranslateUi();
-    m_shiftRegConfig->retranslateUi();
     m_axesConfig->retranslateUi();
     m_axesCurvesConfig->retranslateUi();
     m_advSettings->retranslateUi();
@@ -669,7 +596,7 @@ void MainWindow::loadAppConfig()
     appS->endGroup();
     // load configs dir path
     appS->beginGroup("Configs");
-    m_cfgDirPath = appS->value("Path", gEnv.pAppSettings->fileName().remove("FreeJoySettings.conf") + "configs").toString();
+    m_cfgDirPath = appS->value("Path", gEnv.pAppSettings->fileName().remove("HeliSRSettings.conf") + "configs").toString();
     appS->endGroup();
 
     //debug tab, only for debug build
@@ -717,15 +644,12 @@ void MainWindow::hidDeviceListChanged(int index)
     m_hidDeviceWorker->setSelectedDevice(index);
 }
 
-// reset all pins
+// reset all: the factory settings
 void MainWindow::on_pushButton_ResetAllPins_clicked()
 {
     qDebug()<<"Reset all started";
     gEnv.pDeviceConfig->resetConfig();
-
     UiReadFromConfig();
-
-    m_pinConfig->resetAllPins();
     qDebug()<<"done";
 }
 
@@ -733,7 +657,8 @@ void MainWindow::on_pushButton_ResetAllPins_clicked()
 void MainWindow::on_pushButton_ReadConfig_clicked()
 {
     qDebug()<<"Read config started";
-    blockWRConfigToDevice(true);
+    m_transferring = true;
+    updateReadWriteButtons();
 
     m_hidDeviceWorker->getConfigFromDevice();
 }
@@ -742,7 +667,8 @@ void MainWindow::on_pushButton_ReadConfig_clicked()
 void MainWindow::on_pushButton_WriteConfig_clicked()
 {
     qDebug()<<"Write config started";
-    blockWRConfigToDevice(true);  // не успевает блокироваться? таймер
+    m_transferring = true;
+    updateReadWriteButtons();
 
     UiWriteToConfig();
     m_hidDeviceWorker->sendConfigToDevice();
@@ -754,10 +680,14 @@ void MainWindow::on_pushButton_LoadFromFile_clicked()
     qDebug()<<"Load from file started";
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open Config"), m_cfgDirPath + "/", tr("Config Files (*.cfg)"));
+    if (fileName.isEmpty()) return;
 
-    gEnv.pDeviceConfig->resetConfig();
-    ConfigToFile::loadDeviceConfigFromFile(this, fileName, gEnv.pDeviceConfig->config);
-    UiReadFromConfig();
+    dev_config_t loaded;
+    hsr_config_defaults(&loaded);
+    if (ConfigToFile::loadDeviceConfigFromFile(this, fileName, loaded)) {
+        gEnv.pDeviceConfig->config = loaded;
+        UiReadFromConfig();
+    }
     qDebug()<<"done";
 }
 
@@ -768,11 +698,14 @@ void MainWindow::on_pushButton_SaveToFile_clicked()
 
     QString tmpStr(ui->comboBox_Configs->currentText());
     if (tmpStr == "") {
-        tmpStr = gEnv.pDeviceConfig->config.device_name;
+        tmpStr = QString::fromLatin1(gEnv.pDeviceConfig->config.device_name,
+                                     int(qstrnlen(gEnv.pDeviceConfig->config.device_name, HSR_NAME_LEN)));
     }
 
-    QFileInfo file(QFileDialog::getSaveFileName(this, tr("Save Config"),
-                                                m_cfgDirPath + "/" + tmpStr, tr("Config Files (*.cfg)")));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Config"),
+                                                    m_cfgDirPath + "/" + tmpStr, tr("Config Files (*.cfg)"));
+    if (fileName.isEmpty()) return;
+    QFileInfo file(fileName);
     UiWriteToConfig();
     ConfigToFile::saveDeviceConfigToFile(file.absoluteFilePath(), gEnv.pDeviceConfig->config);
 
@@ -836,7 +769,7 @@ void MainWindow::on_pushButton_ShowDebug_clicked()
 // Wiki
 void MainWindow::on_pushButton_Wiki_clicked()
 {
-    QDesktopServices::openUrl(QUrl("https://github.com/FreeJoy-Team/FreeJoyWiki"));
+    QDesktopServices::openUrl(QUrl(PROJECT_DOCS_URL));
 }
 
 

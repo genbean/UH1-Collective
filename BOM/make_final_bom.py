@@ -110,7 +110,7 @@ SECTIONS.append(("Huey head: switches", [
     dk("637H/2", "IN1, IN2", notes="GOV RPM INCR / DECR. Price: check the cart"),
     dk("636H/2", "IN7", notes="LDG LT ON (one side wired). Price: check the cart"),
     dk("PB4-M-BK-D-67", "IN13", notes="STOP REL"),
-    dk("1825910-6", "IN9-IN12, IN14", notes="SEARCH CONT hat (4) and starter trigger (1). IN8, IN15, IN16 are spare"),
+    dk("1825910-6", "IN9-IN12, IN14", notes="SEARCH CONT hat (4, new rocker hat) and starter trigger (1). IN8, IN15, IN16 are spare"),
 ]))
 SECTIONS.append(("Huey head: hardware", [
     setkit("Tube boss", 1, "M5 x 8 set screw", "From the boss's front (lower panel off): tap the 4.2 mm pilot M5; the tip "
@@ -128,6 +128,9 @@ SECTIONS.append(("Huey head: hardware", [
         HEAD + "; user's choice 2026-10-23", ORDERED),
     setkit("Trigger pull stop", 1, "M3 x 4 set screw", "Through the trigger's arm (tap M3); its tip bears on the mount. Set it "
            "so the starter switch clicks before the stop"),
+    kit("Search hat bezel", 4, "M2 x 8 countersunk screw", "Through the hat's bezel into M2 threads tapped in the carrier (1.6 mm pilots)"),
+    setkit("Search hat pivot", 1, "M3 x 4 set screw", "Into the rocker plate's centre (tap M3), from behind; its tip is the pivot and sets the "
+           "preload. Turn it with a 1.5 mm hex key through the carrier floor"),
     kit("Panels", 8, "M3 x 12 countersunk screw (DIN 7991)", "4 per panel, into M3 threads tapped in the box's corner "
         "columns (the pilots run 50 mm deep, so the x 12 has room)"),
     kit("HeliSR board", 4, "M3 x 12 countersunk screw (DIN 7991) + M3 hex nut", "From outside the rear wall through a "
@@ -143,8 +146,8 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
     ("Pivot", 2, "Deep-groove ball bearing 6006-2RS, 30 x 55 x 13 mm", "BlueStars", "6006-2RS", "Amazon", "B09XTV8XYK",
      8.99, 2, "", 0, "Sold in pairs", AMZ + "; " + BASE1),
     ("Tube", 1, "Carbon fibre tube, 25 mm OD x 23 mm ID, 500 mm, 3K plain weave, wrapped", "MECCANIXITY", "", "Amazon",
-     "B0CFFT1B31", 27.49, 2, "", 0, "Sold in pairs. Wrapped, as the base needs (not pultruded). Cut to 483 mm (470 + the head's extra 12.7 mm of bore). Drill the "
-     "M4 lock-screw hole 30.5 mm from the bottom end and the head's 5.2 mm cross hole 10 mm below the top end. Check "
+     "B0CFFT1B31", 27.49, 2, "", 0, "Sold in pairs. Wrapped, as the base needs (not pultruded). Cut to 491 mm (470 + the head's extra 12.7 mm of bore + 8 mm for the base's deeper socket). Drill the "
+     "M4 lock-screw hole 38.5 mm from the bottom end and the head's 5.2 mm cross hole 10 mm below the top end. Check "
      "the socket and head fits with it (coupons)", AMZ + "; " + BASE),
     amz("Socket mouth", 1, "Worm-drive hose clamp, 25-40 mm range, 304 stainless, pack of 25", "MISPIRE", "B0F8QWCFWR", 18.99, 25,
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
@@ -160,13 +163,15 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
         "into the post's top pocket, the second on top of it locks the height that levels the tube"),
     kit("Pillow-block caps", 4, "M4 x 20 countersunk screw + M4 hex nut", "Two per cap, from the top; each nut slides "
         "into a slot in the block's front or back face. Length from the CAD"),
-    kit("Side covers", 8, "M3 x 20 countersunk screw", "Four per cover, from its outer face into M3 threads tapped 7 mm "
-        "deep in the block and cap. Length from the CAD"),
+    amz("Side covers", 8, "M3 x 25 countersunk screw (from the M3 x 20-40 set, ASIN B0BYXS4BTF)", "Amazon", "B0BYXS4BTF", 0, "once",
+        "From the same 100-piece set as the trigger pivot (20 of each length). Four per cover, from its outer face into M3 "
+        "threads tapped 11 mm deep in the block and cap: 10 mm of thread, three times the 20 mm screw's. The kit's M3 x 20 "
+        "would only reach 5", BASE + "; user's M3 set 2026-10-24", ORDERED),
     kit("Cable plug", 1, "M2 x 12 countersunk screw", "Up from under the cable cover's rim, through a clearance hole, into an "
         "M2 thread tapped in the plug (1.6 mm pilot): pulls the plug that closes the cable's slot down onto the cover's "
         "shoulders. Length from the CAD"),
     setkit("Tube lock", 1, "M4 x 6 set screw", "Tap the socket boss's 3.3 mm pilot M4; the tip goes into the tube's 4 mm "
-           "lock hole, 30.5 mm from its bottom end"),
+           "lock hole, 38.5 mm from its bottom end"),
     kit("Friction knob", 1, "M5 x 20 countersunk screw + M5 hex nut", "Glue the head into the printed knob "
         "(Base/stl/friction_knob.stl); the screw goes through the spring and the shoe into the nut, slid into the knob "
         "tower's slot from the front. Length from the CAD"),
@@ -252,8 +257,9 @@ PRINTED = [
     ("Head", "Head/Rev4/stl/HueyHeadR4-LowerPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
     ("Head", "Head/Rev4/stl/HueyHeadR4-UpperPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
     ("Head", "Head/Rev4/stl/HueyHeadR4-Trigger.stl", 1, "On either flat side"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-SearchHat.stl", 1, "On its flat bottom ring"),
-    ("Head", "MkII original: 4way_Cover.stl, Bezel.stl, StickRetainer.stl, one ThumbStick-*.stl", 1, "The 4-way hat's parts, from the Thingiverse 5226353 head files (not in this folder). The ThumbStick comes in 4.5 to 5.8 mm, set by the switch's height: the TE 1825910-6 is 5.0 mm to the top of its button (datasheet), so print the 4.8 and the 5.3 and keep the one that clicks cleanly with no preload"),
+    ("Head", "Head/Rev4/stl/HueyHeadR4-Hat-Cap.stl", 1, "Base down. Glue it onto the rocker plate's four legs, last"),
+    ("Head", "Head/Rev4/stl/HueyHeadR4-Hat-RockerPlate.stl", 1, "Legs down on the bed, boss up; the legs are part of it"),
+    ("Head", "Head/Rev4/stl/HueyHeadR4-Hat-Bezel.stl", 1, "Front face down"),
     ("Head", "Head/Rev4/stl/HueyHeadR4-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
     ("Head", "Head/Rev4/stl/HueyHeadR4-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
     ("Head", "Head/Rev4/stl/HueyHeadR4-Pinion.stl", 1, "Flat; the magnet shaft presses into its hex"),

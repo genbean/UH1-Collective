@@ -13,7 +13,8 @@ class ButtonPhysical : public QWidget
     Q_OBJECT
 
 public:
-    explicit ButtonPhysical(int buttonNumber, QWidget *parent = nullptr);
+    //! phys: the firmware's physical input number; text: short name; toolTip: full name
+    ButtonPhysical(int phys, const QString &text, const QString &toolTip, QWidget *parent = nullptr);
     ~ButtonPhysical();
     void setButtonState(bool state);
 

@@ -8,7 +8,7 @@ this folder:
     python mk3_rev3.py           -> stl/ (all printed parts), stl/ref/ and step/MkIII_Rev3_assembly.step
     python mk3_rev3.py --curve   -> prints the balance table and writes renders/strut_balance.png
 
-Tube: 25 x 23 mm carbon fibre, cut to 470 mm (bought as 500). The grip's top sits 445 mm from the pivot, and at the
+Tube: 25 x 23 mm carbon fibre, cut to 491 mm (bought as 500): 470 + the head boss's 12.7 + 8 for the socket's extra depth. The grip's top sits 445 mm from the pivot, and at the
 32 deg stop the hand rises about 9.4 in, the real UH-1's 9.25 in.
 
 Strut: X AUTOHAUX 6" 10 lb / 45 N gas spring (Amazon B0CY267GFY, 2 for $13.69), 152.4 mm eye to eye extended,
@@ -30,12 +30,13 @@ Pivot 58 mm above the desk (Rev 1: 40): the strut's line has to pass about 40 mm
 the clevis around its eye needs the rest.
 
 Bought parts that Rev 1 doesn't have (no bucket, lid, ballast, stop block, thumb knob, M5 stop bolt or striker):
-    1 x X AUTOHAUX 6" 45 N gas strut (the pack has 2);  25 x 23 mm carbon tube, 470 mm
+    1 x X AUTOHAUX 6" 45 N gas strut (the pack has 2);  25 x 23 mm carbon tube, cut to 491 mm
 
 Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (AvrestYPT kit) unless marked:
     lever halves      4 x M4 x 20 + 4 M4 nuts in the lower half's pockets
     pillow-block caps 4 x M4 x 20 + 4 M4 nuts, slid in fore and aft from the blocks' front and back faces
-    side covers       8 x M3 x 20 from the covers' outer faces, into M3 threads tapped in the blocks and caps
+    side covers       8 x M3 x 25 (the NIULUNBAO M3 set) from the covers' outer faces, into M3 threads tapped 11 mm deep
+                      in the blocks and caps
     friction knob     1 x M5 x 20, head glued into the printed knob, + 1 M5 nut slid into the knob tower
     cable plug        1 x M2 x 12 up from under the cable cover's rim, into an M2 thread tapped in the plug
     shoe hinge        1 x M4 x 20 + 1 M4 nut in the +y lug's pocket
@@ -68,9 +69,21 @@ HUB_R = m.DRUM_R                                 # the hub is the friction drum'
 # inside the cap's curve and clear of the bearing seat, and the nuts slide in fore and aft well inside the blocks
 m.BLOCK_HW = 37.5
 m.CAP_BOLT_X = 31.3                              # head 0.64 mm clear of the bearing seat, 1.0 mm inside the cap's curve
+# tube socket 8 mm deeper (Rev 1: bottom at x = -20, 46 mm of engagement; now x = -12, 54 mm), 5.5 mm short of the axial
+# cable bore. The tube is cut 8 mm longer, so the head stays exactly where it was.
+# side covers: the M3 holes move out to r 31.5 (Rev 1: 30), where the wall to the bearing seat is 2.7 mm rather than 1.2, so
+# they can be tapped 11 mm deep (Rev 1: 7) for M3 x 25 screws: 10 mm of thread in the plastic instead of 5, three times the
+# pull-out. The covers grow to r 36.5 (Rev 1: 34) to keep 1.5 mm of rim round the countersinks.
+m.COVER_HOLE_R, m.COVER_R, m.COVER_TAP_DEPTH = 31.5, 36.5, 11.0
+COVER_SCREW_L = 25
+m.SOCK_BOTTOM = 12.0
+TUBE_EXTRA = 20.0 - m.SOCK_BOTTOM
+# the four lever screws: a rectangle centred on the socket's axis (y = -9), 16.75 mm either side. That clears the deeper
+# socket by 1.85 mm at the joint (Rev 1's were 8.5 / -25 on one row and 8.5 / -11 on the other)
+m.LEVER_SCREWS = [(x, m.SOCK_Y + dy) for x in (-17.0, 14.0) for dy in (-16.75, 16.75)]
 
 # ---------------------------------------------------------------- parameters
-# tube: 25 x 23 mm carbon fibre, 470 mm
+# tube: 25 x 23 mm carbon fibre, 470 mm from Rev 1's socket bottom to the head's reference end (it's cut TUBE_EXTRA longer)
 TUBE_L = 470.0
 TUBE_G_PER_MM = 0.121                            # carbon ~1.6 g/cm3 (25 x 1 aluminium: 0.204)
 HEAD_G, HEAD_GM = 368.0, 133.97                  # HueyHead_Rev2 + grip + friction collar on Rev 1's 357.7 mm tube: g, g*m
@@ -81,8 +94,9 @@ BOX_R = 386.7 + TUBE_L - HEAD_TUBE0              # head body's centre of mass: w
 
 def forward_gm():
     """head, grip, tube, cables, hose clamp, lock screw: g*m about the pivot at 0 deg"""
-    mid = m.SOCK_BOTTOM + TUBE_L / 2
-    return (HEAD_GM * 1000 + HEAD_G * (TUBE_L - HEAD_TUBE0) + TUBE_G_PER_MM * TUBE_L * mid
+    mid = 20.0 + TUBE_L / 2                      # the tube from Rev 1's socket bottom (x = -20) out to the head
+    deeper = TUBE_G_PER_MM * TUBE_EXTRA * (m.SOCK_BOTTOM + TUBE_EXTRA / 2)       # the extra length down in the socket
+    return (HEAD_GM * 1000 + HEAD_G * (TUBE_L - HEAD_TUBE0) + TUBE_G_PER_MM * TUBE_L * mid + deeper
             + 13.0 * TUBE_L / HEAD_TUBE0 * mid + 9 * 58.5 + 1.5 * 50.5) / 1000
 
 
@@ -372,7 +386,9 @@ def cover_cable_r3():
     c, sy, slot = _cable_cover_solid()
     x, zh = PLUG_SCREW
     c = c.cut(slot)
-    c = c.cut(m.csk_hole(2, (x, sy, zh), (0, 0, 1), -8.0 + 0.5 - zh, out=6.0))     # up through the rim into the slot
+    rim = math.sqrt(m.COVER_R ** 2 - x ** 2)                                  # the rim's surface under the screw, below the axis
+    c = c.cut(m.csk_hole(2, (x, sy, zh), (0, 0, 1), -8.0 + 0.5 - zh, out=rim + zh + 2.0))   # up through the rim into the slot;
+                                                                                # the counterbore runs out through the rim's surface
     return c.clean()
 
 
@@ -402,7 +418,7 @@ def hardware_r3():
             parts += [m.csk_screw(4, (x, yb, 8), (0, 0, -1), 20), m.nut(4, (x, yb, CAP_NUT_Z), (0, 0, -1))]
         for a in (45, 135, 225, 315):
             px, pz = m.on_circle(m.COVER_HOLE_R, a)
-            parts.append(m.csk_screw(3, (px, s * (m.BLOCK_Y1 + m.COVER_D), pz), (0, -s, 0), 20))
+            parts.append(m.csk_screw(3, (px, s * (m.BLOCK_Y1 + m.COVER_D), pz), (0, -s, 0), COVER_SCREW_L))
     x, zh = PLUG_SCREW
     parts.append(m.csk_screw(2, (x, m.BLOCK_Y1 + 7, zh), (0, 0, 1), 12))              # the cable plug's screw, from below
     return fuse(*parts)
@@ -413,7 +429,7 @@ def lever_hardware():
     return fuse(m.lever_screws(), m.grub_screw(4, 6, (m.TUBE_LOCK_X, Y0, 17.3), (0, 0, -1)))
 
 
-def carbon_tube(length=TUBE_L):
+def carbon_tube(length=TUBE_L + TUBE_EXTRA):
     return tube(m.TUBE_OD / 2, m.TUBE_ID / 2, (-m.SOCK_BOTTOM, Y0, 0), (-m.SOCK_BOTTOM - length, Y0, 0))
 
 

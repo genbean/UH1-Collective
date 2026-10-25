@@ -15,15 +15,15 @@
 #include "board.h"
 
 // Spare pins by index (Arduino pin numbers).
-static const uint8_t SPARE_PIN[HSR_SPARE_PINS] = { 1, 0, 4, 5, 6, 7, 8, 9, 10, 14, 16 };
+static const uint8_t SPARE_PIN[HSR_SPARE_PINS] PROGMEM = { 1, 0, 4, 5, 6, 7, 8, 9, 10, 14, 16 };
 
 // Analog sources 0-8: AX1-AX4, then spare pins 4, 6, 8, 9, 10.
-static const uint8_t ANALOG_PIN[HSR_ANALOG_SOURCES] = { A3, A2, A1, A0, A6, A7, A8, A9, A10 };
-static const uint8_t ANALOG_SPARE_INDEX[HSR_ANALOG_SOURCES] = { 0xFF, 0xFF, 0xFF, 0xFF, 2, 4, 6, 7, 8 };
+static const uint8_t ANALOG_PIN[HSR_ANALOG_SOURCES] PROGMEM = { A3, A2, A1, A0, A6, A7, A8, A9, A10 };
+static const uint8_t ANALOG_SPARE_INDEX[HSR_ANALOG_SOURCES] PROGMEM = { 0xFF, 0xFF, 0xFF, 0xFF, 2, 4, 6, 7, 8 };
 
 // Input number (1-16) for each bit in the order it leaves the chain
 // (HeliSR_Rev3.0_Input_Map.csv): IN5-IN16 come out first, then IN1-IN4.
-static const uint8_t BIT_TO_INPUT[HSR_SR_INPUTS] = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4 };
+static const uint8_t BIT_TO_INPUT[HSR_SR_INPUTS] PROGMEM = { 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1, 2, 3, 4 };
 
 static uint16_t spare_button_mask;   // spare pins that are buttons
 static uint16_t spare_vcc_mask;      // ...of which active high
@@ -102,7 +102,7 @@ void board_init(const dev_config_t *cfg)
 	spare_button_mask = spare_vcc_mask = 0;
 	for (uint8_t i = 0; i < HSR_SPARE_PINS; i++)
 	{
-		uint8_t pin = SPARE_PIN[i];
+		uint8_t pin = pgm_read_byte(&SPARE_PIN[i]);
 		switch (cfg->pins[i])
 		{
 		case PIN_BUTTON_GND:
@@ -128,15 +128,21 @@ void board_init(const dev_config_t *cfg)
 		}
 	}
 
+#ifdef HSR_TEST_AX_PULLUPS
+	// Test builds only: pull AX1-AX4 up, so unconnected inputs read full scale.
+	// Proves the ADC is sampling on a bare Pro Micro.
+	for (uint8_t s = 0; s < HSR_AX_INPUTS; s++) pinMode(pgm_read_byte(&ANALOG_PIN[s]), INPUT_PULLUP);
+#endif
+
 	// Analog sources: AX1-AX4 always (the board has connectors for them),
 	// spare analog pins only when set to AXIS_ANALOG.
 	adc_count = 0;
 	for (uint8_t s = 0; s < HSR_ANALOG_SOURCES; s++)
 	{
-		uint8_t spare = ANALOG_SPARE_INDEX[s];
+		uint8_t spare = pgm_read_byte(&ANALOG_SPARE_INDEX[s]);
 		if (spare != 0xFF && cfg->pins[spare] != PIN_AXIS_ANALOG) continue;
 		adc_sources[adc_count] = s;
-		adc_channel[adc_count] = analogPinToChannel(ANALOG_PIN[s] - A0);
+		adc_channel[adc_count] = analogPinToChannel(pgm_read_byte(&ANALOG_PIN[s]) - A0);
 		adc_count++;
 	}
 	adc_start();
@@ -155,7 +161,7 @@ uint16_t board_read_inputs(void)
 	for (uint8_t bit = 0; bit < HSR_SR_INPUTS; bit++)
 	{
 		if (!(PIND & (1 << PD1)))      // pulled to GND = closed
-			closed |= 1u << (BIT_TO_INPUT[bit] - 1);
+			closed |= 1u << (pgm_read_byte(&BIT_TO_INPUT[bit]) - 1);
 		PORTB |= (1 << PB1);           // rising edge shifts the next bit onto QH
 		delayMicroseconds(1);
 		PORTB &= ~(1 << PB1);
@@ -171,7 +177,7 @@ uint16_t board_read_spare_buttons(void)
 	{
 		uint16_t m = 1u << i;
 		if (!(spare_button_mask & m)) continue;
-		uint8_t high = digitalRead(SPARE_PIN[i]);
+		uint8_t high = digitalRead(pgm_read_byte(&SPARE_PIN[i]));
 		if ((spare_vcc_mask & m) ? high : !high) pressed |= m;
 	}
 	return pressed;
@@ -189,7 +195,7 @@ void board_read_analog(uint16_t out[HSR_ANALOG_SOURCES])
 
 void board_set_led(uint8_t spare_index, uint8_t on)
 {
-	if (spare_index < HSR_SPARE_PINS) digitalWrite(SPARE_PIN[spare_index], on ? HIGH : LOW);
+	if (spare_index < HSR_SPARE_PINS) digitalWrite(pgm_read_byte(&SPARE_PIN[spare_index]), on ? HIGH : LOW);
 }
 
 void board_set_pwm(uint8_t spare_index, uint8_t duty_percent)
@@ -201,5 +207,5 @@ void board_set_pwm(uint8_t spare_index, uint8_t duty_percent)
 		return;
 	}
 	if (duty_percent > 100) duty_percent = 100;
-	analogWrite(SPARE_PIN[spare_index], (uint16_t)duty_percent * 255 / 100);
+	analogWrite(pgm_read_byte(&SPARE_PIN[spare_index]), (uint16_t)duty_percent * 255 / 100);
 }

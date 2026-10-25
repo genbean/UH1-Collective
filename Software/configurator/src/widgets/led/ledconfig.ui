@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2" rowstretch="2,3" columnstretch="1,1">
+  <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,1">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -29,7 +29,7 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>PWM LEDs</string>
+      <string>PWM outputs</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <property name="leftMargin">
@@ -48,7 +48,7 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QFrame" name="frame_PwmPa8">
+       <widget class="QFrame" name="frame_Pwm5">
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -72,9 +72,9 @@
           <number>3</number>
          </property>
          <item>
-          <widget class="QLabel" name="text_PA8">
+          <widget class="QLabel" name="text_Pwm5">
            <property name="text">
-            <string>Pin PA8</string>
+            <string>Pin 5</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -82,7 +82,7 @@
           </widget>
          </item>
          <item>
-          <widget class="AltSpinBox" name="spinBox_LedPA8">
+          <widget class="AltSpinBox" name="spinBox_Pwm5">
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
@@ -111,20 +111,20 @@
           </spacer>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_connectedPA8">
+          <widget class="QCheckBox" name="checkBox_connected5">
            <property name="text">
             <string>Connected to axis</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_axisConPA8"/>
+          <widget class="QComboBox" name="comboBox_axisCon5"/>
          </item>
         </layout>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QFrame" name="frame_PwmPb1">
+       <widget class="QFrame" name="frame_Pwm9">
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -148,9 +148,9 @@
           <number>3</number>
          </property>
          <item>
-          <widget class="QLabel" name="text_PB1">
+          <widget class="QLabel" name="text_Pwm9">
            <property name="text">
-            <string>Pin PB1</string>
+            <string>Pin 9</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -158,7 +158,7 @@
           </widget>
          </item>
          <item>
-          <widget class="AltSpinBox" name="spinBox_LedPB1">
+          <widget class="AltSpinBox" name="spinBox_Pwm9">
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
@@ -187,20 +187,20 @@
           </spacer>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_connectedPB1">
+          <widget class="QCheckBox" name="checkBox_connected9">
            <property name="text">
             <string>Connected to axis</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_axisConPB1"/>
+          <widget class="QComboBox" name="comboBox_axisCon9"/>
          </item>
         </layout>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QFrame" name="frame_PwmPb0">
+       <widget class="QFrame" name="frame_Pwm6">
         <property name="styleSheet">
          <string notr="true"/>
         </property>
@@ -224,9 +224,9 @@
           <number>3</number>
          </property>
          <item>
-          <widget class="QLabel" name="text_PB0">
+          <widget class="QLabel" name="text_Pwm6">
            <property name="text">
-            <string>Pin PB0</string>
+            <string>Pin 6</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -234,7 +234,7 @@
           </widget>
          </item>
          <item>
-          <widget class="AltSpinBox" name="spinBox_LedPB0">
+          <widget class="AltSpinBox" name="spinBox_Pwm6">
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
@@ -263,20 +263,20 @@
           </spacer>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_connectedPB0">
+          <widget class="QCheckBox" name="checkBox_connected6">
            <property name="text">
             <string>Connected to axis</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_axisConPB0"/>
+          <widget class="QComboBox" name="comboBox_axisCon6"/>
          </item>
         </layout>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QFrame" name="frame_PwmPb4">
+       <widget class="QFrame" name="frame_Pwm10">
         <property name="frameShape">
          <enum>QFrame::Shape::Box</enum>
         </property>
@@ -297,9 +297,9 @@
           <number>3</number>
          </property>
          <item>
-          <widget class="QLabel" name="text_PB4">
+          <widget class="QLabel" name="text_Pwm10">
            <property name="text">
-            <string>Pin PB4</string>
+            <string>Pin 10</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -307,7 +307,7 @@
           </widget>
          </item>
          <item>
-          <widget class="AltSpinBox" name="spinBox_LedPB4">
+          <widget class="AltSpinBox" name="spinBox_Pwm10">
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
@@ -336,14 +336,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_connectedPB4">
+          <widget class="QCheckBox" name="checkBox_connected10">
            <property name="text">
             <string>Connected to axis</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_axisConPB4"/>
+          <widget class="QComboBox" name="comboBox_axisCon10"/>
          </item>
         </layout>
        </widget>
@@ -354,7 +354,7 @@
    <item row="0" column="1">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Mono LEDs</string>
+      <string>On/off LEDs</string>
      </property>
      <layout class="QGridLayout" name="gridLayout" columnstretch="0">
       <property name="leftMargin">
@@ -404,7 +404,7 @@
            </size>
           </property>
           <property name="text">
-           <string>№</string>
+           <string>Pin</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -436,7 +436,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Input №</string>
+           <string>Logical button</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -864,27 +864,6 @@
         </item>
        </layout>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>RGB LEDs - pin A10</string>
-     </property>
-     <layout class="QHBoxLayout" name="layoutH_RGB">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
      </layout>
     </widget>
    </item>

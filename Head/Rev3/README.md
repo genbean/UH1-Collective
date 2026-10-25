@@ -162,11 +162,11 @@ The list for the whole collective, with part numbers and prices for the board, h
 
 | Item | Qty | Notes |
 |---|---|---|
-| 25 × 23 mm carbon tube, **483 mm** | 1 | The MkIII Rev 3 base's tube (`../../Base`). Cut it to 483 (470 + 12.7 mm for the deeper bore) and drill a 5.2 mm hole through its **front wall only**, 10 mm below its top end (the set screw's tip goes in it) |
+| 25 × 23 mm carbon tube, **491 mm** | 1 | The MkIII Rev 3 base's tube (`../../Base`). Cut it to 491 (470 + 12.7 mm for the deeper bore + 8 mm for the base's deeper socket) and drill a 5.2 mm hole through its **front wall only**, 10 mm below its top end (the set screw's tip goes in it) |
 | M5 × 8 set screw (HIQTRADEBYJJ set-screw kit) | 1 | Tube pin: tapped into the boss's front, tip through the tube's front wall |
 | M3 × 4 set screw (same kit) | 1 | The trigger's pull stop, in its arm |
 | **M3 × 12 countersunk** | 4 | **New:** two front screws, through the neck block's ears into the rear-wall bosses, and two bottom screws, up through the bottom into the neck block |
-| M3 × 25 countersunk (bought separately; the kits stop at 20 mm) | 1 | Trigger pivot: through the left lug and the trigger into the right lug's tapped pilot (8 mm of thread; the lugs' outer faces are 20 mm apart) |
+| M3 × 25 countersunk (from the NIULUNBAO M3 set, Amazon B0BYXS4BTF; the kits stop at 20 mm) | 1 | Trigger pivot: through the left lug and the trigger into the right lug's tapped pilot (8 mm of thread; the lugs' outer faces are 20 mm apart) |
 | M3 × 10 countersunk | 8 | Panels, 4 each |
 | M3 × 12 countersunk + M3 nut, Bivar SRS-4-4MM spacers (Digi-Key SRS-4-4MM-ND) | 4 | HeliSR board, from outside the rear wall |
 | M4 × 16 socket cap + M4 nut | 1 | Friction collar pinch screw |
@@ -203,7 +203,7 @@ Most of the head goes together on the bench, on the neck block, before the body 
    3. Put a dab of hot glue at the front, and lead the wires up out of the top.
 5. **Throttle stops:** nothing to fit. The grip's lug runs between the groove's two end walls, which are the idle and full-open stops.
 6. **Tube:**
-   1. Cut the carbon tube to 483 mm and drill its 5.2 mm hole through the front wall only.
+   1. Cut the carbon tube to 491 mm and drill its 5.2 mm hole through the front wall only.
    2. From the top: Grease the four O-rings lightly. Roll one into each groove inside the grip. Slide the friction collar on (groove up), roll an O-ring down the tube into the collar's groove, then slide the grip on (gear up). Roll the fourth O-ring onto the tube just above the grip: the groove in the head's ceiling takes it as the head goes on.
    3. Route the USB cable and the base sensor's lead up through the tube.
 7. **Block onto the tube:**

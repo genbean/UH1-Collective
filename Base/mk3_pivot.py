@@ -72,7 +72,7 @@ SOCK_BORE_R = 12.7       # 25.4 bore for the 25 mm tube
 SOCK_BOTTOM = 20.0       # tube bottoms out at x = -20
 SOCK_MOUTH = 66.0        # boss ends at x = -66  (46 mm engagement)
 CABLE_R = 6.5            # 13 mm (1/2") cable channels, half in each lever half
-TUBE_LOCK_X = -50.5      # M4 lock screw on top of the boss (drill the tube 30.5 mm from its end)
+TUBE_LOCK_X = -50.5      # M4 lock screw on top of the boss (drill the tube 30.5 mm from its end in Rev 1; 38.5 in Rev 3)
 
 TRUN_OD = 30.2                   # trunnion = bearing seat, printed as part of the lever (coupon step +0.2 fits: locked in)
 BRG_Y0 = HUB_HW + 1.0            # bearing inner face |y|  (33)
@@ -85,6 +85,7 @@ BRG_SEAT_D = BRG_D + 0.1         # printed bearing seat bore in the pillow block
 CAP_BOLT_X = 31.5
 COVER_R, COVER_IN_R, COVER_D = 34.0, 26.0, 15.0   # 34: room round the M3 countersinks in the outer face
 COVER_HOLE_R = 30.0              # M3 fixing circle for side covers
+COVER_TAP_DEPTH = 7.0            # the covers' M3 holes are tapped this deep into the block face
 USB_SIDE, SENSOR_SIDE = 1, -1    # USB exits on the knob side, sensor on the other
 
 AXIS_H = 40.0                    # pivot height above underside of plate
@@ -138,7 +139,7 @@ AS5600_PAD_PITCH = 2.54          #   product photo, +-0.3 mm; centred on the boa
 CARRIER_FLANGE_T = 6.0           # board pocket on the outer face, wire channel underneath
 MAGNET_GAP = 1.0                 # chip face to magnet face (datasheet: 0.5-3 mm); 1.5 at first, closed up 0.5 on 2026-10-23 to match the head
 MAGNET_D, MAGNET_H = 4.0, 2.0    # diametric magnet supplied with the module (about 4 mm across, as measured)
-MAGNET_POCKET = 4.0              # the cover's magnet pocket, the same as the head axle's
+MAGNET_POCKET = 4.2              # the cover's magnet pocket, the same as the head axle's. LOCKED IN: 4.2 fits the magnet, printed 2026-10-24 (4.0 was too small)
 BALLAST_L = 42.0                 # fixed ballast depth against the far wall, ~0.95 kg at 6.8 g/cm3 (README)
 
 # Fasteners: every screw and nut is from the two kits the user has. AvrestYPT (Amazon B0FMD5TMSH): countersunk
@@ -437,7 +438,7 @@ def block_cuts(s):
             cyl(LIP_R, (0, s * (BRG_Y1 - 1), 0), (0, s * (BLOCK_Y1 + 1), 0))]           # retaining lip bore
     for a in (45, 135, 225, 315):
         px, pz = on_circle(COVER_HOLE_R, a)
-        cuts.append(cyl(TAP[3] / 2, (px, s * (BLOCK_Y1 - 7), pz), (px, s * (BLOCK_Y1 + 1), pz)))  # covers' M3: tap 7 deep
+        cuts.append(cyl(TAP[3] / 2, (px, s * (BLOCK_Y1 - COVER_TAP_DEPTH), pz), (px, s * (BLOCK_Y1 + 1), pz)))  # covers' M3
     return cuts
 
 

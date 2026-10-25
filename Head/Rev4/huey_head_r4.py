@@ -26,7 +26,7 @@
 # frame, the trigger and its mount in the box frame. The throttle parts (grip, friction collar, pinion, magnet shaft)
 # are in throttle_r4.py.
 #
-# usage: huey_head_r4.py <MkII-HeadFront.stl> <out dir>      (MkII-HeadFront supplies the 4-way hat cut-out)
+# usage: huey_head_r4.py <out dir>      (the 4-way hat is Hat/hat_r4.py's; no MkII file is needed any more)
 import os
 import sys
 import numpy as np
@@ -541,11 +541,10 @@ BOLT_Z = TUBE_END - 10.0         # the tube's set screw, along y (drill the tube
 GRUB_L = 8.0                     # M5 x 8 set screw (set-screw kit) in an M5 thread tapped in the boss's front
 GRUB_TIP = TY - TUBE_OD / 2 + 0.9   # its tip, through the tube's front wall, 0.1 short of the wall's inside
 # The pinion fills its 6 mm pocket to 0.2 mm off the floor and the ceiling, so it has 0.4 mm of end play (it had 1.2),
-# and is the same both ways up: a thin PINION_HUB on each face, 4.6 mm of teeth between them. The O-rings hold the grip
+# and is the same both ways up: teeth to both faces, chamfered at the tips (throttle script). The O-rings hold the grip
 # up to (at most) the ceiling, 0.5 mm over GEAR_Z, so the lower teeth reach below the grip gear's modelled bottom:
 # the throttle script runs the grip's teeth further down to meet them (GEAR_DOWN).
 PINION_Z = (GEAR_Z[0] - 0.3, CEILING - 0.2)     # the whole pinion
-PINION_HUB = (0.5, 8.0)                         # (height on each face, radius)
 POCKET_D = 23.0                  # pinion tips are 22 mm
 WEB = (CEILING, CEILING + 3.0)   # bearing web over the pinion, bored for the magnet shaft
 SHAFT_D = 6.15
@@ -1006,10 +1005,11 @@ def search_hat():
 
 
 if __name__ == "__main__":
-    front_path, out = sys.argv[1], sys.argv[2]
+    out = sys.argv[-1]
     os.makedirs(out, exist_ok=True)
-    front = load(front_path)
-    lp, lp_text = lower_panel(front)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "Hat"))
+    import hat_r4                                     # the new SEARCH CONT hat: panel carrier, bezel, rocker plate, cap, legs
+    lp, lp_text = hat_r4.lower_panel_new()
     up, up_text = upper_panel()
     parts = {
         "HueyHeadR4-Body.stl": body_r4(),
@@ -1018,8 +1018,8 @@ if __name__ == "__main__":
         "HueyHeadR4-UpperPanel-Black.stl": tilt(up),
         "HueyHeadR4-UpperPanel-WhiteText.stl": tilt(up_text),
         "HueyHeadR4-Trigger.stl": trigger(),
-        "HueyHeadR4-SearchHat.stl": search_hat(),
         "HueyHeadR4-SensorSeatCoupon.stl": seat_coupon(),
     }
     for name, m in parts.items():
         save(m, os.path.join(out, name))
+    hat_r4.write_hat_parts(out)

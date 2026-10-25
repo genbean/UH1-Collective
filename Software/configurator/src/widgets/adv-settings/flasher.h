@@ -2,44 +2,63 @@
 #define FLASHER_H
 
 #include <QWidget>
+#include "common_defines.h"
 
-namespace Ui {
-class Flasher;
-}
+QT_BEGIN_NAMESPACE
+class QComboBox;
+class QLabel;
+class QProgressBar;
+class QPushButton;
+class QToolButton;
+QT_END_NAMESPACE
 
+class AvrFlasher;
+
+// Firmware updates: a connected HeliSR device is restarted into its bootloader
+// over USB; a Pro Micro without HeliSR firmware gets a 1200-baud touch on its
+// serial port, or a double tap on RST. avrdude then writes the .hex.
 class Flasher : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit Flasher(QWidget *parent = nullptr);
-    ~Flasher();
 
     void retranslateUi();
 
-    void deviceConnected(bool isConnect);
-
-    const QByteArray *fileArray() const;
+    //! a HeliSR device is open (info: its INFO answer, or nullptr)
+    void deviceConnected(bool isConnect, const hsr_info_t *info = nullptr);
+    bool isBusy() const;
 
 signals:
-    void flashModeClicked(bool is_start_flash);
-    void startFlash(bool is_start_flash);
+    void enterBootloaderRequested();
 
 public slots:
-    void flasherFound(bool isFound);
-    void flashStatus(int status, int percent);
-private slots:
-    void on_pushButton_FlasherMode_clicked();
-    void on_pushButton_FlashFirmware_clicked();
+    void bootloaderStarted(bool isSuccess);
 
 private:
-    Ui::Flasher *ui;
+    void fillFirmwareList();
+    void refreshPorts();
+    QString chooseHexFile();
+    void flashConnected();
+    void flashNewBoard();
+    void setBusy(bool busy);
+    void flashFinished(bool success, const QString &message);
 
-    QByteArray m_fileArray;
-    QString m_flashButtonText;
-    QString m_enterToFlash_BtnText;
-    QString m_defaultButtonStyle;
-    void flashDone();
+    AvrFlasher *m_avr;
+    QString m_hexFile;
+    bool m_connected = false;
+
+    QLabel *m_deviceLabel;
+    QLabel *m_fileLabel;
+    QComboBox *m_firmware;
+    QPushButton *m_flashButton;
+    QLabel *m_newBoardLabel;
+    QComboBox *m_ports;
+    QToolButton *m_refreshPorts;
+    QPushButton *m_flashNewButton;
+    QProgressBar *m_progress;
+    QLabel *m_status;
 };
 
 #endif // FLASHER_H

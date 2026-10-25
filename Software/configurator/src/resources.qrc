@@ -2,11 +2,9 @@
     <qresource prefix="/">
         <file>FreeJoyQt_ru.qm</file>
         <file>FreeJoyQt_zh_CN.qm</file>
-        <file>Images/BluePill_render.jpg</file>
         <file>Images/icon.png</file>
         <file>Images/icon-32.png</file>
         <file>styles/default.qss</file>
-        <file>Images/pinout.png</file>
         <file>Images/ST_wiki.png</file>
         <file>Images/ST_wiki_dark.png</file>
         <file>Images/moon.png</file>
@@ -21,17 +19,5 @@
         <file>Images/flags/Russia.png</file>
         <file>Images/flags/United_Kingdom.png</file>
         <file>FreeJoyQt_de_DE.qm</file>
-        <file>Images/rgb.png</file>
-        <file>Images/hall2.png</file>
-        <file>Images/potentiometer.png</file>
-        <file>Images/monoLed.png</file>
-        <file>Images/pwmLed.png</file>
-        <file>Images/fastEncoder.png</file>
-        <file>Images/buttonEncToggle.png</file>
-        <file>Images/ADS1115.png</file>
-        <file>Images/AS5600.png</file>
-        <file>Images/MLX90393.png</file>
-        <file>Images/rgbButtonOff.png</file>
-        <file>Images/rgbButtonOn.png</file>
     </qresource>
 </RCC>
