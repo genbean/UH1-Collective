@@ -152,8 +152,12 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
      "the socket and head fits with it (coupons)", AMZ + "; " + BASE),
     amz("Socket mouth", 1, "Worm-drive hose clamp, 25-40 mm range, 304 stainless, pack of 25", "MISPIRE", "B0F8QWCFWR", 18.99, 25,
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
-    kit("Lever halves", 4, "M4 x 20 countersunk screw + M4 hex nut", "From the top, the heads 16 mm down their counterbores "
-        "(a long 2.5 mm hex key helps); the nuts go in the lower half's pockets first"),
+    amz("Lever halves", 4, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
+        "flat and lock washers and a hex key (200 pieces)", "HELIFOUNER", "B0CDSKK7V1", 9.99, "once",
+        "Uses 4 x M4 x 40, with 4 of its M4 nuts. "
+        "The heads sit flush in 8 mm counterbores at the top and the nuts in hex pockets open to the underside, as far apart "
+        "as the lever allows; no tip protrudes. The nuts go into the lower half's pockets first", BASE,
+        ORDERED),
     ("Strut", 1, "Gas strut, 6 in (152.4 mm eye to eye), 45 N (sold as 9-12 lb), flat eyelet tabs", "X AUTOHAUX", "",
      "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half", BASE),
     kit("Strut eyes", 2, "M4 x 16 countersunk screw + M4 hex nut", "One per eye: head on +y, nut in the -y cheek's pocket. "
@@ -171,7 +175,7 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
     kit("Cable plug", 1, "M2 x 12 countersunk screw", "Up from under the cable cover's rim, through a clearance hole, into an "
         "M2 thread tapped in the plug (1.6 mm pilot): pulls the plug that closes the cable's slot down onto the cover's "
         "shoulders. Length from the CAD"),
-    any_("Friction knob", 1, "M5 x 16 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
+    any_("Friction knob", 1, "M5 x 25 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
          "have only countersunk heads): any hardware store. Its head presses into the hex pocket moulded into the printed "
          "knob (Base/stl/friction_knob.stl), so the knob turns it; it goes through the spring and the shoe into the M5 nut",
          "Base/README.md, Friction knob", CHECK),
@@ -193,7 +197,7 @@ SECTIONS.append(("Kits, consumables and tools", [
     ("Hardware", 1, "Screw kit, 1715 pieces: countersunk hex-socket screws M2-M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20, "
      "with hex nuts and washers, hex keys", "AvrestYPT", "", "Amazon", "B0FMD5TMSH", 17.99, "once", ORDERED, 1,
      "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (8), M4 x 12 (2),"
-     " M4 x 16 (4), M4 x 20 (9); nuts M3 (4), M4 (17), M5 (1). Your order (link 2026-10-23)",
+     " M4 x 16 (4), M4 x 20 (5); nuts M3 (4), M4 (13), M5 (1). Your order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (your order)"),
     ("Hardware", 1, "Set screw kit, 500 pieces, 304 stainless: M3 x 3, 4, 5, 6; M4 x 4, 5, 6; M5 x 5, 8; M6 x 6, 10; "
      "M8 x 8; hex keys", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714", 8.96, "once", ORDERED, 1,
@@ -276,7 +280,7 @@ PRINTED = [
     ("Base", "Base/stl/sensor_carrier.stl", 1, ""),
     ("Base", "Base/stl/shoe.stl", 1, ""),
     ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end"),
-    ("Base", "Base/stl/friction_knob.stl", 1, "Top face down; the M5 x 16 hex bolt's head presses into its hex pocket"),
+    ("Base", "Base/stl/friction_knob.stl", 1, "Top face down; the M5 x 25 hex bolt's head presses into its hex pocket"),
 ]
 DROPPED = [
     ("Glue, thread-lock, taps, drill bit, felt tape, hose clamp, 10 mm spring, #10 desk screws", 0,
@@ -284,7 +288,7 @@ DROPPED = [
     ("Fgruh M3 and M4 socket-cap screw kits, M3 x 10 / M4 x 30 / M5 x 40 countersunk packs, M6 x 25 and M6 x 30 bolts, M6 and "
      "M4 nyloc nuts, uxcell M5 x 5 set screws, heat-set inserts and insert tips", 0, "Every screw and nut now comes from the "
      "AvrestYPT and set screw kits (2026-10-23): the CAD was changed to suit them", "User, 2026-10-23"),
-    ("MkII-AdjustKnob.stl (friction knob)", 1, "Took an M6 hex head; the base now prints its own knob for an M5 x 16 hex bolt",
+    ("MkII-AdjustKnob.stl (friction knob)", 1, "Took an M6 hex head; the base now prints its own knob for an M5 x 25 hex bolt",
      "Base/mk3_pivot.py"),
     ("SparkFun Pro Micro 12640 (Digi-Key 1568-12640-ND)", 1, "Replaced by the OSOYOO USB-C Pro Micro from Amazon", FULL),
     ("Sullins PRPC012SAAN-RC male headers (Digi-Key 35-PRPC012SAAN-RC-ND)", 2, "The OSOYOO Pro Micro comes with header pins", FULL),

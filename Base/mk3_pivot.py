@@ -99,7 +99,7 @@ FELT_T = 1.5
 SHOE_T = 5.5
 KNOB_X, KNOB_Y = -45.0, 22.0
 HINGE_X, HINGE_Z = 45.0, -4.0
-# friction knob: an M5 x 16 hex-head bolt (ISO 4017), its head in a hex pocket moulded into the printed knob so the knob
+# friction knob: an M5 x 16 hex-head bolt (Rev 3: M5 x 25, see mk3_rev3.py) (ISO 4017), its head in a hex pocket moulded into the printed knob so the knob
 # turns it, runs down through the spring and the shoe's front tab (top at z = 5) into an M5 nut slid into a slot just
 # under the knob tower's top (z = -1)
 SPRING_SEAT = 2.0                # the spring sits in a 10.6 mm recess this deep in the shoe's tab
