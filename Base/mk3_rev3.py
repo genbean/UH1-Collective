@@ -8,7 +8,7 @@ this folder:
     python mk3_rev3.py           -> stl/ (all printed parts), stl/ref/ and step/MkIII_Rev3_assembly.step
     python mk3_rev3.py --curve   -> prints the balance table and writes renders/strut_balance.png
 
-Tube: 25 x 23 mm carbon fibre, cut to 491 mm (bought as 500): 470 + the head boss's 12.7 + 8 for the socket's extra depth. The grip's top sits 445 mm from the pivot, and at the
+Tube: 25 x 23 mm carbon fibre, used whole, 500 mm, uncut: 470 + the head boss's 12.7 + 17.3 down in the socket (it ends at x = -2.7, inside the axial cable bore; notch its sides there for the cables). No lock screw: the hose clamp holds it. The grip's top sits 445 mm from the pivot, and at the
 32 deg stop the hand rises about 9.4 in, the real UH-1's 9.25 in.
 
 Strut: X AUTOHAUX 6" 10 lb / 45 N gas spring (Amazon B0CY267GFY, 2 for $13.69), 152.4 mm eye to eye extended,
@@ -30,20 +30,20 @@ Pivot 58 mm above the desk (Rev 1: 40): the strut's line has to pass about 40 mm
 the clevis around its eye needs the rest.
 
 Bought parts that Rev 1 doesn't have (no bucket, lid, ballast, stop block, thumb knob, M5 stop bolt or striker):
-    1 x X AUTOHAUX 6" 45 N gas strut (the pack has 2);  25 x 23 mm carbon tube, cut to 491 mm
+    1 x X AUTOHAUX 6" 45 N gas strut (the pack has 2);  25 x 23 mm carbon tube, 500 mm uncut
 
 Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (AvrestYPT kit) unless marked:
     lever halves      4 x M4 x 20 + 4 M4 nuts in the lower half's pockets
     pillow-block caps 4 x M4 x 20 + 4 M4 nuts, slid in fore and aft from the blocks' front and back faces
     side covers       8 x M3 x 25 (the NIULUNBAO M3 set) from the covers' outer faces, into M3 threads tapped 11 mm deep
                       in the blocks and caps
-    friction knob     1 x M5 x 20, head glued into the printed knob, + 1 M5 nut slid into the knob tower
+    friction knob     1 x M5 x 16 hex-head bolt (bought: the kits have no hex heads), its head in the knob's moulded hex
+                      pocket, + 1 M5 nut slid into the knob tower
     cable plug        1 x M2 x 12 up from under the cable cover's rim, into an M2 thread tapped in the plug
     shoe hinge        1 x M4 x 20 + 1 M4 nut in the +y lug's pocket
     strut eyes        2 x M4 x 16 + 2 M4 nuts in pockets
     strut collar      1 x M4 x 12 + 1 M4 nut (clamp)
     down-stops        2 x M4 x 16, head up, each in an M4 nut pressed into its post, + 1 M4 lock nut each
-    tube lock         1 x M4 x 6 set screw (set-screw kit) in an M4 thread tapped in the socket boss
 """
 import os
 import sys
@@ -69,15 +69,19 @@ HUB_R = m.DRUM_R                                 # the hub is the friction drum'
 # inside the cap's curve and clear of the bearing seat, and the nuts slide in fore and aft well inside the blocks
 m.BLOCK_HW = 37.5
 m.CAP_BOLT_X = 31.3                              # head 0.64 mm clear of the bearing seat, 1.0 mm inside the cap's curve
-# tube socket 8 mm deeper (Rev 1: bottom at x = -20, 46 mm of engagement; now x = -12, 54 mm), 5.5 mm short of the axial
-# cable bore. The tube is cut 8 mm longer, so the head stays exactly where it was.
+# tube socket deeper (Rev 1: bottom at x = -20, 46 mm of engagement; now x = -2.7, 63.3 mm), into the axial cable bore.
+# The tube is that much longer, so the head stays exactly where it was.
 # side covers: the M3 holes move out to r 31.5 (Rev 1: 30), where the wall to the bearing seat is 2.7 mm rather than 1.2, so
 # they can be tapped 11 mm deep (Rev 1: 7) for M3 x 25 screws: 10 mm of thread in the plastic instead of 5, three times the
 # pull-out. The covers grow to r 36.5 (Rev 1: 34) to keep 1.5 mm of rim round the countersinks.
 m.COVER_HOLE_R, m.COVER_R, m.COVER_TAP_DEPTH = 31.5, 36.5, 11.0
 COVER_SCREW_L = 25
-m.SOCK_BOTTOM = 12.0
-TUBE_EXTRA = 20.0 - m.SOCK_BOTTOM
+# 2026-10-25: the socket now takes the whole 500 mm tube, uncut. 470 + the head boss's 12.7 + TUBE_EXTRA = 500, so the socket
+# bottoms out at x = -2.7, inside the axial cable bore (it was 12.0 for a 491 mm cut). The user notches the tube's sides
+# where the axial bore crosses its wall, so the cables can get in.
+TUBE_BOUGHT = 500.0
+TUBE_EXTRA = TUBE_BOUGHT - 470.0 - 12.7
+m.SOCK_BOTTOM = 20.0 - TUBE_EXTRA
 # the four lever screws: a rectangle centred on the socket's axis (y = -9), 16.75 mm either side. That clears the deeper
 # socket by 1.85 mm at the joint (Rev 1's were 8.5 / -25 on one row and 8.5 / -11 on the other)
 m.LEVER_SCREWS = [(x, m.SOCK_Y + dy) for x in (-17.0, 14.0) for dy in (-16.75, 16.75)]
@@ -192,8 +196,7 @@ def lever_r3():
     cuts = [cyl(m.SOCK_BORE_R, (-m.SOCK_BOTTOM, Y0, 0), (-m.SOCK_MOUTH - 1, Y0, 0)),                # tube socket
             tube(m.SOCK_BOSS_R + 1, m.SOCK_BOSS_R - 1.2, (-54, Y0, 0), (-63, Y0, 0)),                # hose-clamp groove
             cyl(m.CABLE_R, (0, -m.TRUN_OUT - 1, 0), (0, m.TRUN_OUT + 1, 0)),                         # axial 1/2" bore
-            cyl(m.CABLE_R, (-m.SOCK_BOTTOM - 1, Y0, 0), (3, Y0, 0)),                                 # radial 1/2" bore
-            cyl(m.TAP[4] / 2, (m.TUBE_LOCK_X, Y0, 10), (m.TUBE_LOCK_X, Y0, 20))]                     # tube lock: tap M4
+            cyl(m.CABLE_R, (-m.SOCK_BOTTOM - 1, Y0, 0), (3, Y0, 0))]                                 # radial 1/2" bore
     for c in cuts:
         h = h.cut(c)
     return h.clean()
@@ -406,7 +409,9 @@ def cable_plug():
 def hardware_r3():
     """the fixed base's kit screws and nuts (reference): friction screw, shoe hinge, side covers, pillow-block caps and
     down-stops"""
-    parts = [m.csk_screw(5, (m.KNOB_X, m.KNOB_Y, m.KNOB_HEAD_Z), (0, 0, -1), 20),
+    hz = m.KNOB_HEAD_Z - m.KNOB_BOLT[1]
+    parts = [m.fuse(m.hexprism(m.M5_HEAD_AF - 0.1, (m.KNOB_X, m.KNOB_Y, hz), (m.KNOB_X, m.KNOB_Y, m.KNOB_HEAD_Z)),
+                    m.cyl(2.1, (m.KNOB_X, m.KNOB_Y, hz - m.KNOB_BOLT[0]), (m.KNOB_X, m.KNOB_Y, hz + 0.1))),   # M5 x 16 hex bolt
              m.nut(5, (m.KNOB_X, m.KNOB_Y, m.FN_NUT_Z), (0, 0, -1)),
              m.csk_screw(4, (m.HINGE_X, 12, m.HINGE_Z), (0, 1, 0), 20), m.nut(4, (m.HINGE_X, 28.6, m.HINGE_Z), (0, 1, 0))]
     for s in (-1, 1):
@@ -425,8 +430,8 @@ def hardware_r3():
 
 
 def lever_hardware():
-    """Rev 1's lever screws + nuts and the tube lock's set screw: they turn with the lever (reference)"""
-    return fuse(m.lever_screws(), m.grub_screw(4, 6, (m.TUBE_LOCK_X, Y0, 17.3), (0, 0, -1)))
+    """Rev 1's lever screws + nuts: they turn with the lever (reference)"""
+    return m.lever_screws()
 
 
 def carbon_tube(length=TUBE_L + TUBE_EXTRA):
@@ -599,6 +604,21 @@ def chamfer_edges(shape, sizes=CHAMFERS, chunk=8):
     return shape
 
 
+def lever_halves_r3():
+    """Rev 1's lever_halves() with the chamfers put on the whole lever before it is split, so only the edges that stay
+    outside when the halves are bolted together are chamfered: the joint's mating faces keep their sharp edges"""
+    h = m.lever()
+    for c in m.lever_screw_cuts():
+        h = h.cut(c)
+    h = chamfer_edges(h.clean())
+    up = h.intersect(box(-200, 200, -100, 100, 0, 200)).clean()
+    lo = h.intersect(box(-200, 200, -100, 100, -200, 0)).clean()
+    return up, lo
+
+
+m.lever_halves = lever_halves_r3
+
+
 # ---------------------------------------------------------------- build + export
 def build():
     parts = m.build()                                                                       # lever halves are Rev 3's (m.lever)
@@ -620,7 +640,7 @@ def build():
         "lever_screws": lever_hardware(),
     })
     for name in PRINTED:
-        if name not in ("cover_cable", "cable_plug"):                    # chamfered before the slot is cut
+        if name not in ("cover_cable", "cable_plug", "lever_upper", "lever_lower"):   # those: see their own steps
             parts[name] = chamfer_edges(parts[name])
     return parts
 
