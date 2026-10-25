@@ -5,12 +5,12 @@ The collective's pivot base. The lever runs on two 6006-2RS bearings and is prin
 A small gas strut, centred under the tube and the hub, holds the lever up. Its lower end is bolted into a gusseted clevis on the base, just ahead of the pivot. Its upper end sits on a collar clamped to the tube. Rev 1 balanced the lever with a ballast bucket and about a kilogram of ballast, and Rev 2 with a clock spring.
 
 Rev 3 also changes four other things from Rev 1:
-- **Tube:** a 491 mm carbon tube (470 mm, plus the 12.7 mm the head's boss takes, plus 8 mm for the deeper socket).
+- **Tube:** the whole 500 mm carbon tube, uncut (470 mm, plus the 12.7 mm the head's boss takes, plus 17.3 mm down in the socket).
 - **Up-stop:** a boss on the back of the lever lands on a pedestal on the frame at 32°, instead of Rev 1's adjustable quadrant and striker.
 - **Lever:** the hub is 60 mm across all the way.
 - **Pivot height:** 58 mm above the desk, on an 8 mm (5/16 in) base plate.
 
-![Rev 3 with the full 491 mm tube](renders/rev3_full.png)
+![Rev 3 with the full 500 mm tube](renders/rev3_full.png)
 
 ![From the sensor side](renders/rev3_hero.png)
 
@@ -86,7 +86,7 @@ If even the end variant is wrong, move the whole range, e.g. `COUPON_STEPS = (0.
 
 | | |
 |---|---|
-| Tube | 25 × 23 mm carbon fibre, **491 mm** (cut from 500): 470 mm plus the 12.7 mm (1/2 in) the head's boss now takes, plus the 8 mm the socket now goes deeper |
+| Tube | 25 × 23 mm carbon fibre, **500 mm**, uncut: 470 mm plus the 12.7 mm (1/2 in) the head's boss takes, plus the 17.3 mm the socket takes |
 | Grip centre / grip top from the pivot | 387 mm / 445 mm: two-thirds of the real UH-1's 26.25" (667 mm) |
 | Travel | 0° (level) to a fixed **32°** |
 | Hand rise | the head's lower front corner rises **9.4"**, against the real Huey's 9.25" |
@@ -177,10 +177,10 @@ The lever is two prints, `lever_upper.stl` and `lever_lower.stl`, split at z = 0
 - **Joint:** four countersunk M4 × 20 screws (DIN 7991 / ISO 10642, from the screw kit) go in from the top, into M4 hex nuts in hex pockets in the bottom half. The heads sit 8.5 mm above the joint and the nuts 8 mm below it, so the pockets are about 17 mm deep: push each nut to the bottom of its pocket with a screwdriver, or start the screw and let it pull the nut home. The cone heads centre the upper half on the screws, so tighten them evenly. The counterbores are about 16 mm deep, so you need a long 2.5 mm hex key. The four screws form a rectangle centred on the socket's axis, 16.75 mm either side of it, which leaves 1.85 mm of wall beside the socket.
 - **Cables:** both ½" cable bores are half-round channels in each half. Lay the USB cable and the 3-core sensor lead into the lower half, then close the upper half over them. Nothing has to be threaded through a hole.
 - **Trunnions:** each bearing's inner race holds the two half-trunnions together. Press the bearings on after the screws are tight, and before the sensor carrier and module: neither passes through a bearing. Lay the sensor lead in bare and solder the module on afterwards.
-- **Socket depth:** the tube socket runs 54 mm in from the mouth, to 12 mm from the pivot axis and 5.5 mm short of the axial cable bore (Rev 1: 46 mm). The tube is cut 8 mm longer to match, so the head sits where it did. The cable bore is still 13 mm, and now only the last 12 mm of it joins the socket to the axial bore.
+- **Socket depth:** the tube socket runs 63.3 mm in from the mouth, to 2.7 mm from the pivot axis, so it opens into the axial cable bore (Rev 1: 46 mm). The tube is 500 mm, uncut, so the head sits where it did. The tube's end sits 3.8 mm into the axial bore: file a notch in each side of the tube, 13 mm wide (centred on the tube's horizontal midline) and at least 4 mm deep from its end, where the axial bore crosses the tube's wall, so the cables can get in.
 ![The lever's socket and screws](renders/rev3_lever_socket.png)
 
-- **Socket mouth:** the halves meet face to face all the way to the mouth. The hose clamp in the groove holds them together there, and an M4 × 6 set screw in the top of the socket boss pins the tube.
+- **Socket mouth:** the halves meet face to face all the way to the mouth. The hose clamp in the groove holds them together there. There is no tube lock screw: the hose clamp and the press fit hold the tube.
 
 ## Down-stop
 
@@ -198,9 +198,9 @@ Its sloping face stops 6.5 mm from the centre of the desk screw in that corner, 
 
 ## Friction knob
 
-An M5 × 20 countersunk screw, its head glued into the printed knob (`stl/friction_knob.stl`), runs down through the spring and the shoe's front tab into an M5 nut. The nut slides into a slot just under the knob tower's top, from the front. The spring sits in a 2 mm recess in the shoe's tab, so it is still 6.5 mm long when fitted. Turning the knob screws it down and loads the spring.
+An M5 × 16 hex-head bolt (ISO 4017 / DIN 933, 8 mm across flats), its head in a hex pocket moulded into the printed knob (`stl/friction_knob.stl`), runs down through the spring and the shoe's front tab into an M5 nut. The nut slides into a slot just under the knob tower's top, from the front. The spring sits in a 2 mm recess in the shoe's tab, so it is still 6.5 mm long when fitted. Turning the knob screws it down and loads the spring.
 
-Glue the head in with CA or epoxy so the knob turns the screw; a 3 mm hex key still reaches the head through the knob's top. The MkII knob (`stl/MkII-AdjustKnob.stl`, made for an M6 hex head) isn't used any more.
+Press the bolt's head into the pocket from the top: the hex walls turn it with the knob, so nothing has to be glued, and a spanner or socket still reaches the head through the open top. The spring pushes the knob up against the head. The bolt isn't in the screw kits (they have only countersunk heads): buy an M5 × 16 hex-head bolt, zinc or stainless, from any hardware store.
 
 ## Sensor
 
@@ -220,7 +220,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 
 - **Buy roll-wrapped, not pultruded.** Pultruded tubes have all their fibres running lengthwise and split easily when clamped or drilled. Roll-wrapped tubes have cross plies and take both.
 - **Check the fits.** The lever's socket and the head's tube bore were tuned on the 25 mm aluminium tube with the coupons. Check them with the carbon tube, and re-run the socket and bearing coupons if its outside diameter differs.
-- **Drilling:** you still drill the 4 mm hole for the lock set screw (38.5 mm from the bottom end) and the head's 5.2 mm cross hole (10 mm below the top end). Use a sharp bit and back the tube with wood, or wrap the spot with tape so it doesn't splinter.
+- **Drilling and notching:** you drill the head's 5.2 mm cross hole (10 mm below the top end). Use a sharp bit and back the tube with wood, or wrap the spot with tape so it doesn't splinter.
 - **Clamping:** do the collar's M4 clamp screw and the hose clamp up firmly, but don't crush the tube.
 
 ## Setting it
@@ -246,9 +246,9 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 
 1. **Frame:** tap the eight M3 cover holes, in the pillow blocks and the caps, 11 mm deep. Press an M4 nut into the pocket in each down-stop post's top, and slide an M4 nut into each of the four slots in the pillow blocks' front and back faces (the knob-side block's front one opens on the tower gusset's sloping face).
 2. **Lever:** press the four M4 nuts into the lower half's pockets, lay the USB cable and the sensor lead into the lower half, close the upper half and fit the four M4 × 20 screws (see [Split lever](#split-lever)). Press the bearings onto the trunnions.
-3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, glue the M5 × 20's head into the knob, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
+3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, press the M5 × 16 hex bolt's head into the knob's hex pocket, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
 4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
-5. **Tube:** cut it to 491 mm and drill it. Slide it into the socket, tap the boss's lock hole M4, fit the M4 × 6 set screw into the tube's hole and tighten the hose clamp, with the head on top.
+5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
 6. **Collar:** clamp it on the tube 64 mm out from the front face of the socket boss, to its centre. That puts it 130 mm from the pivot.
 7. **Strut, body end:** fit the plastic tab into the collar's clevis with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
 8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 118 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
@@ -265,12 +265,11 @@ Every screw and nut is from two kits and one pack: the AvrestYPT countersunk kit
 | Pillow-block caps | M4 × 20 countersunk, from the top | M4 nut slid into a slot in the block's front or back face | 4 |
 | Side covers | M3 × 25 countersunk (the NIULUNBAO M3 set), from the cover's outer face | M3 thread tapped 11 mm deep in the block or cap | 8 |
 | Cable plug | M2 × 12 countersunk, up from under the cable cover's rim | M2 thread tapped in the plug | 1 |
-| Friction knob | M5 × 20 countersunk, head glued in the knob | M5 nut slid into the knob tower from the front | 1 |
+| Friction knob | **M5 × 16 hex-head bolt (bought; not in the kits)**, head in the knob's moulded hex pocket | M5 nut slid into the knob tower from the front | 1 |
 | Shoe hinge | M4 × 20 countersunk, head in the sensor-side lug | M4 nut in the knob-side lug's pocket | 1 |
 | Strut eyes | M4 × 16 countersunk, head on the knob side | M4 nut in the far cheek's pocket | 2 |
 | Strut collar clamp | M4 × 12 countersunk, head 2 mm into the sensor-side ear | M4 nut in the other ear's pocket | 1 |
 | Down-stops | M4 × 16 countersunk, head up | M4 nut in the post's top pocket, plus an M4 lock nut | 2 |
-| Tube lock | M4 × 6 set screw | M4 thread tapped in the socket boss; the tip goes in the tube's hole | 1 |
 
 ![Screws from above](renders/rev3_screws_top.png)
 
@@ -292,7 +291,7 @@ Every screw and nut is from two kits and one pack: the AvrestYPT countersunk kit
 |---|---|---|
 | 6006-2RS deep-groove ball bearing (30 × 55 × 13) | 2 | |
 | X AUTOHAUX 6" 45 N gas strut | 1 | pack of 2, $13.69 |
-| 25 × 23 mm carbon tube, 500 mm | 1 | roll-wrapped; cut to 491. It slides into a 54 mm deep socket |
+| 25 × 23 mm carbon tube, 500 mm | 1 | roll-wrapped; used uncut. It slides into a 63.3 mm deep socket |
 | Worm-drive hose clamp, about 25–40 mm | 1 | on the socket mouth |
 | Screws and nuts | | from the two kits and the M3 set: see [Screws](#screws) |
 | Compression spring, 10 mm OD | 1 | friction knob |
