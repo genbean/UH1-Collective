@@ -11,7 +11,7 @@ Firmware and a setup app that turn a **Pro Micro on a HeliSR Rev 3.0 board** int
 
 ## Getting started
 
-1. Download **HeliSR Configurator** from the [Releases](https://github.com/genbean/Heli-Collective/releases) page.
+1. Download **HeliSR Configurator** from the [Releases](https://github.com/genbean/UH1-Collective/releases) page.
 2. Follow the **[Quick start](docs/quick-start.md)**: install, flash the Pro Micro, check it works, set it up.
 
 ## Documentation

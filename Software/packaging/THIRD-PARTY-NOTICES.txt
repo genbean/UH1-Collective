@@ -7,7 +7,7 @@ versions of FreeJoy and FreeJoyConfiguratorQt by the FreeJoy team
 (https://github.com/FreeJoy-Team), also GPL-3.0. The full source, and the
 list of changes from FreeJoy, are at:
 
-    https://github.com/genbean/Heli-Collective  (folder Software, NOTICE.md)
+    https://github.com/genbean/UH1-Collective  (folder Software, NOTICE.md)
 
 This package also contains the following programs and libraries, unmodified.
 
