@@ -29,7 +29,7 @@
    <item row="0" column="1">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Firmware flasher</string>
+      <string>Firmware</string>
      </property>
      <layout class="QHBoxLayout" name="layoutH_Flasher">
       <property name="leftMargin">
@@ -80,7 +80,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string notr="true">F103Joy</string>
+         <string notr="true">HeliSR</string>
         </property>
         <property name="maxLength">
          <number>26</number>
@@ -231,7 +231,7 @@
            <string notr="true">HHHH</string>
           </property>
           <property name="text">
-           <string notr="true">0483</string>
+           <string notr="true">1B4F</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -256,7 +256,7 @@
            <string notr="true">HHHH</string>
           </property>
           <property name="text">
-           <string notr="true">5750</string>
+           <string notr="true">9206</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -326,7 +326,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some values may not work on some operating systems(PID 5750 on Ubuntu, for example). After choosing the wrong value, the controller needs to be reflashed with ST-link/UART.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Give each HeliSR board on one PC its own PID. If a value doesn't work, flash the firmware again with a double tap on RST (Firmware, above): the settings are kept, but you can then write new ones.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>
@@ -357,7 +357,7 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Some values may not work on some operating systems(PID 5750 on Ubuntu, for example). After choosing the wrong value, the controller needs to be reflashed with ST-link/UART.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Give each HeliSR board on one PC its own PID. If a value doesn't work, flash the firmware again with a double tap on RST (Firmware, above): the settings are kept, but you can then write new ones.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string/>

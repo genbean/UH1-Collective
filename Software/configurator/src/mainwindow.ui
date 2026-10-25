@@ -53,7 +53,7 @@
       </property>
       <widget class="QWidget" name="tab_PinConfig">
        <attribute name="title">
-        <string> Pin Config </string>
+        <string> Board </string>
        </attribute>
        <layout class="QVBoxLayout" name="layoutV_tabPinConfig">
         <property name="leftMargin">
@@ -116,28 +116,6 @@
         <string> Axes Curves </string>
        </attribute>
        <layout class="QVBoxLayout" name="layoutV_tabAxesCurvesConfig">
-        <property name="spacing">
-         <number>0</number>
-        </property>
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>6</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_ShiftRegisters">
-       <attribute name="title">
-        <string> Shift Registers </string>
-       </attribute>
-       <layout class="QVBoxLayout" name="layoutV_tabShiftRegistersConfig">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -442,6 +420,9 @@
          </item>
          <item>
           <widget class="QPushButton" name="pushButton_Wiki">
+           <property name="toolTip">
+            <string>Documentation</string>
+           </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>

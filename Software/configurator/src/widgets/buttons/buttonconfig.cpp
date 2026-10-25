@@ -17,12 +17,13 @@ ButtonConfig::ButtonConfig(QWidget *parent)
 {
     ui->setupUi(this);
     m_logicButtonInFocus = -1;
-    m_isShifts_act = false;
-    m_shift1_act = false;
-    m_shift2_act = false;
-    m_shift3_act = false;
-    m_shift4_act = false;
-    m_shift5_act = false;
+    // the HeliSR firmware polls its inputs on every pass: no polling intervals to set
+    ui->frame_7->hide();
+    // shifts are logical buttons; IN1-IN16 always exist, so they're always available
+    for (QSpinBox *sb : {ui->spinBox_Shift1, ui->spinBox_Shift2, ui->spinBox_Shift3, ui->spinBox_Shift4, ui->spinBox_Shift5}) {
+        sb->setMaximum(HSR_MAX_BUTTONS);
+        sb->setEnabled(true);
+    }
 
     // dynamic creation with scroll
 #ifdef DYNAMIC_CREATION
@@ -113,9 +114,6 @@ void ButtonConfig::logicaButtonsCreator()
     static int tmp = 0;     //
     static QElapsedTimer timer;
     if (tmp >= MAX_BUTTONS_NUM) {
-        if (MAX_BUTTONS_NUM != 128) {
-            qCritical() << "buttonconfig.cpp MAX_BUTTONS_NUM != 128";
-        }
         qDebug() << "LogicaButtonsCreator() finished in"<<timer.elapsed()<<"ms";
         emit logicalButtonsCreated();
         return;
@@ -188,8 +186,11 @@ void ButtonConfig::on_checkBox_AutoPhysBut_toggled(bool checked)
     m_logicButtonPtrList[0]->setAutoPhysBut(checked);
 }
 
-void ButtonConfig::physButtonsCreator(int count)
+void ButtonConfig::physButtonsCreator(const QVector<HsrBoard::PhysInput> &inputs)
 {
+    for (ButtonPhysical *&p : m_physByNumber) {
+        p = nullptr;
+    }
     // delete all
     while (!m_PhysButtonPtrList.empty()) {
         QWidget *widget = m_PhysButtonPtrList.takeLast();
@@ -200,15 +201,18 @@ void ButtonConfig::physButtonsCreator(int count)
     int row = 0;
     int column = 0;
     ui->layoutG_PhysicalButton->setAlignment(Qt::AlignTop);
-    for (int i = 0; i < count; i++) {
+    for (const HsrBoard::PhysInput &in : inputs) {
         if (column >= 8) // phys buttons column
         {
             row++;
             column = 0;
         }
-        ButtonPhysical *physicalButtonWidget = new ButtonPhysical(i, this);
+        ButtonPhysical *physicalButtonWidget = new ButtonPhysical(in.phys, in.shortName, in.name, this);
         ui->layoutG_PhysicalButton->addWidget(physicalButtonWidget, row, column);
         m_PhysButtonPtrList.append(physicalButtonWidget);
+        if (in.phys >= 0 && in.phys < HSR_MAX_PHYS) {
+            m_physByNumber[in.phys] = physicalButtonWidget;
+        }
         column++;
         connect(physicalButtonWidget, &ButtonPhysical::physButtonPressed, this, &ButtonConfig::setPhysicButton);
     }
@@ -269,121 +273,44 @@ void ButtonConfig::typeLimit(button_type_t current, button_type_t previous)
     }
 }
 
-void ButtonConfig::setUiOnOff(int value)
+void ButtonConfig::setPhysicalInputs(const QVector<HsrBoard::PhysInput> &inputs)
 {
-    if (value > 0) {
-        ui->spinBox_Shift1->setEnabled(true);
-        ui->spinBox_Shift2->setEnabled(true);
-        ui->spinBox_Shift3->setEnabled(true);
-        ui->spinBox_Shift4->setEnabled(true);
-        ui->spinBox_Shift5->setEnabled(true);
-    } else {
-        ui->spinBox_Shift1->setEnabled(false);
-        ui->spinBox_Shift2->setEnabled(false);
-        ui->spinBox_Shift3->setEnabled(false);
-        ui->spinBox_Shift4->setEnabled(false);
-        ui->spinBox_Shift5->setEnabled(false);
-    }
     for (int i = 0; i < m_logicButtonPtrList.size(); ++i) {
-        m_logicButtonPtrList[i]->setSpinBoxOnOff(value);
-        m_logicButtonPtrList[i]->setMaxPhysButtons(value);
+        m_logicButtonPtrList[i]->setPhysicalInputs(inputs);
     }
-
-    physButtonsCreator(value);
+    physButtonsCreator(inputs);
 }
 
 void ButtonConfig::buttonStateChanged()
 {
-    int number = 0;
-    params_report_t *paramsRep = &gEnv.pDeviceConfig->paramsReport;
+    const params_report_t *paramsRep = &gEnv.pDeviceConfig->paramsReport;
 
     // logical buttons state
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 8; j++) {
-            number = j + (i *8);
-            if (number < m_logicButtonPtrList.size()) {
-                if ((paramsRep->log_button_data[i] & (1 << (j & 0x07)))) {
-                    m_logicButtonPtrList[number]->setButtonState(true);
-                } else if ((paramsRep->log_button_data[i] & (1 << (j & 0x07))) == false) {
-                    m_logicButtonPtrList[number]->setButtonState(false);
-                }
-            }
-        }
+    for (int i = 0; i < m_logicButtonPtrList.size() && i < HSR_MAX_BUTTONS; ++i) {
+        m_logicButtonPtrList[i]->setButtonState(paramsRep->log_button_data[i / 8] & (1 << (i % 8)));
     }
 
-    // physical button state
-    for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < 8; j++) {
-            number = j + (i *8);
-//            if (number >= m_PhysButtonPtrList.size()) {
-//                i = 99;
-//                break;// goto
-//            }
-
-            if (number < m_PhysButtonPtrList.size()) {
-                if ((paramsRep->phy_button_data[i] & (1 << (j & 0x07)))) {
-                    m_PhysButtonPtrList[number]->setButtonState(true);
-                } else if ((paramsRep->phy_button_data[i] & (1 << (j & 0x07))) == false) {
-                    m_PhysButtonPtrList[number]->setButtonState(false);
-                }
-            }
+    // physical inputs state
+    for (int i = 0; i < HSR_MAX_PHYS; ++i) {
+        if (m_physByNumber[i]) {
+            m_physByNumber[i]->setButtonState(paramsRep->phy_button_data[i / 8] & (1 << (i % 8)));
         }
     }
-
 
     // shift state
-    for (int i = 0; i < SHIFT_COUNT; ++i) // выглядит как избыточный код, но так необходимо для оптимизации
-    {
-        if (paramsRep->shift_button_data & (1 << (i & 0x07))) {
-            m_isShifts_act = true;
-
-            if (i == 0 && m_shift1_act == false) {
-                m_defaultShiftStyle = ui->text_shift1_logicalButton->styleSheet();
-                ui->text_shift1_logicalButton->setStyleSheet(m_defaultShiftStyle + "background-color: rgb(0, 128, 0);");
-                //ui->groupBox_Shift1->setStyleSheet("background-color: rgb(0, 128, 0);");
-                //ui->spinBox_Shift1->setStyleSheet("background-color: rgb(0, 128, 0);");
-                m_shift1_act = true;
-            } else if (i == 1 && m_shift2_act == false) {
-                m_defaultShiftStyle = ui->text_shift1_logicalButton->styleSheet();
-                ui->text_shift2_logicalButton->setStyleSheet(m_defaultShiftStyle + "background-color: rgb(0, 128, 0);");
-                m_shift2_act = true;
-            } else if (i == 2 && m_shift3_act == false) {
-                m_defaultShiftStyle = ui->text_shift1_logicalButton->styleSheet();
-                ui->text_shift3_logicalButton->setStyleSheet(m_defaultShiftStyle + "background-color: rgb(0, 128, 0);");
-                m_shift3_act = true;
-            } else if (i == 3 && m_shift4_act == false) {
-                m_defaultShiftStyle = ui->text_shift1_logicalButton->styleSheet();
-                ui->text_shift4_logicalButton->setStyleSheet(m_defaultShiftStyle + "background-color: rgb(0, 128, 0);");
-                m_shift4_act = true;
-            } else if (i == 4 && m_shift5_act == false) {
-                m_defaultShiftStyle = ui->text_shift1_logicalButton->styleSheet();
-                ui->text_shift5_logicalButton->setStyleSheet(m_defaultShiftStyle + "background-color: rgb(0, 128, 0);");
-                m_shift5_act = true;
-            }
-
-        } else if (m_isShifts_act == true) {
-            if (i == 0 && m_shift1_act == true) {
-                ui->text_shift1_logicalButton->setStyleSheet(m_defaultShiftStyle);
-                m_shift1_act = false;
-            } else if (i == 0 && m_shift2_act == true) {
-                ui->text_shift2_logicalButton->setStyleSheet(m_defaultShiftStyle);
-                m_shift2_act = false;
-            } else if (i == 0 && m_shift3_act == true) {
-                ui->text_shift3_logicalButton->setStyleSheet(m_defaultShiftStyle);
-                m_shift3_act = false;
-            } else if (i == 0 && m_shift4_act == true) {
-                ui->text_shift4_logicalButton->setStyleSheet(m_defaultShiftStyle);
-                m_shift4_act = false;
-            } else if (i == 0 && m_shift5_act == true) {
-                ui->text_shift5_logicalButton->setStyleSheet(m_defaultShiftStyle);
-                m_shift5_act = false;
-            }
-
-            if (m_shift1_act == false && m_shift2_act == false && m_shift3_act == false && m_shift4_act == false
-                && m_shift5_act == false) {
-                m_isShifts_act = false;
-            }
+    QLabel *shiftLabels[HSR_MAX_SHIFTS] = {ui->text_shift1_logicalButton, ui->text_shift2_logicalButton,
+                                           ui->text_shift3_logicalButton, ui->text_shift4_logicalButton,
+                                           ui->text_shift5_logicalButton};
+    for (int i = 0; i < HSR_MAX_SHIFTS; ++i) {
+        bool active = paramsRep->shift_button_data & (1 << i);
+        if (active == m_shiftActive[i]) {
+            continue;
         }
+        if (m_defaultShiftStyle.isNull()) {
+            m_defaultShiftStyle = shiftLabels[i]->styleSheet();
+        }
+        shiftLabels[i]->setStyleSheet(active ? m_defaultShiftStyle + "background-color: rgb(0, 128, 0);" : m_defaultShiftStyle);
+        m_shiftActive[i] = active;
     }
 }
 

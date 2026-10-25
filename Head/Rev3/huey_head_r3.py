@@ -607,11 +607,10 @@ BOLT_Z = TUBE_END - 10.0         # the tube's set screw, along y (drill the tube
 GRUB_L = 8.0                     # M5 x 8 set screw (set-screw kit) in an M5 thread tapped in the boss's front
 GRUB_TIP = TY - TUBE_OD / 2 + 0.9   # its tip, through the tube's front wall, 0.1 short of the wall's inside
 # The pinion fills its 6 mm pocket to 0.2 mm off the floor and the ceiling, so it has 0.4 mm of end play (it had 1.2),
-# and is the same both ways up: a thin PINION_HUB on each face, 4.6 mm of teeth between them. The O-rings hold the grip
+# and is the same both ways up: teeth to both faces, chamfered at the tips (throttle script). The O-rings hold the grip
 # up to (at most) the ceiling, 0.5 mm over GEAR_Z, so the lower teeth reach below the grip gear's modelled bottom:
 # the throttle script runs the grip's teeth further down to meet them (GEAR_DOWN).
 PINION_Z = (GEAR_Z[0] - 0.3, CEILING - 0.2)     # the whole pinion
-PINION_HUB = (0.5, 8.0)                         # (height on each face, radius)
 POCKET_D = 23.0                  # pinion tips are 22 mm
 WEB = (CEILING, CEILING + 3.0)   # bearing web over the pinion, bored for the magnet shaft
 SHAFT_D = 6.15

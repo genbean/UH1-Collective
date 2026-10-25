@@ -10,8 +10,8 @@ Encoders::Encoders(int encodersNumber, QWidget *parent)
     m_input_B = 0;
     m_notDefined = tr("Not defined");
 
-    m_encodersNumber = encodersNumber + 1; // fast encoder index 0
-    ui->label_EncoderIndex->setNum(m_encodersNumber);
+    m_encodersNumber = encodersNumber;
+    ui->label_EncoderIndex->setNum(m_encodersNumber + 1);
 
     for (int i = 0; i < ENCODER_TYPE_COUNT; ++i) {
         ui->comboBox_EncoderType->addItem(m_encoderTypeList[i].guiName);

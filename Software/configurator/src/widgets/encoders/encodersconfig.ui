@@ -190,7 +190,7 @@
           <string notr="true"/>
          </property>
          <property name="title">
-          <string>Slow encoders</string>
+          <string>Encoders</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

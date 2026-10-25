@@ -28,13 +28,18 @@ public:
 
     void axesValueChanged();
 
+    //! axis-to-button ranges per axis, as set on the page
+    QVector<int> a2bCounts() const;
+    //! number of axes that took the calibration
+    int applyCalibration(int analogSource, int rawMin, int rawMax);
+
 signals:
     void axisRawValueChanged(int);
     void axisOutValueChanged(int);
     void a2bCountChanged(int count);
 
 public slots:
-    void addOrDeleteMainSource(int sourceEnum, QString sourceName, bool isAdd);
+    void setAvailableSources(const pin_func_t *pins);
 private slots:
     void a2bCountCalc(int count, int previousCount);
     void hideAxis(int index, bool hide);

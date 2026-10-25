@@ -5,7 +5,7 @@ const QString ButtonPhysical::m_whiteStyleOff = QStringLiteral(R"(
     QLabel {
         border-radius: 13px;
         min-height: 26px;
-        min-width: 26px;
+        min-width: 34px;
         background-color: rgb(170, 60, 60);
         color: rgb(220, 221, 222);
     }
@@ -17,7 +17,7 @@ const QString ButtonPhysical::m_darkStyleOff = QStringLiteral(R"(
     QLabel {
         border-radius: 13px;
         min-height: 26px;
-        min-width: 26px;
+        min-width: 34px;
         background-color: rgb(90, 90, 90);
         color: rgb(220, 221, 222);
     }
@@ -27,20 +27,21 @@ const QString ButtonPhysical::m_styleOn = QStringLiteral(R"(
     QLabel {
         border-radius: 13px;
         min-height: 26px;
-        min-width: 26px;
+        min-width: 34px;
         background-color: rgb(0, 128, 0);
         color: rgb(220, 221, 222);
     }
 )");
 
-ButtonPhysical::ButtonPhysical(int buttonNumber, QWidget *parent)
+ButtonPhysical::ButtonPhysical(int phys, const QString &text, const QString &toolTip, QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ButtonPhysical)
 {
     ui->setupUi(this);
     m_currentState = false;
-    m_buttonIndex = buttonNumber;
-    ui->label_PhysicalButton->setNum(m_buttonIndex + 1);
+    m_buttonIndex = phys;
+    ui->label_PhysicalButton->setText(text);
+    setToolTip(toolTip);
 
     updateStyleColor();
     installEventFilter(this);

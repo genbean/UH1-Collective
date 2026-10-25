@@ -23,8 +23,6 @@ public:
 
     void retranslateUi();
 
-    void setI2CEnabled(bool isEnable);
-
 private slots:
     void filterChanged(int filterLevel);
     void functionIndexChanged(int index);
@@ -33,28 +31,9 @@ private:
     Ui::AxesExtended *ui;
 
     int m_axisNumber;
-    QVector<int> m_i2c_enumIndex;
     QVector<int> m_function_enumIndex;
     QVector<int> m_button_1_3_enumIndex;
     QVector<int> m_button_2_enumIndex;
-
-    enum
-    {
-        AS5600 = 0x36,        //54
-        ADS1115_00 = 0x48,    //72
-        ADS1115_01,
-        ADS1115_10,
-        ADS1115_11,
-    };
-
-    const QVector <deviceEnum_guiName_t> m_i2cPtrList =      // static?
-    {{
-        {AS5600,          "AS 5600"},
-        {ADS1115_00,      "ADS 1115_00"},
-        {ADS1115_01,      "ADS 1115_01"},
-        {ADS1115_10,      "ADS 1115_10"},
-        {ADS1115_11,      "ADS 1115_11"},
-    }};
 
     const QVector <deviceEnum_guiName_t> m_functionList =      // static?
     {{

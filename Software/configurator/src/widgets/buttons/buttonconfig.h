@@ -11,6 +11,7 @@
 
 #include "deviceconfig.h"
 #include "global.h"
+#include "helisrboard.h"
 
 //#define DYNAMIC_CREATION
 #ifdef DYNAMIC_CREATION
@@ -39,7 +40,8 @@ signals:
     void logicalButtonsCreated();
 
 public slots:
-    void setUiOnOff(int value);
+    //! the physical inputs that exist with the current board settings
+    void setPhysicalInputs(const QVector<HsrBoard::PhysInput> &inputs);
 
 private slots:
     void functionTypeChanged(button_type_t current, button_type_t previous, int buttonIndex);
@@ -58,18 +60,13 @@ protected:
 
 private:
     Ui::ButtonConfig *ui;
-    void physButtonsCreator(int count);
+    void physButtonsCreator(const QVector<HsrBoard::PhysInput> &inputs);
     QString m_defaultShiftStyle;
 
     int m_logicButtonInFocus;
     bool m_autoPhysButEnabled;
 
-    bool m_isShifts_act;
-    bool m_shift1_act;
-    bool m_shift2_act;
-    bool m_shift3_act;
-    bool m_shift4_act;
-    bool m_shift5_act;
+    bool m_shiftActive[HSR_MAX_SHIFTS] = {};
 
     void logicaButtonsCreator();
 
@@ -77,6 +74,7 @@ private:
 
     QList<ButtonLogical *> m_logicButtonPtrList;
     QList<ButtonPhysical *> m_PhysButtonPtrList;
+    ButtonPhysical *m_physByNumber[HSR_MAX_PHYS] = {};
 
     struct pinTypeLimit_t
     {
@@ -87,8 +85,8 @@ private:
     static const int m_typeLimCount = 2;
     const pinTypeLimit_t m_ButtonsTypeLimit[m_typeLimCount] =
     {
-        {ENCODER_INPUT_A,        15},
-        {ENCODER_INPUT_B,        15},
+        {ENCODER_INPUT_A,        HSR_MAX_ENCODERS},
+        {ENCODER_INPUT_B,        HSR_MAX_ENCODERS},
     };
 };
 

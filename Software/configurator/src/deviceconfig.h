@@ -12,8 +12,8 @@ public:
     void resetConfig();
 
     dev_config_t config;
-    //joy_report_t joyReport;
     params_report_t paramsReport;
+    hsr_info_t info;            // from the connected device's INFO reply
 };
 
 #endif // DEVICECONFIG_H

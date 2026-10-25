@@ -1,0 +1,47 @@
+HeliSR Configurator - licences and third-party components
+==========================================================
+
+HeliSR Configurator and the HeliSR firmware are free software under the GNU
+General Public License v3 or later (licenses\GPL-3.0.txt). They are modified
+versions of FreeJoy and FreeJoyConfiguratorQt by the FreeJoy team
+(https://github.com/FreeJoy-Team), also GPL-3.0. The full source, and the
+list of changes from FreeJoy, are at:
+
+    https://github.com/genbean/Heli-Collective  (folder Software, NOTICE.md)
+
+This package also contains the following programs and libraries, unmodified.
+
+
+Qt 6 (the Qt6*.dll files and the platforms, styles, imageformats and iconengines folders)
+------------------------------------------------------------------------------------------
+Copyright (C) The Qt Company Ltd. and other contributors.
+Used under the GNU Lesser General Public License v3 (licenses\LGPL-3.0.txt).
+The DLLs are Qt's own, unmodified; you may replace them with your own build
+of the same Qt version. Source code: https://download.qt.io/official_releases/qt/
+(the version is in the DLLs' file properties). Qt includes third-party code,
+listed with its licences at https://doc.qt.io/qt-6/licenses-used-in-qt.html
+
+
+avrdude (avrdude\avrdude.exe, avrdude\avrdude.conf)
+---------------------------------------------------
+Copyright (C) Brian S. Dean, Joerg Wunsch and the avrdude contributors.
+Version 8.0, the Arduino build "8.0.0-arduino1". Used under the GNU General
+Public License v2 or later (avrdude\LICENSE.txt, also licenses\GPL-2.0.txt).
+HeliSR Configurator runs it as a separate program to write firmware to the
+Pro Micro. Source code: https://github.com/avrdudes/avrdude (tag v8.0) and
+https://github.com/arduino/avrdude-packing (the Arduino build). A copy of the
+source is attached to each HeliSR release on GitHub.
+
+
+MinGW-w64 GCC runtime (libgcc_s_seh-1.dll, libstdc++-6.dll, libwinpthread-1.dll)
+---------------------------------------------------------------------------------
+libgcc and libstdc++: Copyright (C) Free Software Foundation, Inc. GPL v3 with
+the GCC Runtime Library Exception (licenses\GCC-RUNTIME-EXCEPTION.txt).
+libwinpthread: Copyright (C) the MinGW-w64 project. MIT and ZPL licences
+(licenses\winpthreads-COPYING.txt).
+
+
+HIDAPI (built into HeliSRConfigurator.exe)
+------------------------------------------
+Copyright 2009 Alan Ott, Signal 11 Software. Used under the GPL v3, one of its
+three licence options. https://github.com/libusb/hidapi

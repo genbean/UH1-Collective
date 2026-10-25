@@ -65,7 +65,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="text_chanelEncoder">
         <property name="text">
-         <string>Chanel/Encoder</string>
+         <string>Encoder</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

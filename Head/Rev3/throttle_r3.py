@@ -308,15 +308,25 @@ HEX_CLEAR = -0.03                # pinion hex hole over SHAFT_HEX (the shaft's h
                                  # 2026-10-23: the 4.45 shaft is loose in a 4.6 hole and still slightly loose in 4.5
 
 
+PINION_CHAMFER = 2.2             # 45 degrees off the tooth tips at both faces; see pinion()
+
+
 def pinion():
+    """Teeth the whole way to both faces (no hubs: a hub's step printed badly), with a 45 degree chamfer off the tips at
+    each face. The chamfer is what keeps the pinion clear of the grip's neck: under the grip's gear the neck (r 16.7)
+    reaches inside the pinion's tip circle, and with the grip pushed up to the ceiling (0.5 mm) and the pinion down on its
+    floor (0.2 mm) the neck's shoulder stands 0.2 mm into the pinion's bottom face. A chamfer of 2.0 clears that exactly;
+    2.2 leaves 0.3 mm of margin, and 3.2 of the 5.6 mm of face at the pitch circle. It's the same at both faces, so the
+    pinion goes in either way up, and it prints with no step: a 45 degree chamfer needs no support."""
     z0, z1 = h.PINION_Z
-    hh, rh = h.PINION_HUB
-    g = gear_solid(h.GEAR_M, h.PINION_TEETH, z0 + hh, z1 - hh, h.PX, h.PY, rot=pinion_phase())
-    g = g.fuse(cyl(rh, z0, z0 + hh + 0.01, h.PX, h.PY)).fuse(cyl(rh, z1 - hh - 0.01, z1, h.PX, h.PY))   # a hub each face
+    g = gear_solid(h.GEAR_M, h.PINION_TEETH, z0, z1, h.PX, h.PY, rot=pinion_phase())
+    ra, c, e = h.GEAR_M * (h.PINION_TEETH + 2) / 2, PINION_CHAMFER, 0.3
+    env = [(0, z0), (ra - c, z0), (ra + e, z0 + c + e), (ra + e, z1 - c - e), (ra - c, z1), (0, z1)]   # (r, z)
+    g = g.intersect(cq.Workplane("XZ").polyline(env).close().revolve(360, (0, 0, 0), (0, 1, 0)).val().translate(V(h.PX, h.PY, 0)))
     return g.cut(hex_prism(h.SHAFT_HEX + HEX_CLEAR, z0 - 1, z1 + 1, h.PX, h.PY)).clean()   # 4.47 hole on the 4.45 hex: a snug push fit
 
 
-MAGNET_BORE = 4.2                # the magnet is about 4 mm: 4.0 printed too small (user, 2026-10-23); 4.6 was for a 5 mm magnet
+MAGNET_BORE = 4.2                # the magnet is about 4 mm. LOCKED IN: 4.2 fits, printed 2026-10-24 (4.0 printed too small; 4.6 was for a 5 mm magnet)
 
 
 def magnet_shaft():
