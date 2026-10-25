@@ -1,6 +1,6 @@
 # Plan: a FreeJoy fork for the Pro Micro + HeliSR
 
-Status, 2026-10-24: **phases 0-3 are done.** See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results) and [Phase 3 results](#phase-3-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
+Status, 2026-10-25: **phases 0-4 are done.** See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results) and [Phase 4 results](#phase-4-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
 
 ## Goal
 
@@ -282,3 +282,34 @@ With them, `out_axis_data` went too. Measured on the Pro Micro: **237-257 B neve
 **Toolchain:** MinGW-w64 g++ 13.1 from Qt's mirror, installed with aqtinstall to `%USERPROFILE%\Qt\Tools\mingw1310_64`. The same toolchain builds the configurator in phase 4.
 
 **Still to check on a real HeliSR:** the shift-register inputs, real sensors, the spare pins, and ADC noise. All the logic itself has now been verified on the AVR.
+
+## Phase 4 results
+
+FreeJoyConfiguratorQt is now **HeliSR Configurator** (`configurator/`, see its README). Built with Qt 6.8.3 and MinGW 13.1 (aqtinstall, in `%USERPROFILE%\Qt`), no warnings.
+
+**What changed:**
+- **Rebrand:** name, program, settings folder (`Documents\HeliSR`), a new helicopter icon, and an About box that credits FreeJoyConfiguratorQt. FreeJoy's logos and wiki links are gone; the help button opens this project's `Software` folder on GitHub.
+- **One settings definition:** the app compiles the firmware's `shared/helisr_config.h` and `helisr_protocol.h`, and the new `shared/helisr_defaults.h`, which holds the factory settings both sides load. Moving them there left the firmware byte-for-byte the same size (21,398 B flash, 2,093 B RAM) and all 192 PC checks still pass.
+- **USB:** finds HeliSR boards by manufacturer "HeliSR" and the settings collection (usage page 0xFF00), lists them by name and serial, reads INFO first and refuses settings it doesn't understand (protocol, settings version and size must match), reads live data at about 100 per second, and writes with WRITE + COMMIT. After a write it waits for the board to restart and reconnects on its own.
+- **Board page** (replaces FreeJoy's pin page): IN1-IN16 and AX1-AX4 with live AX readings, the 11 spare pins with only the functions each pin can do, and a summary. Spare-pin and axis-range changes rebuild the other pages' lists once.
+- **AS5600 helper:** for AX1/PROG1 or AX4/PROG4. It walks through the datasheet's OUT-pin programming, sees each PROG press in the live reading (and presses shorter than the chip's 100 ms), checks the result (the output follows the sensor, or stays at 0 if the burn failed), and can apply the measured range as the calibration of the axes using that input.
+- **Other pages:** buttons pick inputs by name (IN5, Pin TX, X range 2); Switch center added; 8 encoders numbered from 1, no fast encoder; LEDs per spare pin and PWM on pins 5/6/9/10; no I2C sensors, shift registers, RGB or host-controlled LEDs.
+- **Flasher:** HeliSR's bootloader command, then the new serial port, then avrdude (`-c avr109 -b 57600 -D`, which keeps the EEPROM settings). A Pro Micro without HeliSR firmware gets a 1200-baud touch on a chosen port, or a double tap on RST. avrdude comes from `avrdude\` next to the app (phase 5 bundles it), else the Arduino IDE.
+- **Profiles:** a HeliSR INI layout (spare pins by label, LEDs by pin), checked and clamped on load; FreeJoy profiles are refused with a message.
+- **Command line:** `--info`, `--read`, `--write`, `--write-defaults`, `--params`, `--flash`, `--flash-new`, plus test commands.
+
+**Tested on the Pro Micro (bare, release firmware):**
+
+| Check | Result |
+|---|---|
+| Detection and INFO | ✅ "HeliSR (HSR30AABCC1)", firmware 1.0.0, 16 MHz, protocol 1, settings v2 (652 B) |
+| Live data | ✅ 212 packets in 2 s |
+| Read to a profile, write, read back, restore (`--roundtrip`) | ✅ byte-identical; the board restarted under its test name and back; 5.8 s |
+| Flash over USB (`--flash`) | ✅ bootloader port COM4 found, written and verified, settings kept; 7.3 s |
+| Every page: random settings in and back out (`--ui-test`) | ✅ 200 of 200 setups byte-identical (a deliberately broken LED mapping was caught on every LED) |
+| The window's Write and Read buttons (`--ui-device-test`) | ✅ random settings written, board restarted and reconnected, read back identical, original restored |
+| Screenshots of every page with a test profile | ✅ after one fix: axis sources were filled in after the axes read their settings |
+
+**Not tested yet:** the AS5600 helper with a real AS5600 (needs the board and sensor, phase 6), flashing a Pro Micro without HeliSR firmware (`--flash-new`, the 1200-baud touch and double tap), several boards at once, and Linux/macOS builds. The Inno Setup script is still FreeJoy's (phase 5).
+
+**Translations:** the Russian, Chinese and German files are kept; texts that didn't change are still translated, new and changed texts show in English.

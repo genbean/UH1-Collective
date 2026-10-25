@@ -1,17 +1,14 @@
 #include "deviceconfig.h"
-
-extern "C" {
-#include "stm_main.h"
-}
+#include "shared/helisr_defaults.h"
 
 DeviceConfig::DeviceConfig()
 {
-    config = InitConfig();
-    //joyReport = {};
+    hsr_config_defaults(&config);
     paramsReport = {};
+    info = {};
 }
 
 void DeviceConfig::resetConfig()
 {
-    config = InitConfig();
+    hsr_config_defaults(&config);
 }

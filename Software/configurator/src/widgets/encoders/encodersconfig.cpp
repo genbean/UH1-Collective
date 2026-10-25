@@ -1,7 +1,8 @@
 #include "encodersconfig.h"
 #include "ui_encodersconfig.h"
 
-#define FAST_ENCODER_COUNT 1
+// HeliSR has no hardware-timer ("fast") encoder: all encoders are polled
+// ones, numbered from 0 as in the firmware.
 
 EncodersConfig::EncodersConfig(QWidget *parent) :
     QWidget(parent),
@@ -11,24 +12,15 @@ EncodersConfig::EncodersConfig(QWidget *parent) :
     m_encodersInput_A_count = 0;
     m_encodersInput_B_count = 0;
     m_notDefined = tr("Not defined");
-
-    m_fastEncoderInput_A = 0;
-    m_fastEncoderInput_B = 0;
-
-    for (int i = 1; i < ENCODER_TYPE_COUNT; ++i) {      // i = 1 - fast encoder without ENCODER_CONF_1x
-        ui->comboBox_EncoderType->addItem(m_fastEncoderTypeList[i].guiName);
-        ui->label_ButtonNumberA->setText(m_notDefined);
-        ui->label_ButtonNumberB->setText(m_notDefined);
-    }
+    ui->groupBox_FastEncoder->hide();
 
     ui->layoutV_Encoders->setAlignment(Qt::AlignTop);
     // encoders spawn
-    for (int i = 0; i < MAX_ENCODERS_NUM - FAST_ENCODER_COUNT; i++)
+    for (int i = 0; i < MAX_ENCODERS_NUM; i++)
     {
         Encoders * encoder = new Encoders(i, this);
         ui->layoutV_Encoders->addWidget(encoder);
         m_encodersPtrList.append(encoder);
-        //encoder->hide();
     }
 }
 
@@ -44,42 +36,6 @@ void EncodersConfig::retranslateUi()
         m_encodersPtrList[i]->retranslateUi();
     }
 }
-
-void EncodersConfig::fastEncoderSelected(const QString &pinGuiName, bool isSelected)
-{
-    if (isSelected == true){
-        if (ui->label_ButtonNumberA->text() == m_notDefined){
-            ui->label_ButtonNumberA->setText(pinGuiName);
-            m_fastEncoderInput_A++;
-        } else {
-            ui->label_ButtonNumberB->setText(pinGuiName);
-            m_fastEncoderInput_B++;
-        }
-    } else {
-        if (ui->label_ButtonNumberA->text() == pinGuiName){
-            ui->label_ButtonNumberA->setText(m_notDefined);
-            m_fastEncoderInput_A--;
-        } else {
-            ui->label_ButtonNumberB->setText(m_notDefined);
-            m_fastEncoderInput_B--;
-        }
-    }
-    setUiOnOff();
-}
-
-void EncodersConfig::setUiOnOff()
-{
-    if (m_fastEncoderInput_A > 0 && m_fastEncoderInput_B > 0){
-        for(auto&& child:ui->groupBox_FastEncoder->findChildren<QWidget *>()){
-        child->setEnabled(true);
-        }
-    } else {
-        for(auto&& child:ui->groupBox_FastEncoder->findChildren<QWidget *>()){
-        child->setEnabled(false);
-        }
-    }
-}
-
 
 void EncodersConfig::encoderInputChanged(int encoder_A, int encoder_B)      // говнокод
 {
@@ -175,9 +131,7 @@ void EncodersConfig::encoderInputChanged(int encoder_A, int encoder_B)      // �
 
 void EncodersConfig::readFromConfig()
 {
-    ui->comboBox_EncoderType->setCurrentIndex(gEnv.pDeviceConfig->config.encoders[0] - 1);      // - 1 - fast encoder without ENCODER_CONF_1x
-
-    for (int i = 0; i < MAX_ENCODERS_NUM - FAST_ENCODER_COUNT; i++)
+    for (int i = 0; i < MAX_ENCODERS_NUM; i++)
     {
         m_encodersPtrList[i]->readFromConfig();
     }
@@ -185,8 +139,7 @@ void EncodersConfig::readFromConfig()
 
 void EncodersConfig::writeToConfig()
 {
-    gEnv.pDeviceConfig->config.encoders[0] = ui->comboBox_EncoderType->currentIndex() + 1;      // + 1 - fast encoder without ENCODER_CONF_1x
-    for (int i = 0; i < MAX_ENCODERS_NUM - FAST_ENCODER_COUNT; i++)
+    for (int i = 0; i < MAX_ENCODERS_NUM; i++)
     {
         m_encodersPtrList[i]->writeToConfig();
     }

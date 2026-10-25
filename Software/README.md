@@ -2,7 +2,7 @@
 
 Firmware and a configuration app for a **Pro Micro (ATmega32U4) on a HeliSR Rev 3.0 board**. They work in any collective, throttle, button box or panel. This is a fork of [FreeJoy](https://github.com/FreeJoy-Team/FreeJoy), licensed under the GPL-3; see [NOTICE.md](NOTICE.md).
 
-**Status: under construction.** Phases 0-3 of [PLAN.md](PLAN.md) are done. The firmware has FreeJoy's button, axis, encoder and LED features. Its logic is tested on the PC, matches FreeJoy's own code exactly on random settings, and gives identical results on a Pro Micro. It hasn't been tested on a HeliSR board yet, and the configurator isn't adapted yet.
+**Status: under construction.** Phases 0-4 of [PLAN.md](PLAN.md) are done. The firmware has FreeJoy's button, axis, encoder and LED features. Its logic is tested on the PC, matches FreeJoy's own code exactly on random settings, and gives identical results on a Pro Micro. HeliSR Configurator sets it up, saves profiles and flashes it, tested with a bare Pro Micro. Nothing has been tested on a HeliSR board yet, and there's no installer yet (phase 5).
 
 | Folder | What's in it |
 |---|---|
@@ -11,7 +11,7 @@ Firmware and a configuration app for a **Pro Micro (ATmega32U4) on a HeliSR Rev 
 | `firmware/build.ps1` | Builds the firmware (see below) |
 | `firmware/test/` | Development test tools for a Pro Micro: the settings channel and joystick (`hsr-usb-test.ps1`), flashing through the bootloader command (`hsr-flash-via-bootloader.ps1`), a logic test (`hsr-logic-test.ps1`), and the lockstep replay of the PC tests (`hsr-lockstep.ps1`, needs `build.ps1 -Test`). Shared helpers are in `hsr-usb-lib.ps1`. |
 | `firmware/test/host/` | The PC tests: the firmware's logic compiled for the PC, the scenario tests, and the comparison with FreeJoy's own code (`run-host-tests.ps1`) |
-| `configurator/` | HeliSR Configurator, forked from FreeJoyConfiguratorQt (not modified yet) |
+| `configurator/` | HeliSR Configurator, forked from FreeJoyConfiguratorQt: setup, profiles, flashing, a command-line mode. See [configurator/README.md](configurator/README.md) |
 
 ## Building the firmware
 
@@ -25,6 +25,10 @@ cd Software\firmware
 ```
 
 The `.hex` files land in `firmware\build\<variant>\`.
+
+## Building the configurator
+
+See [configurator/README.md](configurator/README.md): Qt 6 with MinGW, then `qmake` and `mingw32-make`.
 
 ## What the board reports with no settings
 
@@ -53,3 +57,5 @@ cd test
 ```
 
 Flash the normal build afterwards: the test firmware ignores the board's inputs once a lockstep run has started.
+
+The configurator has its own tests: `HeliSRConfigurator --ui-test 200` puts random settings through every page and back, and with a board connected `--roundtrip` and `--ui-device-test` write, read back and restore its settings.

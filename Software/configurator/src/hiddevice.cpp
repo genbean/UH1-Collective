@@ -1,283 +1,340 @@
 #include <QThread>
 #include <QDebug>
 #include <QElapsedTimer>
-#include <QMap>
+#include <cstring>
 #include <thread>
 #include "hiddevice.h"
 #include "hidapi.h"
 #include "common_defines.h"
-#include "reportconverter.h"
 #include "deviceconfig.h"
 #include "global.h"
-#include "firmwareupdater.h"
 
-static const int DEVICE_SEARCH_DELAY = 1000; // ms
-static const int OLD_FIRMWARE_VID = 0x0483;
-// sience FJ v1.7 REPORT_ID_FIRMWARE = 5 but flasher has = 4
-static const int REPORT_ID_FLASH = 4;
+// HeliSR's settings channel: every packet is [report ID, command, index, status,
+// 60 data bytes], and the device answers each command with a packet carrying
+// the same command and index (see firmware/HeliSR/src/shared/helisr_protocol.h).
 
-void HidDevice::processData()                   /////// bad code, I'll try to rewrite later
+static const int DEVICE_SEARCH_DELAY = 1000;    // ms between device list updates
+static const int PARAMS_PERIOD = 10;            // ms between live data reads
+static const ushort SETTINGS_USAGE_PAGE = 0xFF00;
+static const int RESTART_WAIT = 700;              // ms for a restarting device to drop off the bus
+
+static const int CONFIG_CHUNKS = (sizeof(dev_config_t) + HSR_PACKET_DATA - 1) / HSR_PACKET_DATA;
+static const int PARAMS_PARTS = (sizeof(params_report_t) + HSR_PACKET_DATA - 1) / HSR_PACKET_DATA;
+
+void HidDevice::processData()
 {
-    // Mutex is used for thread-safe access to m_currentWork and m_ledState 
-    // from both UI and worker threads, as processData() blocks without an event loop.
-    const QString FLASHER_PROD_STR ("FreeJoy Flasher");
-    const QString FJ_MANUFACT_STR ("FreeJoy");
-    const QString OLD_MANUFACT_STR ("STMicroelectronics");
-
-    // m_hidDevicesList - should be thread safe
-
-    int res = 0;
-    int oldSelectedDevice = -1;
-    bool deviceCountChanged = false;
-    uint8_t buffer[BUFFERSIZE]{};
-    uint8_t deviceBuffer[BUFFERSIZE];
-    uint8_t paramsRequest[1] = {REPORT_ID_PARAM};
-    QList<QPair<bool, hid_device_info*>> tmp_HidList;
-    m_currentWork = REPORT_ID_PARAM;
-    QElapsedTimer paramsTimer;
-    //paramsTimer.start();
-
-    hid_device_info *hidDevInfo;
-    // first device in list need for hid_free_enumeration(). fixes memory leak
-    hid_device_info *firstInList = NULL;
-    // if hid_enumerate(0x0, 0x0) it takes 140-190ms on my main PC but in a laptop it takes 25ms.
-    // the more devices are connected, the longer the search takes
-    // std::thread because we dont have event loop
-    //QElapsedTimer timer;
+    // Device list: hid_enumerate() can take a while with many devices, so it
+    // runs in its own thread (this worker has no event loop).
     std::thread th([&] {
         while (m_isFinish == false) {
-            // free memory. start from first device in list
-            //timer.start();
-            hid_free_enumeration(firstInList);
-            firstInList = hidDevInfo = hid_enumerate(0x0, 0x0);
-            //qDebug()<<"hid_enumerate(0x0, 0x0) ms ="<<timer.elapsed();
-            while(hidDevInfo) {
-                // flasher search. flasher is here because we dont need read params buffer
-                // and we are not intrested in other devices when we flash firmware
-                if(QString::fromWCharArray(hidDevInfo->product_string) == FLASHER_PROD_STR) {
-                    // flasher found, remember path
-                    if (m_flasherPath.isEmpty()) {
-                        m_flasherPath = hidDevInfo->path;
-                        // remove all devices and add flasher
-                        m_hidDevicesList.clear();
-                        m_deviceNames.clear();
-                        m_deviceNames.append(qMakePair(false, FLASHER_PROD_STR));
-                        emit hidDeviceList(m_deviceNames);
-                        emit flasherConnected();
-                        emit flasherFound(true);
-                    }
-                    //hidDevInfo = hidDevInfo->next;
-                    // start flash firmware
-                    if (m_currentWork == REPORT_ID_FIRMWARE) {
-                        flashFirmwareToDevice();
-                        // flash done
-                        m_flasherPath.clear();
-                        m_currentWork = REPORT_ID_PARAM;
-                        m_deviceNames.clear();
-                        emit hidDeviceList(m_deviceNames);
-                        emit deviceConnected();
-                        QThread::msleep(300);
-                        break;
-                    }
-                    break;
+            QList<Device> found;
+            hid_device_info *first = hid_enumerate(0x0, 0x0);
+            for (hid_device_info *d = first; d; d = d->next) {
+                if (QString::fromWCharArray(d->manufacturer_string ? d->manufacturer_string : L"") != HSR_MANUFACTURER) {
+                    continue;
                 }
-                // add devices ptr to list. since FJ v1.7 we have changed the name and made two interfaces
-                if (QString::fromWCharArray(hidDevInfo->manufacturer_string) == FJ_MANUFACT_STR && hidDevInfo->interface_number == 1) {
-                    tmp_HidList.append(qMakePair(false, hidDevInfo));
+                // the settings collection; hidapi on some systems doesn't report usage pages
+                if (d->usage_page != SETTINGS_USAGE_PAGE && !(d->usage_page == 0 && d->interface_number == 1)) {
+                    continue;
                 }
-                // search the old firmware device
-                else if (hidDevInfo->vendor_id == OLD_FIRMWARE_VID && QString::fromWCharArray(hidDevInfo->manufacturer_string) == OLD_MANUFACT_STR &&
-                         hidDevInfo->interface_number <= 0) {
-                    // true if older than FJ v1.7
-                    tmp_HidList.append(qMakePair(true, hidDevInfo));
+                Device dev;
+                dev.vid = d->vendor_id;
+                dev.pid = d->product_id;
+                dev.path = d->path;
+                dev.name = QString::fromWCharArray(d->product_string ? d->product_string : L"");
+                QString serial = QString::fromWCharArray(d->serial_number ? d->serial_number : L"");
+                if (serial.isEmpty() == false) {
+                    dev.name += " (" + serial + ")";
                 }
-                hidDevInfo = hidDevInfo->next;
-                // all devices added
-                if (!hidDevInfo) {
-                    // old devices count != new devices count
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    if (m_hidDevicesList.size() != tmp_HidList.size()) {  // mutex
-                        m_hidDevicesList.clear();
-                        m_deviceNames.clear();
-                        for (int i = 0; i < tmp_HidList.size(); ++i) {
-                            m_hidDevicesList.append(tmp_HidList[i].second);
-                            // device names for UI combobox. pair for old firmware device
-                            m_deviceNames.append(qMakePair(tmp_HidList[i].first, QString::fromWCharArray(tmp_HidList[i].second->product_string)));
-                        }
-                        // emit all connected FJ devices names
-                        emit hidDeviceList(m_deviceNames);
-                        tmp_HidList.clear();
-                        deviceCountChanged = true;
-                        // flasher disconnected. clear path
-                        if (m_flasherPath.isEmpty() == false) {
-                            m_flasherPath.clear();
-                            emit flasherFound(false);
-                        }
+                found.append(dev);
+            }
+            hid_free_enumeration(first);
+
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                bool changed = found.size() != m_hidDevicesList.size();
+                for (int i = 0; changed == false && i < found.size(); ++i) {
+                    changed = found[i].path != m_hidDevicesList[i].path || found[i].name != m_hidDevicesList[i].name;
+                }
+                if (changed) {
+                    m_hidDevicesList = found;
+                    QStringList names;
+                    for (const Device &dev : found) {
+                        names.append(dev.name);
                     }
+                    m_listChanged = true;
+                    emit hidDeviceList(names);
                 }
             }
-            tmp_HidList.clear();
-            std::this_thread::sleep_for(std::chrono::milliseconds(DEVICE_SEARCH_DELAY));
+            for (int i = 0; i < DEVICE_SEARCH_DELAY / 50 && m_isFinish == false; ++i) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            }
         }
     });
 
+    int openedDevice = -1;
+    bool disconnectedSent = false;
+    QElapsedTimer paramsTimer;
+    QElapsedTimer infoTimer;
 
     while (m_isFinish == false)
     {
-        bool shouldSleep = false;
+        std::string path;
+        int selected;
         {
             std::lock_guard<std::mutex> lock(m_mutex);
-            if (m_flasherPath.isEmpty()) {
-                // all devices disconnected
-                if (m_hidDevicesList.empty()) {
-                    emit deviceDisconnected();
-                    oldSelectedDevice = m_selectedDevice = -1;
-                    shouldSleep = true;
+            if (m_selectedDevice >= m_hidDevicesList.size()) {
+                m_selectedDevice = int(m_hidDevicesList.size()) - 1;
+            }
+            selected = m_selectedDevice;
+            if (selected >= 0) {
+                path = m_hidDevicesList[selected].path;
+            }
+        }
+
+        // (re)open the selected device when the selection or the list changes,
+        // and after a restart (the device comes back under the same path)
+        if (selected != openedDevice || m_listChanged.exchange(false) || m_device == nullptr) {
+            closeDevice();
+            openedDevice = -1;
+            if (selected >= 0) {
+                m_device = hid_open_path(path.c_str());
+                if (m_device) {
+                    bool compatible = readInfo();
+                    if (compatible == false && gEnv.pDeviceConfig->info.firmware_version == 0) {
+                        // no answer: still starting up, or just restarting; try again shortly
+                        closeDevice();
+                        QThread::msleep(300);
+                        continue;
+                    }
+                    openedDevice = selected;
+                    disconnectedSent = false;
+                    m_compatible = compatible;
+                    infoTimer.start();
+                    qDebug().nospace() << "Opened HeliSR device " << selected + 1;
+                    emit deviceConnected();
+                    emit deviceInfoReceived(m_compatible);
                 }
             }
         }
-        if (shouldSleep) {
-            QThread::msleep(600);
+
+        if (m_device == nullptr) {
+            if (disconnectedSent == false) {
+                emit deviceDisconnected();
+                disconnectedSent = true;
+            }
+            m_currentWork = WORK_PARAMS;
+            QThread::msleep(200);
             continue;
         }
-        if (m_flasherPath.isEmpty()) {
-            // open HID
-            if (m_selectedDevice != oldSelectedDevice || (deviceCountChanged && m_selectedDevice >= 0)) {
-                std::string path;
-                bool shouldOpen = false;
-                {
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    if (!m_hidDevicesList.empty() && m_selectedDevice < m_hidDevicesList.size()) {  // mutex
-                        path = m_hidDevicesList[m_selectedDevice].path;
-                        shouldOpen = true;
 
-                        const ushort vid = m_hidDevicesList[m_selectedDevice].vid;
-                        const ushort pid = m_hidDevicesList[m_selectedDevice].pid;
-                        const wchar_t *serNum = m_hidDevicesList[m_selectedDevice].serNum.c_str();
+        switch (m_currentWork) {
+        case WORK_READ:
+            emit configReceived(m_compatible && readConfigFromDevice());
+            m_currentWork = WORK_PARAMS;
+            break;
 
-                        qDebug().nospace()<<"Open HID device №"<<m_selectedDevice + 1
-                                         <<". VID"<<QString::number(vid, 16).toUpper().rightJustified(4, '0')
-                                        <<", PID"<<QString::number(pid, 16).toUpper().rightJustified(4, '0')
-                                       <<", Serial number "<<QString::fromWCharArray(serNum);
-                    }
-                }
-
-                if (shouldOpen) {
-                    m_paramsRead = hid_open_path(path.c_str());
-                    // params hid opened
-                    if (m_paramsRead) {
-                        ReportConverter::resetReport();
-                        emit deviceConnected();
-                        oldSelectedDevice = m_selectedDevice;
-                        deviceCountChanged = false;
-
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        // for old firmware
-                        if (m_deviceNames[m_selectedDevice].first) {
-                            m_oldFirmwareSelected = true;
-                        } else {
-                            m_oldFirmwareSelected = false;
-                        }
-                        // send params request
-                        hid_write(m_paramsRead, paramsRequest, 1);
-                        qDebug()<<"HID opened, connected devices ="<<m_hidDevicesList.size();
-                    }
-                }
+        case WORK_WRITE:
+            if (m_compatible && writeConfigToDevice()) {
+                // the device restarts with the new settings and enumerates again
+                closeDevice();
+                emit configSent(true);
+                QThread::msleep(RESTART_WAIT);
+            } else {
+                emit configSent(false);
             }
-            // device connected
-            if (m_paramsRead) {
-                int currentWork;
-                {
-                    std::lock_guard<std::mutex> lock(m_mutex);
-                    currentWork = m_currentWork;
-                }
-                // read joy report
-                if (currentWork == REPORT_ID_PARAM && !m_oldFirmwareSelected) {
-                    // send params request
-                    if (!paramsTimer.isValid() || paramsTimer.hasExpired(5000)) {
-                        hid_write(m_paramsRead, paramsRequest, 2);
-                        paramsTimer.start();
-                    }
-                    // read report
-                    res=hid_read_timeout(m_paramsRead, buffer, BUFFERSIZE,200);
-                    if (res < 0) {
-                        hid_close(m_paramsRead);
-                        m_paramsRead=nullptr;
-                    } else {
-                        if (buffer[0] == REPORT_ID_PARAM) {   // перестраховка
-                            memset(deviceBuffer, 0, BUFFERSIZE);
-                            memcpy(deviceBuffer, buffer, BUFFERSIZE);
-                            if (ReportConverter::paramReport(deviceBuffer) == -1) continue;
-                            if (ReportConverter::paramReport(deviceBuffer)) { // datarace?
-                                emit paramsPacketReceived(true);
-                            } else {
-                                emit paramsPacketReceived(false);
-                                QThread::msleep(300);
-                            }
-                        }
-                    }
-                }
-                // read config from device
-                else if (currentWork == REPORT_ID_CONFIG_IN) {
-                    readConfigFromDevice(buffer);
-                    #ifdef QT_DEBUG
-                    gEnv.readFinished = true;
-                    #endif
-                }
-                // write config to device
-                else if (currentWork == REPORT_ID_CONFIG_OUT) { ////////////// ХУЁВО ПАШЕТ. редко
-                    writeConfigToDevice(buffer);
-                    // disconnect all devices
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        emit deviceDisconnected();
-                        m_deviceNames.clear();
-                        emit hidDeviceList(m_deviceNames);
-                        m_hidDevicesList.clear();  // mutex
-                        oldSelectedDevice = m_selectedDevice = -1;
-                    }
-                    #ifdef QT_DEBUG
-                    gEnv.readFinished = false;
-                    #endif
-                    QThread::msleep(200);
-                }
-                else if (currentWork == REPORT_ID_LED_HOST_CONTROL) {
-                    uint8_t ledBuffer[64] = {0};
-                    uint32_t currentLedState = 0;
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        currentLedState = m_ledState;
-                        m_currentWork = REPORT_ID_PARAM;
-                    }
-                    ledBuffer[0] = REPORT_ID_LED_HOST_CONTROL;
-                    ledBuffer[1] = uint8_t(currentLedState & 0xFF);
-                    ledBuffer[2] = uint8_t((currentLedState >> 8) & 0xFF);
-                    ledBuffer[3] = uint8_t((currentLedState >> 16) & 0xFF);
-                    ledBuffer[4] = uint8_t((currentLedState >> 24) & 0xFF);
-                    hid_write(m_paramsRead, ledBuffer, 64);
-                }
-                else if (m_oldFirmwareSelected) {
-                    QThread::msleep(200);
-                }
+            m_currentWork = WORK_PARAMS;
+            break;
+
+        case WORK_BOOTLOADER:
+            if (startBootloader()) {
+                closeDevice();
+                emit bootloaderStarted(true);
+                QThread::msleep(RESTART_WAIT);
+            } else {
+                emit bootloaderStarted(false);
             }
+            m_currentWork = WORK_PARAMS;
+            break;
+
+        default:
+            if (m_compatible == false) {
+                // no live data from firmware this app doesn't understand; just
+                // check now and then that it's still there
+                if (infoTimer.elapsed() > 1000) {
+                    infoTimer.start();
+                    bool compatible = readInfo();
+                    if (m_device && compatible != m_compatible) {
+                        m_compatible = compatible;
+                        emit deviceInfoReceived(m_compatible);
+                    }
+                }
+                QThread::msleep(50);
+                break;
+            }
+            if (paramsTimer.isValid() && paramsTimer.elapsed() < PARAMS_PERIOD) {
+                QThread::msleep(1);
+                break;
+            }
+            paramsTimer.start();
+            if (readParams()) {
+                emit paramsPacketReceived();
+            }
+            break;
         }
     }
+    closeDevice();
     th.join();
-    // free memory. start from first device in list
-    hid_free_enumeration(firstInList);
 }
 
+void HidDevice::closeDevice()
+{
+    if (m_device) {
+        hid_close(m_device);
+        m_device = nullptr;
+    }
+}
+
+// Send one command and wait for its answer. reply gets the whole 64-byte packet.
+bool HidDevice::transact(uint8_t cmd, uint8_t index, const void *data, int len, uint8_t *reply,
+                         int timeoutMs, int tries)
+{
+    uint8_t out[HSR_PACKET_SIZE] = {HSR_REPORT_CFG, cmd, index, 0};
+    if (data && len > 0) {
+        memcpy(out + HSR_PACKET_HEADER, data, qMin(len, HSR_PACKET_DATA));
+    }
+
+    for (int t = 0; t < tries && m_device; ++t) {
+        if (hid_write(m_device, out, sizeof(out)) < 0) {
+            closeDevice();
+            return false;
+        }
+        QElapsedTimer timer;
+        timer.start();
+        while (timer.elapsed() < timeoutMs) {
+            int res = hid_read_timeout(m_device, reply, HSR_PACKET_SIZE, timeoutMs - int(timer.elapsed()));
+            if (res < 0) {
+                closeDevice();
+                return false;
+            }
+            if (res >= HSR_PACKET_HEADER && reply[0] == HSR_REPORT_CFG && reply[1] == cmd && reply[2] == index) {
+                return true;
+            }
+        }
+        qDebug() << "No answer to command" << cmd << "index" << index << "- retrying";
+    }
+    return false;
+}
+
+bool HidDevice::readInfo()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    hsr_info_t &info = gEnv.pDeviceConfig->info;
+    info = {};
+    if (transact(HSR_CMD_INFO, 0, nullptr, 0, reply) == false || reply[3] != HSR_OK) {
+        qDebug() << "No INFO answer";
+        return false;
+    }
+    memcpy(&info, reply + HSR_PACKET_HEADER, sizeof(info));
+    qDebug().nospace() << "Firmware " << Qt::hex << info.firmware_version << ", protocol " << Qt::dec
+                       << info.protocol_version << ", board " << Qt::hex << info.board_id << Qt::dec
+                       << ", settings v" << info.config_version << " (" << info.config_size << " bytes), "
+                       << info.cpu_mhz << " MHz, stack free " << info.stack_free << " B";
+    return info.protocol_version == HSR_PROTOCOL_VERSION && info.config_version == HSR_CONFIG_VERSION
+           && info.config_size == sizeof(dev_config_t);
+}
+
+bool HidDevice::readParams()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    params_report_t params;
+    for (int part = 0; part < PARAMS_PARTS; ++part) {
+        if (transact(HSR_CMD_PARAMS, uint8_t(part), nullptr, 0, reply, 100, 1) == false || reply[3] != HSR_OK) {
+            return false;
+        }
+        int offset = part * HSR_PACKET_DATA;
+        memcpy(reinterpret_cast<uint8_t *>(&params) + offset, reply + HSR_PACKET_HEADER,
+               qMin(int(HSR_PACKET_DATA), int(sizeof(params)) - offset));
+    }
+    gEnv.pDeviceConfig->paramsReport = params;
+    return true;
+}
+
+bool HidDevice::readConfigFromDevice()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    dev_config_t config;
+    for (int chunk = 0; chunk < CONFIG_CHUNKS; ++chunk) {
+        if (transact(HSR_CMD_READ, uint8_t(chunk), nullptr, 0, reply) == false || reply[3] != HSR_OK) {
+            qDebug() << "Reading settings failed at chunk" << chunk;
+            return false;
+        }
+        int offset = chunk * HSR_PACKET_DATA;
+        memcpy(reinterpret_cast<uint8_t *>(&config) + offset, reply + HSR_PACKET_HEADER,
+               qMin(int(HSR_PACKET_DATA), int(sizeof(config)) - offset));
+    }
+    if (config.config_version != HSR_CONFIG_VERSION) {
+        qDebug() << "Settings version" << config.config_version << "isn't" << HSR_CONFIG_VERSION;
+        return false;
+    }
+    gEnv.pDeviceConfig->config = config;
+    qDebug() << "All settings received";
+    return true;
+}
+
+bool HidDevice::writeConfigToDevice()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    dev_config_t config = gEnv.pDeviceConfig->config;
+    config.config_version = HSR_CONFIG_VERSION;
+    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&config);
+
+    for (int chunk = 0; chunk < CONFIG_CHUNKS; ++chunk) {
+        int offset = chunk * HSR_PACKET_DATA;
+        int len = qMin(int(HSR_PACKET_DATA), int(sizeof(config)) - offset);
+        if (transact(HSR_CMD_WRITE, uint8_t(chunk), bytes + offset, len, reply) == false || reply[3] != HSR_OK) {
+            qDebug() << "Writing settings failed at chunk" << chunk;
+            // throw away the partial write
+            transact(HSR_CMD_RELOAD, 0, nullptr, 0, reply);
+            return false;
+        }
+    }
+
+    uint16_t crc = hsr_crc16(bytes, sizeof(config));
+    uint8_t crcBytes[2] = {uint8_t(crc & 0xFF), uint8_t(crc >> 8)};
+    if (transact(HSR_CMD_COMMIT, 0, crcBytes, 2, reply, 2000, 1) == false) {
+        qDebug() << "No answer to COMMIT";
+        return false;
+    }
+    if (reply[3] != HSR_OK) {
+        qDebug() << "COMMIT refused, status" << reply[3];
+        transact(HSR_CMD_RELOAD, 0, nullptr, 0, reply);
+        return false;
+    }
+    qDebug() << "All settings sent and saved; the device restarts";
+    return true;
+}
+
+bool HidDevice::startBootloader()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    static const char key[] = "bootloader run";
+    if (transact(HSR_CMD_BOOTLOADER, 0, key, sizeof(key) - 1, reply, 500, 1) == false || reply[3] != HSR_OK) {
+        qDebug() << "Bootloader command not acknowledged";
+        return false;
+    }
+    qDebug() << "Device is starting its bootloader";
+    return true;
+}
 
 // another device selected in comboBox
 void HidDevice::setSelectedDevice(int deviceNumber)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    if (deviceNumber < 0 || m_flasherPath.isEmpty() == false){
-        return;
-    } else if (deviceNumber > m_hidDevicesList.size() - 1){
+    if (deviceNumber > m_hidDevicesList.size() - 1) {
         deviceNumber = int(m_hidDevicesList.size() - 1);
     }
-    m_selectedDevice = deviceNumber;//std::memory_order_release?
+    m_selectedDevice = deviceNumber;
 }
 
 // stop processData()
@@ -286,360 +343,20 @@ void HidDevice::setIsFinish(bool isFinish)
     m_isFinish = isFinish;
 }
 
-// read config
-void HidDevice::readConfigFromDevice(uint8_t *buffer)
-{
-    QElapsedTimer timer;
-    timer.start();
-    int res = 0;
-    qint64 start_time = 0;
-    qint64 resendTime = 0;
-    uint8_t report_count = 0;
-    uint8_t config_request_buffer[2] = {REPORT_ID_CONFIG_IN, 1};
-
-    // 62 = BUFFERSIZE(64)-2 bytes (first - ID, second - cfg part)
-    uint8_t cfg_count = sizeof(dev_config_t) / 62;
-    uint8_t last_cfg_size = sizeof(dev_config_t) % 62;
-    if (last_cfg_size > 0)
-    {
-        cfg_count++;
-    }
-
-    start_time = timer.elapsed();
-    resendTime = start_time;
-    hid_write(m_paramsRead, config_request_buffer, 2);
-
-    while (timer.elapsed() < start_time + 5000)
-    {
-        if (m_paramsRead)    // перестаховка
-        {
-            res=hid_read_timeout(m_paramsRead, buffer, BUFFERSIZE,100);
-            if (res < 0) {
-                hid_close(m_paramsRead);
-                m_paramsRead=nullptr;
-            }
-            else
-            {
-                if (buffer[0] == REPORT_ID_CONFIG_IN)
-                {
-                    if (buffer[1] == config_request_buffer[1])
-                    {
-                        ReportConverter::getConfigFromDevice(buffer);
-                        config_request_buffer[1] += 1;
-                        hid_write(m_paramsRead, config_request_buffer, 2);
-                        report_count++;
-                        resendTime = timer.elapsed();
-                        qDebug()<<"Config"<<report_count<<"received";
-                        if (config_request_buffer[1] > cfg_count)
-                        {
-                            break;
-                        }
-                    }
-                }
-                else if ((resendTime + 250 - timer.elapsed()) <= 0)
-                {
-                    qDebug() << "Resend activated";
-                    config_request_buffer[1] = report_count +1;
-                    qDebug() << config_request_buffer[1];
-                    resendTime = timer.elapsed();
-                    hid_write(m_paramsRead, config_request_buffer, 2);
-                }
-            }
-        } else {
-            {
-                std::lock_guard<std::mutex> lock(m_mutex);
-                m_currentWork = REPORT_ID_PARAM;
-            }
-            emit configReceived(false);
-            break;
-        }
-    }
-    qDebug()<<"Read report_count ="<<report_count<<"/"<<cfg_count;
-    if (report_count == cfg_count){
-        qDebug() << "All config received";
-    } else {
-        qDebug() << "ERROR, not all config received";
-    }
-
-    if (report_count == cfg_count) {
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            m_currentWork = REPORT_ID_PARAM;
-        }
-        emit configReceived(true);
-    } else {
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            m_currentWork = REPORT_ID_PARAM;
-        }
-        emit configReceived(false);
-    }
-}
-
-// write config
-void HidDevice::writeConfigToDevice(uint8_t *buffer)
-{
-    QElapsedTimer timer;
-    timer.start();
-    int res = 0;
-    qint64 startTime = 0;
-    qint64 resendTime = 0;
-    uint8_t reportCount = 0;
-    uint8_t configOutBuf[BUFFERSIZE] = {REPORT_ID_CONFIG_OUT, 0};
-
-    // 62 = BUFFERSIZE(64)-2 bytes (first - ID, second - cfg part)
-    uint8_t cfg_count = sizeof(dev_config_t) / 62;
-    uint8_t last_cfg_size = sizeof(dev_config_t) % 62;
-    if (last_cfg_size > 0)
-    {
-        cfg_count++;
-    }
-
-    startTime = timer.elapsed();
-    resendTime = startTime;
-    hid_write(m_paramsRead, configOutBuf, BUFFERSIZE);
-
-    while (timer.elapsed() < startTime + 5000)
-    {
-        if (m_paramsRead)    // перестаховка
-        {
-            res = hid_read_timeout(m_paramsRead, buffer, BUFFERSIZE,100);
-            if (res < 0) {
-                hid_close(m_paramsRead);
-                m_paramsRead=nullptr;
-            }
-            else
-            {
-                if (buffer[0] == REPORT_ID_CONFIG_OUT)
-                {
-                    if (buffer[1] == configOutBuf[1] + 1)
-                    {
-                        configOutBuf[1] += 1;
-                        ReportConverter::sendConfigToDevice(configOutBuf, configOutBuf[1]);
-                        //memcpy(configOutBuf, configOutBuf, BUFFERSIZE);
-
-                        hid_write(m_paramsRead, configOutBuf, BUFFERSIZE);
-                        reportCount++;
-                        resendTime = timer.elapsed();
-                        qDebug()<<"Config"<<reportCount<<"sent";
-
-                        if (buffer[1] == cfg_count){
-                            break;
-                        }
-                    }
-                }
-                else if ((resendTime + 250 - timer.elapsed()) <= 0)
-                {
-                    qDebug() << "Resend activated";
-                    resendTime = timer.elapsed();
-                    configOutBuf[1] = reportCount;
-                    hid_write(m_paramsRead, configOutBuf, BUFFERSIZE);
-                }
-            }
-        } else {
-            {
-                std::lock_guard<std::mutex> lock(m_mutex);
-                m_currentWork = REPORT_ID_PARAM;
-            }
-            emit configSent(false);
-            break;
-        }
-    }
-    qDebug()<<"Write report_count ="<<reportCount<<"/"<<cfg_count;
-    if (reportCount == cfg_count) {
-        qDebug() << "All config sent";
-        while (timer.elapsed() < startTime + 2000) {
-            if (m_paramsRead) {
-                res = hid_read_timeout(m_paramsRead, buffer, BUFFERSIZE,100);
-                if (res < 0) {
-                    hid_close(m_paramsRead);
-                    m_paramsRead=nullptr;
-                } else if (buffer[1] == 0xFE) {
-                    qDebug() << "ERROR! Version doesnt match";
-                    {
-                        std::lock_guard<std::mutex> lock(m_mutex);
-                        m_currentWork = REPORT_ID_PARAM;
-                    }
-                    emit configSent(false);
-                    return;
-                }
-            }
-        }
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            m_currentWork = REPORT_ID_PARAM;
-        }
-        emit configSent(true);
-    } else {
-        qDebug() << "ERROR, not all config sent";
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            m_currentWork = REPORT_ID_PARAM;
-        }
-        emit configSent(false);
-    }
-}
-
-// flash firmware
-void HidDevice::flashFirmwareToDevice()
-{
-    qDebug()<<"flash size = "<<m_firmware->size();
-    if (m_flasherPath.isEmpty() == false)
-    {
-        hid_device* flasher = hid_open_path(m_flasherPath);
-        qint64 millis;
-        QElapsedTimer time;
-        time.start();
-        millis = time.elapsed();
-        uint8_t flash_buffer[BUFFERSIZE]{};
-        uint8_t flasher_device_buffer[BUFFERSIZE]{};
-        uint16_t length = uint16_t(m_firmware->size());
-        uint16_t crc16 = FirmwareUpdater::computeChecksum(m_firmware);
-        int update_percent = 0;
-
-        flash_buffer[0] = REPORT_ID_FLASH;
-        flash_buffer[1] = 0;
-        flash_buffer[2] = 0;
-        flash_buffer[3] = 0;
-        flash_buffer[4] = uint8_t(length & 0xFF);
-        flash_buffer[5] = uint8_t(length >> 8);
-        flash_buffer[6] = uint8_t(crc16 & 0xFF);
-        flash_buffer[7] = uint8_t(crc16 >> 8);
-
-        hid_write(flasher, flash_buffer, BUFFERSIZE);
-
-        int res = 0;
-        uint8_t buffer[BUFFERSIZE]{};
-        while (time.elapsed() < millis + 50000) // 50 for flashing
-        {
-            if (flasher){
-                res=hid_read_timeout(flasher, buffer, BUFFERSIZE,5000);  // 5000?
-                if (res < 0) {
-                    hid_close(flasher);
-                    flasher=nullptr;
-                    return;
-                } else {
-                    if (buffer[0] == REPORT_ID_FLASH) {
-                        memset(flasher_device_buffer, 0, BUFFERSIZE);
-                        memcpy(flasher_device_buffer, buffer, BUFFERSIZE);
-                    }
-                }
-            }
-
-            if (flasher_device_buffer[0] == REPORT_ID_FLASH)
-            {
-                uint16_t cnt = uint16_t(flasher_device_buffer[1] << 8 | flasher_device_buffer[2]);
-                if ((cnt & 0xF000) == 0xF000)  // status packet
-                {
-                    //qDebug()<<"ERROR";
-                    if (cnt == 0xF001)  // firmware size error
-                    {
-                        hid_close(flasher);
-                        emit flashStatus(SIZE_ERROR, update_percent);
-                        return;
-                    }
-                    else if (cnt == 0xF002) // CRC error
-                    {
-                        hid_close(flasher);
-                        emit flashStatus(CRC_ERROR, update_percent);
-                        return;
-                    }
-                    else if (cnt == 0xF003) // flash erase error
-                    {
-                        hid_close(flasher);
-                        emit flashStatus(ERASE_ERROR, update_percent);
-                        return;
-                    }
-                    else if (cnt == 0xF000) // OK
-                    {
-                        hid_close(flasher);
-                        emit flashStatus(FINISHED, update_percent);
-                        return;
-                    }
-                }
-                else
-                {
-                    qDebug()<<"Firmware packet requested:"<<cnt;
-
-                    flash_buffer[0] = REPORT_ID_FLASH;
-                    flash_buffer[1] = uint8_t(cnt >> 8);
-                    flash_buffer[2] = uint8_t(cnt & 0xFF);
-                    flash_buffer[3] = 0;
-
-                    if (cnt * 60 < m_firmware->size())
-                    {
-                        memcpy(flash_buffer +4, m_firmware->constData() + (cnt - 1) * 60, 60);
-                        update_percent = ((cnt - 1) * 60 * 100 / m_firmware->size());
-                        hid_write(flasher, flash_buffer, 64);
-                        emit flashStatus(IN_PROCESS, update_percent);
-
-                        qDebug()<<"Firmware packet sent:"<<cnt;
-                    }
-                    else
-                    {
-                        memcpy(flash_buffer +4, m_firmware->constData() + (cnt - 1) * 60, m_firmware->size() - (cnt - 1) * 60);
-                        update_percent = 0;
-                        hid_write(flasher, flash_buffer, 64);
-                        emit flashStatus(IN_PROCESS, update_percent);
-
-                        qDebug()<<"Firmware packet sent:"<<cnt;
-                    }
-                }
-            }
-        }
-        hid_close(flasher);
-        emit flashStatus(666, update_percent);
-    }
-}
-
-// button "get config" clicked
+// button "read config" clicked
 void HidDevice::getConfigFromDevice()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_currentWork = REPORT_ID_CONFIG_IN;
+    m_currentWork = WORK_READ;
 }
-// button "send config" clicked
+
+// button "write config" clicked
 void HidDevice::sendConfigToDevice()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_currentWork = REPORT_ID_CONFIG_OUT;
+    m_currentWork = WORK_WRITE;
 }
 
-void HidDevice::sendLedState(uint32_t bitmask)
+// flasher: restart the device into its bootloader
+void HidDevice::enterBootloader()
 {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_ledState = bitmask;
-    m_currentWork = REPORT_ID_LED_HOST_CONTROL;
-}
-// button "flash firmware" clicked
-void HidDevice::flashFirmware(const QByteArray* firmware)
-{
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_firmware = firmware; // pointer?
-    m_currentWork = REPORT_ID_FIRMWARE;
-}
-
-bool HidDevice::enterToFlashMode()
-{
-    if(m_paramsRead)
-    {
-        m_flasherPath.clear();
-        QElapsedTimer time;
-        time.start();
-        uint8_t report = REPORT_ID_FIRMWARE;
-        if (m_oldFirmwareSelected) {
-            report = 4;
-        }
-        // send "enter to bootloader mode" message
-        uint8_t config_buffer[64] = {report,'b','o','o','t','l','o','a','d','e','r',' ','r','u','n'};
-        hid_write(m_paramsRead, config_buffer, 64);
-        // waiting flasher
-        while (time.hasExpired(DEVICE_SEARCH_DELAY + 700) == false)
-        {
-            if (m_flasherPath.isEmpty() == false){
-                return true;
-            }
-        }
-    }
-    return false;
+    m_currentWork = WORK_BOOTLOADER;
 }
