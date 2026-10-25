@@ -13,7 +13,7 @@ The board README's "MMJoy2 setup" section is out of date: HeliSR's own firmware 
 
 ## 1. Install HeliSR Configurator
 
-Download `HeliSR-Configurator-x.y.z-Setup.exe` from the project's [Releases](https://github.com/genbean/Heli-Collective/releases) page and run it. It installs for your user account only and needs no administrator rights.
+Download `HeliSR-Configurator-x.y.z-Setup.exe` from the project's [Releases](https://github.com/genbean/UH1-Collective/releases) page and run it. It installs for your user account only and needs no administrator rights.
 
 The installer isn't signed, so Windows may show **"Windows protected your PC"**. Click **More info**, then **Run anyway**.
 

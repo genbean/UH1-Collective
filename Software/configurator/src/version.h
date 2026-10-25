@@ -6,7 +6,7 @@
 #define MINOR_VERSION 0
 #define PATCH_VERSION 0
 
-#define PROJECT_URL "https://github.com/genbean/Heli-Collective"
+#define PROJECT_URL "https://github.com/genbean/UH1-Collective"
 #define PROJECT_DOCS_URL PROJECT_URL "/tree/main/Software"
 
 #ifdef INNO_SETUP

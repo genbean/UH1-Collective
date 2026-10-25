@@ -35,5 +35,5 @@ avrdude\                 avrdude, which writes the firmware
 licenses\                the licences; see THIRD-PARTY-NOTICES.txt
 
 Full instructions (quick start, user guide, flashing, AS5600 sensors):
-https://github.com/genbean/Heli-Collective/tree/main/Software
-Source code and the HeliSR board: https://github.com/genbean/Heli-Collective
+https://github.com/genbean/UH1-Collective/tree/main/Software
+Source code and the HeliSR board: https://github.com/genbean/UH1-Collective

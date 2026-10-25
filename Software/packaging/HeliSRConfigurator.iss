@@ -13,7 +13,7 @@
 
 #define MyAppName "HeliSR Configurator"
 #define MyAppExeName "HeliSRConfigurator.exe"
-#define MyAppURL "https://github.com/genbean/Heli-Collective"
+#define MyAppURL "https://github.com/genbean/UH1-Collective"
 
 [Setup]
 ; HeliSR's own AppId (FreeJoy's installer has a different one, so the two never mix)
