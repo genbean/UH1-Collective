@@ -49,6 +49,11 @@ enum
 	HSR_CMD_DEFAULTS,       // load the factory settings (not saved until COMMIT) -> ack
 	HSR_CMD_PARAMS,         // start live data for 5 s; index = part (0 or 1) -> params bytes
 	HSR_CMD_BOOTLOADER,     // data = "bootloader run" -> ack, then the bootloader starts
+
+	// Test builds only (HSR_TEST_STEP): the PC drives the logic in lockstep
+	HSR_CMD_TEST_APPLY = 0x70,  // restart the logic from the settings in RAM and enter
+	                            // test mode (the board's own inputs are ignored) -> ack
+	HSR_CMD_TEST_STEP,          // data = hsr_test_step_t -> hsr_test_result_t
 };
 
 enum
@@ -73,7 +78,33 @@ typedef struct
 	uint8_t     usb_serial_port;    // 1 if the build includes the Arduino USB serial port
 	uint32_t    unique_id;          // random, made on first start, kept in EEPROM
 	uint8_t     config_from_eeprom; // 0 if the settings are factory defaults
+	uint16_t    stack_free;         // RAM the stack has never reached since start-up (bytes)
+	uint16_t    commands;           // settings packets received since start-up
+	uint16_t    replies_dropped;    // replies not sent because the endpoint stayed busy
+	uint16_t    pass_max_us;        // longest input-processing pass since start-up
 } hsr_info_t;
+#pragma pack(pop)
+
+/* Test builds: one logic pass with given inputs and time, and its results. */
+#pragma pack(push, 1)
+typedef struct
+{
+	uint16_t    now;                            // ms
+	uint16_t    sr_inputs;                      // bit n = IN(n+1) closed
+	uint16_t    spare_buttons;                  // bit n = spare pin n pressed
+	uint16_t    analog[9];                      // HSR_ANALOG_SOURCES raw readings
+} hsr_test_step_t;
+
+typedef struct
+{
+	uint8_t     log_buttons[8];                 // logical buttons (after inversion)
+	uint8_t     phy_buttons[8];                 // debounced physical inputs
+	int16_t     axes[8];                        // output axes
+	uint8_t     povs[4];                        // hat values, used hats in order
+	uint8_t     shifts;
+	uint16_t    leds;                           // single LEDs by spare pin
+	uint8_t     pwm[4];                         // PWM duty per channel (%)
+} hsr_test_result_t;
 #pragma pack(pop)
 
 /* CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF), over the whole dev_config_t. */
