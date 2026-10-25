@@ -1,6 +1,6 @@
 # Plan: a FreeJoy fork for the Pro Micro + HeliSR
 
-Status, 2026-10-25: **phases 0-4 are done.** See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results) and [Phase 4 results](#phase-4-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
+Status, 2026-10-25: **phases 0-5 are done.** See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results), [Phase 4 results](#phase-4-results) and [Phase 5 results](#phase-5-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
 
 ## Goal
 
@@ -313,3 +313,46 @@ FreeJoyConfiguratorQt is now **HeliSR Configurator** (`configurator/`, see its R
 **Not tested yet:** the AS5600 helper with a real AS5600 (needs the board and sensor, phase 6), flashing a Pro Micro without HeliSR firmware (`--flash-new`, the 1200-baud touch and double tap), several boards at once, and Linux/macOS builds. The Inno Setup script is still FreeJoy's (phase 5).
 
 **Translations:** the Russian, Chinese and German files are kept; texts that didn't change are still translated, new and changed texts show in English.
+
+## Phase 5 results
+
+`packaging/build-release.ps1` builds a release in under a minute (see `packaging/README.md`):
+
+| Output (1.0.0) | Size |
+|---|---|
+| `HeliSR-Configurator-1.0.0-Setup.exe` (Inno Setup 6) | 12.7 MB |
+| `HeliSR-Configurator-1.0.0-portable.zip` | 14.9 MB |
+| `HeliSR-Configurator-1.0.0-SHA256SUMS.txt` | |
+
+**Contents** (37 MB installed):
+- the app and Qt 6.8.3, from windeployqt: 4 Qt DLLs and 6 plugins, no translations, no software OpenGL, no network plugins;
+- the MinGW runtime;
+- `firmware\HeliSR_16MHz.hex` and `HeliSR_8MHz.hex`, both 21,398 B; the builds differ, as they should;
+- `avrdude\`, the Arduino IDE's avrdude 8.0.0-arduino1: one 32-bit exe that needs only Windows' own DLLs;
+- the licences (GPL-3, LGPL-3, GPL-2, the GCC runtime exception, winpthreads), `THIRD-PARTY-NOTICES.txt`, `NOTICE.md` and a quick-start `README.txt`.
+
+**The installer:**
+- per-user, no admin rights needed (an admin can choose all users);
+- 64-bit Windows 10 or later;
+- English, Russian and German;
+- its own AppId;
+- a GPL-3 licence page;
+- a Start-menu entry, and an optional desktop icon.
+
+**Tested** (silent install into a scratch folder, then the installed copy with only `C:\Windows` on the PATH, so no Qt or MinGW from this PC):
+
+| Check | Result |
+|---|---|
+| Install and uninstall | ✅ exit 0. The uninstall removed the folder, the Start-menu shortcut and the uninstall registry entry |
+| `--info` on the Pro Micro | ✅ |
+| `--ui-test 50` (the window's pages, Qt plugins loading) | ✅ 50 of 50 |
+| `--flash` with the bundled firmware | ✅ the bundled avrdude ran (not the Arduino IDE's copy), written and verified, settings kept |
+| The window | ✅ it found the bundled firmware and picked the 16 MHz build to match the board |
+
+**Stack, measured again:** the board's lowest unused stack is **208 B** once the app polls live data at 100 per second; it was 237-257 B in phase 3 with lighter USB traffic. More frequent USB interrupts land during the deepest processing pass. That still leaves about 200 B, but don't add stack-hungry features without measuring.
+
+**Still open:**
+- **avrdude source:** each GitHub release must carry avrdude's source next to the binary (GPL-2); the release checklist in `packaging/README.md` says what to attach.
+- **Code signing:** the installer isn't signed, so SmartScreen warns the first time; the user guide (phase 7) should explain "More info → Run anyway".
+- **Not tested:** the 8 MHz firmware on a 3.3 V Pro Micro (none here); flashing a factory-fresh Pro Micro (`--flash-new`).
+- **No GitHub Actions workflow yet** (optional).

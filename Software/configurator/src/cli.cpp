@@ -187,7 +187,7 @@ int flash(const QString &hex, Session *session, const QString &port)
     int lastPercent = -10;
     QObject::connect(&avr, &AvrFlasher::status, [](const QString &s) { out(s); });
     QObject::connect(&avr, &AvrFlasher::progress, [&](int p) {
-        if (p >= lastPercent + 10 || p == 100) {
+        if ((p >= lastPercent + 10 || p == 100) && p != lastPercent) {
             out(QStringLiteral("  %1 %").arg(p));
             lastPercent = p;
         }

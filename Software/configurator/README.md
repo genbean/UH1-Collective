@@ -64,6 +64,6 @@ qmake ..\HeliSRConfigurator.pro CONFIG+=release
 mingw32-make -j8
 ```
 
-The program is `build\src\release\HeliSRConfigurator.exe`. The settings layout and USB protocol come straight from the firmware's `firmware/HeliSR/src/shared/` headers, so the app and the firmware always agree.
+The program is `build\src\release\HeliSRConfigurator.exe`. The settings layout and USB protocol come straight from the firmware's `firmware/HeliSR/src/shared/` headers, so the app and the firmware always agree. To run it from the build folder, keep Qt's `bin` on the PATH; for the installer and portable zip (Qt, avrdude and the firmware bundled), see [../packaging/README.md](../packaging/README.md).
 
 The Linux and macOS code paths from FreeJoyConfiguratorQt are kept, but only Windows has been built and tested.
