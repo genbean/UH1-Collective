@@ -33,11 +33,11 @@ Bought parts that Rev 1 doesn't have (no bucket, lid, ballast, stop block, thumb
     1 x X AUTOHAUX 6" 45 N gas strut (the pack has 2);  25 x 23 mm carbon tube, 500 mm uncut
 
 Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (AvrestYPT kit) unless marked:
-    lever halves      4 x M4 x 20 + 4 M4 nuts in the lower half's pockets
+    lever halves      4 x M4 x 40 socket head cap (HELIFOUNER M4 x 30-50 kit) + 4 M4 nuts in the lower half's pockets
     pillow-block caps 4 x M4 x 20 + 4 M4 nuts, slid in fore and aft from the blocks' front and back faces
     side covers       8 x M3 x 25 (the NIULUNBAO M3 set) from the covers' outer faces, into M3 threads tapped 11 mm deep
                       in the blocks and caps
-    friction knob     1 x M5 x 16 hex-head bolt (bought: the kits have no hex heads), its head in the knob's moulded hex
+    friction knob     1 x M5 x 25 hex-head bolt (bought: the kits have no hex heads), its head in the knob's moulded hex
                       pocket, + 1 M5 nut slid into the knob tower
     cable plug        1 x M2 x 12 up from under the cable cover's rim, into an M2 thread tapped in the plug
     shoe hinge        1 x M4 x 20 + 1 M4 nut in the +y lug's pocket
@@ -82,9 +82,9 @@ COVER_SCREW_L = 25
 TUBE_BOUGHT = 500.0
 TUBE_EXTRA = TUBE_BOUGHT - 470.0 - 12.7
 m.SOCK_BOTTOM = 20.0 - TUBE_EXTRA
-# the four lever screws: a rectangle centred on the socket's axis (y = -9), 16.75 mm either side. That clears the deeper
-# socket by 1.85 mm at the joint (Rev 1's were 8.5 / -25 on one row and 8.5 / -11 on the other)
-m.LEVER_SCREWS = [(x, m.SOCK_Y + dy) for x in (-17.0, 14.0) for dy in (-16.75, 16.75)]
+# the four lever screws: a rectangle centred on the socket's axis (y = -9), 16.75 mm either side, and on the pivot axis (x = 0),
+# 17 mm fore and aft. That clears the deeper socket by 1.85 mm at the joint (Rev 1's were 8.5 / -25 and 8.5 / -11, at x = -17 / 14)
+m.LEVER_SCREWS = [(x, m.SOCK_Y + dy) for x in (-17.0, 17.0) for dy in (-16.75, 16.75)]
 
 # ---------------------------------------------------------------- parameters
 # tube: 25 x 23 mm carbon fibre, 470 mm from Rev 1's socket bottom to the head's reference end (it's cut TUBE_EXTRA longer)
@@ -142,6 +142,8 @@ PAD_Z = -16.0                                    # pad underside at 0 deg
 STOP_X = sum(PAD_X) / 2
 POST_TOP = PAD_Z - 8.0                           # an M4 nut sits in a pocket in each post's top, a lock nut on it
 CAP_NUT_Z = -8.3                                 # pillow-block cap screws: the nut's top face (the M4 x 20 ends at -12)
+m.FN_NUT_Z = CAP_NUT_Z                           # the friction knob's M5 nut sits as deep, so its slot's roof is thick (Rev 1: -3.2)
+m.KNOB_BOLT = (25.0, 3.5)                        # ... which takes an M5 x 25 hex bolt (it ended at -7.0 as an M5 x 16): tip at -16
 
 # up-stop: boss on the back of the hub's underside, landing flat on a frame pedestal at STOP_DEG
 STOP_DEG = 32.0
@@ -244,7 +246,8 @@ def frame_r3():
         cuts += [hexprism(a4, (STOP_X, y, POST_TOP - t4 - 0.2), (STOP_X, y, POST_TOP + 1)),     # down-stop nut pocket
                  cyl(2.2, (STOP_X, y, POST_TOP - 10), (STOP_X, y, POST_TOP))]
     aw = (ROD_TAB_T + 0.6) / 2 + CLEVIS_T                                                      # anchor's outer faces, +-y
-    cuts += [cyl(m.CSK[5][1] / 2, (m.KNOB_X, m.KNOB_Y, 0), (m.KNOB_X, m.KNOB_Y, -14)),          # M5 friction screw
+    cuts += [cyl(m.CSK[5][1] / 2, (m.KNOB_X, m.KNOB_Y, 0),
+                 (m.KNOB_X, m.KNOB_Y, m.KNOB_HEAD_Z - m.KNOB_BOLT[1] - m.KNOB_BOLT[0] - 1.0)),     # M5 friction bolt, 1 mm past its tip
              box(-55, m.KNOB_X + 4.8, m.KNOB_Y - m.NUT_AF[5] / 2, m.KNOB_Y + m.NUT_AF[5] / 2,
                  m.FN_NUT_Z - m.NUT_T[5] - 0.4, m.FN_NUT_Z),                                     # its nut, in from the front
              cyl(2.2, (m.HINGE_X, 10, m.HINGE_Z), (m.HINGE_X, 34, m.HINGE_Z)),                  # shoe hinge: M4 x 20,
@@ -411,7 +414,7 @@ def hardware_r3():
     down-stops"""
     hz = m.KNOB_HEAD_Z - m.KNOB_BOLT[1]
     parts = [m.fuse(m.hexprism(m.M5_HEAD_AF - 0.1, (m.KNOB_X, m.KNOB_Y, hz), (m.KNOB_X, m.KNOB_Y, m.KNOB_HEAD_Z)),
-                    m.cyl(2.1, (m.KNOB_X, m.KNOB_Y, hz - m.KNOB_BOLT[0]), (m.KNOB_X, m.KNOB_Y, hz + 0.1))),   # M5 x 16 hex bolt
+                    m.cyl(2.1, (m.KNOB_X, m.KNOB_Y, hz - m.KNOB_BOLT[0]), (m.KNOB_X, m.KNOB_Y, hz + 0.1))),   # M5 x 25 hex bolt
              m.nut(5, (m.KNOB_X, m.KNOB_Y, m.FN_NUT_Z), (0, 0, -1)),
              m.csk_screw(4, (m.HINGE_X, 12, m.HINGE_Z), (0, 1, 0), 20), m.nut(4, (m.HINGE_X, 28.6, m.HINGE_Z), (0, 1, 0))]
     for s in (-1, 1):
@@ -560,13 +563,13 @@ def _hole_wall(f, p, n):
     return ((p - o) - d * (p - o).dot(d)).dot(n) < 0
 
 
-def sharp_edges(shape, eps=0.05, max_dot=0.5):
+def sharp_edges(shape, eps=0.05, max_dot=0.5, exclude=None):
     """convex edges between two faces meeting at under 120 degrees, neither face a hole's wall"""
     em = _faces_of_edges(shape)
     out = []
     for i in range(1, em.Extent() + 1):
         e, fs = cq.Edge(em.FindKey(i)), [cq.Face(f) for f in em.FindFromIndex(i)]
-        if len(fs) != 2 or e.Length() < 0.5:
+        if len(fs) != 2 or e.Length() < 0.5 or (exclude is not None and exclude(e)):
             continue
         p = e.positionAt(0.5)
         n1, n2 = fs[0].normalAt(p), fs[1].normalAt(p)
@@ -585,12 +588,12 @@ def _chamfer(shape, edges, c):
         return None
 
 
-def chamfer_edges(shape, sizes=CHAMFERS, chunk=8):
+def chamfer_edges(shape, sizes=CHAMFERS, chunk=8, exclude=None):
     """chamfer what will take it: one awkward edge sinks a whole set, so add the edges a chunk at a time and a failing
     chunk one edge at a time"""
     for c in sizes:
         keep = []
-        es = sharp_edges(shape)
+        es = sharp_edges(shape, exclude=exclude)
         for i in range(0, len(es), chunk):
             part = es[i:i + chunk]
             if _chamfer(shape, keep + part, c) is not None:
@@ -604,15 +607,70 @@ def chamfer_edges(shape, sizes=CHAMFERS, chunk=8):
     return shape
 
 
+# the four lever screws: M4 socket head cap screws from the HELIFOUNER kit (M4 x 30/35/40/45/50, with nuts). Each head sits at
+# the top of its counterbore, flush with the hub's surface at the counterbore's lowest edge, and each nut in a pocket open to
+# the underside, so the seats are as far apart as the lever allows. The kit length is the longest whose tip stays inside the
+# lever's outline, and the nut's open face sits level with the hub's surface at its far flat (hex corners along y, flats
+# facing fore and aft, so the nut reaches only AF/2 along the hub's curve).
+KIT_LENGTHS = (30, 35, 40, 45, 50)
+CAP_K, CAP_D, CAP_CB_R = 4.0, 7.0, 4.0           # M4 cap head (ISO 4762): height, diameter; counterbore radius (0.5 mm clear all round)
+LS_NUT_T, LS_TIP_PAST_NUT = 3.2, 1.0             # M4 nut thickness; the screw's tip stands this far past the nut's far face
+NUT_WALL = 0.1                                   # hub left under the nut's far flat at its open face
+
+
+def hex_y(af, p0, p1):
+    """m.hexprism with its corners along y (flats facing x), to stay inside the hub's curve fore and aft"""
+    p0, p1 = V(*p0), V(*p1)
+    pl = cq.Plane(origin=p0, xDir=(0, 1, 0), normal=(p1 - p0).normalized())
+    return cq.Workplane(pl).polygon(6, af / math.cos(math.radians(30))).extrude((p1 - p0).Length).val()
+
+
+def lever_screw_seats():
+    """per screw (x, y, head seat z, kit length, tip z, nut pocket ceiling z), in the lever's frame"""
+    out = []
+    for x, y in m.LEVER_SCREWS:
+        z_head = math.sqrt(HUB_R ** 2 - (abs(x) + CAP_CB_R) ** 2) - CAP_K     # head top level with the hub's lowest point under the counterbore
+        z_nut_open = -math.sqrt(HUB_R ** 2 - (abs(x) + m.LS_NUT_AF / 2) ** 2) + NUT_WALL   # lowest the nut's open face may sit
+        length = max(k for k in KIT_LENGTHS if k <= z_head - (z_nut_open - LS_TIP_PAST_NUT))
+        z_tip = z_head - length
+        out.append((x, y, z_head, length, z_tip, z_tip + LS_TIP_PAST_NUT + LS_NUT_T))
+    return out
+
+
+def lever_screw_cuts_r3():
+    """per screw: counterbore from the head seat to the top, clearance hole, and a hex pocket from the underside up to the
+    nut's seat"""
+    cuts = []
+    for x, y, zh, _, _, zn in lever_screw_seats():
+        cuts += [cyl(CAP_CB_R, (x, y, zh), (x, y, 60)),
+                 cyl(m.LS_CLR_R, (x, y, zn - 0.5), (x, y, zh + 0.01)),
+                 hex_y(m.LS_NUT_AF, (x, y, -60), (x, y, zn))]
+    return cuts
+
+
+def lever_screws_r3():
+    """the cap screws and their nuts (reference)"""
+    parts = []
+    for x, y, zh, length, zt, zn in lever_screw_seats():
+        parts += [cyl(CAP_D / 2, (x, y, zh), (x, y, zh + CAP_K)), cyl(2.0, (x, y, zt), (x, y, zh)),
+                  hex_y(7.0, (x, y, zn - LS_NUT_T), (x, y, zn))]
+    return fuse(*parts)
+
+
+m.lever_screw_cuts = lever_screw_cuts_r3
+m.lever_screws = lever_screws_r3
+
+
 def lever_halves_r3():
-    """Rev 1's lever_halves() with the chamfers put on the whole lever before it is split, so only the edges that stay
-    outside when the halves are bolted together are chamfered: the joint's mating faces keep their sharp edges"""
+    """Rev 1's lever_halves() with the chamfers kept off every edge in the joint plane, so only the edges that stay outside
+    when the halves are bolted together are chamfered: the joint's mating faces keep their sharp edges"""
     h = m.lever()
     for c in m.lever_screw_cuts():
         h = h.cut(c)
-    h = chamfer_edges(h.clean())
-    up = h.intersect(box(-200, 200, -100, 100, 0, 200)).clean()
-    lo = h.intersect(box(-200, 200, -100, 100, -200, 0)).clean()
+    h = h.clean()
+    on_joint = lambda e: abs(e.BoundingBox().zmin) < 1e-4 and abs(e.BoundingBox().zmax) < 1e-4
+    up = chamfer_edges(h.intersect(box(-200, 200, -100, 100, 0, 200)).clean(), exclude=on_joint)
+    lo = chamfer_edges(h.intersect(box(-200, 200, -100, 100, -200, 0)).clean(), exclude=on_joint)
     return up, lo
 
 
