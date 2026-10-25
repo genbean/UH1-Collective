@@ -48,12 +48,17 @@ Thanks to the FreeJoy team for publishing their work under a free licence.
 - **Flashing:** the STM32 flasher (`firmwareupdater.*`, `flasher.ui`) is replaced by `avrflasher.*`, which uses the Pro Micro's bootloader and avrdude.
 - **New:** profile files for HeliSR settings (`configtofile.cpp` rewritten), a command-line mode (`cli.cpp`) and a page round-trip test (`uitest.cpp`).
 
+**2026-10-25 (phase 5)**
+- FreeJoyConfiguratorQt's Inno Setup script moved to `packaging/HeliSRConfigurator.iss` and rewritten for HeliSR: its own AppId, per-user install, the bundled firmware and avrdude.
+- `packaging/build-release.ps1` (new) builds the release; `packaging/licenses/LGPL-3.0.txt` is the FSF's text, unmodified.
+
 ## Third-party components
 
 - **Arduino AVR core** (the firmware is built on it), https://github.com/arduino/ArduinoCore-avr. LGPL-2.1 or later. `usb_helisr.cpp` follows its HID library's descriptor handling.
-- **Qt** (the configurator's GUI toolkit), https://www.qt.io. Used under the LGPL-3.0. Installers ship Qt's own DLLs, unmodified, with Qt's licence.
+- **Qt** (the configurator's GUI toolkit), https://www.qt.io. Used under the LGPL-3.0. The installer ships Qt's own DLLs, unmodified, with the LGPL text (`packaging/licenses/LGPL-3.0.txt`).
 - **HIDAPI** (`configurator/src/*/hidapi.c`), Copyright 2009 Alan Ott, Signal 11 Software. Used under the GPL-3.0, one of its three licence options.
-- **avrdude** (run by the configurator to flash the Pro Micro; to be bundled with the installer), https://github.com/avrdudes/avrdude. GPL-2.0 or later. It is a separate program, run as one.
+- **avrdude** (run by the configurator to flash the Pro Micro), https://github.com/avrdudes/avrdude. GPL-2.0 or later. The installer bundles the Arduino build 8.0.0-arduino1, unmodified, with its licence; it is a separate program, run as one. Its source is attached to each release (see `packaging/README.md`).
+- **MinGW-w64 GCC runtime** (`libgcc_s_seh-1.dll`, `libstdc++-6.dll`, `libwinpthread-1.dll`, shipped by the installer). GPL-3.0 with the GCC Runtime Library Exception, and MIT/ZPL for winpthreads.
 
 ## Names
 
