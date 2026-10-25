@@ -24,7 +24,6 @@ SWITCH_CENTER = 31
 X, Y, Z, RX, RY, RZ = range(6)
 # analog sources
 AX1, AX2, AX3, AX4 = range(4)
-A2B_FIRST = 27          # physical input number of the first axis range
 
 
 def IN(n):
@@ -71,8 +70,9 @@ def axis_off(c, a):
 
 
 # ------------------------------------------------------- the UH-1 collective --
-# The Huey head (Head/README.md, Controls) on a HeliSR Rev 3.0 board, the
-# collective's AS5600 on AX1 and the throttle's on AX4.
+# The Huey head (Head/Rev4, controls as in Head/README.md) on a HeliSR Rev 3.0
+# board, the collective's AS5600 on AX1 and the throttle's on AX4. The Rev 4
+# throttle runs from an idle stop to full open: no cutoff range.
 c = load()
 c["DeviceUsbConfig"]["DeviceName"] = "UH-1 Collective"
 axis_off(c, X)
@@ -80,10 +80,6 @@ axis_off(c, Y)
 axis_off(c, RX)
 axis(c, Z, AX1, filter_level=1)             # collective
 axis(c, RZ, AX4, filter_level=1)            # throttle
-# throttle cutoff: range 1 is the bottom 7 % of the throttle (the idle gate is at about 8 %)
-t = c["Axes2bConfig_%d" % RZ]
-t["ButtonsCount"] = "2"
-t["Point_0"], t["Point_1"], t["Point_2"] = "0", "18", "255"
 
 clear_buttons(c)
 button(c, 1, IN(1))                         # GOV RPM INCR
@@ -100,9 +96,8 @@ button(c, 11, IN(9))                        # SEARCH CONT EXT
 button(c, 12, IN(10))                       # SEARCH CONT RETR
 button(c, 13, IN(11))                       # SEARCH CONT L
 button(c, 14, IN(12))                       # SEARCH CONT R
-button(c, 15, IN(13))                       # STOP REL (idle release)
+button(c, 15, IN(13))                       # STOP REL
 button(c, 16, IN(14))                       # starter trigger
-button(c, 17, A2B_FIRST)                    # throttle in the cutoff range (Rz range 1)
 save(c, "UH-1 collective (HeliSR head).cfg")
 
 # -------------------------------------------------------------- button box --

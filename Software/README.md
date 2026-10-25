@@ -4,7 +4,7 @@ Firmware and a setup app that turn a **Pro Micro on a HeliSR Rev 3.0 board** int
 
 - **16 switch inputs** (IN1–IN16) and **4 analog inputs** (AX1–AX4) on the board, plus 11 spare Pro Micro pins for more buttons, analog axes, LEDs or PWM backlighting.
 - **64 buttons, 8 axes, 4 hats** as Windows and games see them. Plain buttons, latching toggles, pulses for toggle switches, a button for the middle of ON-OFF-ON switches, radio and sequential buttons, 8 rotary encoders, and 5 shift layers.
-- **Axes:** calibration, smoothing, dead bands, curves, combined axes, axes driven by buttons, and up to 12 button ranges per axis (detents, a throttle cutoff).
+- **Axes:** calibration, smoothing, dead bands, curves, combined axes, axes driven by buttons, and up to 12 button ranges per axis (detents, lever positions).
 - **AS5600 sensors:** a helper for programming their range with the board's PROG buttons.
 - **Works straight away:** with no setup, IN1–IN16 are buttons 1–16 and AX1–AX4 are four axes.
 - **HeliSR Configurator** (Windows 10/11) reads and writes the settings, saves them as profiles, and flashes the firmware itself, with no Arduino IDE needed.

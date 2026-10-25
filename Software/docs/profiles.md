@@ -16,14 +16,14 @@ The factory settings: IN1–IN16 are buttons 1–16, AX1–AX4 are the X, Y, Z a
 
 ## UH-1 collective (HeliSR head)
 
-For the UH-1 collective built from this project: the Huey head ([`Head`](../../Head/README.md#controls)) on a HeliSR Rev 3.0 board, the collective's AS5600 in the MkIII base on AX1, and the throttle's AS5600 on AX4. The device is called **UH-1 Collective**.
+For the UH-1 collective built from this project: the Huey head ([`Head/Rev4`](../../Head/Rev4/README.md), controls as in [`Head`](../../Head/README.md#controls)) on a HeliSR Rev 3.0 board, the collective's AS5600 in the MkIII base on AX1, and the throttle's AS5600 on AX4. The device is called **UH-1 Collective**.
 
 **Axes:**
 
 | Axis | Input | |
 |---|---|---|
 | Z | AX1 | Collective |
-| Rz | AX4 | Throttle: 0 at cutoff, about 8 % at the idle gate, full at full open |
+| Rz | AX4 | Throttle: 0 at the idle stop, full at full open |
 
 Filter level 1 on both. X, Y and Rx are off, so the spare AX2 and AX3 can't add stray axes. Program both AS5600s first (see the [AS5600 guide](as5600.md)), then calibrate each axis, or use the AS5600 helper's measured range.
 
@@ -45,9 +45,8 @@ Filter level 1 on both. X, Y and Rx are off, so the spare AX2 and AX3 can't add 
 | 12 | IN10 | SEARCH CONT RETR |
 | 13 | IN11 | SEARCH CONT L |
 | 14 | IN12 | SEARCH CONT R |
-| 15 | IN13 | STOP REL (the idle release) |
+| 15 | IN13 | STOP REL |
 | 16 | IN14 | Starter trigger |
-| 17 | Rz range 1 | Throttle in the cutoff range (the bottom 7 % of the throttle) |
 
 Each switch position has its own button, so every position can be bound in a sim, middle positions included. The search light hat is wired as four buttons (IN9–IN12 in the order EXT, RETR, L, R); swap the inputs in the Physical column if yours differ. IN8, IN15, IN16, AX2 and AX3 are spare.
 

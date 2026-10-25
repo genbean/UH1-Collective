@@ -376,7 +376,7 @@ The board README's "MMJoy2 setup" section is out of date, but that folder is fro
 
 **Example profiles** (`profiles/`, made by `make_profiles.py` from the factory-settings profile, which `--save-defaults` writes):
 - **Default (16 buttons, 4 axes):** the factory settings.
-- **UH-1 collective (HeliSR head):** the Huey head's controls from `Head/README.md`, with buttons for the middle positions of the ON-OFF-ON switches and for LDG LT OFF. The collective (AX1) is Z and the throttle (AX4) is Rz. A throttle-cutoff button covers the bottom 7 %. Named "UH-1 Collective".
+- **UH-1 collective (HeliSR head):** the Huey head's controls from `Head/README.md`, with buttons for the middle positions of the ON-OFF-ON switches and for LDG LT OFF. The collective (AX1) is Z and the throttle (AX4) is Rz. Rev 4's throttle has no cutoff range, so the profile has no cutoff button (the first version wrongly had one, from the Rev 2 README). Named "UH-1 Collective".
 - **Button box:** every button type, with two encoders, a hat and a shift layer.
 
 The installer ships them, and the app copies them to `Documents\HeliSR\configs\examples` (an edited copy is left alone).
@@ -387,7 +387,7 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
 
   | Profile | Buttons | Axes | Hat |
   |---|---|---|---|
-  | UH-1 | 17 | 2 | – |
+  | UH-1 | 16 | 2 | – |
   | Button box | 16 | 0 | 1 |
   | Default | 16 | 4 | – |
 

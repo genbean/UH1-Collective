@@ -116,7 +116,7 @@ The firmware reports up to **8 axes**: X, Y, Z, Rx, Ry, Rz, Slider 1, Slider 2. 
 | Calibrate | Click, move the control through its whole range, then click **Stop && Save**: the minimum and maximum are set from what it saw |
 | Set Center / Center | For self-centring controls: set the centre to the current position. Without Center, the centre is half-way |
 | Reset calibration | The full range again |
-| Buttons from axes | Splits the axis into up to 12 ranges, each a physical input (an axis range) on the Button Config page: detents, a throttle cutoff, a gear lever. Drag the markers to set where each range starts and ends |
+| Buttons from axes | Splits the axis into up to 12 ranges, each a physical input (an axis range) on the Button Config page: detents, or the positions of a gear or flap lever. Drag the markers to set where each range starts and ends |
 
 **Show extended settings:**
 
