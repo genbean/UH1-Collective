@@ -12,11 +12,13 @@ AxesExtended::AxesExtended(int axisNumber, QWidget *parent)
 
     m_axisNumber = axisNumber;
 
-    // I2C
-    m_i2c_enumIndex.reserve(m_i2cPtrList.size());
-    for (int i = 0; i < m_i2cPtrList.size(); ++i) {
-        ui->comboBox_I2cAddress->addItem(m_i2cPtrList[i].guiName);
-        m_i2c_enumIndex.push_back(m_i2cPtrList[i].deviceEnumIndex);
+    // no I2C sensors on HeliSR (its I2C pins drive the shift registers)
+    ui->comboBox_I2cAddress->hide();
+    ui->text_i2cAddress->hide();
+    // the encoder an "Encoder" axis follows, numbered as on the Encoders page
+    ui->spinBox_ChanelEncoder->setRange(1, HSR_MAX_ENCODERS);
+    for (QSpinBox *sb : {ui->spinBox_Button1, ui->spinBox_Button2, ui->spinBox_Button3}) {
+        sb->setMaximum(HSR_MAX_BUTTONS);
     }
     // function
     m_function_enumIndex.reserve(m_functionList.size());
@@ -45,8 +47,6 @@ AxesExtended::AxesExtended(int axisNumber, QWidget *parent)
     ui->comboBox_Button1->setCurrentIndex(AXIS_BUTTON_DOWN);
     ui->comboBox_Button2->setCurrentIndex(AXIS_BUTTON_RESET);
     ui->comboBox_Button3->setCurrentIndex(AXIS_BUTTON_UP);
-    // set ADS1115_00 selected
-    ui->comboBox_I2cAddress->setCurrentIndex(1);
 
     // set filter text
     ui->label_Filter->setText(tr("Filter") + " " + m_filterList[ui->sliderH_Filter->value()].guiName);
@@ -68,11 +68,6 @@ void AxesExtended::retranslateUi()
     ui->retranslateUi(this);
 }
 
-void AxesExtended::setI2CEnabled(bool isEnable)
-{
-    ui->comboBox_I2cAddress->setEnabled(isEnable);
-}
-
 void AxesExtended::filterChanged(int filterLevel)
 {
     ui->label_Filter->setText(tr("Filter") + " " + m_filterList[filterLevel].guiName);
@@ -89,14 +84,12 @@ void AxesExtended::functionIndexChanged(int index)
 
 void AxesExtended::readFromConfig()
 {
-    //ui->comboBox_I2cAddress->setCurrentIndex(Converter::EnumToIndex(axisCfg->i2c_address, m_i2c_enumIndex));
     axis_config_t *axisCfg = &gEnv.pDeviceConfig->config.axis_config[m_axisNumber];
-    // I2C, sources, function
-    ui->comboBox_I2cAddress->setCurrentIndex(Converter::EnumToIndex(axisCfg->i2c_address, m_i2c_enumIndex));
+    // sources, function
     ui->comboBox_AxisSource2->setCurrentIndex(Converter::EnumToIndex(axisCfg->source_secondary, axesList()));
     ui->comboBox_Function->setCurrentIndex(Converter::EnumToIndex(axisCfg->function, m_function_enumIndex));
     // chanel
-    ui->spinBox_ChanelEncoder->setValue(axisCfg->channel);
+    ui->spinBox_ChanelEncoder->setValue(axisCfg->channel + 1);
     // buttons
     ui->comboBox_Button1->setCurrentIndex(Converter::EnumToIndex(axisCfg->button1_type, m_button_1_3_enumIndex));
     ui->spinBox_Button1->setValue(axisCfg->button1 + 1);
@@ -120,12 +113,11 @@ void AxesExtended::readFromConfig()
 void AxesExtended::writeToConfig()
 {
     axis_config_t *axisCfg = &gEnv.pDeviceConfig->config.axis_config[m_axisNumber];
-    // I2C, sources, function
-    axisCfg->i2c_address = m_i2cPtrList[ui->comboBox_I2cAddress->currentIndex()].deviceEnumIndex;
+    // sources, function
     axisCfg->source_secondary = axesList()[ui->comboBox_AxisSource2->currentIndex()].deviceEnumIndex;
     axisCfg->function = m_functionList[ui->comboBox_Function->currentIndex()].deviceEnumIndex;
     // chanel
-    axisCfg->channel = ui->spinBox_ChanelEncoder->value();
+    axisCfg->channel = ui->spinBox_ChanelEncoder->value() - 1;
     // buttons
     axisCfg->button1_type = m_button_1_3_list[ui->comboBox_Button1->currentIndex()].deviceEnumIndex;
     axisCfg->button1 = ui->spinBox_Button1->value() - 1;

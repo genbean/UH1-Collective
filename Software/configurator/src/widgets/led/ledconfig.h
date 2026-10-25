@@ -2,15 +2,18 @@
 #define LEDCONFIG_H
 
 #include <QWidget>
+#include "common_types.h"
 #include "global.h"
 
 class LED;
-class LedRGBConfig;
+class QFrame;
 
 namespace Ui {
 class LedConfig;
 }
 
+// LEDs live on the spare Pro Micro pins: one on/off LED per pin set to "LED",
+// and the four PWM channels on pins 5, 6, 9 and 10.
 class LedConfig : public QWidget
 {
     Q_OBJECT
@@ -26,25 +29,15 @@ public:
 
     void retranslateUi();
 
-    //void ButtonLEDStateChanged();     // future
-
-signals:
-    void hostLedMaskChanged(uint32_t bitmask);
-
 public slots:
-    void spawnLeds(int ledCount);
-    void ledPwmSelected(Pin pin, bool selected);
-    void ledRgbSelected(Pin pin, bool selected);
-    void onLedToggled(int ledNumber, bool state);
+    //! the spare pin functions from the Board page
+    void setPins(const pin_func_t *pins);
 
 private:
     Ui::LedConfig *ui;
 
-    LedRGBConfig *m_ledsRgb;
-
-    QList<LED *> m_ledPtrList;
-    int m_currentLedCount;
-    uint32_t m_hostLedMask = 0;
+    QList<LED *> m_ledPtrList;      // by spare pin index
+    QFrame *m_pwmFrames[HSR_MAX_PWM];
 
     void setEnabledTimers(bool enabled);
 };

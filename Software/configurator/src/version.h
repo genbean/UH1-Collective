@@ -1,22 +1,20 @@
 #ifndef VERSION_H
 #define VERSION_H
 
+// HeliSR Configurator's own version (forked from FreeJoyConfiguratorQt 1.7.3b0)
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 7
-#define PATCH_VERSION 3
-#define BUILD_VERSION 0
+#define MINOR_VERSION 0
+#define PATCH_VERSION 0
+
+#define PROJECT_URL "https://github.com/genbean/Heli-Collective"
+#define PROJECT_DOCS_URL PROJECT_URL "/tree/main/Software"
 
 #ifdef INNO_SETUP
-	#define APP_VERSION Str(MAJOR_VERSION) + "." + Str(MINOR_VERSION) + "." + Str(PATCH_VERSION) + "." + "b" + Str(BUILD_VERSION)
+	#define APP_VERSION Str(MAJOR_VERSION) + "." + Str(MINOR_VERSION) + "." + Str(PATCH_VERSION)
 #else
 	#define str(s) #s
 	#define xstr(s) str(s)
-	#define APP_VERSION xstr(MAJOR_VERSION) "." xstr(MINOR_VERSION) "." xstr(PATCH_VERSION) "b" xstr(BUILD_VERSION)
-
-	// If it is defined by the compiler, then it is a nightly build, and in the YYYYMMDD format.
-	#ifndef BUILD_VERSION
-		#define BUILD_VERSION 0
-	#endif
+	#define APP_VERSION xstr(MAJOR_VERSION) "." xstr(MINOR_VERSION) "." xstr(PATCH_VERSION)
 #endif
 
 #endif // VERSION_H

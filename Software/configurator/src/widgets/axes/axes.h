@@ -30,7 +30,12 @@ public:
     void updateAxisRaw();
     void updateAxisOut();
 
-    void addOrDeleteMainSource(int sourceEnum, QString sourceName, bool isAdd);
+    //! offer the analog sources these spare pin settings provide
+    void setAvailableSources(const pin_func_t *pins);
+    //! axis-to-button ranges set on this axis
+    int a2bCount() const;
+    //! set the calibration from raw readings if this axis uses that analog source
+    bool applyCalibration(int analogSource, int rawMin, int rawMax);
 
 signals:
     void a2bCountChanged(int count, int previousCount);
@@ -38,7 +43,6 @@ signals:
 private slots:
     void calibMinMaxValueChanged(int value);
     void calibrationStarted(int rawValue);
-    void mainSourceIndexChanged(int index);
 
     void a2bSpinBoxChanged(int count);
 
@@ -66,86 +70,6 @@ private:
 
     QVector<int> m_mainSource_enumIndex;
 
-    enum
-    {
-        Encoder = -3,
-        I2C = -2,
-        None = -1,
-        A0 = 0,
-        A1,
-        A2,
-        A3,
-        A4,
-        A5,
-        A6,
-        A7,
-        A8,
-        A9,
-        A10,
-        A15,
-        B0,
-        B1,
-        B3,
-        B4,
-        B5,
-        B6,
-        B7,
-        B8,
-        B9,
-        B10,
-        B11,
-        B12,
-        B13,
-        B14,
-        B15,
-        C13,
-        C14,
-        C15,
-    };
-
-
-    const QVector <deviceEnum_guiName_t> m_axesPinList =      // любая последовательность, но первые 2 добавляются в конструкторе
-    {{
-        {None,     tr("None")},
-        {Encoder,  tr("Encoder")},
-        {I2C,      "I2C"},
-        {A0,       "A0"},
-        {A1,       "A1"},
-        {A2,       "A2"},
-        {A3,       "A3"},
-        {A4,       "A4"},
-        {A5,       "A5"},
-        {A6,       "A6"},
-        {A7,       "A7"},
-        {A8,       "A8"},
-        {A9,       "A9"},
-        {A10,      "A10"},
-        {A15,      "A15"},
-        {B0,       "B0"},
-        {B1,       "B1"},
-        {B3,       "B3"},
-        {B4,       "B4"},
-        {B5,       "B5"},
-        {B6,       "B6"},
-        {B7,       "B7"},
-        {B8,       "B8"},
-        {B9,       "B9"},
-        {B10,      "B10"},
-        {B11,      "B11"},
-        {B12,      "B12"},
-        {B13,      "B13"},
-        {B14,      "B14"},
-        {B15,      "B15"},
-        {C13,      "C13"},
-        {C14,      "C14"},
-        {C15,      "C15"},
-    }};
-
-    const QVector <deviceEnum_guiName_t> m_axisSourceMain =      // порядов обязан быть как в common_types.h!!!!!!!!!!!
-    {{
-        {None,          tr("None")},
-        {Encoder,       tr("Encoder")},
-    }};
 };
 
 #endif // AXES_H

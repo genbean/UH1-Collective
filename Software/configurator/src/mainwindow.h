@@ -6,17 +6,15 @@
 #include <QTranslator>
 
 #include "hiddevice.h"
-#include "reportconverter.h"
 
 #include "advancedsettings.h"
 #include "axesconfig.h"
 #include "axescurvesconfig.h"
+#include "boardconfig.h"
 #include "buttonconfig.h"
 #include "debugwindow.h"
 #include "encodersconfig.h"
 #include "ledconfig.h"
-#include "pinconfig.h"
-#include "shiftregistersconfig.h"
 #include "switchbutton.h"
 
 QT_BEGIN_NAMESPACE
@@ -34,25 +32,27 @@ public:
     ~MainWindow();
     void setDefaultStyleSheet();
 
-signals:
-    void getConfigDone(bool success);
-    void sendConfigDone(bool success);
+    // used by the page round-trip test (uitest.cpp) as well
+    bool isInitialized() const { return m_initialized; }
+    void UiReadFromConfig();
+    //! removeOemName: also clear Windows' cached name for the config's VID/PID
+    void UiWriteToConfig(bool removeName = true);
 
 private slots:
     void showConnectDeviceInfo();
     void hideConnectDeviceInfo();
-    void flasherConnected();
-    //void getParamsPacket(uint8_t *buffer);
-    void getParamsPacket(bool firmwareCompatible);
+    void deviceInfoReceived(bool compatible);
+    void getParamsPacket();
 
     void configReceived(bool success);
     void configSent(bool success);
-    void blockWRConfigToDevice(bool block);
 
-    void deviceFlasherController(bool isStartFlash);
-
-    void hidDeviceList(const QList<QPair<bool, QString>> &deviceNames);
+    void hidDeviceList(const QStringList &deviceNames);
     void hidDeviceListChanged(int index);
+
+    //! spare pins or axis ranges changed: the pages that depend on them follow
+    void scheduleBoardUpdate();
+    void applyCalibration(int analogSource, int rawMin, int rawMax);
 
     void languageChanged(const QString &language);
     void setFont();
@@ -88,13 +88,10 @@ private:
     QThread *m_thread;
     HidDevice *m_hidDeviceWorker;
 
-    QThread *m_threadGetSendConfig;
-
-    PinConfig *m_pinConfig;
+    BoardConfig *m_boardConfig;
     ButtonConfig *m_buttonConfig;
     LedConfig *m_ledConfig;
     EncodersConfig *m_encoderConfig;
-    ShiftRegistersConfig *m_shiftRegConfig;
     AxesConfig *m_axesConfig;
     AxesCurvesConfig *m_axesCurvesConfig;
     AdvancedSettings *m_advSettings;
@@ -102,9 +99,12 @@ private:
     DebugWindow *m_debugWindow = nullptr;
     bool m_debugIsEnable;
 
-    bool m_deviceChanged;
+    bool m_deviceReady = false;         // a compatible device is open
+    bool m_transferring = false;        // reading or writing its settings
+    bool m_boardUpdatePending = false;
+    bool m_initialized = false;         // the pages have been filled once
 
-    QString m_buttonDefaultStyle;   // ?????????
+    QString m_buttonDefaultStyle;
 
     QString m_cfgDirPath;
     void curCfgFileChanged(const QString &fileName);
@@ -112,8 +112,11 @@ private:
     QIcon pixmapToIcon(QPixmap pixmap, const QColor &color);
     void updateColor();
 
-    void UiReadFromConfig();
-    void UiWriteToConfig();
+    void applyBoardUpdate();
+    void updateReadWriteButtons();
+    QString firmwareVersionText() const;
+
+    void removeOemName();
 
     void loadAppConfig();
     void saveAppConfig();

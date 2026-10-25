@@ -3,6 +3,7 @@
 #include <QTimer>
 #include <QTranslator>
 #include "converter.h"
+#include "helisrboard.h"
 
 const QVector <deviceEnum_guiName_t> &axesList()    // порядок обязан быть как в common_types.h!!!!!!!!!!!
 {
@@ -35,11 +36,11 @@ Axes::Axes(int axisNumber, QWidget *parent)
     m_axisNumber = axisNumber;
     ui->groupBox_AxixName->setTitle(axesList()[m_axisNumber].guiName);
 
-    // add main source
-    for (int i = 0; i < 2; ++i) {
-        ui->comboBox_AxisSource1->addItem(m_axesPinList[i].guiName);
-        m_mainSource_enumIndex.push_back(m_axesPinList[i].deviceEnumIndex);
-    }
+    // main source: none, encoder (buttons to axis), then the analog sources (setAvailableSources())
+    ui->comboBox_AxisSource1->addItem(tr("None"));
+    m_mainSource_enumIndex.push_back(SOURCE_NO);
+    ui->comboBox_AxisSource1->addItem(tr("Encoder"));
+    m_mainSource_enumIndex.push_back(SOURCE_ENCODER);
 
     // set a2b  // двойная работа? readFromConfig()
     ui->spinBox_A2bCount->setMaximum(MAX_A2B_BUTTONS);
@@ -62,9 +63,6 @@ Axes::Axes(int axisNumber, QWidget *parent)
     // calibration value changed
     connect(ui->spinBox_CalibMax, qOverload<int>(&QSpinBox::valueChanged), this, &Axes::calibMinMaxValueChanged);
     connect(ui->spinBox_CalibMin, qOverload<int>(&QSpinBox::valueChanged), this, &Axes::calibMinMaxValueChanged);
-    // main source changed
-    connect(ui->comboBox_AxisSource1, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &Axes::mainSourceIndexChanged);
     // a2b count changed
     connect(ui->spinBox_A2bCount, qOverload<int>(&QSpinBox::valueChanged), this, &Axes::a2bSpinBoxChanged);
 
@@ -84,32 +82,43 @@ void Axes::retranslateUi()
     m_axesExtend->retranslateUi();
 }
 
-void Axes::addOrDeleteMainSource(int sourceEnum, QString sourceName, bool isAdd)
+void Axes::setAvailableSources(const pin_func_t *pins)
 {
-    if (isAdd == true) {
-        ui->comboBox_AxisSource1->addItem(m_axesPinList[Converter::EnumToIndex(sourceEnum, m_axesPinList)].guiName + " - " + sourceName);
-        m_mainSource_enumIndex.push_back(m_axesPinList[Converter::EnumToIndex(sourceEnum, m_axesPinList)].deviceEnumIndex);
-    } else {
-        for (int i = 0; i < m_mainSource_enumIndex.size(); ++i) {
-            if (m_mainSource_enumIndex[i] == sourceEnum) {
-                if (ui->comboBox_AxisSource1->currentIndex() == i) {
-                    ui->comboBox_AxisSource1->setCurrentIndex(0);
-                }
-                ui->comboBox_AxisSource1->removeItem(i);
-                m_mainSource_enumIndex.erase(m_mainSource_enumIndex.begin() + i);
-                break;
-            }
+    QComboBox *cb = ui->comboBox_AxisSource1;
+    int current = m_mainSource_enumIndex[qMax(cb->currentIndex(), 0)];
+    QSignalBlocker blocker(cb);
+    while (cb->count() > 2) {
+        cb->removeItem(cb->count() - 1);
+    }
+    m_mainSource_enumIndex.resize(2);
+    for (int s = 0; s < HSR_ANALOG_SOURCES; ++s) {
+        if (HsrBoard::analogSourceAvailable(s, pins)) {
+            cb->addItem(HsrBoard::analogSourceName(s));
+            m_mainSource_enumIndex.push_back(s);
         }
     }
+    int index = m_mainSource_enumIndex.indexOf(current);
+    cb->setCurrentIndex(index < 0 ? 0 : index);
 }
 
-void Axes::mainSourceIndexChanged(int index)
+int Axes::a2bCount() const
 {
-    if (m_mainSource_enumIndex[index] == I2C) {
-        m_axesExtend->setI2CEnabled(true);
-    } else {
-        m_axesExtend->setI2CEnabled(false);
+    return m_a2bButtonsCount;
+}
+
+bool Axes::applyCalibration(int analogSource, int rawMin, int rawMax)
+{
+    if (m_mainSource_enumIndex[qMax(ui->comboBox_AxisSource1->currentIndex(), 0)] != analogSource) {
+        return false;
     }
+    // raw readings 0-HSR_RAW_MAX become -32767..32767, as in the firmware
+    auto toAxis = [](int raw) {
+        return int(AXIS_MIN_VALUE + qint64(raw) * AXIS_SPAN / HSR_RAW_MAX);
+    };
+    ui->checkBox_Center->setChecked(false);
+    ui->spinBox_CalibMin->setValue(toAxis(rawMin));
+    ui->spinBox_CalibMax->setValue(toAxis(rawMax));
+    return true;
 }
 
 void Axes::calibMinMaxValueChanged(int value)
@@ -272,7 +281,7 @@ void Axes::writeToConfig()
     // output, inverted
     axCfg->out_enabled = ui->checkBox_Output->isChecked();
     axCfg->inverted = ui->checkBox_Inverted->isChecked();
-    // I2C, sources, function
+    // sources
     axCfg->source_main = m_mainSource_enumIndex[ui->comboBox_AxisSource1->currentIndex()];
     // calibration
     axCfg->calib_min = ui->spinBox_CalibMin->value();

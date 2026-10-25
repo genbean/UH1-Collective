@@ -60,11 +60,29 @@ void AxesConfig::a2bCountCalc(int count, int previousCount)
     emit a2bCountChanged(m_a2bButtonsCount);
 }
 
-void AxesConfig::addOrDeleteMainSource(int sourceEnum, QString sourceName, bool isAdd)
+void AxesConfig::setAvailableSources(const pin_func_t *pins)
 {
     for (int i = 0; i < MAX_AXIS_NUM; ++i) {
-        m_axesPtrList[i]->addOrDeleteMainSource(sourceEnum, sourceName, isAdd);
+        m_axesPtrList[i]->setAvailableSources(pins);
     }
+}
+
+QVector<int> AxesConfig::a2bCounts() const
+{
+    QVector<int> counts;
+    for (int i = 0; i < MAX_AXIS_NUM; ++i) {
+        counts.append(m_axesPtrList[i]->a2bCount());
+    }
+    return counts;
+}
+
+int AxesConfig::applyCalibration(int analogSource, int rawMin, int rawMax)
+{
+    int n = 0;
+    for (int i = 0; i < MAX_AXIS_NUM; ++i) {
+        n += m_axesPtrList[i]->applyCalibration(analogSource, rawMin, rawMax);
+    }
+    return n;
 }
 
 void AxesConfig::axesValueChanged()

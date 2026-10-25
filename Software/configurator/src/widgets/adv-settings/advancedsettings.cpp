@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QTimer>
 #include <QProcess>
+#include <QRegularExpressionValidator>
 
 #include "version.h"
 #include "deviceconfig.h"
@@ -46,6 +47,11 @@ AdvancedSettings::AdvancedSettings(QWidget *parent)
 #endif
 
     ui->layoutG_Lang->setAlignment(Qt::AlignCenter);
+
+    // the firmware sends the name as a USB string byte for byte: printable ASCII only
+    ui->lineEdit_DeviceUSBName->setMaxLength(HSR_NAME_LEN);
+    ui->lineEdit_DeviceUSBName->setValidator(
+        new QRegularExpressionValidator(QRegularExpression("[ -~]*"), ui->lineEdit_DeviceUSBName));
 }
 
 AdvancedSettings::~AdvancedSettings()
@@ -119,16 +125,15 @@ void AdvancedSettings::on_spinBox_FontSize_valueChanged(int fontSize)
 // about
 void AdvancedSettings::on_pushButton_About_clicked()
 {
-    const QString version("<p align=\"center\">FreeJoyConfiguratorQt v" + QStringLiteral(APP_VERSION) + " ");
+    const QString version("<p align=\"center\">HeliSR Configurator v" + QStringLiteral(APP_VERSION) + " ");
     const QString source = tr("<br>Built with Qt %1 (%2)<br>"
                               R"(Source code available under GPLv3 on <a style="color: #03A9F4; text-decoration:none;"
-                                href="https://github.com/FreeJoy-Team/FreeJoyConfiguratorQt">Github</a><br>)")
-                               .arg(QT_VERSION_STR, QSysInfo::buildCpuArchitecture()); //"Copyright © %3 Reksotiv and contributors"//, "2021"
-
-    const QString wiki(tr(R"(<br>Check <a style="color: #03A9F4; text-decoration:none;"
-                            href="https://github.com/FreeJoy-Team/FreeJoyWiki">our wiki </a>
-                            for detailed instructions.)"));
-    QMessageBox::about(this, tr("About FreeJoyQt"), version + source + wiki);
+                                href="%3">GitHub</a><br>)")
+                               .arg(QT_VERSION_STR, QSysInfo::buildCpuArchitecture(), PROJECT_URL);
+    const QString origin(tr(R"(<br>A fork of <a style="color: #03A9F4; text-decoration:none;"
+                              href="https://github.com/FreeJoy-Team/FreeJoyConfiguratorQt">FreeJoyConfiguratorQt</a>
+                              by Reksotiv and the FreeJoy team, for the Pro Micro on a HeliSR board.)"));
+    QMessageBox::about(this, tr("About HeliSR Configurator"), version + source + origin);
 }
 
 // remove name from registry
@@ -154,7 +159,9 @@ void AdvancedSettings::readFromConfig()
     //ui->lineEdit_PID->setInputMask("HHHH");
     ui->lineEdit_PID->setText(QString::number(gEnv.pDeviceConfig->config.pid, 16).toUpper().rightJustified(4, '0'));
     // device name
-    ui->lineEdit_DeviceUSBName->setText(gEnv.pDeviceConfig->config.device_name);
+    // up to HSR_NAME_LEN characters, NUL-terminated only when shorter
+    const char *name = gEnv.pDeviceConfig->config.device_name;
+    ui->lineEdit_DeviceUSBName->setText(QString::fromLatin1(name, int(qstrnlen(name, HSR_NAME_LEN))));
     // usb exchange period
     ui->spinBox_USBExchangePeriod->setValue(gEnv.pDeviceConfig->config.exchange_period_ms);
 }

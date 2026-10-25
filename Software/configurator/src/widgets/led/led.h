@@ -15,12 +15,11 @@ class LED : public QWidget
     Q_OBJECT
 
 public:
+    //! ledNumber: the spare pin index the LED is on
     explicit LED(int ledNumber, QWidget *parent = nullptr);
     ~LED();
 
     int currentButtonSelected() const;
-
-    void updateButtonStyle(bool checked);
 
     void setLedState(bool state);
 
@@ -28,14 +27,6 @@ public:
     void writeToConfig();
 
     void retranslateUi();
-
-    bool isHostControlled() const;
-
-signals:
-    void ledToggled(int ledNumber, bool state);
-
-protected:
-    void changeEvent(QEvent *event) override;
 
 private:
     Ui::LED *ui;
