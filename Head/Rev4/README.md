@@ -21,7 +21,7 @@ The switches, gears, AS5600 seat and wiring are unchanged. The throttle has no i
 | **Tube depth** | The tube bore is 32.7 mm deep (20 mm + 1/2 in), up a column that carries the boss on up, so the press fit has 63 % more length. The tube is cut 491 mm: 12.7 mm longer than before for this bore, and 8 mm more for the base's deeper socket, so the head sits at the same height. The cross hole is still 10 mm below the tube's top end. |
 | **Tube set screw** | The screw kit has no M5 longer than 20 mm, so the M5 × 40 cross bolt and its nut slot are gone. An M5 × 8 set screw, in a tapped hole in the boss's front, pins the tube through the front wall of its 5.2 mm cross hole. It goes in from the front with the lower panel off. |
 | **Screws** | Every screw and nut but one is from the two kits: see [Screws](#screws). The trigger's M3 × 25 pivot comes from the NIULUNBAO M3 countersunk set ([Amazon B0BYXS4BTF](https://www.amazon.com/dp/B0BYXS4BTF): M3 × 20–40). |
-| **Starter trigger** | Its mount is laid out square to the rear wall, so it prints with the head, standing on the bed. Nothing reaches past the rear wall's plane. The switch's leads drop into a groove under the mount and go up one straight duct into the box. An adjustable stop makes sure the switch always clicks. See [Starter trigger](#starter-trigger). |
+| **Starter trigger** | Its mount is laid out square to the rear wall, so it prints with the head, standing on the bed. Nothing reaches past the rear wall's plane. The switch's leads drop into a groove under the mount and go up one straight round hole into the box. An adjustable stop makes sure the switch always clicks. See [Starter trigger](#starter-trigger). |
 | **Printing** | The head prints on its rear wall, like Rev 2's body. That leaves the neck, the knob and the tube bore about 20° off horizontal, so they need tree supports, and the press-fit bore needs a test fit (see [Printing](#printing)). |
 
 ![Lower panel off](renders/HueyHeadR4_Front.png)
@@ -78,9 +78,9 @@ Backed right out, the trigger stops on the switch itself, bottomed out.
 
 If the starter reads on with the trigger released, the tail's front face has printed long: file it back a little.
 
-**The leads.** The switch's legs go through two slots in the pocket's floor into a well behind it, and the well is open below. Under the mount, a groove, 3 mm wide at its mouth, runs from the well along to the right-hand lug. The groove is open along its length, and its roof slopes at 45° so it prints without supports. The right-hand lug is wider than the left to carry the duct. From the groove's end, one straight 3.1 × 4.6 mm duct goes up through the lug, the sloping bottom and the solid behind the boss, and comes out of the solid's top inside the box.
+**The leads.** The switch's legs go through two slots in the pocket's floor into a well behind it, and the well is open below. Under the mount, a groove, 3 mm wide at its mouth, runs from the well along to the right-hand lug. The groove is open along its length, and its roof slopes at 45° so it prints without supports. The right-hand lug is wider than the left to carry the hole. From the groove's end, one straight, round 4 mm hole goes up through the lug, the sloping bottom and the solid behind the boss, and comes out inside the box, beside the rear wall. It leans 8° toward the rear wall as it climbs, which keeps at least 1.2 mm of wall to the neck's bore, the AS5600 seat, the pinion pocket and the rear wall's outside all the way. It has no bends, so three 30 AWG silicone wires push straight through, and a 3.5 mm drill bit goes the whole way to clean it out (it lies nearly flat when the head prints, so its roof may sag a little).
 
-Every bend in the route is in the open. The leads can't go straight up behind the switch: the neck's bore is in front of it and the trigger behind.
+The only bend in the route is in the open, where the leads turn from the groove into the hole. The leads can't go straight up behind the switch: the neck's bore is in front of it and the trigger behind.
 
 ## Controls, throttle and wiring
 
@@ -108,7 +108,7 @@ All STLs are in the head's own frame, so they open assembled. In the slicer, tur
 
 | Part | File | Lay it on | Notes |
 |---|---|---|---|
-| **Head** | `HueyHeadR4-Body.stl` | its **rear wall** (outside face) | **Tree supports**, on build plate and on the model, for the neck, the friction knob, the inside of the neck and the tube bore (they lie about 20° off horizontal), and the 50 mm bridge over the wire slot. Paint them on with support enforcers if you'd rather leave the rest bare. The trigger mount needs none: its lugs stand on the bed and its faces are bridges. Keep supports out of the switch's pocket, the groove under the mount and the leads' duct. 4 walls, 25 % infill, in the filament you printed the grip bearing coupons with. |
+| **Head** | `HueyHeadR4-Body.stl` | its **rear wall** (outside face) | **Tree supports**, on build plate and on the model, for the neck, the friction knob, the inside of the neck and the tube bore (they lie about 20° off horizontal), and the 50 mm bridge over the wire slot. Paint them on with support enforcers if you'd rather leave the rest bare. The trigger mount needs none: its lugs stand on the bed and its faces are bridges. Keep supports out of the switch's pocket, the groove under the mount and the leads' hole. 4 walls, 25 % infill, in the filament you printed the grip bearing coupons with. |
 | Lower panel | `HueyHeadR4-LowerPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | White labels on a P1S with AMS, as in [Rev 3](../Rev3/README.md#white-labels-on-a-p1s-with-ams) |
 | Upper panel | `HueyHeadR4-UpperPanel-Black.stl` + `-WhiteText.stl` | front face (labels) | As Rev 3 |
 | Trigger | `HueyHeadR4-Trigger.stl` | either flat side | Tap the hole through its arm M3, for the pull stop |
@@ -184,7 +184,7 @@ With the lower panel off, everything inside the box goes in through its open fro
 6. **Starter trigger** (the mount is open at the back until the trigger goes on):
    1. Solder a 26–28 AWG lead, about 25 cm long, to the tips of two diagonally opposite legs of the tact switch. Diagonal legs are always the switched pair: 1 and 4, or 2 and 3, on TE's drawing. Leave the other two legs as they are.
    2. Push the switch into its pocket from behind, legs first, button out. The legs go through the slots in the pocket's floor. Draw the leads out through the open bottom of the well as it goes in. A dab of hot glue at the pocket's edge holds the switch.
-   3. Lay the leads in the groove under the mount, along to the right-hand lug. Tin their ends so they're stiff, and push them up the duct at the groove's end. They come out of a window in the side of the boss, about 23–27 mm above the grip's gear, inside the box.
+   3. Lay the leads in the groove under the mount, along to the right-hand lug. Tin their ends so they're stiff, and push them up the hole at the groove's end. The hole runs straight into the box, about 60 mm. Run a 3.5 mm drill bit through it by hand first, from the groove's end, to clear any printing sag: its top end comes out right against the rear wall's inside, so a bit can't go in straight from the box side. The leads come out there and run up along the rear wall.
    4. Turn the M3 × 4 set screw into the trigger's arm from behind, until it's flush with the arm's front.
    5. Drop the return spring into its pocket in the mount. Any pen spring up to 4 mm across will do; trim it to about 13 mm if it's long.
    6. Slide the trigger in from behind between the lugs, pressing the spring in. Fit the M3 × 25 countersunk pivot from the left, through the trigger, into the right-hand lug.
@@ -218,7 +218,7 @@ With the lower panel off, everything inside the box goes in through its open fro
   - both panels with their switches;
   - the HeliSR board.
 - **The wires clear everything along their routes:** the AS5600's wires, the starter's leads and the USB and sensor cables.
-- **The starter's leads' route** has at least 1.2 mm of wall all round, from the well to where the duct comes out into the box, except where it's open on purpose: the well into the groove, and the groove's mouth. It stays clear of the neck's bore, the stop groove, the pinion pocket, the AS5600 pod and the pivot's pilot.
+- **The starter's leads' route** has at least 1.2 mm of wall all round, from the well to where the hole comes out into the box, except where it's open on purpose: the well into the groove, and the groove's mouth. It stays clear of the neck's bore, the stop groove, the pinion pocket, the AS5600 pod and the pivot's pilot.
 - **The trigger's action**, turning it about its pivot:
   - released, its tail rests on the mount and holds it, and the button is clear of the arm;
   - pulled, the arm meets the button after 0.5 mm, and presses it 0.15, 0.25 and 0.45 mm at 4.0°, 4.6° and 5.6° of pull;

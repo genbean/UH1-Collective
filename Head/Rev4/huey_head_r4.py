@@ -17,7 +17,7 @@
 # rear wall like Rev 2's body. The neck, the knob and the tube bore lie about 20 degrees off horizontal that way, so
 # they print on tree supports, and the 25.2 mm press-fit bore wants a test fit and a light ream. No ears, key, notch
 # or screws hold anything to the box any more; the trigger and its switch, spring and pivot fit to the built-in mount.
-# That mount is square to the rear wall, so it prints on the bed with the rest, and the switch's leads run up a duct
+# That mount is square to the rear wall, so it prints on the bed with the rest, and the switch's leads run up a straight round hole
 # inside the head.
 #
 # Everything is modelled in the MkII head frame (x across the face, y into the head, z up the tube; the face is at
@@ -579,13 +579,13 @@ PIN_DEPTH = 4.0                  # bearing hole depth, below the pinion pocket
 # mount and arm holds the trigger released, its tail against the mount above the pivot, the button clear of the arm.
 # The switch's legs go through slots in the pocket's floor into a well, open below. The leads drop out of it into a
 # groove under the mount, open below too, run along it to the right lug, which is wide enough to carry them, and go
-# up a duct through the lug, the sloping bottom and the solid behind the boss, out of its top into the box. Every bend
-# is in the open; the duct is one straight push. (Straight up behind the switch there's no room: the neck's bore is
+# up one straight round hole through the lug, the sloping bottom and the solid behind the boss, out into the box. Every
+# bend is in the open; the hole is one straight push, and a drill bit goes the whole way. (Straight up behind the switch there's no room: the neck's bore is
 # in front and the trigger's tail behind.)
 TRIG_X = (-15.5 + DX, 4.5 + DX)       # the lugs' outer faces, 20 mm apart; the pivot is an M3 x 25 countersunk from the
 PIVOT_L = 25.0                        # left lug, threaded 8 mm into the right one (bought separately: the user's choice)
 LUG, TRIG_CLR = 3.0, 0.3              # the left lug's thickness and the right lug's pivot length; the trigger's clearance
-MOUNT_X1 = TRIG_X[1] + 6.1            # but the right lug carries on to here, round the leads' duct
+MOUNT_X1 = TRIG_X[1] + 7.1            # but the right lug carries on to here, round the leads' hole
 PIVOT = (51.0, -1.5)                  # as far back as leaves 2.3 mm of lug behind the hole
 PIVOT_D = (3.4, 2.5)                  # clearance (left lug and trigger), and the M3 pilot right through the right lug
 ARM = (51.0, 55.0)                    # front and back faces of the trigger's arm, from the pivot down past the switch
@@ -615,10 +615,10 @@ PAD = (44.25, -17.75)                 # the finger pad's top front corner, where
                                       # level with the grip's top
 LEAD_WX = 3.3                        # the well and the groove run this far either side of the switch's centre
 LEAD_GROOVE = (3.0, 3.0)              # the leads' groove under the mount: its mouth's width (y), and its depth
-LEAD_DUCT = ((TRIG_X[1] + 1.65, TRIG_X[1] + 4.75), (47.8, 52.4), (24.0, 50.0))   # the duct up the right lug: x, y,
-                                      # and the z its straight top part runs between
-DUCT_EXIT = (CEILING + 22.5, CEILING + 26.5, 4.0)   # (head z) the duct's side exit into the box, and how far it opens
-
+LEAD_HOLE = (14.2, 42.7, 0.0, 8.0, 4.0, 62.0)   # the leads' round hole, one straight bore: (x, y) where it leaves the groove
+                                      # (box frame, at the mount's bottom), how far it leans toward +x and toward the rear wall
+                                      # as it climbs (deg: its direction is (tan, tan, 1)), its diameter (three 30 AWG silicone
+                                      # wires, or a 3.5 mm drill bit to clean it) and its length
 YDIR = np.array([0.0, COS, SIN])     # box +y in the head frame
 FLARE_Z = 28.2 + DZ                      # the 45 degree flare in front of the boss meets the boss's side here
 PLUG_GAP = 2.25                       # the flare stops this far behind the panel's back (the panel's plug is 1.8 thick)
@@ -645,9 +645,10 @@ def switch_bodies(grow=0.0):
             + ycyl(*SEARCH, 2 * HAT_R + 2 * g, 0, 7.0 + g))
 
 
-def interior(y0=-1.0):
-    """Head frame: the lower box's inside, from box y = y0 back to the rear wall."""
-    return tilt(prism(BODY.offset(-WALL, mf.JoinType.Miter), y0, YB))
+def interior(y0=-1.0, grow=0.0):
+    """Head frame: the lower box's inside, from box y = y0 back to the rear wall. grow > 0 makes it overlap the walls by
+    that much, so a solid cut to it fuses into them instead of sharing their faces."""
+    return tilt(prism(BODY.offset(-WALL + grow, mf.JoinType.Miter), y0, YB + grow))
 
 
 def walls(y0=0.0):
@@ -702,14 +703,14 @@ def flare():
     """A 45 degree skirt in front of the boss, down to the sloping bottom (in Rev 3 it carried the neck block's key). It
     stops PLUG_GAP behind the panel."""
     cone = mf.Manifold.cylinder(FLARE_Z + 40.0, BOSS_D / 2 + FLARE_Z + 40.0, BOSS_D / 2, 128).translate((TX, TY, -40.0))
-    return cone ^ sweep(zcyl(TX, TY, BOSS_D, -40.0, FLARE_Z)) ^ by(PLUG_GAP) ^ interior()
+    return cone ^ sweep(zcyl(TX, TY, BOSS_D, -40.0, FLARE_Z)) ^ by(PLUG_GAP) ^ interior(grow=0.02)
 
 
 def neck_solid():
     """Head frame. Rev 3's neck block, as part of the box: the boss, the pod beside it and the solid behind them fill
     the lower box up to the top of the boss, on the sloping bottom and against the rear wall, with the 45 degree flare in
     front of the boss, and the neck and friction knob under the box. Cut by neck_cuts() in body_r4()."""
-    inner = interior()
+    inner = interior(grow=0.02)
     boss = zcyl(TX, TY, BOSS_D, NECK_BOT, BOSS_TOP) ^ by(PLUG_GAP)   # not past the flare's face: it grazed it by 0.25 mm
     pod = zprism(square(POD_IN + 2 * POD_WALL, PX, PY, MODULE_ROT), NECK_BOT, BOSS_TOP)
     pod = mf.Manifold.batch_hull([pod, tilt(untilt(pod).translate((0, YC, 0)))])     # its walls run back to the rear wall
@@ -762,29 +763,28 @@ def neck_cuts():
 
 def lead_path():
     """Head frame: the starter switch's leads, drawn in the box frame. The well behind the switch's pocket; the groove
-    under the mount, which the well opens into, along to the right lug; and the duct, straight up from the groove's end
-    through the lug, the sloping bottom and the solid behind the boss, out of the solid's top into the box. The groove
-    prints on its side, so its roof slopes at 45 degrees: 3 mm wide at its mouth, wider inside. The duct is 3.1 x 4.6 mm."""
+    under the mount, which the well opens into, along to the lug; and one straight round hole, up from the groove's end
+    through the lug, the sloping bottom and the solid behind the boss, out into the box. The hole leans a little as it
+    climbs (LEAD_HOLE), which keeps 1.2 mm of wall to the neck's bore, the sensor seat and the rear wall's outside all the way. The groove prints on its side, so its roof slopes at 45 degrees: 3 mm wide at its mouth, wider inside."""
     tx, tz = TACT
-    (dx0, dx1), (dy0, dy1), (dz0, dz1) = LEAD_DUCT
+    hx, hy, lx, ly, hd, hl = LEAD_HOLE
     w, d = LEAD_GROOVE
     yb = MOUNT_FACE - TACT_BODY - FLOOR                                  # the well's back
     h = TACT_POCKET[1] / 2 + 0.1
     well = box(tx - LEAD_WX, yb - WELL, tz - h, tx + LEAD_WX, yb + 0.1, tz + h)
     z0 = MOUNT_Z0 - 0.5
     sec = cs([(yb - w, z0), (yb, z0), (yb, MOUNT_Z0 + d), (yb - w - (d + 0.5), MOUNT_Z0 + d)])   # (y, z)
-    groove = _side(sec, tx - LEAD_WX, dx1)
-    run = mf.Manifold.batch_hull([_side(sec, dx0, dx1), box(dx0, dy0, dz0, dx1, dy1, dz0 + 1.0)])
-    # The duct is straight up in the box frame, which leans 20 degrees toward the tube as it climbs. It comes out
-    # beside the boss into the box between DUCT_EXIT[0] and DUCT_EXIT[1] (head z): it stops there, and that stretch is
-    # opened DUCT_EXIT[2] mm further to the right, into the box, so the leads come out of its side. (It used to run on up
-    # the column to its top, ending 0.04 mm from the tube bore; carried up parallel to the tube instead, it would come out
-    # through the rear wall's outside face.)
-    z0, z1, wx = DUCT_EXIT
-    below = lambda z: mf.Manifold.cube((400.0, 400.0, z + 200.0)).translate((-200.0, -200.0, -200.0))
-    duct = tilt(box(dx0, dy0, dz0, dx1, dy1, dz1)) ^ below(z1)
-    window = (tilt(box(dx0, dy0, dz0, dx1 + wx, dy1, dz1)) ^ below(z1)) - below(z0)
-    return tilt(well + groove + run) + duct + window
+    groove = _side(sec, tx - LEAD_WX, hx + hd / 2 + 0.3)
+    dv = np.array([np.tan(np.radians(lx)), np.tan(np.radians(ly)), 1.0])
+    dv /= np.linalg.norm(dv)
+    ax = np.cross([0.0, 0.0, 1.0], dv)                                  # the rotation taking z to the hole's direction
+    ang = np.degrees(np.arctan2(np.linalg.norm(ax), dv[2]))
+    ax /= np.linalg.norm(ax)
+    kx = np.array([[0, -ax[2], ax[1]], [ax[2], 0, -ax[0]], [-ax[1], ax[0], 0]])
+    rot = np.eye(3) + np.sin(np.radians(ang)) * kx + (1 - np.cos(np.radians(ang))) * kx @ kx
+    hole = mf.Manifold.cylinder(hl + 3.0, hd / 2, hd / 2, 64).translate((0, 0, -3.0)).transform(
+        np.hstack([rot, np.array([[hx], [hy], [MOUNT_Z0 + 1.0]])]).tolist())   # starts 3 mm down in the groove
+    return tilt(well + groove + hole)
 
 
 def body_r4():
@@ -905,7 +905,7 @@ def trigger_mount():
     top = 40.0                                                          # trimmed to the bottom below
     # the block in front of the faces, from inside the neck back; its face steps forward round the pivot
     m = box(x0, 25.0, MOUNT_Z0, MOUNT_X1, UPPER_FACE, top) + box(x0, 25.0, MOUNT_Z0, MOUNT_X1, MOUNT_FACE, FACE_STEP)
-    # the lugs, back to the plane of the rear wall's outside (the bed); the right one wide enough for the leads' duct
+    # the lugs, back to the plane of the rear wall's outside (the bed); the right one wide enough for the leads' hole
     m += box(x0, UPPER_FACE - 0.01, MOUNT_Z0, x0 + LUG, YC, top) + box(x1 - LUG, UPPER_FACE - 0.01, MOUNT_Z0, MOUNT_X1, YC, top)
     m ^= under_bottom(0.5)
     m -= mount_chamfers()
