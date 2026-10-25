@@ -1,5 +1,5 @@
 # Build Heli_Collective_Final_BOM.xlsx and Heli_Collective_DigiKey.csv: one BOM for the whole collective as it is
-# built now: the HeliSR Rev 3.0 board (bare PCB ordered from OSH Park, frozen), the Huey head Rev 4 (Head/Rev4/) and
+# built now: the HeliSR Rev 3.0 board (bare PCB ordered from OSH Park, frozen), the Huey head Rev 5 (Head/Rev5/) and
 # the MkIII base Rev 3 (Base/, a concept, not yet printed).
 # The board's parts, the cables and the head switches are read from the frozen Rev 3.0 BOM scripts (single source of
 # truth), and the board's parts are checked against the ordered board file again. Head and base lines cite the
@@ -41,14 +41,14 @@ by_mpn = {it[4]: it for _, items in fd["ORDER"] for it in items}          # refs
 
 BRD = "PCB/HeliSR_Rev3.0 board BOM (checked against the ordered board)"
 FULL = "PCB/HeliSR_Rev3.0/HeliSR_Rev3.0_BOM.xlsx (Digi-Key cart)"
-HEAD = "Head/Rev4/README.md and Head/Rev3/README.md, Bought"
+HEAD = "Head/Rev5/README.md and Head/Rev4/README.md, Bought"
 BASE = "Base/README.md, Bought parts"
 BASE1 = "Base/mk3_pivot.py (the Rev 1 parts Rev 3 keeps)"
 CAD = "Base/mk3_pivot.py geometry (no size in any list)"
 AMZ = "Amazon listing on 2026-10-22 (link you sent)"
 KIT = "AvrestYPT screw kit (Amazon B0FMD5TMSH)"
 SETKIT = "HIQTRADEBYJJ set screw kit (Amazon B0DG33R714)"
-SCREWS = "Head/Rev4 and Base/mk3_rev3.py screw lists; renders/*Screws*.png"
+SCREWS = "Head/Rev5 and Base/mk3_rev3.py screw lists; renders/*Screws*.png"
 CHECK, INKIT, ORDERED = "check", "kit", "ordered"
 FILL = {CHECK: "FCE4D6", INKIT: "E2EFDA", ORDERED: "DDEBF7"}
 
@@ -113,7 +113,7 @@ SECTIONS.append(("Huey head: switches", [
     dk("1825910-6", "IN9-IN12, IN14", notes="SEARCH CONT hat (4, new rocker hat) and starter trigger (1). IN8, IN15, IN16 are spare"),
 ]))
 SECTIONS.append(("Huey head: hardware", [
-    setkit("Tube boss", 1, "M5 x 8 set screw", "From the boss's front (lower panel off): tap the 4.2 mm pilot M5; the tip "
+    setkit("Tube boss", 1, "M5 x 8 set screw", "From the boss's front (lower panel off), into its printed M5 thread; the tip "
            "pins the tube through the front wall of its 5.2 mm cross hole, 10 mm below the tube's top. Replaces the M5 x 40 "
            "bolt and nut (the kit's M5s stop at 20 mm)"),
     kit("Friction collar", 1, "M4 x 12 countersunk screw + M4 hex nut", "Pinch screw: the head sits 2 mm into the +y ear, "
@@ -124,15 +124,16 @@ SECTIONS.append(("Huey head: hardware", [
     amz("Trigger pivot", 1, "M3 countersunk hex socket screws, 10.9 black oxide, M3 x 20 / 25 / 30 / 35 / 40, 100 pcs", "Amazon",
         "B0BYXS4BTF", 9.99, "once", "Ordered 2026-10-23. Uses the M3 x 25 (ISO 10642 / DIN 7991); the kits stop at "
          "20 mm. Head in the countersink in the mount's left lug, through the trigger, then about 8 mm "
-         "into the right lug's 2.5 mm pilot (tap it M3 all the way through); the tip stays about 0.9 mm inside the lug",
+         "into the right lug's printed M3 thread; the tip stays about 0.9 mm inside the lug",
         HEAD + "; user's choice 2026-10-23", ORDERED),
-    setkit("Trigger pull stop", 1, "M3 x 4 set screw", "Through the trigger's arm (tap M3); its tip bears on the mount. Set it "
+    setkit("Trigger pull stop", 1, "M3 x 4 set screw", "Through the trigger's arm (printed M3 thread); its tip bears on the mount. Set it "
            "so the starter switch clicks before the stop"),
+    kit("Trigger pull stop seat", 1, "M2 x 8 countersunk screw", "Flush in a countersunk, M2-tapped hole (1.6 mm pilot) in the mount's face under the spring pocket, so the pull stop's tip bears on steel and not on plastic"),
     kit("Search hat bezel", 4, "M2 x 8 countersunk screw", "Through the hat's bezel into M2 threads tapped in the carrier (1.6 mm pilots)"),
-    setkit("Search hat pivot", 1, "M3 x 4 set screw", "Into the rocker plate's centre (tap M3), from behind; its tip is the pivot and sets the "
+    setkit("Search hat pivot", 1, "M3 x 4 set screw", "Into the rocker plate's centre (printed M3 thread), from behind; its tip is the pivot and sets the "
            "preload. Turn it with a 1.5 mm hex key through the carrier floor"),
-    kit("Panels", 8, "M3 x 12 countersunk screw (DIN 7991)", "4 per panel, into M3 threads tapped in the box's corner "
-        "columns (the pilots run 50 mm deep, so the x 12 has room)"),
+    kit("Panels", 8, "M3 x 16 countersunk screw (DIN 7991)", "4 per panel, into the M3 threads printed 20 mm deep in the "
+        "box's corner columns (a kit M3 x 20 fits too)"),
     kit("HeliSR board", 4, "M3 x 12 countersunk screw (DIN 7991) + M3 hex nut", "From outside the rear wall through a "
         "spacer and the board"),
     dk("SRS-4-4MM", "HeliSR board", 4, "Between the rear wall and the board", source=HEAD),
@@ -146,8 +147,8 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
     ("Pivot", 2, "Deep-groove ball bearing 6006-2RS, 30 x 55 x 13 mm", "BlueStars", "6006-2RS", "Amazon", "B09XTV8XYK",
      8.99, 2, "", 0, "Sold in pairs", AMZ + "; " + BASE1),
     ("Tube", 1, "Carbon fibre tube, 25 mm OD x 23 mm ID, 500 mm, 3K plain weave, wrapped", "MECCANIXITY", "", "Amazon",
-     "B0CFFT1B31", 27.49, 2, "", 0, "Sold in pairs. Wrapped, as the base needs (not pultruded). Cut to 491 mm (470 + the head's extra 12.7 mm of bore + 8 mm for the base's deeper socket). Drill the "
-     "M4 lock-screw hole 38.5 mm from the bottom end and the head's 5.2 mm cross hole 10 mm below the top end. Check "
+     "B0CFFT1B31", 27.49, 2, "", 0, "Sold in pairs. Wrapped, as the base needs (not pultruded). Used whole, 500 mm, uncut (470 + the head's extra 12.7 mm of bore + 17.3 mm down in the base's socket). Drill the "
+     "head's 5.2 mm cross hole 10 mm below the top end and file a 13 mm wide notch, 4+ mm deep, in each side of the bottom end for the cables. Check "
      "the socket and head fits with it (coupons)", AMZ + "; " + BASE),
     amz("Socket mouth", 1, "Worm-drive hose clamp, 25-40 mm range, 304 stainless, pack of 25", "MISPIRE", "B0F8QWCFWR", 18.99, 25,
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
@@ -170,11 +171,11 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
     kit("Cable plug", 1, "M2 x 12 countersunk screw", "Up from under the cable cover's rim, through a clearance hole, into an "
         "M2 thread tapped in the plug (1.6 mm pilot): pulls the plug that closes the cable's slot down onto the cover's "
         "shoulders. Length from the CAD"),
-    setkit("Tube lock", 1, "M4 x 6 set screw", "Tap the socket boss's 3.3 mm pilot M4; the tip goes into the tube's 4 mm "
-           "lock hole, 38.5 mm from its bottom end"),
-    kit("Friction knob", 1, "M5 x 20 countersunk screw + M5 hex nut", "Glue the head into the printed knob "
-        "(Base/stl/friction_knob.stl); the screw goes through the spring and the shoe into the nut, slid into the knob "
-        "tower's slot from the front. Length from the CAD"),
+    any_("Friction knob", 1, "M5 x 16 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
+         "have only countersunk heads): any hardware store. Its head presses into the hex pocket moulded into the printed "
+         "knob (Base/stl/friction_knob.stl), so the knob turns it; it goes through the spring and the shoe into the M5 nut",
+         "Base/README.md, Friction knob", CHECK),
+    kit("Friction knob", 1, "M5 hex nut", "Slid into the knob tower's slot from the front; the friction bolt threads into it"),
     amz("Friction knob", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon", "B09FF6VQ55",
         11.10, 10, "Over the M5 screw, in a 2 mm recess in the shoe; 6.5 mm long when fitted in the CAD. The CAD asked for 1.1 "
         "mm wire and 10-12 mm free length; this is the nearest stock size, so trim a coil if it is too long", CAD, CHECK),
@@ -191,12 +192,12 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
 SECTIONS.append(("Kits, consumables and tools", [
     ("Hardware", 1, "Screw kit, 1715 pieces: countersunk hex-socket screws M2-M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20, "
      "with hex nuts and washers, hex keys", "AvrestYPT", "", "Amazon", "B0FMD5TMSH", 17.99, "once", ORDERED, 1,
-     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (12), M3 x 20 (8), M4 x 12 (2),"
-     " M4 x 16 (4), M4 x 20 (9), M5 x 20 (1); nuts M3 (4), M4 (17), M5 (1). Your order (link 2026-10-23)",
+     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (8), M4 x 12 (2),"
+     " M4 x 16 (4), M4 x 20 (9); nuts M3 (4), M4 (17), M5 (1). Your order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (your order)"),
     ("Hardware", 1, "Set screw kit, 500 pieces, 304 stainless: M3 x 3, 4, 5, 6; M4 x 4, 5, 6; M5 x 5, 8; M6 x 6, 10; "
      "M8 x 8; hex keys", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714", 8.96, "once", ORDERED, 1,
-     "The set screws: M5 x 8 (tube, head), M3 x 4 (trigger pull stop), M4 x 6 (tube lock, base). Your "
+     "The set screws: M5 x 8 (tube, head), M3 x 4 (trigger pull stop). Your "
      "order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (your order)"),
     amz("Assembly", 1, "Cyanoacrylate (CA) super glue gel, 0.14 fl oz", "Loctite", "B0006HUJCQ", 3.82, "once",
@@ -216,8 +217,8 @@ SECTIONS.append(("Kits, consumables and tools", [
     ("Assembly", 1, "Tweezers, 1 mm tip (Olimex CHN-TWZ1MM), for placing the SMD parts", "Olimex", "CHN-TWZ1MM", "Digi-Key",
      "1188-CHN-TWZ1MM-ND", 0.82, "once", "", 0, "Description from Olimex's sibling CHN-TWZ2MM listing: check the tip", "Digi-Key order 102438510"),
     amz("Assembly", 1, "Taps, M3 / M4 / M5 / M6 / M8, 5-piece set", "Amazon", "B0FN49CGJG", 6.49, "once",
-        "M3: head panel columns, trigger lug and arm, base side covers. M4: tube lock. M5: tube set screw",
-        "Head/Rev4/README.md; Base/README.md"),
+        "M3: base side covers. M4: tube lock. The head's threads (M3 and up) are printed",
+        "Head/Rev5/README.md; Base/README.md"),
     amz("Assembly", 1, "Drill bit, 5.2 mm HSS, 2 pcs", "Amazon", "B0FN3WV6DW", 6.99, "once",
         "The tube's cross hole is 5.2 mm", "Head/Rev4/README.md"),
 ]))
@@ -245,25 +246,25 @@ def _delivered(l):
 SECTIONS = [(t, [_delivered(l) for l in lines]) for t, lines in SECTIONS]
 
 PRINTED = [
-    ("Head", "Head/Rev4/stl/HueyHeadR4-GripBearingCoupons.stl", 1, "Flat, labels up. Optional: checks the head's 25.2 mm "
+    ("Head", "Head/Rev5/stl/HueyHeadR5-GripBearingCoupons.stl", 1, "Flat, labels up. Optional: checks the head's 25.2 mm "
      "tube bore on the carbon tube (the grip now rides on O-rings)"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-ORingCoupon.stl", 1, "Upright. A slice of the grip's bore with one O-ring groove: "
+    ("Head", "Head/Rev5/stl/HueyHeadR5-ORingCoupon.stl", 1, "Upright. A slice of the grip's bore with one O-ring groove: "
      "fit a greased 24 x 2 O-ring and slide it on the carbon tube before printing the grip (about 2 g)"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-SensorSeatCoupon.stl", 1, "The same way round as in the head on its rear wall. "
+    ("Head", "Head/Rev5/stl/HueyHeadR5-SensorSeatCoupon.stl", 1, "The same way round as in the head on its rear wall. "
      "Optional: slide the AS5600 module through it first"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-Body.stl", 1, "One piece: box, neck, faux friction knob, boss, sensor pod and "
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Body.stl", 1, "One piece: box, neck, faux friction knob, boss, sensor pod and "
      "trigger mount. On its rear wall, with tree supports under the neck, knob and tube bore; then ream the bore to a "
      "press fit on the tube"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-LowerPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-UpperPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-Trigger.stl", 1, "On either flat side"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-Hat-Cap.stl", 1, "Base down. Glue it onto the rocker plate's four legs, last"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-Hat-RockerPlate.stl", 1, "Legs down on the bed, boss up; the legs are part of it"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-Hat-Bezel.stl", 1, "Front face down"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-Pinion.stl", 1, "Flat; the magnet shaft presses into its hex"),
-    ("Head", "Head/Rev4/stl/HueyHeadR4-MagnetShaft.stl", 1, "Cap face down, pin up"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-LowerPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-UpperPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Trigger.stl", 1, "On either flat side"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-Cap.stl", 1, "Base down. Glue it onto the rocker plate's four legs, last"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-RockerPlate.stl", 1, "Legs down on the bed, boss up; the legs are part of it"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-Bezel.stl", 1, "Front face down"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "Flat; the magnet shaft presses into its hex"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
     ("Base", "Base/stl/coupons/coupon_trunnion.stl, coupon_bearing_seat.stl, coupon_tube_socket.stl", 1,
      "Fit-test coupons: print first and tune mk3_pivot.py (the socket with the carbon tube)"),
     ("Base", "Base/stl/frame.stl", 1, "Plate down"),
@@ -275,7 +276,7 @@ PRINTED = [
     ("Base", "Base/stl/sensor_carrier.stl", 1, ""),
     ("Base", "Base/stl/shoe.stl", 1, ""),
     ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end"),
-    ("Base", "Base/stl/friction_knob.stl", 1, "Top face down; glue the M5 x 20's head into it"),
+    ("Base", "Base/stl/friction_knob.stl", 1, "Top face down; the M5 x 16 hex bolt's head presses into its hex pocket"),
 ]
 DROPPED = [
     ("Glue, thread-lock, taps, drill bit, felt tape, hose clamp, 10 mm spring, #10 desk screws", 0,
@@ -283,7 +284,7 @@ DROPPED = [
     ("Fgruh M3 and M4 socket-cap screw kits, M3 x 10 / M4 x 30 / M5 x 40 countersunk packs, M6 x 25 and M6 x 30 bolts, M6 and "
      "M4 nyloc nuts, uxcell M5 x 5 set screws, heat-set inserts and insert tips", 0, "Every screw and nut now comes from the "
      "AvrestYPT and set screw kits (2026-10-23): the CAD was changed to suit them", "User, 2026-10-23"),
-    ("MkII-AdjustKnob.stl (friction knob)", 1, "Took an M6 hex head; the base now prints its own knob for the M5 x 20",
+    ("MkII-AdjustKnob.stl (friction knob)", 1, "Took an M6 hex head; the base now prints its own knob for an M5 x 16 hex bolt",
      "Base/mk3_pivot.py"),
     ("SparkFun Pro Micro 12640 (Digi-Key 1568-12640-ND)", 1, "Replaced by the OSOYOO USB-C Pro Micro from Amazon", FULL),
     ("Sullins PRPC012SAAN-RC male headers (Digi-Key 35-PRPC012SAAN-RC-ND)", 2, "The OSOYOO Pro Micro comes with header pins", FULL),
@@ -314,8 +315,8 @@ DROPPED = [
 ]
 SOURCES = [
     ("HeliSR Rev 3.0 board", "PCB/HeliSR_Rev3.0", "Bare PCB ordered from OSH Park on 2026-10-21; folder frozen and read-only"),
-    ("Huey head", "Head/Rev4", "Current head design: Rev 4, one piece (Rev 3 with its neck block and trigger mount built "
-     "back into the box). Rev 3 (Head/Rev3) is the same head in three parts, with no supports; Rev 2 (Head/) is superseded"),
+    ("Huey head", "Head/Rev5", "Current head design: Rev 5, Rev 4 cut to the real UH-1 panels' dimensions, with printed "
+     "threads. Rev 4 (Head/Rev4), the larger one-piece head it came from, is kept as a fallback"),
     ("MkIII base Rev 3", "Base (Base/mk3_rev3.py imports Base/mk3_pivot.py)", "Concept, nothing printed yet: check the orange lines"),
     ("Prices", "Digi-Key cart 2026-10-19 (JST headers 2026-10-22); Amazon listings 2026-10-22; OSH Park order 2026-10-21",
      "Pack prices, before shipping and tariff"),
