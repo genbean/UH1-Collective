@@ -512,10 +512,10 @@ def edge_cutter(p0, p1, n1, n2, c, o0=0.25, o1=0.25):
     return tri.transform(np.hstack([np.stack([t1, v, d], 1), (p0 - o0 * d).reshape(3, 1)]).tolist())
 
 
-def rear_chamfers():
-    """Box frame: cutters that chamfer every edge round the rear wall's outside face, the face the head prints on (the
-    whole outline of both boxes, rounded corners included)."""
-    polys = BACK.to_polygons()
+def outline_chamfers(outline, y, ny, c, keep=lambda a, b: False):
+    """Box frame: cutters that chamfer every edge round a flat face at y (outward normal ny along y) whose outline is
+    the cross-section outline, rounded corners included. Edges keep(a, b) says yes to are left square."""
+    polys = outline.to_polygons()
     pts = np.asarray(max(polys, key=lambda q: abs(0.5 * np.sum(q[:, 0] * np.roll(q[:, 1], -1) - np.roll(q[:, 0], -1) * q[:, 1]))))
     if np.sum(pts[:, 0] * np.roll(pts[:, 1], -1) - np.roll(pts[:, 0], -1) * pts[:, 1]) < 0:
         pts = pts[::-1]                                            # counterclockwise: outward is to the right of each edge
@@ -523,10 +523,16 @@ def rear_chamfers():
     for a, b in zip(pts, np.roll(pts, -1, axis=0)):
         dx, dz = b - a
         length = np.hypot(dx, dz)
-        if length < 0.05:
+        if length < 0.05 or keep(a, b):
             continue
-        out += edge_cutter((a[0], YC, a[1]), (b[0], YC, b[1]), (0.0, 1.0, 0.0), (dz / length, 0.0, -dx / length), REAR_CHAMFER)
+        out += edge_cutter((a[0], y, a[1]), (b[0], y, b[1]), (0.0, ny, 0.0), (dz / length, 0.0, -dx / length), c)
     return out
+
+
+def rear_chamfers():
+    """Box frame: cutters that chamfer every edge round the rear wall's outside face, the face the head prints on (the
+    whole outline of both boxes, rounded corners included)."""
+    return outline_chamfers(BACK, YC, 1.0, REAR_CHAMFER)
 
 
 def body():
@@ -985,8 +991,14 @@ def plug(opening, holes):
     return c
 
 
+# Each panel's face is chamfered all round its outline, except the upper panel's bottom edge, which sits down on the lower
+# box. 0.5 mm is as much as the lower panel's corner countersinks allow: their rims come within 0.55 mm of its edges.
+PANEL_CHAMFER = 0.5
+
+
 def lower_panel(front):
     p = prism(LOWER_PANEL, -PANEL_T, 0)
+    p -= outline_chamfers(LOWER_PANEL, -PANEL_T, -1.0, PANEL_CHAMFER)
     opening = BODY.offset(-WALL, mf.JoinType.Miter)
     holes = [(x, z, 7.2) for x, z in COLUMNS] + [(*GOV, NUT_RELIEF["toggle"]), (*LDG_EXT, NUT_RELIEF["toggle"]),
                                                (*STOP_REL, NUT_RELIEF["pb4"]), (*SEARCH, 2 * HAT_R + 1.0)]
@@ -1004,6 +1016,8 @@ def lower_panel(front):
 
 def upper_panel():
     p = prism(UPPER_PANEL, UY - PANEL_T, UY)
+    p -= outline_chamfers(UPPER_PANEL, UY - PANEL_T, -1.0, PANEL_CHAMFER,
+                          keep=lambda a, b: max(a[1], b[1]) < UZ0 + 0.01)   # the bottom edge, on the lower box
     opening = UPPER_IN.offset(-WALL, mf.JoinType.Miter)
     holes = [(x, z, 7.2) for x, z in UPPER_COLUMNS] + [(*SL, NUT_RELIEF["toggle"]), (*LDG_ON, NUT_RELIEF["toggle"])]
     p += prism(plug(opening, holes), UY - 0.01, UY + PLUG_H)
