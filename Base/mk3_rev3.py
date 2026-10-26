@@ -42,7 +42,7 @@ Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (A
     cable plug        1 x M2 x 12 up from under the cable cover's rim, into an M2 thread tapped in the plug
     shoe hinge        1 x M4 x 20 + 1 M4 nut in the +y lug's pocket
     strut eyes        2 x M4 x 16 + 2 M4 nuts in pockets
-    strut collar      1 x M4 x 12 + 1 M4 nut (clamp)
+    strut collar      2 x M4 x 12 + 2 M4 nuts (clamp)
     down-stops        2 x M4 x 16, head up, each in an M4 nut pressed into its post, + 1 M4 lock nut each
 """
 import os
@@ -137,6 +137,7 @@ ROD_CLEAR = 1.0                                  # front gussets stop this far s
 
 # collar on the tube
 COLLAR_W, COLLAR_WALL = 40.0, 5.0
+CLAMP_PITCH = 20.0                               # the two clamp screws' spacing
 COLLAR_BACK = 30.0                               # the collar runs this far past the eye away from the strut (the strut's push), 10 mm toward it
 COLLAR_BORE = m.TUBE_OD / 2 + 0.15
 CHEEK_T = 5.0                                    # (the tab is thinner now; the cheeks make up the width, so the M4 x 16 still ends at its nut)
@@ -312,7 +313,7 @@ def _collar(d=COLLAR_D):
     solid behind the eye where the strut pushes and split into two cheeks round the strut's tab.
     Prints standing on its -x end, so the bore and the cheeks build straight up and the web's slope is under 30 deg."""
     x0, x1 = -d - COLLAR_BACK, -d + COLLAR_W - COLLAR_BACK
-    xc = (x0 + x1) / 2                                                                           # the clamp screw: mid-ring
+    xcs = [(x0 + x1) / 2 + s * CLAMP_PITCH / 2 for s in (-1, 1)]                                 # two clamp screws, evenly along the ring
     ro = COLLAR_BORE + COLLAR_WALL
     ring = cyl(ro, (x0, Y0, 0), (x1, Y0, 0))
     ears = box(x0, x1, Y0 - 7, Y0 + 7, ro - 3, ro + 8)
@@ -325,9 +326,10 @@ def _collar(d=COLLAR_D):
     c = fuse(ring, ears, web)
     c = c.cut(cyl(COLLAR_BORE, (x0 - 1, Y0, 0), (x1 + 1, Y0, 0)))
     c = c.cut(box(x0 - 1, x1 + 1, Y0 - 1.0, Y0 + 1.0, 0, ro + 9))                                # clamp slit
-    c = c.cut(cyl(2.2, (xc, Y0 - 8, ro + 3), (xc, Y0 + 8, ro + 3)))                              # M4 x 12 clamp screw,
-    c = c.cut(m.csk_hole(4, (xc, Y0 - 5, ro + 3), (0, 1, 0), 1, out=3))                          # its head 2 mm in on -y
-    c = c.cut(hexprism(7.2, (xc, Y0 + 3.8, ro + 3), (xc, Y0 + 8, ro + 3)))                       # its nut
+    for xc in xcs:
+        c = c.cut(cyl(2.2, (xc, Y0 - 8, ro + 3), (xc, Y0 + 8, ro + 3)))                          # M4 x 12 clamp screw,
+        c = c.cut(m.csk_hole(4, (xc, Y0 - 5, ro + 3), (0, 1, 0), 1, out=3))                      # its head 2 mm in on -y
+        c = c.cut(hexprism(7.2, (xc, Y0 + 3.8, ro + 3), (xc, Y0 + 8, ro + 3)))                   # its nut
     c = c.cut(box(-d - BODY_TAB_W / 2 - 1.2, x1 + 1, Y0 - gap / 2, Y0 + gap / 2, -COLLAR_E - BODY_TAB_W / 2 - 4, -ro + 0.5))   # tab slot
     # the strut's boss is wider than its tab, so the cheeks stop short of it on the strut's side (+x, the strut lies within
     # 5 deg of the tube) and leave room for the boss all round: it sits BOSS_CLR off the tab's shoulder, 0.3 mm more of height
@@ -369,10 +371,11 @@ def pins(theta=0.0):
     aw = (ROD_TAB_T + 0.6) / 2 + CLEVIS_T
     cw = (BODY_TAB_T + 0.6) / 2 + CHEEK_T
     d, ro = COLLAR_D, COLLAR_BORE + COLLAR_WALL
-    xc = -d + (COLLAR_W - 2 * COLLAR_BACK) / 2
+    xm = -d + (COLLAR_W - 2 * COLLAR_BACK) / 2
     anchor = fuse(m.csk_screw(4, (ANCH_X, Y0 + aw, ANCH_Z), (0, -1, 0), 16), m.nut(4, (ANCH_X, Y0 - aw + 3.4, ANCH_Z), (0, -1, 0)))
     col = fuse(m.csk_screw(4, (-d, Y0 + cw, -COLLAR_E), (0, -1, 0), 16), m.nut(4, (-d, Y0 - cw + 2.5, -COLLAR_E), (0, -1, 0)),
-               m.csk_screw(4, (xc, Y0 - 5, ro + 3), (0, 1, 0), 12), m.nut(4, (xc, Y0 + 3.8, ro + 3), (0, 1, 0)))
+               *[f for s in (-1, 1) for f in (m.csk_screw(4, (xm + s * CLAMP_PITCH / 2, Y0 - 5, ro + 3), (0, 1, 0), 12),
+                                              m.nut(4, (xm + s * CLAMP_PITCH / 2, Y0 + 3.8, ro + 3), (0, 1, 0)))])
     return fuse(anchor, rot_y(col, theta))
 
 
