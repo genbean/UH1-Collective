@@ -100,17 +100,17 @@ The real collective starts about 30° above level and swings about 30–40°. Ou
 
 ![The same at the 32° stop](renders/rev3_section32.png)
 
-At the down-stop the strut lies almost flat under the socket boss, and its line passes about 40 mm below the pivot. As the tube lifts, the collar rises and the strut swings up toward the pivot. Its leverage shrinks in step with the head's weight, which also gets easier to hold as the tube rises. The strut also loses a little force as it extends, from 118 mm at the bottom to 142 mm at 32°, out of its 102–152 mm stroke.
+At the down-stop the strut lies almost flat under the socket boss, and its line passes about 40 mm below the pivot. As the tube lifts, the collar rises and the strut swings up toward the pivot. Its leverage shrinks in step with the head's weight, which also gets easier to hold as the tube rises. The strut also loses a little force as it extends, from 117 mm at the bottom to 140 mm at 32°, out of its 102–152 mm stroke.
 
 ![Torque and out-of-balance against lever angle](renders/strut_balance.png)
 
-The geometry is set so a **40 N strut balances to within 3 g at the grip**. That's the bottom of the range the 45 N strut is sold as. A stronger strut lifts a little too much, nearly the same amount at every angle, so a fixed weight in the head cancels it:
+The geometry is set so a **40 N strut balances to within 5 g at the grip**. That's the bottom of the range the 45 N strut is sold as. A stronger strut lifts a little too much, nearly the same amount at every angle, so a fixed weight in the head cancels it:
 
 | Strut force | Out of balance at the grip | Ballast in the head to even it out |
 |---|---|---|
-| 40 N | −1 to +3 g | none |
-| 45 N (nominal) | +59 to +65 g (rises) | about **48 g** |
-| 53 N (top of the range) | +148 to +170 g | about 125 g |
+| 40 N | −4 to +5 g | none |
+| 45 N (nominal) | +53 to +72 g (rises) | about **48 g** |
+| 53 N (top of the range) | +141 to +178 g | about 125 g |
 
 The collar does the fine tuning. Sliding it 8 mm toward the pivot adds about 24 g of lift at the grip, and 8 mm away takes 24 g off. For comparison, Rev 1's bucket was out by ±130 g at the ends of its travel.
 
@@ -124,11 +124,11 @@ The figures assume the strut gains 30 % in force from fully extended to fully co
 |---|---|
 | Length | 152.4 mm eye to eye extended, 101.6 mm compressed (51 mm stroke) |
 | Force | 45 N, sold as 9–12 lb (40–53 N) |
-| Ends | flat eyelet tabs: steel on the rod, plastic on the body |
+| Ends | flat eyelet tabs. The 40 N strut's collar end, measured: a steel tab 3.94 mm thick and 8 mm wide, a 4.45 mm eye, then a Ø8 mm boss whose face is 5.72 mm from the eye's centre and which runs about 7 mm |
 
 A 40 N cabinet strut ([QLXHBOT](https://www.amazon.com/dp/B0C8DJ8W9H)) was considered and rejected: its ends are snap-on sockets, which pop off if the strut ever pulls. This strut has eyelets that bolt through.
 
-**Measure yours** before printing the frame and collar. The listing gives the eye holes as 4 mm, the body as 12.1 mm and the rod as 4 mm, and the script uses those (`PIN_R` is the M4 screw's 4.4 mm clearance in the printed cheeks). The tab thicknesses and widths are still guesses: `ROD_TAB_T`, `BODY_TAB_T`, `ROD_TAB_W`, `BODY_TAB_W`. The clevis slots are the tab thickness plus 0.6 mm.
+**Measure yours** before printing the frame and collar. The listing gives the eye holes as 4 mm, the body as 12.1 mm and the rod as 4 mm, and the script uses those (`PIN_R` is the M4 screw's 4.4 mm clearance in the printed cheeks). The collar end's tab and boss are measured (`BODY_TAB_T`, `BODY_TAB_W`, `BODY_BOSS_D`, `BODY_BOSS_AT`, `BODY_BOSS_L`). The anchor end's tab is still a guess: `ROD_TAB_T`, `ROD_TAB_W`. The clevis slots are the tab thickness plus 0.6 mm.
 
 ## Anchor: a fixed, gusseted clevis
 
@@ -237,7 +237,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 - **Lever halves:** print on their joint faces, with no supports (see [Split lever](#split-lever)).
   - **Lower half:** the stop block and the down-stop pads stand on the bed with the joint face. The block's back face leans about 32° from vertical, within normal overhang limits.
   - **Upper half:** the stop wedge sits on the bed at the back of the hub, with its sloping face leaning in toward the hub.
-- **Strut collar** (`strut_collar.stl`): stands on one end. The bore and the clevis cheeks build straight up.
+- **Strut collar** (`strut_collar.stl`): 40 mm long, with a web tapering from the ring down to the strut's eye, solid behind the eye where the strut pushes and split into two cheeks round the tab. Stand it on the end away from the strut (the end without the boss notch), so the bore builds straight up, the web's slope is under 30° and the notch opens at the top.
 - **Friction knob** (`friction_knob.stl`): top face down.
 - **Cable plug** (`cable_plug.stl`): on one of its long flat faces.
 - **Caps, shoe, covers and sensor carrier:** no special notes.
@@ -249,9 +249,9 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, press the M5 × 16 hex bolt's head into the knob's hex pocket, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
 4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
 5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
-6. **Collar:** clamp it on the tube 64 mm out from the front face of the socket boss, to its centre. That puts it 130 mm from the pivot.
-7. **Strut, body end:** fit the plastic tab into the collar's clevis with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
-8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 118 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
+6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
+7. **Strut, collar end:** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
+8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 117 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
 9. **Down-stops:** screw the M4 × 16s, head up, through a lock nut into the nuts in the posts. Set them so the tube is level at the bottom, then lock the nuts.
 10. Balance it as above.
 

@@ -115,13 +115,18 @@ STRUT_PROG = 1.3                                 # force rise from extended to c
 STRUT_BODY_D, STRUT_ROD_D, STRUT_BODY_L = 12.1, 4.0, 70.0   # diameters from the listing
 TAB_L = 12.0                                     # eye centre to where the tab meets the rod or body
 ROD_TAB_T, ROD_TAB_W = 3.0, 10.0                 # steel tab on the rod end (anchor)
-BODY_TAB_T, BODY_TAB_W = 6.0, 12.0               # plastic tab on the body end (collar)
+# collar end of the 40 N strut, measured: a steel tab with a 4.45 mm eye, then a Ø8 mm boss whose face is 5.72 mm from the eye's
+# centre and which runs about 6.9 mm (photo). The boss is wider than the tab is thick, so it cannot go into the collar's slot.
+BODY_TAB_T, BODY_TAB_W = 3.94, 8.0
+BODY_BOSS_D, BODY_BOSS_AT, BODY_BOSS_L = 8.0, 5.72, 6.9
+BODY_TAB_L = BODY_BOSS_AT + BODY_BOSS_L          # eye centre to where the boss meets the body
+BOSS_CLR = 0.5                                   # the collar's relief round the boss
 PIN_R = 2.2                                      # M4 screws through both eyes (the listing gives 4 mm holes)
 STRUT_G = 65.0                                   # strut mass, g (estimate)
 
 # where the strut's eyes sit (lever frame for the collar: d along the tube, e below its axis)
 ANCH_X, ANCH_Z = -12.0, -40.5                    # fixed anchor eye
-COLLAR_D, COLLAR_E = 130.0, 32.0                 # collar eye, as set for a 40 N strut
+COLLAR_D, COLLAR_E = 128.0, 26.0                 # collar eye, as set for a 40 N strut (E: close under the tube, to spare the plastic a long lever)
 COLLAR_RANGE = (-8.0, 8.0)                       # collar slide inside the strut's stroke
 Y0 = m.SOCK_Y                                    # the strut's plane = the tube's
 
@@ -131,9 +136,10 @@ CLEVIS_RUN = 20.0                                # front gussets reach this far 
 ROD_CLEAR = 1.0                                  # front gussets stop this far short of the strut's rod (both sides)
 
 # collar on the tube
-COLLAR_W, COLLAR_WALL = 20.0, 5.0
+COLLAR_W, COLLAR_WALL = 40.0, 5.0
+COLLAR_BACK = 30.0                               # the collar runs this far past the eye away from the strut (the strut's push), 10 mm toward it
 COLLAR_BORE = m.TUBE_OD / 2 + 0.15
-CHEEK_T = 4.0
+CHEEK_T = 5.0                                    # (the tab is thinner now; the cheeks make up the width, so the M4 x 16 still ends at its nut)
 
 # down-stop: pads on the socket boss, posts either side of the strut
 PAD_X = (-52.0, -40.0)                           # clear of the hose-clamp groove (x -54..-63)
@@ -285,24 +291,49 @@ def anchor_clevis():
 
 
 # ---------------------------------------------------------------- tube collar
+def _hull(pts):
+    """convex hull (monotone chain) of 2D points"""
+    pts = sorted(set(pts))
+    cross = lambda o, a, b: (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    half = []
+    for seq in (pts, pts[::-1]):
+        h = []
+        for p in seq:
+            while len(h) >= 2 and cross(h[-2], h[-1], p) <= 0:
+                h.pop()
+            h.append(p)
+        half += h[:-1]
+    return half
+
+
 def _collar(d=COLLAR_D):
     """split clamp collar in the lever frame (tube along -X at z = 0): slit and M4 clamp on top, clevis below.
-    Prints standing on one end, so the bore and the clevis cheeks build straight up."""
-    x0, x1 = -d - COLLAR_W / 2, -d + COLLAR_W / 2
+    The ring is COLLAR_W long and the eye hangs off its strut end: a web tapers from the ring's whole length down to the eye,
+    solid behind the eye where the strut pushes and split into two cheeks round the strut's tab.
+    Prints standing on its -x end, so the bore and the cheeks build straight up and the web's slope is under 30 deg."""
+    x0, x1 = -d - COLLAR_BACK, -d + COLLAR_W - COLLAR_BACK
+    xc = (x0 + x1) / 2                                                                           # the clamp screw: mid-ring
     ro = COLLAR_BORE + COLLAR_WALL
     ring = cyl(ro, (x0, Y0, 0), (x1, Y0, 0))
     ears = box(x0, x1, Y0 - 7, Y0 + 7, ro - 3, ro + 8)
     gap = BODY_TAB_T + 0.6
-    lug = box(x0, x1, Y0 - gap / 2 - CHEEK_T, Y0 + gap / 2 + CHEEK_T, -COLLAR_E, -ro + 2)
-    eye = cyl(BODY_TAB_W / 2 + 3, (-d, Y0 - gap / 2 - CHEEK_T, -COLLAR_E), (-d, Y0 + gap / 2 + CHEEK_T, -COLLAR_E))
-    c = fuse(ring, ears, lug, eye)
+    cw = gap / 2 + CHEEK_T
+    re = BODY_TAB_W / 2 + 3.5                                                                    # the eye's radius round the pin
+    hull = _hull([(x0, -ro + 2), (x1, -ro + 2)] + [(-d + re * math.cos(a * math.pi / 18), -COLLAR_E + re * math.sin(a * math.pi / 18))
+                                                    for a in range(36)])
+    web = gusset_xz(hull, Y0 - cw, Y0 + cw)
+    c = fuse(ring, ears, web)
     c = c.cut(cyl(COLLAR_BORE, (x0 - 1, Y0, 0), (x1 + 1, Y0, 0)))
     c = c.cut(box(x0 - 1, x1 + 1, Y0 - 1.0, Y0 + 1.0, 0, ro + 9))                                # clamp slit
-    c = c.cut(cyl(2.2, (-d, Y0 - 8, ro + 3), (-d, Y0 + 8, ro + 3)))                              # M4 x 12 clamp screw,
-    c = c.cut(m.csk_hole(4, (-d, Y0 - 5, ro + 3), (0, 1, 0), 1, out=3))                          # its head 2 mm in on -y
-    c = c.cut(hexprism(7.2, (-d, Y0 + 3.8, ro + 3), (-d, Y0 + 8, ro + 3)))                       # its nut
-    c = c.cut(box(x0 - 1, x1 + 1, Y0 - gap / 2, Y0 + gap / 2, -COLLAR_E - BODY_TAB_W / 2 - 4, -ro + 0.5))   # tab slot
-    cw = gap / 2 + CHEEK_T
+    c = c.cut(cyl(2.2, (xc, Y0 - 8, ro + 3), (xc, Y0 + 8, ro + 3)))                              # M4 x 12 clamp screw,
+    c = c.cut(m.csk_hole(4, (xc, Y0 - 5, ro + 3), (0, 1, 0), 1, out=3))                          # its head 2 mm in on -y
+    c = c.cut(hexprism(7.2, (xc, Y0 + 3.8, ro + 3), (xc, Y0 + 8, ro + 3)))                       # its nut
+    c = c.cut(box(-d - BODY_TAB_W / 2 - 1.2, x1 + 1, Y0 - gap / 2, Y0 + gap / 2, -COLLAR_E - BODY_TAB_W / 2 - 4, -ro + 0.5))   # tab slot
+    # the strut's boss is wider than its tab, so the cheeks stop short of it on the strut's side (+x, the strut lies within
+    # 5 deg of the tube) and leave room for the boss all round: it sits BOSS_CLR off the tab's shoulder, 0.3 mm more of height
+    # for the strut's tilt. The notch opens on the end face.
+    c = c.cut(box(-d + BODY_BOSS_AT - BOSS_CLR, x1 + 1, Y0 - cw - 1, Y0 + cw + 1, -COLLAR_E - BODY_TAB_W / 2 - 6,
+                  -COLLAR_E + BODY_BOSS_D / 2 + BOSS_CLR + 0.3))
     c = c.cut(cyl(PIN_R, (-d, Y0 - 10, -COLLAR_E), (-d, Y0 + 10, -COLLAR_E)))                    # M4 x 16 strut screw,
     c = c.cut(m.csk_hole(4, (-d, Y0 + cw, -COLLAR_E), (0, -1, 0), 1))                            # head on +y,
     c = c.cut(hexprism(7.2, (-d, Y0 - cw + 2.5, -COLLAR_E), (-d, Y0 - cw - 1, -COLLAR_E)))       # nut 2.5 deep on -y
@@ -320,15 +351,16 @@ def strut(theta=0.0):
     a, c = V(ANCH_X, Y0, ANCH_Z), V(cx, Y0, cz)
     u = (c - a).normalized()
 
-    def tab(at, t, w, toward):
-        """flat eyelet tab: round end on the eye, running TAB_L toward the rod or body"""
-        body = cq.Solid.makeBox(TAB_L, t, w, V(0, -t / 2, -w / 2)).fuse(cyl(w / 2, (0, -t / 2, 0), (0, t / 2, 0)))
+    def tab(at, t, w, toward, length):
+        """flat eyelet tab: round end on the eye, running `length` toward the rod or body"""
+        body = cq.Solid.makeBox(length, t, w, V(0, -t / 2, -w / 2)).fuse(cyl(w / 2, (0, -t / 2, 0), (0, t / 2, 0)))
         body = body.cut(cyl(PIN_R - 0.2, (0, -t, 0), (0, t, 0)))
         return body.rotate((0, 0, 0), (0, 1, 0), math.degrees(math.atan2(-toward.z, toward.x))).translate(at)
 
-    return fuse(tab(a, ROD_TAB_T, ROD_TAB_W, u), tab(c, BODY_TAB_T, BODY_TAB_W, -u),
-                cyl(STRUT_ROD_D / 2, (a + u * TAB_L).toTuple(), (c - u * (TAB_L + STRUT_BODY_L - 2)).toTuple()),
-                cyl(STRUT_BODY_D / 2, (c - u * (TAB_L + STRUT_BODY_L)).toTuple(), (c - u * TAB_L).toTuple()))
+    boss = cyl(BODY_BOSS_D / 2, (c - u * BODY_TAB_L).toTuple(), (c - u * BODY_BOSS_AT).toTuple())
+    return fuse(tab(a, ROD_TAB_T, ROD_TAB_W, u, TAB_L), tab(c, BODY_TAB_T, BODY_TAB_W, -u, BODY_BOSS_AT + 1.0), boss,
+                cyl(STRUT_ROD_D / 2, (a + u * TAB_L).toTuple(), (c - u * (BODY_TAB_L + STRUT_BODY_L - 2)).toTuple()),
+                cyl(STRUT_BODY_D / 2, (c - u * (BODY_TAB_L + STRUT_BODY_L)).toTuple(), (c - u * BODY_TAB_L).toTuple()))
 
 
 def pins(theta=0.0):
@@ -337,9 +369,10 @@ def pins(theta=0.0):
     aw = (ROD_TAB_T + 0.6) / 2 + CLEVIS_T
     cw = (BODY_TAB_T + 0.6) / 2 + CHEEK_T
     d, ro = COLLAR_D, COLLAR_BORE + COLLAR_WALL
+    xc = -d + (COLLAR_W - 2 * COLLAR_BACK) / 2
     anchor = fuse(m.csk_screw(4, (ANCH_X, Y0 + aw, ANCH_Z), (0, -1, 0), 16), m.nut(4, (ANCH_X, Y0 - aw + 3.4, ANCH_Z), (0, -1, 0)))
     col = fuse(m.csk_screw(4, (-d, Y0 + cw, -COLLAR_E), (0, -1, 0), 16), m.nut(4, (-d, Y0 - cw + 2.5, -COLLAR_E), (0, -1, 0)),
-               m.csk_screw(4, (-d, Y0 - 5, ro + 3), (0, 1, 0), 12), m.nut(4, (-d, Y0 + 3.8, ro + 3), (0, 1, 0)))
+               m.csk_screw(4, (xc, Y0 - 5, ro + 3), (0, 1, 0), 12), m.nut(4, (xc, Y0 + 3.8, ro + 3), (0, 1, 0)))
     return fuse(anchor, rot_y(col, theta))
 
 
