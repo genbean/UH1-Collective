@@ -162,8 +162,8 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
      "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half", BASE),
     kit("Strut eyes", 2, "M4 x 16 countersunk screw + M4 hex nut", "One per eye: head on +y, nut in the -y cheek's pocket. "
         "The listing gives the strut's eye holes as 4 mm. Snug, then thread-lock: the eye must still turn"),
-    kit("Strut collar", 1, "M4 x 12 countersunk screw + M4 hex nut", "Collar clamp: the head sits 2 mm into the -y ear, "
-        "the nut in the +y ear's pocket"),
+    kit("Strut collar", 2, "M4 x 12 countersunk screw + M4 hex nut", "Collar clamp, two 20 mm apart: each head sits 2 mm into the -y ear, "
+        "its nut in the +y ear's pocket"),
     kit("Down-stops", 2, "M4 x 16 countersunk screw + 2 M4 hex nuts", "Head up: its flat top is the stop. One nut pressed "
         "into the post's top pocket, the second on top of it locks the height that levels the tube"),
     kit("Pillow-block caps", 4, "M4 x 20 countersunk screw + M4 hex nut", "Two per cap, from the top; each nut slides "
@@ -196,8 +196,8 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
 SECTIONS.append(("Kits, consumables and tools", [
     ("Hardware", 1, "Screw kit, 1715 pieces: countersunk hex-socket screws M2-M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20, "
      "with hex nuts and washers, hex keys", "AvrestYPT", "", "Amazon", "B0FMD5TMSH", 17.99, "once", ORDERED, 1,
-     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (8), M4 x 12 (2),"
-     " M4 x 16 (4), M4 x 20 (5); nuts M3 (4), M4 (13), M5 (1). Your order (link 2026-10-23)",
+     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (8), M4 x 12 (3),"
+     " M4 x 16 (4), M4 x 20 (5); nuts M3 (4), M4 (14), M5 (1). Your order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (your order)"),
     ("Hardware", 1, "Set screw kit, 500 pieces, 304 stainless: M3 x 3, 4, 5, 6; M4 x 4, 5, 6; M5 x 5, 8; M6 x 6, 10; "
      "M8 x 8; hex keys", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714", 8.96, "once", ORDERED, 1,

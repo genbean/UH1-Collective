@@ -221,7 +221,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 - **Buy roll-wrapped, not pultruded.** Pultruded tubes have all their fibres running lengthwise and split easily when clamped or drilled. Roll-wrapped tubes have cross plies and take both.
 - **Check the fits.** The lever's socket and the head's tube bore were tuned on the 25 mm aluminium tube with the coupons. Check them with the carbon tube, and re-run the socket and bearing coupons if its outside diameter differs.
 - **Drilling and notching:** you drill the head's 5.2 mm cross hole (10 mm below the top end). Use a sharp bit and back the tube with wood, or wrap the spot with tape so it doesn't splinter.
-- **Clamping:** do the collar's M4 clamp screw and the hose clamp up firmly, but don't crush the tube.
+- **Clamping:** do the collar's two M4 clamp screws and the hose clamp up firmly, but don't crush the tube.
 
 ## Setting it
 
@@ -268,7 +268,7 @@ Every screw and nut is from three kits and one pack: the AvrestYPT countersunk k
 | Friction knob | **M5 × 25 hex-head bolt (bought; not in the kits)**, head in the knob's moulded hex pocket | M5 nut slid into the knob tower from the front | 1 |
 | Shoe hinge | M4 × 20 countersunk, head in the sensor-side lug | M4 nut in the knob-side lug's pocket | 1 |
 | Strut eyes | M4 × 16 countersunk, head on the knob side | M4 nut in the far cheek's pocket | 2 |
-| Strut collar clamp | M4 × 12 countersunk, head 2 mm into the sensor-side ear | M4 nut in the other ear's pocket | 1 |
+| Strut collar clamp | M4 × 12 countersunk, head 2 mm into the sensor-side ear | M4 nut in the other ear's pocket | 2 |
 | Down-stops | M4 × 16 countersunk, head up | M4 nut in the post's top pocket, plus an M4 lock nut | 2 |
 
 ![Screws from above](renders/rev3_screws_top.png)
