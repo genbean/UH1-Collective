@@ -11,8 +11,8 @@ board, out = sys.argv[1:3]
 DK = "https://www.digikey.com/en/products/result?keywords="
 PRICES = ("Unit prices for the parts carried over from Rev 3.0 are single-unit Digi-Key prices from the Rev 3.0 cart "
           "(2026-10-19 to 2026-10-22). The new Rev 4.0 parts are priced from distributor listings found on 2026-10-26 "
-          "(PCA9546ADR: Digi-Key cut tape; BM04B-SRSS-TBT: Digi-Key via an aggregator) or, for the 0805 resistors and "
-          "capacitor, at the Rev 3.0 0805 resistor's price: check them in the cart. Before shipping and tariff. The bare "
+          "(PCA9546ADR: Digi-Key cut tape; BM04B-SRSS-TBT: Digi-Key via an aggregator) or, for the 1206 resistors, at "
+          "the Rev 3.0 0805 resistor's price: check them in the cart. Before shipping and tariff. The bare "
           "PCB is priced at a third of an OSH Park order of three (Rev 3.0: $10.20).")
 
 # (refs, value, footprint, description, manufacturer, mfr part, digikey part, unit USD, notes)
@@ -21,20 +21,19 @@ SOLDERED = [
      "SN74HC165DR", "296-8250-1-ND", 0.50, "Front, under the Pro Micro: fit before the sockets"),
     ("RN1, RN2", "10k x8 bussed", "R_Array_SIP9", "Resistor network, 8 x 10 kOhm bussed, SIP-9", "Bourns",
      "4609X-101-103LF", "4609X-101-103LF-ND", 0.39, "Pin 1 (dot) is the common pin: it goes in the square pad. Keep upright"),
-    ("C1, C2", "100nF", "C_1206_3216Metric", "Capacitor, 100 nF, 50 V, X7R, 1206", "Samsung", "CL31B104KBCNNNC",
-     "1276-1017-1-ND", 0.14, "Decoupling: C1 beside U1's VCC pin, C2 beside U2's"),
+    ("C1, C2, C4", "100nF", "C_1206_3216Metric", "Capacitor, 100 nF, 50 V, X7R, 1206", "Samsung", "CL31B104KBCNNNC",
+     "1276-1017-1-ND", 0.14, "Decoupling: C1 beside U1's VCC pin, C2 beside U2's (front); C4 beside U3's (back)"),
     ("C3", "22uF", "C_1206_3216Metric", "Capacitor, 22 uF, 10 V, X5R, 1206", "Samsung", "CL31A226KPHNNNE",
      "1276-1287-1-ND", 0.47, "Bulk supply capacitor, between U1 and U2"),
     ("U3", "PCA9546A", "SOIC-16_3.9x9.9mm_P1.27mm", "I2C switch, 4 channels, with reset, SOIC-16 (narrow, D package)",
      "Texas Instruments", "PCA9546ADR", "296-21770-1-ND", 1.82,
      "Back. Gives each AS5600 port its own I2C channel (they all answer at 0x36). Not the wide DW package"),
-    ("C4", "100nF", "C_0805_2012Metric", "Capacitor, 100 nF, 50 V, X7R, 0805", "Samsung", "CL21B104KBCNNNC",
-     "1276-1003-1-ND", 0.10, "Back, beside U3's VCC pin"),
-    ("R1-R8", "2.2k", "R_0805_2012Metric", "Resistor, 2.2 kOhm, 1 %, 1/8 W, 0805", "YAGEO", "RC0805FR-072K2L",
-     "311-2.20KCRCT-ND", 0.10, "Back: the ports' I2C pull-ups, a pair under each port (R1/R2 AX1, R3/R4 AX2, R5/R6 AX3, "
+    ("R1-R8", "2.2k", "R_1206_3216Metric", "Resistor, 2.2 kOhm, 1 %, 1/4 W, 1206", "YAGEO", "RC1206FR-072K2L",
+     "311-2.20KFRCT-ND", 0.10, "Back: the ports' I2C pull-ups, a pair under each port (R1/R2 AX1, R3/R4 AX2, R5/R6 AX3, "
      "R7/R8 AX4; the odd one SDA, the even one SCL)"),
-    ("R9-R11", "10k", "R_0805_2012Metric", "Resistor, 10 kOhm, 1 %, 1/8 W, 0805", "YAGEO", "RC0805FR-0710KL",
-     "311-10.0KCRCT-ND", 0.10, "Back: pull-ups on the Pro Micro's SDA (R9) and SCL (R10), and on U3's /RESET (R11)"),
+    ("R9-R11", "10k", "R_1206_3216Metric", "Resistor, 10 kOhm, 1 %, 1/4 W, 1206", "YAGEO", "RC1206FR-0710KL",
+     "311-10.0KFRCT-ND", 0.10, "Back: pull-ups on the Pro Micro's SDA (R9) and SCL (R10), and on U3's /RESET (R11). "
+     "Any 1 % 1206 10 kOhm resistor will do if this one is out of stock"),
     ("SW1", "TL1015AF160QG", "SW_TL1015AF160QG", "Tactile switch, SMD, 3.9 x 2.9 mm, gull wing", "E-Switch",
      "TL1015AF160QG", "EG4344CT-ND", 0.48, "RST, at the far end between AX4 and AX2. The four ground tabs are left unsoldered"),
     ("J1, J2", None, "JST_SH_BM10B-SRSS-TB_1x10-1MP_P1.00mm_Vertical", "JST SR/SH header, 10-pin, 1.0 mm, SMD, top entry",
@@ -104,7 +103,7 @@ wb.calculation = CalcProperties(fullCalcOnLoad=True)
 ws["A1"] = "HeliSR Rev 4.0 - board BOM"; ws["A1"].font = F(bold=True, size=14)
 ws["A2"] = ("The parts you solder onto the bare HeliSR Rev 4.0 PCB, checked against the board file. Rev 4.0 has not "
             "been ordered. The front carries the connectors, the button and Rev 3.0's parts; the back carries U3, C4 "
-            "and R1-R11. The Pro Micro and its pin headers are listed separately at the end. " + PRICES)
+            "and R1-R11. Every resistor and capacitor is 1206. The Pro Micro and its pin headers are listed separately at the end. " + PRICES)
 ws["A2"].font = F(italic=True, color="595959"); ws["A2"].alignment = wrap
 ws.merge_cells("A2:M2"); ws.row_dimensions[2].height = 42
 ws["A3"] = "Boards to build"; ws["A3"].font = F(bold=True); ws.merge_cells("A3:B3")

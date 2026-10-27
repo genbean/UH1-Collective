@@ -16,7 +16,7 @@ ports are built the same, so any port takes a short or a long cable.
 | | |
 |---|---|
 | Board size | 39.3 × 33.64 mm (1.55 × 1.32 in), as Rev 3.0, with the same four M3 holes. 2 layers, 1.6 mm FR4 |
-| Parts | Connectors, the button, the Pro Micro sockets and Rev 3.0's parts on the **front**; the I²C switch, its capacitor and all the 0805 resistors on the **back** |
+| Parts | Connectors, the button, the Pro Micro sockets and Rev 3.0's parts on the **front**; the I²C switch, its capacitor and all the resistors on the **back**. Every resistor and capacitor is **1206**, for hand soldering |
 | Switch inputs | 16, on two 10-pin JST SR/SH 1.0 mm connectors (BM10B-SRSS-TBT, SMD), wired exactly as on Rev 3.0 |
 | AS5600 ports | 4, each on its own 4-pin JST SR/SH 1.0 mm connector (BM04B-SRSS-TBT, SMD): **1 SDA, 2 GND, 3 VCC, 4 SCL** |
 | I²C switch | PCA9546A (TI PCA9546ADR, SOIC-16 narrow), address 0x70, with its /RESET on a Pro Micro pin |
@@ -193,7 +193,7 @@ The HeliSR firmware in `Software/firmware/HeliSR` is written for Rev 3.0. Rev 4.
 ## Assembly order
 
 1. **The back first**, while the front is still flat: **U3** (pin 1 dot toward the far end, at the J1 side), then
-   **C4** and **R1–R11**. R1–R8 are all 2.2 kΩ (or all 4.7 kΩ: see [AS5600 modules](#as5600-modules)); R9–R11 10 kΩ.
+   **C4** and **R1–R11** (all 1206). R1–R8 are all 2.2 kΩ (or all 4.7 kΩ: see [AS5600 modules](#as5600-modules)); R9–R11 10 kΩ.
 2. On the front, **U1, U2**, then the 1206 caps **C1, C2, C3**.
 3. **RN1, RN2**. The dot (pin 1) goes in the square pad.
 4. The JST headers and the RST button.
@@ -214,6 +214,8 @@ run in its 3.3 V mode (R1 left fitted). There is no RP2040 build of the HeliSR f
 - The M3 holes: their courtyards (6.9 mm across) overlap J1, J2 and the far-end ports AX4 (J14) and AX2 (J12). Every
   pad, track and via is at least 3.5 mm from each hole centre, clear of the M3 nut's corners (3.18 mm) on the front
   and the 6.4 mm spacer on the back.
+- The far end: RST's courtyard overlaps the AX4 and AX2 ports' by up to 0.3 mm; the switch body and the JST housings
+  are about 1.4 mm apart.
 - Library silkscreen outlines that touch where parts nest.
 
 The rules use `(severity ignore)`, because `kicad-cli` 9.x still reports `(severity exclusion)` rules as errors
@@ -230,7 +232,7 @@ the BOM.
 2. `route_v4.py` runs the generator for a list of placement variants, gives VCC/GND a 0.3 mm class, routes with
    Freerouting, imports the result (`imp_v2.py`) and DRCs it. It routes with the vias 0.7 mm across, so their holes
    end up at least 0.6 mm apart, and imports them at 0.6 mm. This board is the best of the 45 variants in the final sweep
-   (U3's position, the pull-ups' offset under the ports, the far-end ports' spacing): complete, 39 router vias.
+   (U3's position, the pull-ups' offset under the ports, the far-end ports' spacing): complete, 44 router vias.
 3. `finish_all_v4.py` widens the router's neck-downs, pours GND on both layers, adds GND stitching vias
    (`stitch_v4.py`), writes the DRC rules and title block (`finish_v4.py`), places the silk labels on both sides
    (`silk_fix_v4.py`), and DRCs the result.
@@ -247,11 +249,11 @@ the BOM.
   PCA9546A datasheet (TI SCPS148I): A0 1, A1 2, /RESET 3, SD0–SC1 4–7, GND 8, SD2–SC3 9–12, A2 13, SCL 14, SDA 15,
   VCC 16. Every port, pull-up and Pro Micro pin is as listed above, and every net joins at least two pads.
 - **Clearance:** the cheap-fab rules above. All copper is at least 0.5 mm from the edge, and every track and via at
-  least 3.55 mm from a hole centre (every pad 3.89 mm). The only neck-down is 0.5 mm of VCC at 0.18 mm, where the
-  router squeezed past a pad (above the 0.127 mm fab minimum).
-- **Routing:** 946 mm of track, 74 vias: 39 from the router and 35 GND stitching vias. The I²C lines from U3 to the
-  ports are 9–28 mm long.
-- **Decoupling:** C4's VCC pad is 2.5 mm from U3's VCC pin (centre to centre); C1's is 1.8 mm from U1's and C2's
+  least 3.7 mm from a hole centre (every pad 4.1 mm). No neck-downs: every signal track is 0.2 mm and every VCC/GND
+  track 0.3 mm.
+- **Routing:** 998 mm of track, 78 vias: 44 from the router and 34 GND stitching vias. The I²C lines from U3 to the
+  ports are 6–29 mm long.
+- **Decoupling:** C4's VCC pad is 2.65 mm from U3's VCC pin (centre to centre); C1's is 1.8 mm from U1's and C2's
   2.7 mm from U2's, as on Rev 3.0.
 - **Silkscreen:** every label is 1.0 mm tall with a 0.16 mm stroke, outside every courtyard on its side, and at least
   0.5 mm from the next label. The front names the connectors (J1, J2, AX1–AX4), RST, USB and the front parts; the

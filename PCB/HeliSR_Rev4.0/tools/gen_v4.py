@@ -6,6 +6,7 @@
 #   Front: the Rev 3.0 parts under the Pro Micro; along each long side a 10-pin input header and one 4-pin port
 #   (top: J1, AX3; bottom: J2, AX1); across the far end AX4 (J1 side), RST, AX2 (J2 side).
 #   Back: U3 with its decoupling cap and upstream pull-ups, and under each port its own pair of 2.2k pull-ups.
+#   All the back resistors and C4 are 1206, like the front caps, for hand soldering.
 #   Ports (JST SH 4-pin): 1 SDA, 2 GND, 3 VCC, 4 SCL.
 # Builds the placed, unrouted board and a DSN for Freerouting.
 # Run with KiCad 9's python. usage: gen_v4.py <out.kicad_pcb> <out.dsn> [params.json]
@@ -17,7 +18,9 @@ P = {"row_y": 2.7, "clear": 0.2, "sig_w": 0.2, "pwr_w": 0.3, "hole_in": 3.2, "sc
      "nut_clr": 3.75, "row_gap": 0.5, "gap": 6.5, "pmx0": 0.6, "u2_rot": 180,
      "end_y": 10.1,            # far-end ports: centre distance from the long edges
      "u3_x": 30.0,             # U3 (back), on the board's centre line
-     "pu_off": 1.0}            # port pull-ups: distance in from the port's centre toward the board
+     "pu_off": 1.0,            # port pull-ups: distance in from the port's centre toward the board
+     "c4_dx": 2.4, "c4_dy": 2.6,   # C4 from U3's VCC pin (1206, upright, clear of RN1's last pin)
+     "r9_dx": 6.2}             # R9, R10 in from U3's SDA, SCL pins
 if len(sys.argv) > 3: P.update(json.loads(open(sys.argv[3]).read()))
 FP = os.environ.get("KICAD9_FOOTPRINT_DIR") or os.path.join(os.path.dirname(pcbnew.__file__), "..", "..", "..", "share", "kicad", "footprints")
 MM = pcbnew.FromMM; mm = pcbnew.ToMM
@@ -166,16 +169,16 @@ for ch, ax in CHANNEL.items():
     connect(U3, 4 + 2 * ch if ch < 2 else 9 + 2 * (ch - 2), ax + "_SDA")
     connect(U3, 5 + 2 * ch if ch < 2 else 10 + 2 * (ch - 2), ax + "_SCL")
 assert pad_xy(U3, 1)[0] > UX and pad_xy(U3, 1)[1] < CY and pad_xy(U3, 16)[0] < UX, "U3 orientation"
-R = lambda ref, x, y, rot, val: place("Resistor_SMD", "R_0805_2012Metric", ref, x, y, rot, val, back=True)
+R = lambda ref, x, y, rot, val: place("Resistor_SMD", "R_1206_3216Metric", ref, x, y, rot, val, back=True)
 v16 = pad_xy(U3, 16)
-C4 = place("Capacitor_SMD", "C_0805_2012Metric", "C4", v16[0] - 2.3, v16[1] + 1.9, 90, "100nF", back=True)
+C4 = place("Capacitor_SMD", "C_1206_3216Metric", "C4", v16[0] - P["c4_dx"], v16[1] + P["c4_dy"], 90, "100nF", back=True)
 cp = sorted(C4.Pads(), key=lambda p: math.hypot(mm(p.GetPosition().x) - v16[0], mm(p.GetPosition().y) - v16[1]))
 cp[0].SetNet(net("VCC")); cp[1].SetNet(net("GND"))        # VCC on the pad nearer pin 16
 # upstream pull-ups (SDA, SCL; the Pro Micro side) and /RESET's, beside U3
 s15, s14 = pad_xy(U3, 15), pad_xy(U3, 14)
-R9 = R("R9", s15[0] - 5.1, s15[1] + 0.4, 0, "10k"); R10 = R("R10", s14[0] - 5.1, s14[1] + 1.15, 0, "10k")
+R9 = R("R9", s15[0] - P["r9_dx"], s15[1] + 0.4, 0, "10k"); R10 = R("R10", s14[0] - P["r9_dx"], s14[1] + 1.55, 0, "10k")
 r3 = pad_xy(U3, 3)
-R11 = R("R11", r3[0] + 2.35, r3[1] + 0.4, 90, "10k")
+R11 = R("R11", r3[0] + 2.45, r3[1] + 0.4, 90, "10k")
 def pullup(r, sig):
     ps = list(r.Pads())
     # VCC on the pad nearer the board's edge (the port's VCC pin is on the edge side of its signal pins)
@@ -189,9 +192,9 @@ for ax in ("AX1", "AX2", "AX3", "AX4"):
     f = PORTS[ax]; fx, fy = mm(f.GetPosition().x), mm(f.GetPosition().y)
     if ax in ("AX3", "AX1"):                  # long sides: the pair side by side along the row, upright
         dy = P["pu_off"] if ax == "AX3" else -P["pu_off"]
-        ra = R(f"R{k}", fx - 1.0, fy + dy, 90, "2.2k"); rb = R(f"R{k + 1}", fx + 1.0, fy + dy, 90, "2.2k")
+        ra = R(f"R{k}", fx - 1.2, fy + dy, 90, "2.2k"); rb = R(f"R{k + 1}", fx + 1.2, fy + dy, 90, "2.2k")
     else:                                     # far end: one above the other, lying along x
-        ra = R(f"R{k}", fx - P["pu_off"], fy - 1.0, 0, "2.2k"); rb = R(f"R{k + 1}", fx - P["pu_off"], fy + 1.0, 0, "2.2k")
+        ra = R(f"R{k}", fx - P["pu_off"], fy - 1.2, 0, "2.2k"); rb = R(f"R{k + 1}", fx - P["pu_off"], fy + 1.2, 0, "2.2k")
     pullup(ra, ax + "_SDA"); pullup(rb, ax + "_SCL")
     RP[ax] = (ra.GetReference(), rb.GetReference()); k += 2
 
