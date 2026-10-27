@@ -30,6 +30,13 @@
   (severity ignore)
   (condition "(A.Reference == 'H1' && B.Reference == 'J1') || (A.Reference == 'J1' && B.Reference == 'H1') || (A.Reference == 'H2' && B.Reference == 'J14') || (A.Reference == 'J14' && B.Reference == 'H2') || (A.Reference == 'H3' && B.Reference == 'J2') || (A.Reference == 'J2' && B.Reference == 'H3') || (A.Reference == 'H4' && B.Reference == 'J12') || (A.Reference == 'J12' && B.Reference == 'H4')"))
 
+# The far end: RST (SW1) between the AX4 and AX2 ports. Their courtyards overlap by up to 0.3 mm; the switch body
+# and the JST housings are about 1.4 mm apart, and their pads are still checked by the clearance rules.
+(rule "Far end: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "(A.Reference == 'SW1' && B.Reference == 'J14') || (A.Reference == 'J14' && B.Reference == 'SW1') || (A.Reference == 'SW1' && B.Reference == 'J12') || (A.Reference == 'J12' && B.Reference == 'SW1')"))
+
 # Library footprint outlines that touch where parts nest (socket vs resistor network, SOIC vs C1).
 (rule "Nested parts: silkscreen"
   (constraint silk_clearance (min 0mm))

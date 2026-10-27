@@ -136,6 +136,7 @@ elif stage == "final":
     FIELD = [("J1", "J13"), ("J2", "J11")]
     SILK = [("J7", "RN2"), ("J8", "RN1"), ("U1", "C1")]
     HOLES = [("H1", "J1"), ("H2", "J14"), ("H3", "J2"), ("H4", "J12")]
+    END = [("SW1", "J14"), ("SW1", "J12")]
     open(os.path.join(outdir, NAME + ".kicad_dru"), "w").write(f"""(version 1)
 
 # Known, intentional DRC hits on this board. Each rule names the exact footprints it covers, so the same check
@@ -167,6 +168,13 @@ elif stage == "final":
   (constraint courtyard_clearance)
   (severity ignore)
   (condition "{pairs(REF, HOLES)}"))
+
+# The far end: RST (SW1) between the AX4 and AX2 ports. Their courtyards overlap by up to 0.3 mm; the switch body
+# and the JST housings are about 1.4 mm apart, and their pads are still checked by the clearance rules.
+(rule "Far end: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "{pairs(REF, END)}"))
 
 # Library footprint outlines that touch where parts nest (socket vs resistor network, SOIC vs C1).
 (rule "Nested parts: silkscreen"

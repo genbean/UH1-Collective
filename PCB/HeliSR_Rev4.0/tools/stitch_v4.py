@@ -71,7 +71,7 @@ vias = [(mm(v.GetPosition().x), mm(v.GetPosition().y), mm(v.GetDrillValue()) / 2
 ok &= box_sum(np.asarray(pads, dtype=bool), int(math.ceil((VIA_R + PAD_CLR) / RES))) == 0
 hole_img = Image.new("1", (NX, NY), 0); dh = ImageDraw.Draw(hole_img)
 for x, y, r, _ in holes + vias:
-    R = r + 0.15 + H2H
+    R = r + 0.15 + H2H + 0.05                         # + a margin for the raster's rounding
     dh.ellipse([*px(x - R, y - R), *px(x + R, y + R)], fill=1)
 ok &= ~np.asarray(hole_img, dtype=bool)
 
