@@ -1,0 +1,162 @@
+(footprint "SW_TL1015AF160QG"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "E-Switch TL1015AF160QG 3.9 x 2.9 mm SMD tact switch, gull wing. Terminals on 4.15 mm centres; ground tabs left unsoldered.")
+	(tags "tact switch SMD reset TL1015")
+	(property "Reference" "SW1"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9b6ab375-4530-4414-9e38-2df33253a6fd")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "TL1015AF160QG"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d2542f05-9034-4476-95d5-a4c78f707c36")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "abc3ad7c-62a6-4af6-9da3-493e6a97ba5a")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d19eda1f-6d9b-4370-8284-775057790d32")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.15 1.55)
+		(end 1.15 1.55)
+		(stroke
+			(width 0.12)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "caa11099-37a0-4156-9de2-f2933afacc29")
+	)
+	(fp_line
+		(start -2.75 -1.45)
+		(end 2.75 -1.45)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "68677098-d925-40da-9c40-794c832d4a5b")
+	)
+	(fp_line
+		(start -2.75 1.45)
+		(end -2.75 -1.45)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "40069158-3871-4759-bb30-dbd3fe475b5e")
+	)
+	(fp_line
+		(start 2.75 -1.45)
+		(end 2.75 1.45)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "1ed0aa04-11f0-4450-8f8d-21dcc3b26bff")
+	)
+	(fp_line
+		(start 2.75 1.45)
+		(end -2.75 1.45)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "70a07e2a-6ab3-40ce-a2db-13e491e0e14e")
+	)
+	(fp_line
+		(start -2 -1.45)
+		(end 2 -1.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "71c91ee2-b836-4c36-b33c-70fca6a979fc")
+	)
+	(fp_line
+		(start -2 1.45)
+		(end -2 -1.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "b4a6c5e5-e16c-4e91-a35e-62fddceb5e0f")
+	)
+	(fp_line
+		(start 2 -1.45)
+		(end 2 1.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "60f89f8f-3c3e-4f4a-b359-6a70a63d558a")
+	)
+	(fp_line
+		(start 2 1.45)
+		(end -2 1.45)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "cebc5087-aacc-44e3-a7ee-2beeb47617df")
+	)
+	(pad "1" smd rect
+		(at -2.075 0)
+		(size 1.35 1.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(thermal_bridge_angle 45)
+		(uuid "2a3a9625-edb4-4eac-ab68-4241d206aac0")
+	)
+	(pad "2" smd rect
+		(at 2.075 0)
+		(size 1.35 1.8)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(thermal_bridge_angle 45)
+		(uuid "0e0cf419-0c08-4928-9d20-a16b732b167e")
+	)
+	(embedded_fonts no)
+)

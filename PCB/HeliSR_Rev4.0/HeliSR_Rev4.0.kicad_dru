@@ -1,0 +1,43 @@
+(version 1)
+
+# Known, intentional DRC hits on this board. Each rule names the exact footprints it covers, so the same check
+# still fires for any other pair. (severity ignore) rather than (severity exclusion): kicad-cli 9.x still reports
+# rule exclusions as errors (KiCad issue 24264), and per-marker exclusions in the .kicad_pro break when parts move.
+
+# Parts nested under the Pro Micro, as on Rev 1.2: the resistor networks, shift registers and decoupling caps sit
+# between the two 12-pin sockets, closer than their courtyards allow. A 4609X SIP is 2.49 mm thick at most,
+# leaving about 0.1 mm to each socket body. (C3, the 1206 lying between U1 and U2, and C2 at U2's outer end clear
+# their courtyards.)
+(rule "Nested under the Pro Micro: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "(A.Reference == 'RN1' && B.Reference == 'J8') || (A.Reference == 'J8' && B.Reference == 'RN1') || (A.Reference == 'RN2' && B.Reference == 'J7') || (A.Reference == 'J7' && B.Reference == 'RN2') || (A.Reference == 'RN1' && B.Reference == 'U1') || (A.Reference == 'U1' && B.Reference == 'RN1') || (A.Reference == 'RN1' && B.Reference == 'U2') || (A.Reference == 'U2' && B.Reference == 'RN1') || (A.Reference == 'RN2' && B.Reference == 'U1') || (A.Reference == 'U1' && B.Reference == 'RN2') || (A.Reference == 'RN2' && B.Reference == 'U2') || (A.Reference == 'U2' && B.Reference == 'RN2') || (A.Reference == 'C1' && B.Reference == 'U1') || (A.Reference == 'U1' && B.Reference == 'C1')"))
+
+# The connector rows: along each long side a 10-pin and a 4-pin JST SH header, 0.5 mm copper apart.
+# The courtyards overlap, but the housings are 1.2 mm apart along a row, and their pads are still checked by the
+# clearance rules.
+(rule "Connector field: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "(A.Reference == 'J1' && B.Reference == 'J13') || (A.Reference == 'J13' && B.Reference == 'J1') || (A.Reference == 'J2' && B.Reference == 'J11') || (A.Reference == 'J11' && B.Reference == 'J2')"))
+
+# The M3 holes' courtyards (6.9 mm across, sized for a 6.4 mm head or spacer) overlap the USB-end connectors (J1, J2)
+# and the far-end ports (J14, J12). The ground pour and every track and via stop 3.5 mm from each hole centre, and the
+# JST pads and housings are clear of the 6.35 mm corners of the M3 nut on the front; nothing on the back comes within
+# reach of the 6.4 mm spacer.
+(rule "Mounting holes: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "(A.Reference == 'H1' && B.Reference == 'J1') || (A.Reference == 'J1' && B.Reference == 'H1') || (A.Reference == 'H2' && B.Reference == 'J14') || (A.Reference == 'J14' && B.Reference == 'H2') || (A.Reference == 'H3' && B.Reference == 'J2') || (A.Reference == 'J2' && B.Reference == 'H3') || (A.Reference == 'H4' && B.Reference == 'J12') || (A.Reference == 'J12' && B.Reference == 'H4')"))
+
+# Library footprint outlines that touch where parts nest (socket vs resistor network, SOIC vs C1).
+(rule "Nested parts: silkscreen"
+  (constraint silk_clearance (min 0mm))
+  (severity ignore)
+  (condition "(A.memberOfFootprint('J7') && B.memberOfFootprint('RN2')) || (A.memberOfFootprint('RN2') && B.memberOfFootprint('J7')) || (A.memberOfFootprint('J8') && B.memberOfFootprint('RN1')) || (A.memberOfFootprint('RN1') && B.memberOfFootprint('J8')) || (A.memberOfFootprint('U1') && B.memberOfFootprint('C1')) || (A.memberOfFootprint('C1') && B.memberOfFootprint('U1'))"))
+
+# The end of U1's library outline runs under C1's pad opening; the fab clips it there anyway.
+(rule "U1 outline end under C1's pad opening"
+  (constraint silk_clearance (min 0mm))
+  (severity ignore)
+  (condition "A.memberOfFootprint('U1') && A.Layer == 'F.Silkscreen'"))

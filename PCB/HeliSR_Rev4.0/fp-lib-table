@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "HeliSR")(type "KiCad")(uri "${KIPRJMOD}/HeliSR.pretty")(options "")(descr "HeliSR project footprints"))
+)

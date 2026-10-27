@@ -1,0 +1,21 @@
+Input,Connector,Connector pin,Chip,Chip input,Chip pin,Shift order (1 = first bit read) / I2C channel
+IN1,J1 (1-8),2,U1,D,14,13
+IN2,J1 (1-8),3,U1,C,13,14
+IN3,J1 (1-8),4,U1,B,12,15
+IN4,J1 (1-8),5,U1,A,11,16
+IN5,J1 (1-8),6,U2,H,6,1
+IN6,J1 (1-8),7,U2,G,5,2
+IN7,J1 (1-8),8,U2,F,4,3
+IN8,J1 (1-8),9,U2,E,3,4
+IN9,J2 (9-16),2,U2,D,14,5
+IN10,J2 (9-16),3,U2,C,13,6
+IN11,J2 (9-16),4,U2,B,12,7
+IN12,J2 (9-16),5,U2,A,11,8
+IN13,J2 (9-16),6,U1,H,6,9
+IN14,J2 (9-16),7,U1,G,5,10
+IN15,J2 (9-16),8,U1,F,4,11
+IN16,J2 (9-16),9,U1,E,3,12
+AX1,J11 (AX1),1 SDA / 4 SCL,U3 (PCA9546A),SD2 / SC2,9 / 10,channel 2
+AX2,J12 (AX2),1 SDA / 4 SCL,U3 (PCA9546A),SD1 / SC1,6 / 7,channel 1
+AX3,J13 (AX3),1 SDA / 4 SCL,U3 (PCA9546A),SD3 / SC3,11 / 12,channel 3
+AX4,J14 (AX4),1 SDA / 4 SCL,U3 (PCA9546A),SD0 / SC0,4 / 5,channel 0
