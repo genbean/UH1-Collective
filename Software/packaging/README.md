@@ -58,6 +58,6 @@ The app looks for the firmware and avrdude at exactly these paths next to itself
 5. **GitHub release.** Tag `vX.Y.Z`, then attach:
    - the installer, the zip and the SHA256SUMS file;
    - `work\stage\firmware\HeliSR_Rev3.0_16MHz.hex` and `HeliSR_Rev4.0_16MHz.hex`, for people who flash with other tools;
-   - **avrdude's source**, which its GPL-2 licence requires next to the binary: avrdude v8.0 (`https://github.com/avrdudes/avrdude/archive/refs/tags/v8.0.zip`) and the Arduino build scripts (`https://github.com/arduino/avrdude-packing`, release 8.0.0-arduino1). If a different avrdude is bundled, attach that version's source instead.
+   - **avrdude's source**, which its GPL-2 licence requires next to the binary: avrdude v8.0 (`https://github.com/avrdudes/avrdude/archive/refs/tags/v8.0.zip`) and the Arduino build scripts with their patch (`https://github.com/arduino/avrdude-packing/archive/refs/tags/8.0-arduino.1.zip`: the IDE calls this avrdude 8.0.0-arduino1, the repository tags it 8.0-arduino.1). If a different avrdude is bundled, attach that version's source instead.
 
 The installer isn't code-signed, so Windows SmartScreen shows "Windows protected your PC" the first time; **More info → Run anyway** continues. The release notes and the user guide should say so.
