@@ -16,7 +16,10 @@ class AvrFlasher;
 
 // Firmware updates: a connected HeliSR device is restarted into its bootloader
 // over USB; a Pro Micro without HeliSR firmware gets a 1200-baud touch on its
-// serial port, or a double tap on RST. avrdude then writes the .hex.
+// serial port, or a double tap on RST. avrdude then writes the .hex. Each
+// board has its own firmware; the flasher checks which board a file is for
+// (FirmwareFile) and asks before anything that could put a Rev 4.0 build on a
+// Rev 3.0 board.
 class Flasher : public QWidget
 {
     Q_OBJECT
@@ -40,6 +43,8 @@ private:
     void fillFirmwareList();
     void refreshPorts();
     QString chooseHexFile();
+    //! whether to go ahead with this file; asks the user if the board may be wrong
+    bool approveFile(const QString &file, int deviceBoard);
     void flashConnected();
     void flashNewBoard();
     void setBusy(bool busy);
@@ -48,6 +53,7 @@ private:
     AvrFlasher *m_avr;
     QString m_hexFile;
     bool m_connected = false;
+    int m_deviceBoard = 0;              // INFO's board_id of the connected device
 
     QLabel *m_deviceLabel;
     QLabel *m_fileLabel;

@@ -17,6 +17,7 @@
 #include "random_settings.h"
 
 void run_unit_tests();
+void run_sensor_tests();
 #ifdef HSR_WITH_FREEJOY
 void run_freejoy_comparison();
 #endif
@@ -36,6 +37,7 @@ int main(int argc, char **argv)
 	}
 
 	run_unit_tests();
+	run_sensor_tests();
 	if (random_n) run_random_scenarios(random_n, 3000);
 #ifdef HSR_WITH_FREEJOY
 	run_freejoy_comparison();

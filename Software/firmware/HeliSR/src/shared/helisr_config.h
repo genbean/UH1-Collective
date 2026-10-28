@@ -5,7 +5,7 @@
   Based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy), firmware v1.7.3b1,
   commit fc697108124f9ffc4ca3f3b1c6bdb2f21f94d52d, file application/Inc/common_types.h.
     Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 and Rev 4.0 boards, 2026.
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -36,14 +36,38 @@
 
 #define HSR_FIRMWARE_VERSION      0x0100   // 1.0.0, shown in the configurator
 #define HSR_CONFIG_VERSION        2        // bump whenever dev_config_t or its defaults change
-#define HSR_BOARD_ID              0x30     // HeliSR Rev 3.0
+
+/* ---------------------------------------------------------------- boards -- */
+
+/* Board IDs, as INFO and the build tag (helisr_protocol.h) report them. Both
+   boards share one settings layout; what differs is what each pin is. */
+#define HSR_BOARD_REV30           0x30     // HeliSR Rev 3.0: AX1-AX4 are analog inputs (A3-A0)
+#define HSR_BOARD_REV40           0x40     // HeliSR Rev 4.0: AX1-AX4 are AS5600s over I2C
+
+/* The board a firmware build is for: 30 or 40 (build.ps1 -Board sets it; the
+   Arduino IDE builds Rev 3.0 unless this line is changed). A Rev 4.0 build
+   drives pins that a Rev 3.0 board's chips drive too, so it must never run on
+   a Rev 3.0 board. HSR_BOARD_ID and HSR_BOARD_SOURCES are the firmware's; the
+   configurator works with both boards at run time. */
+#ifndef HSR_BOARD_REV
+#define HSR_BOARD_REV             30
+#endif
+#if HSR_BOARD_REV == 30
+#define HSR_BOARD_ID              HSR_BOARD_REV30
+#define HSR_BOARD_SOURCES         9        // analog sources 0-8
+#elif HSR_BOARD_REV == 40
+#define HSR_BOARD_ID              HSR_BOARD_REV40
+#define HSR_BOARD_SOURCES         11       // analog sources 0-10
+#else
+#error "HSR_BOARD_REV must be 30 (HeliSR Rev 3.0) or 40 (HeliSR Rev 4.0)"
+#endif
 
 /* --------------------------------------------------------------- limits -- */
 
 #define HSR_SR_INPUTS             16       // IN1-IN16 on J1/J2 (two 74HC165s)
 #define HSR_SPARE_PINS            11       // Pro Micro pins the board leaves free
 #define HSR_AX_INPUTS             4        // AX1-AX4 on J11-J14
-#define HSR_ANALOG_SOURCES        9        // AX1-AX4, then the 5 analog-capable spare pins
+#define HSR_ANALOG_SOURCES        11       // AX1-AX4, the 5 analog-capable spare pins, then A2 and A3 (Rev 4.0)
 #define HSR_MAX_AXES              8        // X, Y, Z, Rx, Ry, Rz, Slider 1, Slider 2
 #define HSR_MAX_BUTTONS           64       // logical buttons reported to the PC
 #define HSR_MAX_PHYS              64       // physical inputs, including axis-to-button ranges
@@ -66,12 +90,32 @@
 
 /* Spare pins, by index, with their Pro Micro silkscreen labels:
      0 TX   1 RX   2 "4"  3 "5"  4 "6"  5 "7"  6 "8"  7 "9"  8 "10"  9 "14"  10 "16"
-   Analog sources 4-8 are spare pins 2, 4, 6, 7 and 8 (Arduino A6-A10). */
+   Rev 4.0 reads its shift registers on pin 14, so spare pin 9 isn't there.
+   Analog sources:
+     0-3   AX1-AX4: Rev 3.0's analog inputs (A3, A2, A1, A0), Rev 4.0's AS5600s
+     4-8   spare pins 2, 4, 6, 7 and 8 (Arduino A6-A10), set to AXIS_ANALOG
+     9-10  Rev 4.0 only: Pro Micro pins A2 and A3, which Rev 3.0 uses for AX2 and
+           AX1. They have no connector and no spare-pin setting: an axis that
+           uses one turns it on. */
 #define HSR_SPARE_ANALOG_MASK     0x01D4   // pins 4, 6, 8, 9, 10
 #define HSR_SPARE_PWM_MASK        0x0198   // pins 5, 6, 9, 10
+#define HSR_SOURCE_A2             9
+#define HSR_SOURCE_A3             10
 
-/* Raw analog readings are 12-bit (16 x 10-bit samples / 4). The PC test
-   program overrides this to FreeJoy's 4095 when comparing with FreeJoy. */
+/* Whether a board has spare pin i, and analog source s. */
+static inline uint8_t hsr_spare_exists(uint8_t board_id, uint8_t i)
+{
+	return i < HSR_SPARE_PINS && !(board_id == HSR_BOARD_REV40 && i == 9);
+}
+
+static inline uint8_t hsr_source_exists(uint8_t board_id, uint8_t s)
+{
+	return s < (board_id == HSR_BOARD_REV40 ? 11 : 9);
+}
+
+/* Raw analog readings are 12-bit (16 x 10-bit samples / 4); Rev 4.0 scales its
+   AS5600s' 0-4095 to the same range. The PC test program overrides this to
+   FreeJoy's 4095 when comparing with FreeJoy. */
 #ifndef HSR_RAW_MAX
 #define HSR_RAW_MAX               4092
 #endif
@@ -322,11 +366,20 @@ typedef struct
 	uint16_t        firmware_version;
 	analog_data_t   raw_axis_data[HSR_MAX_AXES];        // each axis's source, before processing
 	analog_data_t   axis_data[HSR_MAX_AXES];            // what the PC receives
-	uint16_t        analog_inputs[HSR_ANALOG_SOURCES];  // raw 12-bit readings, 0-4092
+	uint16_t        analog_inputs[9];                   // raw 12-bit readings (0-4092) of sources 0-8
 	uint8_t         phy_button_data[HSR_MAX_PHYS / 8];
 	uint8_t         log_button_data[HSR_MAX_BUTTONS / 8];
 	uint8_t         shift_button_data;
+	uint16_t        analog_inputs_a2a3[2];              // sources 9-10 (Rev 4.0), after the rest so the
+	                                                    // fields before keep their places; 0 on Rev 3.0
 } params_report_t;
+
+/* Raw reading of analog source s from the live data. */
+static inline uint16_t hsr_params_analog(const params_report_t *p, uint8_t s)
+{
+	if (s < 9) return p->analog_inputs[s];
+	return s < HSR_ANALOG_SOURCES ? p->analog_inputs_a2a3[s - 9] : 0;
+}
 
 #pragma pack(pop)
 
@@ -374,7 +427,7 @@ static inline uint8_t hsr_pov_mask(const dev_config_t *cfg)
 /* ----------------------------------------------------- layout checks ------ */
 
 #define HSR_CONFIG_SIZE   652
-#define HSR_PARAMS_SIZE   69
+#define HSR_PARAMS_SIZE   73
 
 #if defined(__cplusplus)
   #define HSR_STATIC_ASSERT(c, m) static_assert(c, m)

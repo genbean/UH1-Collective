@@ -62,11 +62,11 @@ Each step points to the README that covers it.
 1. **Order the parts** from the [BOM](BOM/Heli_Collective_Final_BOM.xlsx), and the PCBs from the Gerbers.
 2. **Print the fit-test coupons first**, with the filament and settings you'll use, and try them on your carbon tube, bearings and sensor modules: the [base's coupons](Base/README.md#fit-test-coupons-print-these-before-the-big-parts), and the head's O-ring and sensor seat coupons (Rev 5's, printed as in [Head Rev 4, Printing](Head/Rev4/README.md#printing)). If a fit is off, change its setting in the script and rebuild the STLs.
 3. **Build the HeliSR board** ([assembly order](PCB/HeliSR_Rev4.0/README.md#assembly-order)) and fit the Pro Micro.
-4. **Flash and test it** with HeliSR Configurator: the [quick start](Software/docs/quick-start.md) goes from a bare Pro Micro to a working controller. Check every input now, before it goes into the head. Rev 4.0 needs its own firmware build (see [Status](#status)).
+4. **Flash and test it** with HeliSR Configurator: the [quick start](Software/docs/quick-start.md) goes from a bare Pro Micro to a working controller. Check every input now, before it goes into the head. Pick the **HeliSR Rev 4.0** firmware: each board has its own.
 5. **Prepare the two AS5600 modules:** remove R1 and R4, wire DIR (to VCC on the base's sensor, to GND on the throttle's), check for about 1 µF on VDD3V3, and measure the module's pull-ups. See the Rev 4.0 board's [AS5600 modules](PCB/HeliSR_Rev4.0/README.md#as5600-modules).
 6. **Print and assemble the base** ([Base, Assembly](Base/README.md#assembly)). The USB cable and the sensor lead go into the lever halves before you close them, and the tube is cut, drilled and fitted at the end.
 7. **Print and assemble the head** (Head Rev 5: see its [README](Head/Rev5/README.md) and [Rev 4's assembly steps](Head/Rev4/README.md#assembly), which it follows): the throttle parts, the starter trigger, the grip on the tube, the head pressed onto the tube, then the board, switches and panels.
-8. **Set the two AS5600s' ranges** in HeliSR Configurator: the collective on AX1, the throttle on AX4. On Rev 4.0 the firmware writes each range to its sensor over I²C at every start-up and burns nothing, so it can be set again whenever you like. (On Rev 3.0, the PROG1 and PROG4 buttons burn it once: see the [AS5600 guide](Software/docs/as5600.md).)
+8. **Set the two AS5600s' ranges** in HeliSR Configurator's AS5600 helper ([AS5600 guide](Software/docs/as5600.md#rev-40-setting-the-range-over-i2c)): the collective on AX1, the throttle on AX4. On Rev 4.0 the firmware writes each range to its sensor over I²C at every start-up and burns nothing, so it can be set again whenever you like. (On Rev 3.0, the PROG1 and PROG4 buttons burn it once.)
 9. **Balance and set the friction** ([Base, Setting it](Base/README.md#setting-it)).
 10. **Load the UH-1 profile** in HeliSR Configurator, calibrate the axes, and bind the buttons in your sim ([Profiles](Software/docs/profiles.md#uh-1-collective-helisr-head)).
 
@@ -77,7 +77,7 @@ As of October 2026 this is a complete design that hasn't been built yet.
 - **Base (Rev 3) and head (Rev 5):** designed, and checked in CAD for collisions and fits through the whole travel. Neither has been printed yet. Earlier head fits were tuned with coupons on an aluminium tube, so check them on the carbon tube.
 - **HeliSR Rev 4.0 board:** designed and checked (design rules, and every pad's net against the chips' datasheets), not built yet.
 - **HeliSR Rev 3.0 board:** bare PCBs are ordered, but no board has been built or tested. Rev 4.0 replaces it.
-- **Software:** the firmware and HeliSR Configurator in [`Software/`](Software/README.md) support Rev 3.0, and are tested on a bare Pro Micro only. Rev 4.0 support (the I²C sensors, and setting their ranges in the app) is written and tested on the PC and a bare Pro Micro, but isn't in this repository yet. Neither has run on a built board with real switches and sensors.
+- **Software:** the firmware and HeliSR Configurator in [`Software/`](Software/README.md) support both boards, Rev 4.0 with its I²C sensors and their ranges set in the app. They are tested on the PC and a bare Pro Micro only; the Rev 4.0 sensor code against a model of the I²C switch and the AS5600. Neither board's software has run on a built board with real switches and sensors.
 
 Expect changes once the first one is built.
 

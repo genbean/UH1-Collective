@@ -3,7 +3,7 @@
 
   Based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy) v1.7.3b1.
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 and Rev 4.0 boards, 2026.
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -18,9 +18,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-  Build as "Arduino Leonardo" (5 V / 16 MHz Pro Micro) with Software/firmware/build.ps1.
-  The settings are made with HeliSR Configurator; without it the board is a
-  joystick with IN1-IN16 as buttons 1-16 and AX1-AX4 as the X, Y, Z and Rx axes.
+  Build as "Arduino Leonardo" (5 V / 16 MHz Pro Micro) with Software/firmware/build.ps1:
+  -Board 3.0 (the default) or -Board 4.0. Each board needs its own build, and a
+  Rev 4.0 build must never go on a Rev 3.0 board (see HSR_BOARD_REV in
+  src/shared/helisr_config.h). The settings are made with HeliSR Configurator;
+  without it the board is a joystick with IN1-IN16 as buttons 1-16 and AX1-AX4
+  as the X, Y, Z and Rx axes.
 */
 
 #include <avr/wdt.h>

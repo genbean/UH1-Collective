@@ -34,6 +34,9 @@ public:
 
     // used by the page round-trip test (uitest.cpp) as well
     bool isInitialized() const { return m_initialized; }
+    //! show this board; followDevice = false: keep it even when a device of another board connects
+    void showBoard(int boardId, bool followDevice);
+    BoardConfig *boardConfig() const { return m_boardConfig; }
     void UiReadFromConfig();
     //! removeOemName: also clear Windows' cached name for the config's VID/PID
     void UiWriteToConfig(bool removeName = true);
@@ -103,6 +106,7 @@ private:
     bool m_transferring = false;        // reading or writing its settings
     bool m_boardUpdatePending = false;
     bool m_initialized = false;         // the pages have been filled once
+    bool m_followDeviceBoard = true;    // the pages show the connected device's board
 
     QString m_buttonDefaultStyle;
 

@@ -11,6 +11,7 @@
     2-3   size of dev_config_t
     4-5   CRC-16 of the settings
     6-    dev_config_t
+    960-981    Rev 4.0 only: the AS5600 settings (sensors.cpp)
     1020-1023  unique board ID
 */
 
@@ -32,7 +33,7 @@ static uint8_t loaded_from_eeprom;
 #define EE_UNIQUE_ID    ((uint32_t *)1020)
 #define MAGIC           0x5348      // "HS"
 
-static_assert(6 + sizeof(dev_config_t) <= 1020, "settings don't fit in EEPROM");
+static_assert(6 + sizeof(dev_config_t) <= 960, "settings don't fit in EEPROM");
 
 void settings_defaults(dev_config_t *cfg)
 {

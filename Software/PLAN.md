@@ -2,6 +2,8 @@
 
 Status, 2026-10-25: **phases 0-5 and 7 are done**; phase 6 waits for the built boards. See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results), [Phase 4 results](#phase-4-results), [Phase 5 results](#phase-5-results) and [Phase 7 results](#phase-7-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
 
+2026-10-27: **HeliSR Rev 4.0 support** added, with its own firmware build: see [Rev 4.0 support](#rev-40-support). No Rev 4.0 board exists yet, so it is tested on the PC, through the app's pages, and on a bare Pro Micro.
+
 ## Goal
 
 A general-purpose game-controller firmware and configuration app for **any Pro Micro on a HeliSR Rev 3.0 board**, in any collective, throttle, button box or panel. It isn't tied to the UH-1. Both are forked once from FreeJoy v1.7.3, published together in this project's GitHub repo under GPL-3, and never need FreeJoy's updates.
@@ -20,7 +22,7 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
 | Analog inputs | 4 (AX1–AX4 = A3–A0) | 10-bit ADC, oversampled to 12 bits. AX1 and AX4 have the PROG buttons for AS5600 one-time programming. |
 | Spare Pro Micro pins | 11, **not broken out on the board** (TX, RX, 4, 5, 6, 7, 8, 9, 10, 14, 16) | Reachable only by soldering wires to the Pro Micro's pins. Five are analog-capable (4, 6, 8, 9, 10) and four do PWM (5, 6, 9, 10). See decision 2. |
 | Flash / RAM / EEPROM | 28 KB / 2.5 KB / 1 KB | The real limits on the port (see Risks). |
-| I²C, SPI | Not usable | I²C pins (2, 3) drive the shift registers. SCK (15) is their clock. |
+| I²C, SPI | Not usable | I²C pins (2, 3) drive the shift registers. SCK (15) is their clock. (Rev 4.0 moves the shift registers and reads AS5600s over I²C: [Rev 4.0 support](#rev-40-support).) |
 
 **Firmware features (FreeJoy's, adapted):**
 - **Buttons:** 64 logical buttons (FreeJoy has 128; the 32U4's RAM limits it). Each is fed by an input, an axis range or a shift.
@@ -399,3 +401,80 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
 - **The old `Firmware/HeliCollective` sketch:** retired and removed from the repository.
 - **The repository's top-level README** is only a title.
 - **Not verified on hardware yet (phase 6):** the documented wiring and the AS5600 steps.
+
+## Rev 4.0 support
+
+2026-10-27. HeliSR Rev 4.0 (`PCB/HeliSR_Rev4.0`, designed, not ordered) reads four AS5600s over I²C through a PCA9546A switch instead of analog inputs, because the sensor cables are about 60 cm. Its shift registers' data and load lines move to pins 14 and A0. It gets its own firmware build (`build.ps1 -Board 4.0`), and the configurator supports both boards. Rev 3.0 boards behave as before.
+
+**Decisions:**
+- **One settings layout for both boards.** `dev_config_t`, its version (2) and the protocol version (1) are unchanged. So Rev 3.0's firmware, the settings saved on its boards and the profiles are untouched, and a profile works on either board. What differs is what the pins are (`hsr_spare_exists()`, `hsr_source_exists()` in `helisr_config.h`):
+  - Rev 4.0 has no spare pin 9 (pin 14, the shift registers' data line there). The firmware never touches it whatever the settings say, and the app hides it.
+  - Rev 4.0's A2 and A3 are analog sources 9 and 10, with no spare-pin setting: an axis that uses one turns it on. The live data carries them after the older fields (73 bytes instead of 69), so every field keeps its place; on Rev 3.0 they read 0, in bytes that were padding before.
+- **The AS5600 settings belong to the board, not the profile:** the I²C clock (100, 50, 25 or 10 kHz) and each port's start and stop (ZPOS, MPOS), in their own EEPROM block (960-981), through two new commands (SENSOR_STATUS, SENSOR_CONFIG) that Rev 3.0 answers with ERR_COMMAND. Like Rev 3.0's burnt-in angles, they describe how a sensor is mounted, which a shared profile shouldn't carry. The helper saves them at once, without a restart. The firmware writes them to each sensor's volatile registers at start-up and never burns.
+- **Which board a build is for** is set when it's built (`HSR_BOARD_REV`; the Arduino IDE builds Rev 3.0) and carried in flash as `hsr_build_tag_t`. INFO reads its board ID from the tag, which keeps the linker from dropping it. The app reads the tag from a `.hex` and:
+  - flashes a file for the board the connected firmware is for;
+  - asks before flashing the other board's file (the firmware could be on the wrong board, so it's a question, not a refusal), a Rev 4.0 file onto a Pro Micro without HeliSR firmware, or an untagged file;
+  - on the command line, refuses those unless `--board` says which board the Pro Micro is on.
+  The bundled files are `HeliSR_Rev3.0_16MHz.hex` and `HeliSR_Rev4.0_16MHz.hex` (they were `HeliSR_16MHz.hex`).
+- **One port per pass, blocking,** with every TWI step time-limited (`i2c.cpp`): simple to check, and a pass grows by about 170 I²C clocks (1.7 ms at 100 kHz, 17 ms at 10 kHz; calculated). An interrupt-driven reader would keep passes short at the slow clocks, if they turn out to be needed.
+- **Failures:** a port that fails keeps its last reading (0 until its first) and its state says why; its range is written again once it answers. With the range, CONF is written as 0, the chip's own power-up setting (normal power, 16x slow filter, no fast filter, hysteresis or watchdog), so a chip with other settings burnt in still behaves the same. Every third visit reads ZPOS, MPOS and CONF back, which catches a sensor that restarted without a failed transfer. A stuck bus is freed at once (/RESET pulse, 9 clocks, STOP), and the port that stuck it is left alone for 250 ms so the other ports carry on. A switch that doesn't answer is reset at most every 250 ms.
+- **The app follows the board:** the pages show the connected board's (and remember it); without a board, the Board page chooses. A board ID the app doesn't know counts as incompatible.
+- **Versions:** left at firmware 1.0.0 and app 1.0.0; bump them at the next release.
+- **Not done:** the firmware doesn't check which board it's on. A Rev 4.0 build put on a Rev 3.0 board some other way (avrdude by hand, the Arduino IDE) still drives the contended pins. A possible guard, once a Rev 4.0 board can prove it doesn't misfire: before driving anything, check that pin 3 has Rev 4.0's 10 k pull-up (Rev 3.0's latch line has none), and stay passive if not.
+
+**Builds** (no warnings in HeliSR code):
+
+| Build | Flash (of 28,672) | RAM (of 2,560) |
+|---|---|---|
+| Rev 3.0, release | 21,450 B (74 %); was 21,398 | 2,093 B (81 %), unchanged |
+| Rev 3.0, test (`-Test`) | 21,972 B; was 21,916 | 2,094 B, unchanged |
+| Rev 4.0, release | 24,246 B (84 %); was 24,188 before the CONF write | 2,174 B (84 %), unchanged |
+| Rev 4.0, test (`-Test`) | 24,796 B; was 24,738 | 2,175 B, unchanged |
+| Rev 4.0, USB serial (`-Serial`) | 25,036 B; was 24,978 | 2,284 B, unchanged |
+
+Rev 4.0's extra 81 B of RAM are the sensors' state (40 B), their settings (18 B) and the two extra analog sources. Its lowest unused stack, measured on the bare Pro Micro, is **150 B** after 20 s of the app polling live data and sensor status (159-179 B in the shorter tests). Rev 3.0's is 236-256 B in the same tests (208 B in phase 5's heavier run). Thinner, but enough; don't add stack-hungry features to Rev 4.0 without measuring.
+
+**Tested without a Rev 4.0 board:**
+
+| Check | Result |
+|---|---|
+| Both builds, and Rev 4.0's `-Test` and `-Serial` | ✅ compile |
+| PC tests (`run-host-tests.ps1`, now built as Rev 4.0) | ✅ 344 of 344: the 192 logic checks as before, and 152 new ones. `sensor_tests.cpp` runs `sensors.cpp` against a model of the PCA9546A with an AS5600 on each channel: each port on its own channel (AX1-AX4 → 2, 1, 3, 0) and never two at once; ZPOS before MPOS, 1 ms apart, high byte first, read back; nothing burnt; settings kept in EEPROM and written again at a restart; out-of-range settings refused with nothing changed; a damaged EEPROM block; the clock; a sensor unplugged and back, restarted silently, or refusing its range; the magnet states; the switch missing; a stuck bus; scaling to 0-4092. Also A2/A3 through the pipeline and the live data |
+| What the model found | A stuck sensor took the other ports down while bus recoveries were rate-limited (the switch stayed connected to it). Fixed as above |
+| `--ui-test 200` | ✅ 200 of 200 on Rev 3.0; 200 of 200 with `--board 4.0` |
+| `--ui-test-file`, the 3 example profiles | ✅ unchanged on both boards |
+| `--hex-info` | ✅ both builds identified; a build from before the tag reported as untagged; a non-hex file refused |
+| `--flash-new` refusals (no device needed) | ✅ a Rev 4.0 file without `--board 4.0`, a file for the other board than `--board`, an untagged file, a non-hex file: each refused before anything is touched |
+| `--ui-screenshot` of the Board page | Both boards look right; Rev 4.0 with made-up sensor readings (no device) |
+
+**Found on the way, not Rev 4.0's:** `--ui-test 200` crashed on this PC, on the unchanged code too. FreeJoy's encoder page kept only 8 encoder inputs of each kind and read past its rows when a ninth existed for a moment, while settings load one button at a time. It now keeps full sorted lists (`encodersconfig.cpp`). Loading a profile with 8 encoders over another could have crashed the window the same way.
+
+**On the bare Pro Micro** (the OSOYOO clone, on no board), 2026-10-27:
+
+| Check | Rev 3.0 firmware (this branch) | Rev 4.0 firmware |
+|---|---|---|
+| `--flash` and the board check | ✅ the Rev 4.0 file refused while Rev 3.0 firmware ran; the Rev 3.0 file written and verified, settings kept | ✅ flashed with `--board 4.0`; the Rev 3.0 file then refused until `--board 3.0` |
+| INFO | ✅ board 0x30, settings v2, 236-256 B stack never used | ✅ board 0x40, settings kept, 150-179 B |
+| `hsr-usb-test.ps1` info, params, rawjoy, badcommit | ✅ | ✅ info, rawjoy |
+| `hsr-logic-test.ps1` | ✅ all but the Windows joystick API check (below) | ✅ the same |
+| `hsr-lockstep.ps1`, on the Rev 3.0 test firmware | ✅ 56 of 56 scenarios (58,979 passes) identical; 220 B stack never used | not run |
+| `--roundtrip`, `--ui-device-test` | ✅ | ✅ (the pages on Rev 4.0) |
+| `--params` | ✅ 9 sources | ✅ 11 sources |
+| `--sensors`, `--sensor-roundtrip` | ✅ refused: not a Rev 4.0 board | ✅ every port "no switch" (no PCA9546A), the switch reset about 4 times a second (one per 250 ms); the settings saved, read back, kept through a restart, refused out of range, restored |
+
+Found on the Pro Micro:
+- **`--params` crashed** in the app: its loop over the analog sources read past the 9 that `analog_inputs` holds. Fixed (it now prints the board's sources).
+- **Windows' joystick API (winmm) reports the board with 0 axes and 0 buttons**, with this branch's firmware and with the unchanged firmware alike, so it isn't the change. The raw HID reports are right (11 bytes: 16 buttons, 4 axes), and Windows still has this VID/PID cached as "UH-1 Collective" from phase 7. Probably Windows' cached state; replugging the board, or **Remove name**, may clear it. Not looked into further.
+- **`--info` showed all zeros twice** right after the board reappeared: when the device list changes, the worker reopens the board and clears the shared INFO copy before reading it again, while the command line prints. Unchanged code; a second `--info` is right. Not fixed.
+
+Left on the Pro Micro: this branch's Rev 3.0 release build, with the board's settings as they were (read back identical to a backup taken first).
+
+**Not tested: waits for a Rev 4.0 board:**
+- the shift registers on pins 14 and A0;
+- everything on a real I²C bus: the TWI at each clock, the PCA9546A's channel selection and /RESET, the bus recovery, long cables and the pull-ups;
+- the AS5600 as the firmware uses it: reading STATUS on through RAW ANGLE in one transfer, ZPOS, MPOS and CONF taking effect without a burn, the ANGLE output across the range, STATUS and AGC values with real magnets, and whether a chip burnt on Rev 3.0 takes a new range;
+- the JTD write on a clone with JTAG on;
+- A2 and A3 read by the ADC (the pipeline side is tested on the PC);
+- the I²C helper with real sensors: Set start, Set stop, the direction it detects, the clock change, the board-page states;
+- pass times and the stack at each clock with a switch and sensors answering (the bare Pro Micro only takes the quick no-answer path; its longest pass was 3.4 ms, as on Rev 3.0);
+- the flasher's dialogs in the window (the check behind them is the command line's, tested above).

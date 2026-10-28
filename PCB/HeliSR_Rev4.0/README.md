@@ -1,7 +1,7 @@
 # HeliSR Rev 4.0 – Pro Micro + I²C collective board (Huey head)
 
-> **Designed, not ordered, not built.** The HeliSR firmware doesn't support this board yet: Rev 4.0 needs its
-> own build (the shift-register pins moved, and the AS5600s are read over I²C). See [Firmware](#firmware).
+> **Designed, not ordered, not built.** The HeliSR firmware has a Rev 4.0 build and HeliSR Configurator supports
+> the board, but neither has run on one yet. See [Firmware](#firmware).
 
 A small carrier board for the collective's switch box: a **SparkFun Pro Micro 5V/16 MHz** with **16 switch
 inputs** read through two 74HC165 shift registers, as on Rev 3.0, and **four I²C ports for AS5600 magnetic angle
@@ -183,22 +183,34 @@ free for other use.
 
 ## Firmware
 
-The HeliSR firmware in `Software/firmware/HeliSR` is written for Rev 3.0. Rev 4.0 needs a build that:
+The HeliSR firmware in `Software/firmware/HeliSR` has a build for this board: `Software/firmware/build.ps1 -Board 4.0`,
+shipped as `firmware\HeliSR_Rev4.0_16MHz.hex`. It:
 
-- reads the shift registers on pins 14 (data), 15 (clock) and A0 (load) instead of 2, 15 and 3;
-- runs the TWI on pins 2 and 3 at a configurable clock (100 kHz default), selects each port's PCA9546A channel and
-  reads its AS5600 (address 0x36, RAW ANGLE or ANGLE registers);
-- writes each sensor's start and stop angles at start-up, from settings the Configurator saves;
-- maps channels 2, 1, 3, 0 to AX1–AX4 as above, and pulls A1 low to reset a stuck bus;
-- treats A2 and A3 as spare analog pins instead of AX1–AX4;
+- reads the shift registers on pins 14 (data), 15 (clock) and A0 (load) instead of 2, 15 and 3, in Rev 3.0's bit order;
+- runs the TWI on pins 2 and 3 at 100 kHz, or 50, 25 or 10 kHz for long cables (set in HeliSR Configurator), connects
+  one port's PCA9546A channel at a time and reads its AS5600's ANGLE register (address 0x36), scaled to the analog
+  inputs' 0–4092. It also reads STATUS, RAW ANGLE and AGC, for the magnet checks and the Configurator's helper;
+- writes each sensor's start and stop to its volatile ZPOS and MPOS at start-up, 1 ms apart, from settings it keeps
+  in EEPROM (the Configurator sets them), and CONF as 0 (the chip's factory settings, over anything burnt in); reads
+  them back, and writes them again to a sensor that comes back after an error or has lost them. It never burns
+  anything;
+- maps channels 2, 1, 3, 0 to AX1–AX4 as above. A stuck bus is freed by pulling A1 low (never driving it high), clocking
+  out a half-sent byte and sending a STOP; a port that stuck it is left alone for 250 ms;
+- treats A2 and A3 as spare analog pins (axis sources 9 and 10) instead of AX2 and AX1, and leaves pin 14 out of the
+  spare pins;
 - sets the JTD bit in MCUCR at start-up (written twice, as the ATmega32U4 requires). A0 and A1 are also the JTAG
   pins TDI and TDO (PF7, PF6); SparkFun ships the Pro Micro with JTAG off in its fuses (high fuse 0xD8), but a clone
   with JTAG on would otherwise keep both pins from working as plain I/O.
 
+The sensor code is tested on a PC against a model of the PCA9546A and the AS5600 (`Software/firmware/test/host`).
+Nothing of this board's firmware has run on the board itself: the shift-register pins, the I²C timing on real
+cables, the bus recovery and the sensors' behaviour all wait for one. `Software/PLAN.md` lists what's still to check.
+
 **Keep the builds apart.** Rev 3.0 firmware on a Rev 4.0 board does no harm: it drives the I²C clock line and listens
 on SDA, which only the pull-ups hold, and reads A0–A3 as analog inputs. A Rev 4.0 build on a **Rev 3.0** board would
-drive A0 and A1 against whatever is on AX4 and AX3, and pull pin 2 against U2's QH output, so the Configurator should check the
-board revision before it flashes.
+drive A0 and A1 against whatever is on AX4 and AX3, and pull pin 2 against U2's QH output. So every build carries a tag
+saying which board it's for, INFO reports it, and HeliSR Configurator checks the tag in a `.hex` against the connected
+firmware before it flashes, and asks before putting Rev 4.0 firmware on a Pro Micro whose board it can't tell.
 
 ## Files
 

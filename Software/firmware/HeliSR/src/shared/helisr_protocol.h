@@ -3,7 +3,7 @@
 
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy).
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 and Rev 4.0 boards, 2026.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 
   The device has two HID interfaces:
@@ -15,6 +15,9 @@
     [0] report ID   [1] command   [2] index / argument   [3] status   [4..63] data (60 bytes)
   The device answers each command with a packet carrying the same command
   number. Status is HSR_OK or an HSR_ERR_ code.
+
+  Both boards speak protocol 1. Rev 4.0 adds the two SENSOR commands, which
+  Rev 3.0 answers with HSR_ERR_COMMAND: INFO's board_id says which to expect.
 */
 
 #ifndef HELISR_PROTOCOL_H
@@ -50,6 +53,11 @@ enum
 	HSR_CMD_PARAMS,         // start live data for 5 s; index = part (0 or 1) -> params bytes
 	HSR_CMD_BOOTLOADER,     // data = "bootloader run" -> ack, then the bootloader starts
 
+	// Rev 4.0 only: the AS5600s on AX1-AX4
+	HSR_CMD_SENSOR_STATUS,  // -> hsr_sensor_status_t
+	HSR_CMD_SENSOR_CONFIG,  // index 0: read; index 1: data = hsr_sensor_config_t, saved
+	                        // and applied at once (no restart) -> hsr_sensor_config_t
+
 	// Test builds only (HSR_TEST_STEP): the PC drives the logic in lockstep
 	HSR_CMD_TEST_APPLY = 0x70,  // restart the logic from the settings in RAM and enter
 	                            // test mode (the board's own inputs are ignored) -> ack
@@ -64,6 +72,7 @@ enum
 	HSR_ERR_CRC,            // COMMIT: checksum doesn't match
 	HSR_ERR_VERSION,        // COMMIT: config_version doesn't match the firmware
 	HSR_ERR_BUSY,           // a write is in progress from another command
+	HSR_ERR_VALUE,          // SENSOR_CONFIG: a value out of range; nothing changed
 };
 
 #pragma pack(push, 1)
@@ -85,6 +94,97 @@ typedef struct
 } hsr_info_t;
 #pragma pack(pop)
 
+/* Every firmware build carries this tag in its flash, so the configurator can
+   tell which board a .hex file is for before it flashes it. INFO takes its
+   board_id from the tag too, which keeps the tag in the build. */
+#define HSR_BUILD_MAGIC         "HeliSR firmware"   // 15 characters and the NUL
+
+#pragma pack(push, 1)
+typedef struct
+{
+	char        magic[16];          // HSR_BUILD_MAGIC
+	uint8_t     board_id;           // HSR_BOARD_REV30 / HSR_BOARD_REV40
+	uint8_t     cpu_mhz;
+	uint16_t    firmware_version;   // HSR_FIRMWARE_VERSION
+} hsr_build_tag_t;
+#pragma pack(pop)
+
+/* ------------------------------------------------ Rev 4.0: AS5600 sensors --
+   Each AX port has its own channel on the board's PCA9546A I2C switch, and an
+   AS5600 behind it. The start and stop angles are written to each sensor's
+   working (volatile) ZPOS and MPOS registers every time the firmware starts,
+   from settings kept in EEPROM apart from dev_config_t: they belong to the
+   sensor's mounting, not to a profile, as Rev 3.0's burnt-in angles do. CONF
+   is set to the chip's power-up 0 with them. Nothing is ever burnt into a
+   chip. */
+
+#define HSR_SENSOR_CONFIG_VERSION   1
+#define HSR_I2C_KHZ_DEFAULT         100     // also 50, 25 and 10, for long cables
+#define HSR_AS5600_MIN_SPAN         205     // the AS5600's smallest range: 18 degrees in 4096ths
+
+enum
+{
+	HSR_SENSOR_STARTING = 0,    // not read yet
+	HSR_SENSOR_OK,              // reading, magnet in range
+	HSR_SENSOR_NO_MAGNET,       // the AS5600 answers but sees no magnet (STATUS MD = 0)
+	HSR_SENSOR_MAGNET_WEAK,     // magnet too far or too weak (ML)
+	HSR_SENSOR_MAGNET_STRONG,   // magnet too close or too strong (MH)
+	HSR_SENSOR_NO_SENSOR,       // nothing answers at 0x36 on this port
+	HSR_SENSOR_NO_SWITCH,       // the PCA9546A doesn't answer: no port can be read
+	HSR_SENSOR_BUS_ERROR,       // the bus stuck (a line held low) while on this port
+};
+
+#define HSR_SENSOR_RANGE_OK     0x01    // hsr_sensor_port_t.flags: the sensor holds the saved
+                                        // start and stop, and CONF 0 (read back and checked)
+
+#pragma pack(push, 1)
+typedef struct
+{
+	uint16_t    zpos;           // start: the RAW ANGLE (0-4095) at one end of the travel
+	uint16_t    mpos;           // stop: at the other end, in the direction the angle rises;
+	                            // zpos == mpos: the whole circle (both written as 0)
+} hsr_sensor_range_t;
+
+typedef struct
+{
+	uint8_t             version;        // HSR_SENSOR_CONFIG_VERSION
+	uint8_t             i2c_khz;        // 100, 50, 25 or 10
+	hsr_sensor_range_t  range[4];       // AX1-AX4
+} hsr_sensor_config_t;
+
+typedef struct
+{
+	uint8_t     state;          // HSR_SENSOR_...
+	uint8_t     flags;          // HSR_SENSOR_RANGE_OK
+	uint8_t     status;         // the AS5600's STATUS register (MD 0x20, ML 0x10, MH 0x08)
+	uint8_t     agc;            // its AGC: 0-255 on 5 V, best near the middle
+	uint16_t    raw_angle;      // RAW ANGLE, 0-4095: what the start and stop are set from
+	uint16_t    angle;          // ANGLE, 0-4095 across the range: what the axis gets
+	uint16_t    errors;         // failed transfers on this port since start-up
+} hsr_sensor_port_t;
+
+typedef struct
+{
+	uint8_t             i2c_khz;        // the clock in use
+	uint8_t             bus_resets;     // bus recoveries since start-up (stops at 255)
+	hsr_sensor_port_t   port[4];        // AX1-AX4
+} hsr_sensor_status_t;
+#pragma pack(pop)
+
+/* A start and stop the firmware accepts. */
+static inline uint8_t hsr_sensor_range_valid(const hsr_sensor_range_t *r)
+{
+	if (r->zpos > 4095 || r->mpos > 4095) return 0;
+	if (r->zpos == r->mpos) return 1;
+	uint16_t span = (uint16_t)((r->mpos - r->zpos) & 4095);
+	return span >= HSR_AS5600_MIN_SPAN;
+}
+
+static inline uint8_t hsr_i2c_khz_valid(uint8_t khz)
+{
+	return khz == 100 || khz == 50 || khz == 25 || khz == 10;
+}
+
 /* Test builds: one logic pass with given inputs and time, and its results. */
 #pragma pack(push, 1)
 typedef struct
@@ -92,7 +192,7 @@ typedef struct
 	uint16_t    now;                            // ms
 	uint16_t    sr_inputs;                      // bit n = IN(n+1) closed
 	uint16_t    spare_buttons;                  // bit n = spare pin n pressed
-	uint16_t    analog[9];                      // HSR_ANALOG_SOURCES raw readings
+	uint16_t    analog[9];                      // raw readings of analog sources 0-8 (Rev 3.0's)
 } hsr_test_step_t;
 
 typedef struct
@@ -106,6 +206,12 @@ typedef struct
 	uint8_t     pwm[4];                         // PWM duty per channel (%)
 } hsr_test_result_t;
 #pragma pack(pop)
+
+#if defined(__cplusplus)
+static_assert(sizeof(hsr_build_tag_t) == 20, "hsr_build_tag_t layout");
+static_assert(sizeof(hsr_sensor_config_t) == 18, "hsr_sensor_config_t layout");
+static_assert(sizeof(hsr_sensor_status_t) == 42, "hsr_sensor_status_t layout");
+#endif
 
 /* CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF), over the whole dev_config_t. */
 static inline uint16_t hsr_crc16(const uint8_t *data, uint16_t len)

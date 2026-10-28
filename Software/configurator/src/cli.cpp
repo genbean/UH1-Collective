@@ -9,6 +9,7 @@
 #include "avrflasher.h"
 #include "configtofile.h"
 #include "deviceconfig.h"
+#include "firmwarefile.h"
 #include "global.h"
 #include "helisrboard.h"
 #include "hiddevice.h"
@@ -22,7 +23,8 @@
 namespace
 {
 const QStringList COMMANDS = {"--info", "--read", "--write", "--write-defaults", "--params", "--flash",
-                              "--flash-new", "--roundtrip", "--save-defaults", "--help"};
+                              "--flash-new", "--roundtrip", "--save-defaults", "--hex-info", "--sensors",
+                              "--sensor-roundtrip", "--help"};
 
 void out(const QString &text)
 {
@@ -90,6 +92,9 @@ public:
         QObject::connect(m_dev, &HidDevice::configSent, &m_context, [this](bool ok) { m_writeResult = ok ? 1 : 0; });
         QObject::connect(m_dev, &HidDevice::bootloaderStarted, &m_context, [this](bool ok) { m_bootResult = ok ? 1 : 0; });
         QObject::connect(m_dev, &HidDevice::paramsPacketReceived, &m_context, [this] { m_paramsCount++; });
+        QObject::connect(m_dev, &HidDevice::sensorConfigReceived, &m_context, [this](bool ok) { m_sensorReadResult = ok ? 1 : 0; });
+        QObject::connect(m_dev, &HidDevice::sensorConfigSent, &m_context, [this](bool ok) { m_sensorWriteResult = ok ? 1 : 0; });
+        QObject::connect(m_dev, &HidDevice::sensorStatusReceived, &m_context, [this] { m_sensorStatusCount++; });
         m_thread.start();
     }
 
@@ -144,6 +149,29 @@ public:
         return waitUntil([&] { return m_bootResult >= 0; }, 5000) && m_bootResult == 1;
     }
 
+    //! Rev 4.0: the AS5600 settings, into DeviceConfig::sensorConfig
+    bool readSensors()
+    {
+        m_sensorReadResult = -1;
+        m_dev->readSensorConfig();
+        return waitUntil([&] { return m_sensorReadResult >= 0; }, 3000) && m_sensorReadResult == 1;
+    }
+
+    //! Rev 4.0: save AS5600 settings on the board; false if it refused them
+    bool writeSensors(const hsr_sensor_config_t &config)
+    {
+        m_sensorWriteResult = -1;
+        m_dev->writeSensorConfig(config);
+        return waitUntil([&] { return m_sensorWriteResult >= 0; }, 3000) && m_sensorWriteResult == 1;
+    }
+
+    //! wait for this many more AS5600 status reports
+    bool sensorStatus(int count, int timeoutMs)
+    {
+        int target = m_sensorStatusCount + count;
+        return waitUntil([&] { return m_sensorStatusCount >= target; }, timeoutMs);
+    }
+
     int paramsCount() const { return m_paramsCount; }
     bool compatible() const { return m_compatible; }
     QStringList names() const { return m_names; }
@@ -160,6 +188,9 @@ private:
     int m_writeResult = -1;
     int m_bootResult = -1;
     int m_paramsCount = 0;
+    int m_sensorReadResult = -1;
+    int m_sensorWriteResult = -1;
+    int m_sensorStatusCount = 0;
 };
 
 void printInfo(const QStringList &names)
@@ -168,19 +199,43 @@ void printInfo(const QStringList &names)
     out("Devices:       " + names.join(", "));
     out("Firmware:      " + versionText(i.firmware_version) + QStringLiteral(", %1 MHz").arg(i.cpu_mhz)
         + (i.usb_serial_port ? ", with USB serial port" : ""));
-    out(QStringLiteral("Protocol:      %1, board 0x%2, settings v%3 (%4 bytes)")
-            .arg(i.protocol_version).arg(i.board_id, 2, 16, QChar('0')).arg(i.config_version).arg(i.config_size));
+    out(QStringLiteral("Protocol:      %1, board 0x%2 (%3), settings v%4 (%5 bytes)")
+            .arg(i.protocol_version).arg(i.board_id, 2, 16, QChar('0')).arg(HsrBoard::boardName(i.board_id))
+            .arg(i.config_version).arg(i.config_size));
     out(QStringLiteral("Board ID:      %1, settings from %2")
             .arg(i.unique_id, 8, 16, QChar('0')).arg(i.config_from_eeprom ? "EEPROM" : "factory defaults"));
     out(QStringLiteral("Health:        %1 B stack never used, longest pass %2 us, %3 commands, %4 replies dropped")
             .arg(i.stack_free).arg(i.pass_max_us).arg(i.commands).arg(i.replies_dropped));
 }
 
-int flash(const QString &hex, Session *session, const QString &port)
+// --board 3.0 / 4.0: the board the user says the Pro Micro is on (0 = not said, -1 = not a board)
+int statedBoard(const QString &text)
+{
+    if (text.isEmpty()) return 0;
+    if (text == "3.0" || text == "3") return HSR_BOARD_REV30;
+    if (text == "4.0" || text == "4") return HSR_BOARD_REV40;
+    return -1;
+}
+
+int flash(const QString &hex, Session *session, const QString &port, int stated)
 {
     if (QFileInfo::exists(hex) == false) {
         out("No such file: " + hex);
         return 2;
+    }
+    // which board the file is for, against the board the Pro Micro is on
+    FirmwareFile::Info file = FirmwareFile::read(hex);
+    out(QFileInfo(hex).fileName() + ": " + FirmwareFile::describe(file));
+    int deviceBoard = session ? gEnv.pDeviceConfig->info.board_id : 0;
+    FirmwareFile::Check check = FirmwareFile::check(file, deviceBoard, stated);
+    if (check.verdict != FirmwareFile::Ok) {
+        out("Not flashed. " + check.message);
+        if (check.verdict == FirmwareFile::Confirm) {
+            out(file.tagged ? QStringLiteral("If you're sure, say which board it's on: --board %1")
+                                  .arg(HsrBoard::revisionName(file.boardId).mid(4))
+                            : QStringLiteral("If you're sure, say which board it's on: --board 3.0 or --board 4.0"));
+        }
+        return 1;
     }
     AvrFlasher avr;
     bool done = false, ok = false;
@@ -254,6 +309,73 @@ int roundtrip(Session &s)
     out(restored ? "Original settings restored: OK" : "FAIL: restored settings differ");
     return same && restored ? 0 : 1;
 }
+
+QString sensorLine(const hsr_sensor_status_t &s)
+{
+    static const char *const names[] = {"starting", "OK", "no magnet", "magnet weak", "magnet strong", "no sensor",
+                                        "no switch", "bus error"};
+    QString line = QStringLiteral("%1 kHz, %2 bus resets |").arg(s.i2c_khz).arg(s.bus_resets);
+    for (int i = 0; i < HSR_AX_INPUTS; ++i) {
+        const hsr_sensor_port_t &p = s.port[i];
+        line += QStringLiteral(" AX%1 %2%3 raw %4 out %5 agc %6 err %7 |").arg(i + 1)
+                    .arg(p.state < 8 ? names[p.state] : "?").arg((p.flags & HSR_SENSOR_RANGE_OK) ? " (range)" : "")
+                    .arg(p.raw_angle).arg(p.angle).arg(p.agc).arg(p.errors);
+    }
+    return line;
+}
+
+QString sensorConfigLine(const hsr_sensor_config_t &c)
+{
+    QString line = QStringLiteral("v%1, %2 kHz |").arg(c.version).arg(c.i2c_khz);
+    for (int i = 0; i < HSR_AX_INPUTS; ++i) {
+        line += QStringLiteral(" AX%1 %2-%3").arg(i + 1).arg(c.range[i].zpos).arg(c.range[i].mpos);
+    }
+    return line;
+}
+
+// Rev 4.0: the AS5600 settings saved, read back, kept through a restart,
+// refused when out of range, and the originals put back. Works without sensors: the board keeps the
+// settings whether or not anything answers on its ports.
+int sensorRoundtrip(Session &s)
+{
+    if (s.readSensors() == false) { out("FAIL: reading the AS5600 settings"); return 1; }
+    hsr_sensor_config_t original = gEnv.pDeviceConfig->sensorConfig;
+    out("Read:      " + sensorConfigLine(original));
+
+    hsr_sensor_config_t test = original;
+    test.i2c_khz = original.i2c_khz == 50 ? 25 : 50;
+    test.range[0] = {1000, 3000};
+    test.range[2] = {3900, 200};        // across 0
+    test.range[3] = {0, 0};
+    if (s.writeSensors(test) == false) { out("FAIL: writing test settings"); return 1; }
+    if (s.readSensors() == false) { out("FAIL: read back"); return 1; }
+    bool same = memcmp(&test, &gEnv.pDeviceConfig->sensorConfig, sizeof(test)) == 0;
+    out("Wrote:     " + sensorConfigLine(test));
+    out(same ? "Read back identical: OK" : "FAIL: read back " + sensorConfigLine(gEnv.pDeviceConfig->sensorConfig));
+    bool clock = s.sensorStatus(3, 2000) && gEnv.pDeviceConfig->sensorStatus.i2c_khz == test.i2c_khz;
+    out(clock ? "The status reports the new clock: OK" : "FAIL: the status doesn't report the new clock");
+    out("Status:    " + sensorLine(gEnv.pDeviceConfig->sensorStatus));
+
+    // kept through a restart: write the main settings back unchanged, which restarts the board
+    bool survived = s.read() && s.write() && s.readSensors()
+                    && memcmp(&test, &gEnv.pDeviceConfig->sensorConfig, sizeof(test)) == 0;
+    out(survived ? "Kept through a restart: OK" : "FAIL: not kept through a restart " + sensorConfigLine(gEnv.pDeviceConfig->sensorConfig));
+
+    // out of range: refused, and nothing changes
+    hsr_sensor_config_t bad = test;
+    bad.range[1] = {100, 150};          // under 18 degrees
+    bool refused = s.writeSensors(bad) == false;
+    bad = test;
+    bad.i2c_khz = 40;
+    refused = refused && s.writeSensors(bad) == false;
+    bool kept = s.readSensors() && memcmp(&test, &gEnv.pDeviceConfig->sensorConfig, sizeof(test)) == 0;
+    out(refused && kept ? "Out-of-range settings refused, nothing changed: OK" : "FAIL: out-of-range settings");
+
+    if (s.writeSensors(original) == false || s.readSensors() == false) { out("FAIL: restoring"); return 1; }
+    bool restored = memcmp(&original, &gEnv.pDeviceConfig->sensorConfig, sizeof(original)) == 0;
+    out(restored ? "Original settings restored: OK" : "FAIL: restored settings differ");
+    return same && clock && survived && refused && kept && restored ? 0 : 1;
+}
 }
 
 bool Cli::isCliCommand(const QStringList &args)
@@ -276,9 +398,23 @@ int Cli::run(const QStringList &args)
     if (args.contains("--help")) {
         out("HeliSR Configurator " APP_VERSION);
         out("  --info | --read <file.cfg> | --write <file.cfg> | --write-defaults | --params [s]");
-        out("  --flash <file.hex> | --flash-new <file.hex> [--port COMx] | --roundtrip   [--device <n>]");
-        out("  --save-defaults <file.cfg>   (no device needed)");
+        out("  --flash <file.hex> | --flash-new <file.hex> [--port COMx] [--board 3.0|4.0] | --roundtrip   [--device <n>]");
+        out("  --sensors [s] | --sensor-roundtrip   (HeliSR Rev 4.0 boards)");
+        out("  --save-defaults <file.cfg> | --hex-info <file.hex>   (no device needed)");
+        out("--flash checks which board the file is for. --board says which board the Pro Micro is on, when");
+        out("its firmware doesn't (a new Pro Micro) or says another one.");
         return 0;
+    }
+    int stated = statedBoard(value("--board"));
+    if (stated < 0) {
+        out("--board takes 3.0 or 4.0");
+        return 2;
+    }
+    if (args.contains("--hex-info")) {
+        FirmwareFile::Info file = FirmwareFile::read(value("--hex-info"));
+        out(value("--hex-info") + ": " + FirmwareFile::describe(file));
+        if (file.readable) out(QStringLiteral("%1 bytes of program").arg(file.bytes));
+        return file.readable ? 0 : 1;
     }
     if (args.contains("--save-defaults")) {
         QString file = value("--save-defaults");
@@ -293,7 +429,7 @@ int Cli::run(const QStringList &args)
         return 0;
     }
     if (args.contains("--flash-new")) {
-        return flash(value("--flash-new"), nullptr, value("--port"));
+        return flash(value("--flash-new"), nullptr, value("--port"), stated);
     }
 
     Session s(deviceIndex);
@@ -301,7 +437,7 @@ int Cli::run(const QStringList &args)
         return 1;
     }
     if (args.contains("--flash")) {
-        return flash(value("--flash"), &s, QString());
+        return flash(value("--flash"), &s, QString(), stated);
     }
     if (s.compatible() == false) {
         return 1;
@@ -341,8 +477,11 @@ int Cli::run(const QStringList &args)
             waitUntil([] { return false; }, 250);
             const params_report_t &p = gEnv.pDeviceConfig->paramsReport;
             QString line = QStringLiteral("%1 ms  AX:").arg(t.elapsed(), 5);
+            // the board's analog sources: 0-8, and on Rev 4.0 A2 and A3 too
             for (int i = 0; i < HSR_ANALOG_SOURCES; ++i) {
-                line += QStringLiteral(" %1").arg(p.analog_inputs[i], 4);
+                if (hsr_source_exists(gEnv.pDeviceConfig->info.board_id, uint8_t(i))) {
+                    line += QStringLiteral(" %1").arg(hsr_params_analog(&p, uint8_t(i)), 4);
+                }
             }
             line += "  inputs:";
             for (int i = HSR_MAX_PHYS / 8 - 1; i >= 0; --i) {
@@ -359,6 +498,24 @@ int Cli::run(const QStringList &args)
     }
     if (args.contains("--roundtrip")) {
         return roundtrip(s);
+    }
+    if (args.contains("--sensors") || args.contains("--sensor-roundtrip")) {
+        if (gEnv.pDeviceConfig->info.board_id != HSR_BOARD_REV40) {
+            out("The device isn't a HeliSR Rev 4.0 board: it has no I2C sensors.");
+            return 1;
+        }
+        if (args.contains("--sensor-roundtrip")) {
+            return sensorRoundtrip(s);
+        }
+        if (s.readSensors()) out("Settings: " + sensorConfigLine(gEnv.pDeviceConfig->sensorConfig));
+        int seconds = qMax(1, value("--sensors").toInt());
+        QElapsedTimer t;
+        t.start();
+        while (t.elapsed() < seconds * 1000) {
+            if (s.sensorStatus(5, 2000) == false) { out("FAIL: no status"); return 1; }
+            out(QStringLiteral("%1 ms  ").arg(t.elapsed(), 5) + sensorLine(gEnv.pDeviceConfig->sensorStatus));
+        }
+        return 0;
     }
     return 0;
 }
