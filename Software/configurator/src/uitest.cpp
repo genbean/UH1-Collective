@@ -3,6 +3,7 @@
 #include <QElapsedTimer>
 #include <QFileInfo>
 #include <QPushButton>
+#include <QTabWidget>
 #include <QRandomGenerator>
 #include <QThread>
 #include <cstddef>
@@ -10,6 +11,7 @@
 #include <cstring>
 #include "deviceconfig.h"
 #include "global.h"
+#include "boardconfig.h"
 #include "configtofile.h"
 #include "helisrboard.h"
 #include "mainwindow.h"
@@ -47,8 +49,12 @@ dev_config_t randomConfig(QRandomGenerator &rng)
     c.button_polling_interval_ticks = uint8_t(r(1, 20));
     c.encoder_polling_interval_ticks = uint8_t(r(1, 20));
 
-    // spare pins
+    // spare pins the board has (Rev 4.0 has no pin 14)
     for (int i = 0; i < HSR_SPARE_PINS; ++i) {
+        if (HsrBoard::spareExists(i) == false) {
+            c.pins[i] = PIN_NOT_USED;
+            continue;
+        }
         QVector<int> funcs = {PIN_NOT_USED, PIN_BUTTON_GND, PIN_BUTTON_VCC, PIN_LED_SINGLE};
         if (HsrBoard::spareIsAnalog(i)) funcs << PIN_AXIS_ANALOG;
         if (HsrBoard::spareIsPwm(i)) funcs << PIN_LED_PWM;
@@ -340,9 +346,46 @@ QStringList throughPages(MainWindow &window, dev_config_t expected)
 }
 }
 
+// The Board page as a picture. Rev 4.0 has no board yet, so its I2C helper is
+// shown with made-up readings (the window is told a Rev 4.0 device is there):
+// a way to look at the page, not a test of it.
+static int screenshot(MainWindow &window, const QString &file)
+{
+    if (HsrBoard::isRev40()) {
+        DeviceConfig *d = gEnv.pDeviceConfig;
+        d->info.board_id = HSR_BOARD_REV40;
+        d->sensorConfig = {HSR_SENSOR_CONFIG_VERSION, 100, {{3412, 3801}, {0, 0}, {0, 0}, {310, 1250}}};
+        hsr_sensor_status_t &s = d->sensorStatus;
+        s = {};
+        s.i2c_khz = 100;
+        s.port[0] = {HSR_SENSOR_OK, HSR_SENSOR_RANGE_OK, 0x20, 131, 3602, 2002, 0};
+        s.port[1] = {HSR_SENSOR_NO_SENSOR, 0, 0, 0, 0, 0, 0};
+        s.port[2] = {HSR_SENSOR_NO_SENSOR, 0, 0, 0, 0, 0, 0};
+        s.port[3] = {HSR_SENSOR_MAGNET_WEAK, HSR_SENSOR_RANGE_OK, 0x30, 255, 702, 1700, 3};
+        for (int i = 0; i < HSR_AX_INPUTS; ++i) d->paramsReport.analog_inputs[i] = uint16_t(s.port[i].angle * HSR_RAW_MAX / 4095);
+        d->paramsReport.analog_inputs_a2a3[0] = 1234;
+        window.boardConfig()->setDeviceConnected(true);
+        window.boardConfig()->sensorConfigReceived(true);
+        window.boardConfig()->sensorStatusReceived();
+        window.boardConfig()->updateLiveData();
+    }
+    QTabWidget *tabs = window.findChild<QTabWidget *>("tabWidget");
+    QWidget *page = window.findChild<QWidget *>("tab_PinConfig");
+    if (tabs && page) tabs->setCurrentWidget(page);
+    window.resize(1500, 820);
+    window.show();
+    settle();
+    QThread::msleep(300);
+    settle();
+    bool ok = window.grab().save(file);
+    out(ok ? "Saved " + file : "FAIL: couldn't save " + file);
+    return ok ? 0 : 1;
+}
+
 bool UiTest::isUiTestCommand(const QStringList &args)
 {
-    return args.contains("--ui-test") || args.contains("--ui-device-test") || args.contains("--ui-test-file");
+    return args.contains("--ui-test") || args.contains("--ui-device-test") || args.contains("--ui-test-file")
+           || args.contains("--ui-screenshot");
 }
 
 int UiTest::run(MainWindow &window, const QStringList &args)
@@ -363,9 +406,38 @@ int UiTest::run(MainWindow &window, const QStringList &args)
         return 1;
     }
 
+    // the window saves the board it shows when it closes: leave the user's choice as it was
+    struct KeepBoard
+    {
+        int board = HsrBoard::board();
+        ~KeepBoard() { HsrBoard::setBoard(board); }
+    } keepBoard;
+
     QRandomGenerator rng(seed);
     if (args.contains("--ui-device-test")) {
+        // the device's board, once it has connected; then kept
+        QPushButton *read = window.findChild<QPushButton *>("pushButton_ReadConfig");
+        if (read) waitReady(read, 10000);
+        window.showBoard(HsrBoard::board(), false);
+        out("Board: " + HsrBoard::boardName(HsrBoard::board()));
         return deviceTest(window, rng);
+    }
+    int b = args.indexOf("--board");
+    QString boardArg = (b >= 0 && b + 1 < args.size()) ? args[b + 1] : QString();
+    int board = HsrBoard::board();
+    if (boardArg == "3.0") board = HSR_BOARD_REV30;
+    else if (boardArg == "4.0") board = HSR_BOARD_REV40;
+    else if (boardArg.isEmpty() == false) {
+        out("--board takes 3.0 or 4.0");
+        return 2;
+    }
+    // a device connecting during the test mustn't change the pages under it
+    window.showBoard(board, false);
+    settle();
+    out("Board: " + HsrBoard::boardName(HsrBoard::board()));
+    int shot = args.indexOf("--ui-screenshot");
+    if (shot >= 0) {
+        return shot + 1 < args.size() ? screenshot(window, args[shot + 1]) : 2;
     }
     // profiles: every file named after --ui-test-file, until the next option
     int f = args.indexOf("--ui-test-file");
@@ -378,6 +450,10 @@ int UiTest::run(MainWindow &window, const QStringList &args)
                 out("FAIL: couldn't load " + args[k]);
                 failedFiles++;
                 continue;
+            }
+            // a pin the board doesn't have (Rev 4.0's pin 14) can't come back from its pages
+            for (int i = 0; i < HSR_SPARE_PINS; ++i) {
+                if (HsrBoard::spareExists(i) == false) expected.pins[i] = PIN_NOT_USED;
             }
             QStringList diffs = throughPages(window, expected);
             out(QStringLiteral("%1: %2").arg(QFileInfo(args[k]).fileName(),

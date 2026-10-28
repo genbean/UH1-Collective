@@ -236,7 +236,7 @@ void axes_process(const uint16_t *analog, uint16_t now)
 		}
 
 		// Source
-		if (source >= 0 && source < HSR_ANALOG_SOURCES)
+		if (source >= 0 && source < HSR_BOARD_SOURCES)
 		{
 			int32_t v = analog[source];
 			if (a->offset_angle > 0)   // move the wrap point of a 360-degree sensor

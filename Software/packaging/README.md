@@ -33,7 +33,8 @@ What goes in:
 |---|---|
 | `HeliSRConfigurator.exe` | a clean release build of `..\configurator` |
 | Qt DLLs and plugins, MinGW runtime | `windeployqt` (no translations, no software OpenGL, no network plugins) |
-| `firmware\HeliSR_16MHz.hex` | `..\firmware\build.ps1` (5 V / 16 MHz Pro Micro, no USB serial port) |
+| `firmware\HeliSR_Rev3.0_16MHz.hex` | `..\firmware\build.ps1` (HeliSR Rev 3.0, 5 V / 16 MHz Pro Micro, no USB serial port) |
+| `firmware\HeliSR_Rev4.0_16MHz.hex` | `..\firmware\build.ps1 -Board 4.0` (HeliSR Rev 4.0, the same Pro Micro) |
 | `avrdude\` | the Arduino IDE's avrdude (8.0.0-arduino1): one exe needing only Windows' own DLLs, its config and licence |
 | `profiles\` | the example profiles from `..\profiles` (the app copies them to `Documents\HeliSR\configs\examples`) |
 | `licenses\`, notices, `README.txt`, `NOTICE.md` | this folder and the repo |
@@ -51,12 +52,12 @@ The app looks for the firmware and avrdude at exactly these paths next to itself
    Start-Process output\HeliSR-Configurator-x.y.z-Setup.exe '/VERYSILENT', '/CURRENTUSER', "/DIR=`"$d`"" -Wait
    $env:PATH = 'C:\Windows\System32;C:\Windows'      # no Qt or MinGW on the PATH
    & "$d\HeliSRConfigurator.exe" --info | Out-Host
-   & "$d\HeliSRConfigurator.exe" --flash "$d\firmware\HeliSR_16MHz.hex" | Out-Host
+   & "$d\HeliSRConfigurator.exe" --flash "$d\firmware\HeliSR_Rev3.0_16MHz.hex" | Out-Host
    Start-Process "$d\unins000.exe" '/VERYSILENT' -Wait
    ```
 5. **GitHub release.** Tag `vX.Y.Z`, then attach:
    - the installer, the zip and the SHA256SUMS file;
-   - `work\stage\firmware\HeliSR_16MHz.hex`, for people who flash with other tools;
+   - `work\stage\firmware\HeliSR_Rev3.0_16MHz.hex` and `HeliSR_Rev4.0_16MHz.hex`, for people who flash with other tools;
    - **avrdude's source**, which its GPL-2 licence requires next to the binary: avrdude v8.0 (`https://github.com/avrdudes/avrdude/archive/refs/tags/v8.0.zip`) and the Arduino build scripts (`https://github.com/arduino/avrdude-packing`, release 8.0.0-arduino1). If a different avrdude is bundled, attach that version's source instead.
 
 The installer isn't code-signed, so Windows SmartScreen shows "Windows protected your PC" the first time; **More info → Run anyway** continues. The release notes and the user guide should say so.

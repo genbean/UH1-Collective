@@ -1,6 +1,7 @@
 #ifndef ENCODERSCONFIG_H
 #define ENCODERSCONFIG_H
 
+#include <QVector>
 #include <QWidget>
 
 #include "deviceconfig.h"
@@ -31,8 +32,8 @@ private:
     Ui::EncodersConfig *ui;
 
     QList<Encoders *> m_encodersPtrList;
-    int m_encodersInput_A_count;
-    int m_encodersInput_B_count;
+    QVector<int> m_inputsA;         // button numbers (from 1) set to ENCODER_INPUT_A, in order
+    QVector<int> m_inputsB;         // ... ENCODER_INPUT_B
     QString m_notDefined;
 };
 

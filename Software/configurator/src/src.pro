@@ -46,6 +46,7 @@ SOURCES += \
     configtofile.cpp \
     converter.cpp \
     deviceconfig.cpp \
+    firmwarefile.cpp \
     helisrboard.cpp \
     hiddevice.cpp \
     main.cpp \
@@ -64,7 +65,7 @@ SOURCES += \
     widgets/axes-curves/axescurvesplot.cpp \
     widgets/axes/axesextended.cpp \
     widgets/axes/axestobuttonsslider.cpp \
-    widgets/board/as5600helper.cpp \
+    widgets/board/as5600helper.cpp     widgets/board/as5600i2chelper.cpp \
     widgets/board/boardconfig.cpp \
     widgets/buttons/buttonconfig.cpp \
     widgets/buttons/buttonlogical.cpp \
@@ -91,6 +92,7 @@ HEADERS += \
     converter.h \
     deviceconfig.h \
     global.h \
+    firmwarefile.h \
     helisrboard.h \
     hidapi.h \
     hiddevice.h \
@@ -110,7 +112,7 @@ HEADERS += \
     widgets/axes-curves/axescurvesplot.h \
     widgets/axes/axesextended.h \
     widgets/axes/axestobuttonsslider.h \
-    widgets/board/as5600helper.h \
+    widgets/board/as5600helper.h     widgets/board/as5600i2chelper.h \
     widgets/board/boardconfig.h \
     widgets/buttons/buttonconfig.h \
     widgets/buttons/buttonlogical.h \

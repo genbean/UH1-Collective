@@ -57,5 +57,10 @@ void pipeline_params(params_report_t *p, const uint16_t *analog)
 	memcpy(p->raw_axis_data, raw_axis_data, sizeof(raw_axis_data));
 	for (uint8_t i = 0; i < HSR_MAX_AXES; i++) p->axis_data[i] = axis_out(i);
 	memcpy(p->analog_inputs, analog, sizeof(p->analog_inputs));
+#if HSR_BOARD_SOURCES > 9
+	memcpy(p->analog_inputs_a2a3, analog + 9, sizeof(p->analog_inputs_a2a3));
+#else
+	memset(p->analog_inputs_a2a3, 0, sizeof(p->analog_inputs_a2a3));
+#endif
 	buttons_get(NULL, p->log_button_data, p->phy_button_data, NULL, &p->shift_button_data);
 }
