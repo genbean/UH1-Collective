@@ -119,8 +119,10 @@ Pro Micro "A1" ─────┴── R11 10k ── VCC   ──── SDA/SC
   sensor, and moves on. Only that port's cable is on the bus, so the long cables don't add up.
 - **Pull-ups:** each port has its own 2.2 kΩ pair, on the switch's side of its cable, so each channel is a complete
   I²C bus whether or not the sensor module has pull-ups. With the Pro Micro's 10 kΩ pair in parallel, a low SDA
-  sinks 2.3 + 0.5 = 2.8 mA at 5 V. That is within the 3 mA the I²C standard sets, which is also what the PCA9546A
-  is rated to sink at 0.4 V (the AS5600 can sink 20 mA; the ATmega32U4 more).
+  sinks 2.3 + 0.5 = 2.8 mA at 5 V, plus whatever the module's own pull-ups add. The weakest part on the bus is the
+  PCA9546A, and only while it acknowledges its own writes: TI rates it to sink at least 3 mA at 0.4 V and 6 mA at
+  0.6 V (SCPS148I). Every input on the bus reads below 1.5 V (0.3 × 5 V) as low, so anything up to 6 mA works with
+  margin. The AS5600 sinks 20 mA at 0.4 V (ams datasheet v1-06), the ATmega32U4 more.
 - **/RESET:** R11 holds it high, so the switch works even before the firmware drives A1. Pulling A1 low resets the
   switch (all channels off), which frees a stuck bus. R11 goes to the same 5 V as the chip, as TI's errata ask.
 - **Clock speed:** the AS5600 runs up to 1 MHz, but long cables want a slow clock. Plan on **100 kHz**, and less
@@ -134,21 +136,31 @@ Pro Micro "A1" ─────┴── R11 10k ── VCC   ──── SDA/SC
 
 For the common WWZMDiB module (23 × 23 mm, Amazon B0CM3C8KFT), running on the Pro Micro's 5 V:
 
-- **Remove R1**, the 0 Ω link between VDD5V and VDD3V3, as for Rev 3.0: it puts 5 V on the chip's 3.3 V pin.
-- **Wire DIR** to GND or VCC (it floats on this module). Over I²C it still sets which way the angle rises
-  (GND = clockwise, seen from the chip's top face); the firmware can invert an axis either way.
-- **Remove R4**, the 1 kΩ from PGO (GPO on the module) to GND. Rev 3.0 kept it, because PGO low selects the
-  OUT-pin programming the PROG buttons used. Over I²C that mode isn't wanted: without R4 the chip's internal
-  pull-up holds PGO high. Leave OUT unconnected.
+The R numbers in this list are the module's, not the board's. The pin facts are from the AS5600 datasheet (ams
+v1-06); which part on the module is R1 or R4 is from the module itself, so check yours.
+
+- **Remove the module's R1**, the 0 Ω link between VDD5V and VDD3V3, as for Rev 3.0: it puts 5 V on the chip's
+  3.3 V pin, whose absolute maximum is 4.0 V. The two pins are tied together only when the chip runs on 3.3 V.
+- **Check there is about 1 µF from VDD3V3 to GND.** On 5 V, VDD3V3 is the output of the chip's internal regulator,
+  and the datasheet asks for a 1 µF low-ESR ceramic there. A module built to run on 3.3 V through R1 may have only
+  100 nF on that pin, or nothing. If so, add a 1 µF ceramic between VDD3V3 and GND.
+- **Wire DIR** to GND or VCC (it floats on this module, and the chip has no pull on it). Over I²C it still sets
+  which way the angle rises (GND = clockwise, seen from the chip's top face); the firmware can invert an axis
+  either way.
+- **Remove the module's R4**, the 1 kΩ from PGO (GPO on the module) to GND. Rev 3.0 kept it, because PGO low
+  selects the OUT-pin programming the PROG buttons used. In that mode, pulling OUT to GND for 100 ms twice burns the
+  range into the chip for good, which can be done only once; a stray short on OUT could do it by accident. Without
+  R4 the chip's internal pull-up holds PGO high and OUT is just an output. Leave OUT unconnected.
 - **Wire VCC, GND, SDA and SCL** to the port: pin 1 SDA, 2 GND, 3 VCC, 4 SCL.
-- **Check the module's own pull-ups.** The AS5600 has none of its own; the module may add some. With the module
-  unpowered and unplugged, measure the resistance from SDA to VCC and from SCL to VCC:
-  - **Open circuit (no reading):** no pull-ups. Fit 2.2 kΩ for R1–R8 as listed.
-  - **About 10 kΩ:** fine; with the board's 2.2 kΩ the bus sinks about 3.3 mA. Fit R1–R8 as listed.
-  - **4.7 kΩ or less:** too strong together with 2.2 kΩ. Either remove the module's two pull-ups, or fit 4.7 kΩ for
-    R1–R8 instead (all eight the same).
+- **Check the module's own pull-ups.** The AS5600 has none of its own; the module may add some (ams suggests
+  4.7 kΩ). With the module unpowered and unplugged, measure the resistance from SDA to VCC and from SCL to VCC. The
+  limit is the 6 mA in [The I²C circuit](#the-ic-circuit):
+  - **Open circuit (no reading):** no pull-ups. Fit 2.2 kΩ for the board's R1–R8 as listed.
+  - **10 kΩ or 4.7 kΩ:** fine; with the board's 2.2 kΩ the bus sinks 3.3 or 3.8 mA. They also speed up the
+    rising edges on a long cable. Leave them, and fit R1–R8 as listed.
+  - **Under 2 kΩ:** too strong together with 2.2 kΩ. Remove the module's two pull-ups.
   - Check also that the module's pull-ups go to VCC, not to the chip's 3.3 V pin; if they read open to VCC but
-    about the same value to VDD3V3, remove them.
+    about the same value to VDD3V3, remove them, as they'd push current from the 5 V bus into the chip's regulator.
 
 Nothing is burnt into the chip: the firmware writes each sensor's start and stop angles (ZPOS, MPOS) to its
 working registers every time it starts, so the range can be changed as often as you like.
@@ -204,7 +216,7 @@ board revision before it flashes.
 ## Assembly order
 
 1. **The back first**, while the front is still flat: **U3** (pin 1 dot toward the far end, at the J1 side), then
-   **C4** and **R1–R11** (all 1206). R1–R8 are all 2.2 kΩ (or all 4.7 kΩ: see [AS5600 modules](#as5600-modules)); R9–R11 10 kΩ.
+   **C4** and **R1–R11** (all 1206). R1–R8 are all 2.2 kΩ; R9–R11 10 kΩ.
 2. On the front, **U1, U2**, then the 1206 caps **C1, C2, C3**.
 3. **RN1, RN2**. The dot (pin 1) goes in the square pad.
 4. The JST headers and the RST button.
