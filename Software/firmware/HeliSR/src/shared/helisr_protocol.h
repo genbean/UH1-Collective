@@ -114,8 +114,9 @@ typedef struct
    AS5600 behind it. The start and stop angles are written to each sensor's
    working (volatile) ZPOS and MPOS registers every time the firmware starts,
    from settings kept in EEPROM apart from dev_config_t: they belong to the
-   sensor's mounting, not to a profile, as Rev 3.0's burnt-in angles do.
-   Nothing is ever burnt into a chip. */
+   sensor's mounting, not to a profile, as Rev 3.0's burnt-in angles do. CONF
+   is set to the chip's power-up 0 with them. Nothing is ever burnt into a
+   chip. */
 
 #define HSR_SENSOR_CONFIG_VERSION   1
 #define HSR_I2C_KHZ_DEFAULT         100     // also 50, 25 and 10, for long cables
@@ -134,7 +135,7 @@ enum
 };
 
 #define HSR_SENSOR_RANGE_OK     0x01    // hsr_sensor_port_t.flags: the sensor holds the saved
-                                        // start and stop (read back and checked)
+                                        // start and stop, and CONF 0 (read back and checked)
 
 #pragma pack(push, 1)
 typedef struct

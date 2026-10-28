@@ -58,7 +58,7 @@ cd Software\firmware\test\host
 .\run-host-tests.ps1 -FreeJoy <FreeJoy checkout>   # also compare with FreeJoy's own code on random settings
 ```
 
-The sensor checks run `sensors.cpp` against a model of the board's PCA9546A and an AS5600 on each channel: the channel of each port, the registers and byte order, the 1 ms waits between ZPOS and MPOS, the read-back, that nothing is ever burnt, and what happens when a sensor is unplugged or restarts, the switch is missing, or the bus sticks. The model follows the datasheets as the code reads them, so it can't show that the chips agree: that waits for a Rev 4.0 board.
+The sensor checks run `sensors.cpp` against a model of the board's PCA9546A and an AS5600 on each channel: the channel of each port, the registers and byte order, the 1 ms waits between ZPOS, MPOS and CONF, the read-back, CONF set over settings burnt into a chip, that nothing is ever burnt, and what happens when a sensor is unplugged or restarts, the switch is missing, or the bus sticks. The model follows the datasheets as the code reads them, so it can't show that the chips agree: that waits for a Rev 4.0 board.
 
 **The same scenarios on a Pro Micro**, in lockstep with the PC:
 

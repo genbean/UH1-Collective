@@ -7,15 +7,18 @@
   Every AS5600 is at 0x36, so each AX port has its own channel on the PCA9546A
   I2C switch (0x70), and the firmware talks to one port at a time
   (PCB/HeliSR_Rev4.0/README.md). One port per pass keeps a pass short: about
-  130 clock periods of transfers, so 1.3 ms at 100 kHz and 13 ms at 10 kHz.
+  170 clock periods of transfers, so 1.7 ms at 100 kHz and 17 ms at 10 kHz.
   A visit:
     1. connects the port's channel (and only it);
     2. if the sensor needs its range (new, back after an error, or the settings
-       changed): writes ZPOS, then MPOS, 1 ms apart as the AS5600 datasheet asks
-       for its volatile registers, and reads them back. Nothing is ever burnt;
+       changed): writes ZPOS, then MPOS, then CONF = 0, 1 ms apart as the AS5600
+       datasheet asks for its volatile registers, and reads them back. CONF 0
+       is the chip's own power-up setting (normal power, no hysteresis, 16x
+       slow filter, no fast filter, no watchdog), written so that a chip with
+       other settings burnt in still reads the same. Nothing is ever burnt;
     3. reads ANGLE, which runs 0-4095 across that range: the axis value;
     4. makes one more read, in turn: STATUS and RAW ANGLE (for the helper and
-       the magnet checks), AGC, or ZPOS and MPOS again, which catches a sensor
+       the magnet checks), AGC, or ZPOS to CONF again, which catches a sensor
        that restarted (and lost its range) without a failed transfer.
   A failed transfer marks the port and leaves its last angle in place. A stuck
   bus is freed at once with the switch's /RESET (i2c_recover), and the port
@@ -39,6 +42,8 @@
 #define AS5600_ADDR     0x36
 #define REG_ZPOS        0x01    // ZPOS (2 bytes), then MPOS (2 bytes)
 #define REG_MPOS        0x03
+#define REG_CONF        0x07    // after MANG; bits 13-0
+#define CONF_WANTED     0x0000
 #define REG_STATUS      0x0B    // STATUS, then RAW ANGLE (2 bytes)
 #define REG_ANGLE       0x0E
 #define REG_AGC         0x1A
@@ -144,17 +149,19 @@ static uint8_t write_reg2(uint8_t reg, uint16_t v)
 	return i2c_write(AS5600_ADDR, b, 3);
 }
 
-// Read ZPOS and MPOS back and compare them with the settings: sets or clears
-// RANGE_OK, and with rewrite set asks for them to be written again if they
-// differ (a chip that won't take them is retried every third visit, not on each).
+// Read ZPOS, MPOS (and MANG) and CONF back and compare them with the settings:
+// sets or clears RANGE_OK, and with rewrite set asks for them to be written
+// again if they differ (a chip that won't take them is retried every third
+// visit, not on each).
 static uint8_t check_range(uint8_t n, uint8_t rewrite)
 {
-	uint8_t b[4];
-	uint8_t res = i2c_read(AS5600_ADDR, REG_ZPOS, b, 4);
+	uint8_t b[8];
+	uint8_t res = i2c_read(AS5600_ADDR, REG_ZPOS, b, 8);
 	if (res != I2C_OK) return res;
 	uint16_t z, m;
 	range_of(n, &z, &m);
-	if ((uint16_t)(((b[0] & 0x0F) << 8) | b[1]) == z && (uint16_t)(((b[2] & 0x0F) << 8) | b[3]) == m)
+	if ((uint16_t)(((b[0] & 0x0F) << 8) | b[1]) == z && (uint16_t)(((b[2] & 0x0F) << 8) | b[3]) == m &&
+	    (uint16_t)(((b[6] & 0x3F) << 8) | b[7]) == CONF_WANTED)
 		port[n].flags |= HSR_SENSOR_RANGE_OK;
 	else
 	{
@@ -172,6 +179,9 @@ static uint8_t write_range(uint8_t n)
 	if (res != I2C_OK) return res;
 	delay(1);
 	res = write_reg2(REG_MPOS, m);
+	if (res != I2C_OK) return res;
+	delay(1);
+	res = write_reg2(REG_CONF, CONF_WANTED);
 	if (res != I2C_OK) return res;
 	delay(1);
 	need_range &= (uint8_t)~(1 << n);

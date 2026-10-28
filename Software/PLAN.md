@@ -416,8 +416,8 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
   - asks before flashing the other board's file (the firmware could be on the wrong board, so it's a question, not a refusal), a Rev 4.0 file onto a Pro Micro without HeliSR firmware, or an untagged file;
   - on the command line, refuses those unless `--board` says which board the Pro Micro is on.
   The bundled files are `HeliSR_Rev3.0_16MHz.hex` and `HeliSR_Rev4.0_16MHz.hex` (they were `HeliSR_16MHz.hex`).
-- **One port per pass, blocking,** with every TWI step time-limited (`i2c.cpp`): simple to check, and a pass grows by about 130 I²C clocks (1.3 ms at 100 kHz, 13 ms at 10 kHz; calculated). An interrupt-driven reader would keep passes short at the slow clocks, if they turn out to be needed.
-- **Failures:** a port that fails keeps its last reading (0 until its first) and its state says why; its range is written again once it answers. Every third visit reads ZPOS and MPOS back, which catches a sensor that restarted without a failed transfer. A stuck bus is freed at once (/RESET pulse, 9 clocks, STOP), and the port that stuck it is left alone for 250 ms so the other ports carry on. A switch that doesn't answer is reset at most every 250 ms.
+- **One port per pass, blocking,** with every TWI step time-limited (`i2c.cpp`): simple to check, and a pass grows by about 170 I²C clocks (1.7 ms at 100 kHz, 17 ms at 10 kHz; calculated). An interrupt-driven reader would keep passes short at the slow clocks, if they turn out to be needed.
+- **Failures:** a port that fails keeps its last reading (0 until its first) and its state says why; its range is written again once it answers. With the range, CONF is written as 0, the chip's own power-up setting (normal power, 16x slow filter, no fast filter, hysteresis or watchdog), so a chip with other settings burnt in still behaves the same. Every third visit reads ZPOS, MPOS and CONF back, which catches a sensor that restarted without a failed transfer. A stuck bus is freed at once (/RESET pulse, 9 clocks, STOP), and the port that stuck it is left alone for 250 ms so the other ports carry on. A switch that doesn't answer is reset at most every 250 ms.
 - **The app follows the board:** the pages show the connected board's (and remember it); without a board, the Board page chooses. A board ID the app doesn't know counts as incompatible.
 - **Versions:** left at firmware 1.0.0 and app 1.0.0; bump them at the next release.
 - **Not done:** the firmware doesn't check which board it's on. A Rev 4.0 build put on a Rev 3.0 board some other way (avrdude by hand, the Arduino IDE) still drives the contended pins. A possible guard, once a Rev 4.0 board can prove it doesn't misfire: before driving anything, check that pin 3 has Rev 4.0's 10 k pull-up (Rev 3.0's latch line has none), and stay passive if not.
@@ -428,9 +428,9 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
 |---|---|---|
 | Rev 3.0, release | 21,450 B (74 %); was 21,398 | 2,093 B (81 %), unchanged |
 | Rev 3.0, test (`-Test`) | 21,972 B; was 21,916 | 2,094 B, unchanged |
-| Rev 4.0, release | 24,188 B (84 %) | 2,174 B (84 %) |
-| Rev 4.0, test (`-Test`) | 24,738 B | 2,175 B |
-| Rev 4.0, USB serial (`-Serial`) | 24,978 B | 2,284 B |
+| Rev 4.0, release | 24,246 B (84 %); was 24,188 before the CONF write | 2,174 B (84 %), unchanged |
+| Rev 4.0, test (`-Test`) | 24,796 B; was 24,738 | 2,175 B, unchanged |
+| Rev 4.0, USB serial (`-Serial`) | 25,036 B; was 24,978 | 2,284 B, unchanged |
 
 Rev 4.0's extra 81 B of RAM are the sensors' state (40 B), their settings (18 B) and the two extra analog sources. Its lowest unused stack, measured on the bare Pro Micro, is **150 B** after 20 s of the app polling live data and sensor status (159-179 B in the shorter tests). Rev 3.0's is 236-256 B in the same tests (208 B in phase 5's heavier run). Thinner, but enough; don't add stack-hungry features to Rev 4.0 without measuring.
 
@@ -472,7 +472,7 @@ Left on the Pro Micro: this branch's Rev 3.0 release build, with the board's set
 **Not tested: waits for a Rev 4.0 board:**
 - the shift registers on pins 14 and A0;
 - everything on a real I²C bus: the TWI at each clock, the PCA9546A's channel selection and /RESET, the bus recovery, long cables and the pull-ups;
-- the AS5600 as the firmware uses it: reading STATUS on through RAW ANGLE in one transfer, ZPOS and MPOS taking effect without a burn, the ANGLE output across the range, STATUS and AGC values with real magnets, and whether a chip burnt on Rev 3.0 takes a new range;
+- the AS5600 as the firmware uses it: reading STATUS on through RAW ANGLE in one transfer, ZPOS, MPOS and CONF taking effect without a burn, the ANGLE output across the range, STATUS and AGC values with real magnets, and whether a chip burnt on Rev 3.0 takes a new range;
 - the JTD write on a clone with JTAG on;
 - A2 and A3 read by the ADC (the pipeline side is tested on the PC);
 - the I²C helper with real sensors: Set start, Set stop, the direction it detects, the clock change, the board-page states;
