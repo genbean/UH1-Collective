@@ -1,13 +1,15 @@
 # Build Heli_Collective_Final_BOM.xlsx and Heli_Collective_DigiKey.csv: one BOM for the whole collective as it is
-# built now: the HeliSR Rev 3.0 board (bare PCB ordered from OSH Park, frozen), the Huey head Rev 5 (Head/Rev5/) and
+# built now: the HeliSR Rev 4.0 board (AS5600s over I2C; not ordered yet), the Huey head Rev 5 (Head/Rev5/) and
 # the MkIII base Rev 3 (Base/, a concept, not yet printed).
-# The board's parts, the cables and the head switches are read from the frozen Rev 3.0 BOM scripts (single source of
-# truth), and the board's parts are checked against the ordered board file again. Head and base lines cite the
-# README or CAD they come from. Lines sized only from the CAD are highlighted for checking; lines covered by the
-# two screw kits (every screw and nut in the head and base) are marked and cost nothing extra.
+# The board's parts are read from Rev 4.0's board BOM script and checked against its board file; the cables and the
+# head switches from the frozen Rev 3.0 full BOM script (single source of truth). The Digi-Key order placed for
+# Rev 3.0 (DK_ORDER) counts as bought: the parts Rev 4.0 shares with it are not ordered again, and the ones it
+# doesn't use are listed on the Dropped sheet. Head and base lines cite the README or CAD they come from. Lines
+# sized only from the CAD are highlighted for checking; lines covered by the two screw kits (every screw and nut in
+# the head and base) are marked and cost nothing extra.
 # Sheets: Final BOM (everything bought), Digi-Key order (the electronics order, linked to the Final BOM), Printed
-# parts, Dropped (in earlier lists or carts, not used now), Sources. The CSV is the Digi-Key order for one
-# collective, for Digi-Key's cart / BOM upload.
+# parts, Dropped (in earlier lists or carts, not used now), Sources. The CSV is what's still to order from Digi-Key
+# for one collective (lines already bought left out), for Digi-Key's cart / BOM upload.
 # usage: python make_final_bom.py [out.xlsx]     (any Python 3 with openpyxl)
 import ast, csv, math, os, re, sys
 from openpyxl import Workbook
@@ -18,9 +20,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "Heli_Collective_Final_BOM.xlsx")
 CSV_OUT = os.path.join(os.path.dirname(OUT), "Heli_Collective_DigiKey.csv")
-R3 = os.path.join(ROOT, "PCB", "HeliSR_Rev3.0")
-BOARD_PY, FULL_PY = os.path.join(R3, "tools", "make_board_bom_v3.py"), os.path.join(R3, "tools", "make_bom_v3.py")
-BOARD_PCB = os.path.join(R3, "HeliSR_Rev3.0.kicad_pcb")
+R3, R4 = os.path.join(ROOT, "PCB", "HeliSR_Rev3.0"), os.path.join(ROOT, "PCB", "HeliSR_Rev4.0")
+BOARD_PY, FULL_PY = os.path.join(R4, "tools", "make_board_bom_v4.py"), os.path.join(R3, "tools", "make_bom_v3.py")
+BOARD_PCB = os.path.join(R4, "HeliSR_Rev4.0.kicad_pcb")
 
 # ---- pull the HeliSR data out of the frozen scripts without running them ----------------------------------------
 def module_parts(path, names=(), funcs=()):
@@ -39,7 +41,8 @@ listed = [r for line in bd["SOLDERED"] for r in bfn["expand"](line[0])]
 assert sorted(listed) == sorted(fps), sorted(set(fps) ^ set(listed))
 by_mpn = {it[4]: it for _, items in fd["ORDER"] for it in items}          # refs, qty, desc, mfr, mpn, dk, unit, notes
 
-BRD = "PCB/HeliSR_Rev3.0 board BOM (checked against the ordered board)"
+BRD = "PCB/HeliSR_Rev4.0 board BOM (checked against the board file)"
+NEW = "Digi-Key listing 2026-10-27"
 FULL = "PCB/HeliSR_Rev3.0/HeliSR_Rev3.0_BOM.xlsx (Digi-Key cart)"
 HEAD = "Head/Rev5/README.md and Head/Rev4/README.md, Bought"
 BASE = "Base/README.md, Bought parts"
@@ -54,7 +57,14 @@ FILL = {CHECK: "FCE4D6", INKIT: "E2EFDA", ORDERED: "DDEBF7"}
 
 # line: (where, qty, description, manufacturer, mfr part, supplier, supplier part, pack price USD, pack, status,
 #        packs already bought, notes, source)
-CHECKED = {"639H/2": 8.47, "637H/2": 8.02, "636H/2": 7.55, "A10SR10SR30K254A": 3.17, "A03SR03SR30K203A": 1.35}   # Digi-Key, 2026-10-22
+CHECKED = {"639H/2": 8.47, "637H/2": 8.02, "636H/2": 7.55, "A10SR10SR30K254A": 3.17, "A03SR03SR30K203A": 1.35,   # Digi-Key, 2026-10-22
+           "PCA9546ADR": 1.88, "BM04B-SRSS-TBT": 0.73, "RC1206FR-072K2L": 0.10, "RC1206FR-0710KL": 0.10}       # 2026-10-27
+# Digi-Key order 102438510 (2026-10-23), placed for Rev 3.0: quantity bought of each part, one collective's worth
+DK_ORDER = {"296-8250-1-ND": 2, "4609X-101-103LF-ND": 2, "1276-1017-1-ND": 2, "1276-1287-1-ND": 1, "311-1.00KCRCT-ND": 2,
+            "EG4344CT-ND": 3, "455-BM10B-SRSS-TBTCT-ND": 2, "455-BM03B-SRSS-TBTCT-ND": 4, "S6100-ND": 2, "455-3671-ND": 1,
+            "455-3627-ND": 2, "839-30-01653-DS-ND": 1, "380-SC-2CAK020M-ND": 1, "679-1223-ND": 2, "679-1219-ND": 1,
+            "679-1217-ND": 1, "2223-PB4-M-BK-D-67-ND": 1, "450-1650-ND": 5, "SRS-4-4MM-ND": 4, "315-NC191LT10-ND": 1,
+            "1188-CHN-TWZ1MM-ND": 1}
 def dk(mpn, where=None, qty=None, notes=None, source=FULL):
     refs, q, desc, mfr, mpn_, dkpn, unit, n = by_mpn[mpn]
     notes = (notes or n).replace("Price: check the cart", "Price from Digi-Key, 2026-10-22")
@@ -72,26 +82,31 @@ def any_(where, qty, desc, notes, source, status="", pack=1):
     return (where, qty, desc, "", "", "any", "", None, pack, status, 0, notes, source)
 
 SECTIONS = []
-board = [(refs, len(bfn["expand"](refs)), desc, mfr, mpn, "Digi-Key", dkpn, unit, 1, "", 0, notes, BRD)
+board = [(refs, len(bfn["expand"](refs)), desc, mfr, mpn, "Digi-Key", dkpn, CHECKED.get(mpn, unit), 1, "", 0, notes, BRD)
          for refs, value, fpname, desc, mfr, mpn, dkpn, unit, notes in bd["SOLDERED"]]
-SECTIONS.append(("HeliSR Rev 3.0: the parts you solder to the bare board (Digi-Key)", board))
-SECTIONS.append(("HeliSR Rev 3.0: bare PCB and controller", [
-    ("PCB", 1, "HeliSR Rev 3.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 39.3 x 33.64 mm", "OSH Park", "", "OSH Park",
-     "", 10.20, 3, ORDERED, 1, "Ordered 2026-10-21: $10.20 for three bare boards, free shipping, due back about "
-     "2026-10-29", "OSH Park order confirmation"),
+SECTIONS.append(("HeliSR Rev 4.0: the parts you solder to the bare board (Digi-Key)", board))
+SECTIONS.append(("HeliSR Rev 4.0: bare PCB and controller", [
+    ("PCB", 1, "HeliSR Rev 4.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 39.3 x 33.64 mm", "OSH Park", "", "OSH Park",
+     "", 10.20, 3, "", 0, "Not ordered yet: upload PCB/HeliSR_Rev4.0/HeliSR_Rev4.0_Gerbers.zip. Priced as Rev 3.0's "
+     "order: $10.20 for three bare boards, free shipping", "PCB/HeliSR_Rev4.0/README.md; OSH Park order for Rev 3.0"),
     ("J7, J8", 1, "Pro Micro 5V/16 MHz (ATmega32U4), USB-C, with header pins", "OSOYOO", "", "Amazon", "B0B81FGBLY", 11.99, 1,
-     "", 0, "Runs MMJoy2; plugs into the J7/J8 sockets. Comes with three rows of header pins, so no separate headers. "
-     "Also sold as 3 for $21.99. Check that its 2 x 12 pins line up with J7/J8 (15.24 mm between rows)", AMZ),
+     "", 0, "Runs the HeliSR firmware (its Rev 4.0 build); plugs into the J7/J8 sockets. Comes with three rows of header "
+     "pins, so no separate headers. Also sold as 3 for $21.99. Check that its 2 x 12 pins line up with J7/J8 (15.24 mm "
+     "between rows)", AMZ),
 ]))
 SECTIONS.append(("Wiring", [
     dk("A10SR10SR30K254A", "J1, J2", 1, "Switch loom. The jumper has a connector at each end: cut it in half for the two "
        "board-end pigtails (J1 and J2). Price: check the cart"),
-    dk("A03SR03SR30K203A", "J11, J14", 2, "AX1 (collective sensor) and AX4 (throttle sensor); AX2 and AX3 are spare. "
-       "Price: check the cart"),
-    ("AX1 lead", 1, "3-core cable, 28 AWG, black, 1 m (Digi-Key cut length)", "Tensility", "30-01653", "Digi-Key",
-     "839-30-01653-DS-ND", 2.28, 1, CHECK, 0, "Collective sensor lead: from the AS5600 in the base, through the lever's "
-     "cable channels and up the 470 mm tube, spliced to an AX1 pigtail. Length is an estimate: measure your run; "
-     "Digi-Key sells it by the metre", "Digi-Key cart 2026-10-23; Base/README.md (the 3-core sensor lead)"),
+    ("J11, J14", 2, "JST SR jumper, 4 positions, socket to socket (reversed), 8 in (203 mm)", "JST", "A04SR04SR30K203A",
+     "Digi-Key", "455-3633-ND", 1.52, 1, "", 0, "AX1 (collective sensor) and AX4 (throttle sensor); AX2 and AX3 are spare. "
+     "Cut each in half for a board-end pigtail. The plug is keyed but the wires may all be one colour: find pin 1 (SDA) "
+     "with a meter. Ports: 1 SDA, 2 GND, 3 VCC, 4 SCL", NEW + "; PCB/HeliSR_Rev4.0/README.md"),
+    ("AX1 lead", 1, "4-core cable, 28 AWG, one twisted pair, foil and braid shield, 3.61 mm OD, white, 1 m (Digi-Key cut "
+     "length)", "Tensility", "30-00099", "Digi-Key", "839-30-00099-DS-ND", 3.44, 1, CHECK, 0, "Collective sensor lead: "
+     "from the AS5600 in the base, through the lever's cable channels and up the 470 mm tube, spliced to an AX1 pigtail. "
+     "SDA and GND on the twisted pair, VCC and SCL on the other two; the shield to GND at the board end only. Length is an "
+     "estimate: measure your run; Digi-Key sells it by the metre (145 m in stock 2026-10-27; the black 30-00088 was out "
+     "of stock)", NEW + "; Base/README.md (the 4-core sensor lead)"),
     ("USB", 1, "USB 2.0 cable, USB-A plug to USB-C plug, 2 m (6.56 ft)", "Stewart Connector", "SC-2CAK020M", "Digi-Key",
      "380-SC-2CAK020M-ND", 7.33, 1, "", 0, "Cut it about 15 cm from the USB-C plug. Feed the long piece (USB-A end stays "
      "at the PC) through the device: laid in the lever's open channels, up the tube and in through the head. The cable "
@@ -102,8 +117,10 @@ SECTIONS.append(("Wiring", [
 ]))
 SECTIONS.append(("Angle sensors", [
     ("AX1, AX4", 2, "AS5600 magnetic encoder module, 23 x 23 mm, with 5 x 2 mm diametric magnet", "WWZMDiB", "", "Amazon",
-     "B0CM3C8KFT", 9.99, 4, "", 0, "Sold in fours. AX1: the collective, in the base, programmed with PROG1, DIR to VCC. "
-     "AX4: the throttle, in the head, programmed with PROG4, DIR to GND. On each: remove the 0 ohm R1, keep R4", AMZ),
+     "B0CM3C8KFT", 9.99, 4, "", 0, "Sold in fours. AX1: the collective, in the base, DIR to VCC. AX4: the throttle, in "
+     "the head, DIR to GND. Read over I2C; the firmware sets each range, nothing is burnt. On each: remove the 0 ohm R1 "
+     "and R4 (1 kOhm, PGO to GND), check for about 1 uF from VDD3V3 to GND, and measure the pull-ups (see "
+     "PCB/HeliSR_Rev4.0/README.md, AS5600 modules)", AMZ + "; PCB/HeliSR_Rev4.0/README.md"),
 ]))
 SECTIONS.append(("Huey head: switches", [
     dk("639H/2", "IN3-IN6", notes="LDG LT EXT / RETR and SL ON / STOW. Common to GND. Price: check the cart"),
@@ -216,8 +233,8 @@ SECTIONS.append(("Kits, consumables and tools", [
     amz("Assembly", 1, "Threadlocker, blue 242, 6 ml", "Loctite", "B000I1RSNS", 7.03, "once", "Removable, medium strength",
         "Head/Rev4/README.md; Base/README.md"),
     ("Assembly", 1, "Solder paste, low-temperature (Sn42/Bi58, 138 C), syringe", "Chip Quik", "NC191LT10", "Digi-Key",
-     "315-NC191LT10-ND", 7.95, "once", "", 0, "For the SMD parts on the board (U1, U2, the 1206 caps, the JST headers, "
-     "SW1-SW3). Needs a hot plate or hot air tool and flux. Optional: hand-soldering works too", "Digi-Key cart 2026-10-23"),
+     "315-NC191LT10-ND", 7.95, "once", "", 0, "For the SMD parts on the board (U1-U3, the 1206 parts, the JST headers, "
+     "SW1). Needs a hot plate or hot air tool and flux; with parts on both sides, do the back first. Optional: hand-soldering works too", "Digi-Key cart 2026-10-23"),
     ("Assembly", 1, "Tweezers, 1 mm tip (Olimex CHN-TWZ1MM), for placing the SMD parts", "Olimex", "CHN-TWZ1MM", "Digi-Key",
      "1188-CHN-TWZ1MM-ND", 0.82, "once", "", 0, "Description from Olimex's sibling CHN-TWZ2MM listing: check the tip", "Digi-Key order 102438510"),
     amz("Assembly", 1, "Taps, M3 / M4 / M5 / M6 / M8, 5-piece set", "Amazon", "B0FN49CGJG", 6.49, "once",
@@ -232,11 +249,12 @@ USER_SUPPLIED = {"B0006HUJCQ", "B003JZII34", "B000I1RSNS", "B0FN49CGJG", "B0FN3W
                  "B09FF6VQ55", "B0F43RY9S6"}
 SECTIONS = [(t, [l for l in lines if l[6] not in USER_SUPPLIED]) for t, lines in SECTIONS]
 
-# The Digi-Key order was placed 2026-10-23 (order 102438510): every Digi-Key line is bought
+# What Digi-Key order 102438510 already bought counts as bought; a line it covers in full is marked ordered
 def _ordered(l):
-    if l[5] != "Digi-Key": return l
-    l = list(l); l[10] = 1 if l[8] == "once" else math.ceil(l[1] / l[8])
-    if l[9] == "": l[9] = ORDERED
+    if l[5] != "Digi-Key" or l[6] not in DK_ORDER: return l
+    need = 1 if l[8] == "once" else math.ceil(l[1] / l[8])
+    l = list(l); l[10] = DK_ORDER[l[6]]
+    if l[9] == "" and l[10] >= need: l[9] = ORDERED
     return tuple(l)
 SECTIONS = [(t, [_ordered(l) for l in lines]) for t, lines in SECTIONS]
 
@@ -283,6 +301,18 @@ PRINTED = [
     ("Base", "Base/stl/friction_knob.stl", 1, "Top face down; the M5 x 25 hex bolt's head presses into its hex pocket"),
 ]
 DROPPED = [
+    ("HeliSR Rev 3.0 bare PCBs (OSH Park, 3 boards, $10.20)", 3, "Bought 2026-10-21. Rev 4.0 replaces the board: it reads "
+     "the AS5600s over I2C instead of their analog output", "OSH Park order, 2026-10-21"),
+    ("YAGEO RC0805FR-071KL 1 kOhm 0805 (311-1.00KCRCT-ND)", 2, "Bought in order 102438510 for Rev 3.0's PROG buttons (R1, "
+     "R2); Rev 4.0 has none", "Digi-Key order 102438510"),
+    ("JST BM03B-SRSS-TBT 3-pin header (455-BM03B-SRSS-TBTCT-ND)", 4, "Bought in order 102438510 for Rev 3.0's analog "
+     "inputs; Rev 4.0's AX ports are 4-pin (BM04B-SRSS-TBT)", "Digi-Key order 102438510"),
+    ("E-Switch TL1015AF160QG (EG4344CT-ND), 2 of the 3 bought", 2, "Rev 4.0 has only RST (SW1): the other two are spares",
+     "Digi-Key order 102438510"),
+    ("JST A03SR03SR30K203A 3-pin jumpers (455-3627-ND)", 2, "Bought in order 102438510; Rev 4.0's AX ports take the 4-pin "
+     "A04SR04SR30K203A", "Digi-Key order 102438510"),
+    ("Tensility 30-01653 3-core lead, 1 m (839-30-01653-DS-ND)", 1, "Bought in order 102438510 for the analog sensor; "
+     "I2C needs four cores (Tensility 30-00099)", "Digi-Key order 102438510"),
     ("Glue, thread-lock, taps, drill bit, felt tape, hose clamp, 10 mm spring, #10 desk screws", 0,
      "You supply these yourself", "User, 2026-10-23"),
     ("Fgruh M3 and M4 socket-cap screw kits, M3 x 10 / M4 x 30 / M5 x 40 countersunk packs, M6 x 25 and M6 x 30 bolts, M6 and "
@@ -307,8 +337,6 @@ DROPPED = [
      "heat-shrink and solder", "Earlier BOM draft"),
     ("TE 2495152-1 USB-C plug", 1, "Board-edge part with no solder cups: needs its own PCB", "User question, 2026-10-23"),
     ("JST SR 3-pin jumpers beyond 2", 2, "The full BOM had 4 (one per AX connector); only AX1 and AX4 are wired now", FULL),
-    ("JST BM03B-SRSS-TBT: the cart has 3", 0, "A note, not dropped: the board has 4 footprints (J11-J14); this BOM orders 4",
-     "Digi-Key cart, 2026-10-22"),
     ("MkII collective hardware (base, head bolts, springs, magnets)", 0, "The MkII base is replaced by the MkIII Rev 3",
      "HeliSR_Rev3.0_BOM.xlsx, sheet 2"),
     ("25 x 1 mm aluminium tube, 358 mm", 1, "Replaced by the base's 470 mm carbon tube", "Head/README.md (before)"),
@@ -318,11 +346,16 @@ DROPPED = [
     ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two down-stop posts beside the strut", "Base/mk3_rev3.py"),
 ]
 SOURCES = [
-    ("HeliSR Rev 3.0 board", "PCB/HeliSR_Rev3.0", "Bare PCB ordered from OSH Park on 2026-10-21; folder frozen and read-only"),
+    ("HeliSR Rev 4.0 board", "PCB/HeliSR_Rev4.0 (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
+     "Designed and checked, not ordered yet"),
+    ("HeliSR Rev 3.0 board", "PCB/HeliSR_Rev3.0", "Replaced by Rev 4.0. Bare PCB ordered from OSH Park on 2026-10-21, and "
+     "its parts in Digi-Key order 102438510; folder frozen and read-only. Its full BOM still supplies the cables and "
+     "head switches"),
     ("Huey head", "Head/Rev5", "Current head design: Rev 5, Rev 4 cut to the real UH-1 panels' dimensions, with printed "
      "threads. Rev 4 (Head/Rev4), the larger one-piece head it came from, is kept as a fallback"),
     ("MkIII base Rev 3", "Base (Base/mk3_rev3.py imports Base/mk3_pivot.py)", "Concept, nothing printed yet: check the orange lines"),
-    ("Prices", "Digi-Key cart 2026-10-19 (JST headers 2026-10-22); Amazon listings 2026-10-22; OSH Park order 2026-10-21",
+    ("Prices", "Digi-Key cart 2026-10-19 (JST headers 2026-10-22; Rev 4.0's new parts and cables 2026-10-27); Amazon "
+     "listings 2026-10-22; OSH Park order 2026-10-21",
      "Pack prices, before shipping and tariff"),
 ]
 
@@ -359,8 +392,9 @@ COLS = ["#", "Where", "Qty per collective", "Pack", "Packs needed", "Packs bough
         "Manufacturer", "Mfr part number", "Supplier", "Supplier part number", "Pack price", "To spend", "Notes", "Source"]
 NC = len(COLS)
 setup(ws, "Heli Collective - final BOM",
-      "Everything bought for one collective: the HeliSR Rev 3.0 board (the bare PCB is ordered from OSH Park; every part "
-      "on it comes from Digi-Key), the Huey head and the MkIII base Rev 3 (a concept, not yet printed). Blue line: "
+      "Everything bought for one collective: the HeliSR Rev 4.0 board (the bare PCB from OSH Park, every part on it from "
+      "Digi-Key), the Huey head and the MkIII base Rev 3 (a concept, not yet printed). Packs bought counts what's already "
+      "ordered, including the Digi-Key order placed for Rev 3.0: Rev 4.0 shares most of its parts. Blue line: "
       "already ordered. Green: covered by a kit or pack priced on another line. Orange: size taken from the base's CAD, not from a parts list, so check "
       "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Amazon listings "
       "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. The "
@@ -416,8 +450,8 @@ DCOLS = ["#", "Digi-Key part number", "Quantity", "Mfr part number", "Descriptio
          "Ext. price", "Notes"]
 setup(wd, "Heli Collective - Digi-Key order", "Every line to buy from Digi-Key. Quantities come from the Final BOM's "
       "Packs to order, so they follow the collectives to build and anything marked as bought. "
-      "Heli_Collective_DigiKey.csv holds the same order for one collective (part number, quantity, customer reference), "
-      "for Digi-Key's cart or BOM upload.", len(DCOLS))
+      "Heli_Collective_DigiKey.csv holds what's still to order for one collective (part number, quantity, customer "
+      "reference; lines already bought left out), for Digi-Key's cart or BOM upload.", len(DCOLS))
 header(wd, DCOLS, [4, 25, 9, 20, 40, 16, 10, 10, 50], 4)
 d, dk_rows = 4, []
 for (fr, where, qty, desc, mfr, mpn, sup, spn, unit, pack, bought, notes) in rows:
@@ -434,7 +468,8 @@ for (fr, where, qty, desc, mfr, mpn, sup, spn, unit, pack, bought, notes) in row
 d += 1
 wd.cell(d, 7, "Total").font = F(bold=True)
 wd.cell(d, 8, f"=SUM(H5:H{d - 1})").font = F(bold=True); wd.cell(d, 8).number_format = USD
-wd.cell(d + 1, 1, f"All {d - 5} Digi-Key lines are priced (checked 2026-10-23), before shipping and tariff.").font = F(
+wd.cell(d + 1, 1, f"All {d - 5} Digi-Key lines are priced (checked 2026-10-23; Rev 4.0's new parts 2026-10-27), before "
+        "shipping and tariff.").font = F(
     italic=True, color="595959")
 wd.merge_cells(start_row=d + 1, start_column=1, end_row=d + 1, end_column=len(DCOLS))
 wd.freeze_panes = "A5"
@@ -452,7 +487,8 @@ ws2.freeze_panes = "A5"
 
 ws3 = wb.create_sheet("Dropped")
 setup(ws3, "Heli Collective - dropped from earlier BOMs", "Lines in the Rev 3.0 board's full BOM, the Digi-Key cart or "
-      "earlier head and base revisions that this build doesn't use. Take them out of the cart if they're still in it.", 5)
+      "earlier head and base revisions that this build doesn't use, and the Rev 3.0 parts already bought that Rev 4.0 "
+      "doesn't use. Take them out of the cart if they're still in it.", 5)
 header(ws3, ["#", "Item", "Qty", "Why", "Was in"], [4, 50, 6, 60, 40], 4)
 for i, (item, q, why, src) in enumerate(DROPPED, 1):
     for c, v in enumerate([i, item, q or "", why, src], 1):
@@ -469,6 +505,7 @@ for i, row in enumerate(SOURCES, 1):
 wb.save(OUT)
 with open(CSV_OUT, "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f); w.writerow(["Digi-Key Part Number", "Quantity", "Customer Reference"])
-    for spn, q, where in dk_rows: w.writerow([spn, q, where])
+    for spn, q, where in dk_rows:
+        if q: w.writerow([spn, q, where])
 print(f"{len(fps)} board parts checked; {n} BOM lines ({len(dk_rows)} Digi-Key), {len(PRINTED)} printed-part lines, "
       f"{len(DROPPED)} dropped; wrote {OUT} and {CSV_OUT}")
