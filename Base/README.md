@@ -175,7 +175,7 @@ To change the angle, set `STOP_DEG` and reprint the lever's lower half and the f
 The lever is two prints, `lever_upper.stl` and `lever_lower.stl`, split at z = 0 through the pivot axis and the tube axis. Print both flat on the joint face; they need no supports.
 
 - **Joint:** four M4 × 40 socket head cap screws (from the HELIFOUNER M4 × 30–50 kit, with its nuts) go in from the top, into M4 hex nuts in hex pockets in the bottom half. 40 mm is the longest that fits: each head sits flush in an 8 mm counterbore at the top of the lever, level with the hub's surface at the counterbore's lowest edge, and each nut sits as far out as the underside allows, level with the hub's curve at its flats (the hex has its corners along y, so the flats face fore and aft). The seats are about 40 mm apart (16.5 mm before) and no tip sticks out. The nut pockets leave only about 0.2 mm of wall at their fore and aft flats where they meet the hub's curve, so slice them as they are and push each nut up to the top of its pocket with a screwdriver. A 3 mm hex key reaches the heads; the counterbores are only as deep as the heads. Tighten the four evenly. The four screws form a rectangle centred on the socket's axis (16.75 mm either side of it) and on the pivot axis (17 mm fore and aft of it), which leaves 1.85 mm of wall beside the socket.
-- **Cables:** both ½" cable bores are half-round channels in each half. Lay the USB cable and the 3-core sensor lead into the lower half, then close the upper half over them. Nothing has to be threaded through a hole.
+- **Cables:** both ½" cable bores are half-round channels in each half. Lay the USB cable and the sensor lead (4 cores for I²C, 3 for analog) into the lower half, then close the upper half over them. Nothing has to be threaded through a hole.
 - **Trunnions:** each bearing's inner race holds the two half-trunnions together. Press the bearings on after the screws are tight, and before the sensor carrier and module: neither passes through a bearing. Lay the sensor lead in bare and solder the module on afterwards.
 - **Socket depth:** the tube socket runs 63.3 mm in from the mouth, to 2.7 mm from the pivot axis, so it opens into the axial cable bore (Rev 1: 46 mm). The tube is 500 mm, uncut, so the head sits where it did. The tube's end sits 3.8 mm into the axial bore: file a notch in each side of the tube, 13 mm wide (centred on the tube's horizontal midline) and at least 4 mm deep from its end, where the axial bore crosses the tube's wall, so the cables can get in.
 ![The lever's socket and screws](renders/rev3_lever_socket.png)
@@ -204,13 +204,18 @@ Press the bolt's head into the pocket from the top: the hex walls turn it with t
 
 ## Sensor
 
-The AS5600 module (WWZMDiB, Amazon B0CM3C8KFT, 23 × 23 mm) sits on the sensor side (−Y), in a carrier that plugs into the trunnion bore and turns with the lever. Its ~4 × 2 mm diametric magnet (in a 4.2 mm pocket, the same as the head axle's) sits on the axis in the fixed cover, about 1.0 mm from the chip. Three wires (VCC, OUT, GND) run under the board, through the carrier and up the tube to **AX1** on the HeliSR board. The module has no header: solder the three wires straight into its VCC/OUT/GND holes from the back, 4.7 mm in from one edge (between the two mounting holes on that side), and the carrier's wire channel runs from those holes to the centre hole. The module's pad position is measured from the product photo (±0.3 mm), so check it against yours.
+The AS5600 module (WWZMDiB, Amazon B0CM3C8KFT, 23 × 23 mm) sits on the sensor side (−Y), in a carrier that plugs into the trunnion bore and turns with the lever. Its ~4 × 2 mm diametric magnet (in a 4.2 mm pocket, the same as the head axle's) sits on the axis in the fixed cover, about 1.0 mm from the chip. The lead runs under the board, through the carrier and up the tube to **AX1** on the HeliSR board.
 
+The module has no header, and its pads are in two columns of through-holes, 4.7 mm in from opposite edges: **VCC, OUT, GND** along one, **DIR, SCL, SDA, GPO** along the other. Solder the wires straight in from the back. The carrier's channel under the board spans both columns and the centre hole, so the module fits either way up and the DIR jumper lies in the channel too. The pad positions are measured from the product photos (±0.3 mm), so check them against yours.
+
+**With HeliSR Rev 4.0 (I²C):** four wires, **VCC, GND, SDA and SCL**, to the AX1 port (pin 1 SDA, 2 GND, 3 VCC, 4 SCL).
 - **5 V:** remove the module's 0 Ω R1. It ties VDD3V3 to VDD5V, and the 3V3 pin is rated 4 V max.
-- **DIR to VCC:** DIR floats on this module. The chip turns with the lever and the magnet is fixed, so DIR = VCC makes OUT rise as the lever lifts.
-- **PGO** (labelled GPO on the module) already has 1 kΩ to GND: leave it.
+- **DIR to VCC:** a short jumper across the back of the board, from DIR to VCC. DIR floats on this module. The chip turns with the lever and the magnet is fixed, so DIR = VCC makes the angle rise as the lever lifts.
+- **Remove R4**, the 1 kΩ from PGO (labelled GPO) to GND. PGO low selects the OUT-pin programming used with Rev 3.0; without R4 the chip's own pull-up holds it high.
+- **Pull-ups:** measure the module's SDA→VCC and SCL→VCC resistance before you fit it (see `PCB/HeliSR_Rev4.0`).
+- The range is set by the firmware over I²C, not burnt into the chip, so it can be changed at any time.
 
-The range is programmed once through the OUT pin (datasheet option B) with the HeliSR Rev 3.0's **PROG1** button, because the Pro Micro's I2C pins drive the shift registers:
+**With HeliSR Rev 3.0 (analog):** three wires, **VCC, OUT and GND**, to AX1. Remove R1 and jumper DIR to VCC as above, but keep R4. The range is programmed once through the OUT pin (datasheet option B) with the board's **PROG1** button:
 1. Hold the lever on its down-stop and press PROG1 for about a second.
 2. Lift it to the 32° stop and press PROG1 again.
 

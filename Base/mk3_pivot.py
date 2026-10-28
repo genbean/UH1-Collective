@@ -32,12 +32,15 @@ to the pivot end whenever the bucket tilts up.
 
 Sensor (-Y side): WWZMDiB AS5600 module (23 x 23 mm) in a carrier that plugs into the trunnion bore
 and turns with the lever; its 4 x 2 mm diametric magnet sits on the axis in the fixed cover, ~1.0 mm
-from the chip. Three wires (VCC, OUT, GND) run under the board, through the carrier and up the tube to
-AX1 on the HeliSR board. Run at 5 V: remove the module's 0 ohm R1 (it ties VDD3V3 to VDD5V; the 3V3 pin
-is rated 4 V max). Jumper DIR to VCC (it floats on this module): the chip turns with the lever and the
-magnet is fixed, so DIR = VCC makes OUT rise as the lever lifts. (It can't be checked beforehand: with PGO
-low, OUT reads full scale until programming is done.) PGO (labelled GPO on the module) already has 1 k to GND. The range is programmed once through the OUT pin (datasheet Option B) with the
-HeliSR Rev 3.0 PROG1 button, because the Pro Micro's I2C pins drive the shift registers.
+from the chip. The module has its pads in two columns, VCC/OUT/GND along one edge and DIR/SCL/SDA/GPO along
+the other; the wires are soldered in from the back, and the carrier's channel under the board spans both columns.
+HeliSR Rev 4.0 (I2C): four wires, VCC, GND, SDA and SCL, run through the carrier and up the tube to its AX1 port.
+HeliSR Rev 3.0 (analog): three wires, VCC, OUT and GND, to AX1, with the range programmed once through the OUT pin
+(datasheet Option B) with the PROG1 button. Either way, run at 5 V: remove the module's 0 ohm R1 (it ties VDD3V3
+to VDD5V; the 3V3 pin is rated 4 V max), and jumper DIR to VCC across the back of the board, in the channel (it
+floats on this module): the chip turns with the lever and the magnet is fixed, so DIR = VCC makes the angle rise
+as the lever lifts. PGO (labelled GPO on the module) has 1 k to GND (R4): keep it for Rev 3.0's OUT-pin
+programming, remove it for I2C so the chip's own pull-up holds PGO high.
 
 Gussets: wedge ribs above and below the socket boss tie it into the hub; on the frame a web ties both
 shoe hinge lugs into the quadrant stem, and a corner gusset ties the knob tower to the +y pillow block.
@@ -138,6 +141,8 @@ AS5600_BOARD = 23.0              # WWZMDiB module (Amazon B0CM3C8KFT), 23 x 23 m
 AS5600_CHIP_OFS = (0.0, 0.0)     # chip centre relative to board centre (x, z); shift if yours is off-centre
 AS5600_PAD_X = 4.7               # VCC/OUT/GND through-hole pads: this far in from the board's +x edge (measured off the
 AS5600_PAD_PITCH = 2.54          #   product photo, +-0.3 mm; centred on the board's z). No header: wires soldered through
+AS5600_PAD4_ZOFS = 0.9           # DIR/SCL/SDA/GPO pads: the same distance in from the -x edge, the column's centre about
+                                 #   this far toward the DIR end (VCC's end), measured off the listing's drawing, +-0.3 mm
 CARRIER_FLANGE_T = 6.0           # board pocket on the outer face, wire channel underneath
 MAGNET_GAP = 1.0                 # chip face to magnet face (datasheet: 0.5-3 mm); 1.5 at first, closed up 0.5 on 2026-10-23 to match the head
 MAGNET_D, MAGNET_H = 4.0, 2.0    # diametric magnet supplied with the module (about 4 mm across, as measured)
@@ -540,10 +545,11 @@ def _carrier():
     cx, cz = AS5600_CHIP_OFS
     c = c.cut(cyl(3.5, (0, TRUN_OUT - 8, 0), (0, FLANGE_Y1 + 1, 0)))                       # wire hole
     c = c.cut(box(-b - cx, b - cx, BOARD_Y0, FLANGE_Y1 + 1, -b - cz, b - cz))             # board pocket
-    px = AS5600_BOARD / 2 - AS5600_PAD_X - cx                                               # pad column x
-    c = c.cut(box(-3.5, px + 2.2, TRUN_OUT + 0.4, FLANGE_Y1 + 1, -AS5600_PAD_PITCH - 1.8 - cz,
-                  AS5600_PAD_PITCH + 1.8 - cz))                                             # wire channel: hole to pads
-    return c.clean()
+    px = AS5600_BOARD / 2 - AS5600_PAD_X                                                    # pad columns at +-px
+    pz = AS5600_PAD4_ZOFS + 1.5 * AS5600_PAD_PITCH + 1.8                                    # past the end pads either way,
+    c = c.cut(box(-px - 2.2 - cx, px + 2.2 - cx, TRUN_OUT + 0.4, FLANGE_Y1 + 1, -pz - cz,  # so the board fits either way up
+                  pz - cz))                                                                 # wire channel: both pad columns,
+    return c.clean()                                                                        # the hole and the DIR jumper
 
 
 def sensor_carrier():
@@ -619,7 +625,8 @@ def usb_cable():
 
 
 def sensor_wires():
-    """3-core lead (VCC, OUT, GND): under the board, through the carrier, along the axis, up the tube"""
+    """the lead (Rev 4.0 I2C: VCC, GND, SDA, SCL; Rev 3.0 analog: VCC, OUT, GND): under the board, through the carrier,
+    along the axis, up the tube"""
     yc = -(TRUN_OUT + 2.3)
     pts = [V(11, yc, 0), V(0, yc, 0), V(0, -16, 0), V(0, -12, 4), V(-6, -10, 4), V(-190, -10, 4)]
     return sweep_circle(1.6, cq.Wire.makePolygon(pts), pts[0], (-1, 0, 0))
@@ -632,7 +639,10 @@ def sensor_board():
     chip = box(-2.5, 2.5, BOARD_Y0 + 1.6, CHIP_Y1, -2.0, 2.0)
     px = h - cx - AS5600_PAD_X
     pins = fuse(*[cyl(0.5, (px, BOARD_Y0 - 3.5, (i - 1) * AS5600_PAD_PITCH - cz), (px, BOARD_Y0 + 1.0, (i - 1) * AS5600_PAD_PITCH - cz))
-                  for i in range(3)])                                                     # the three soldered wires, leaving the back
+                  for i in (0, 2)],                                                       # VCC, GND
+                 *[cyl(0.5, (-px - 2 * cx, BOARD_Y0 - 3.5, z - cz), (-px - 2 * cx, BOARD_Y0 + 1.0, z - cz))
+                   for z in (AS5600_PAD4_ZOFS + 0.5 * AS5600_PAD_PITCH, AS5600_PAD4_ZOFS - 0.5 * AS5600_PAD_PITCH)])
+                                                                                          # SCL, SDA: the I2C wires, leaving the back
     return side_shape(pcb.fuse(pins).clean(), SENSOR_SIDE), side_shape(chip, SENSOR_SIDE)
 
 
