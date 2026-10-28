@@ -17,7 +17,7 @@ HeliSR Configurator sets up the HeliSR firmware on a Pro Micro. Nothing you chan
 | Control | What it does |
 |---|---|
 | Device list | Every HeliSR board plugged in, by name and serial number (for example `HeliSR (HSR30AABCC1)`). The app works with the one shown. |
-| Status | Green with the firmware version: connected. Red: no board. Yellow: the board's firmware doesn't match this version of the app; update it (see [Flashing](flashing.md)). |
+| Status | Green with the firmware version and the board (Rev 3.0 or Rev 4.0): connected. Red: no board. Yellow: the board's firmware doesn't match this version of the app; update it (see [Flashing](flashing.md)). |
 | **Read config from Device** | Loads the board's settings into the pages. |
 | **Write config to Device** | Sends the pages' settings to the board. The board checks them, saves them and restarts, and the app reconnects. Windows sees the new name and layout straight away. |
 | Profile list, ⚙ | Profiles in `Documents\HeliSR\configs`. Picking one loads it into the pages (not onto the board). ⚙ chooses another folder. |
@@ -30,9 +30,15 @@ HeliSR Configurator sets up the HeliSR firmware on a Pro Micro. Nothing you chan
 
 The board's fixed inputs, what the spare Pro Micro pins do, and the AS5600 helper.
 
-**IN1–IN16** are the 16 switch inputs, physical inputs 1–16 on the Button Config page. **AX1–AX4** are the 4 analog inputs; the bars show their live readings (0–4092). AX1 and AX4 have the PROG1 and PROG4 buttons for AS5600 sensors.
+**Board** at the top says which HeliSR board the pages show. It follows the connected board (its firmware says which it is); with no board connected you can pick Rev 3.0 or Rev 4.0, for example to make a profile. Both boards have the same settings, so a profile works on either; what one board doesn't have (Rev 4.0 has no pin 14, Rev 3.0 no A2/A3 sources) is dropped from the pages when they show the other.
 
-**Spare Pro Micro pins.** The board leaves 11 Pro Micro pins unused: TX, RX, 4, 5, 6, 7, 8, 9, 10, 14 and 16. They aren't broken out, so using one means soldering a wire to the Pro Micro. Each can be:
+**IN1–IN16** are the 16 switch inputs, physical inputs 1–16 on the Button Config page.
+
+**AX1–AX4**, with their live readings (0–4092):
+- **Rev 3.0:** the 4 analog inputs. AX1 and AX4 have the PROG1 and PROG4 buttons for AS5600 sensors.
+- **Rev 4.0:** the 4 I²C ports for AS5600 sensors. Each shows its sensor's state: OK, no sensor, no magnet, magnet too weak or too strong, or a bus problem. Below them, **A2** and **A3** are two more analog axis sources: Pro Micro pins with no connector, on only while an axis uses them.
+
+**Spare Pro Micro pins.** The board leaves 11 Pro Micro pins unused: TX, RX, 4, 5, 6, 7, 8, 9, 10, 14 and 16 (Rev 4.0 uses pin 14 for its shift registers, so it has 10, plus A2 and A3 above). They aren't broken out, so using one means soldering a wire to the Pro Micro. Each can be:
 
 | Setting | What it does | Pins |
 |---|---|---|
@@ -45,7 +51,7 @@ The board's fixed inputs, what the spare Pro Micro pins do, and the AS5600 helpe
 
 **Summary** adds it all up. Axis ranges (buttons from axes) share 37 physical inputs; if the axes ask for more, the app won't write the settings until you remove some.
 
-**AS5600 programming helper:** see the [AS5600 guide](as5600.md).
+**AS5600 helper:** on Rev 3.0, the PROG-button programming helper; on Rev 4.0, the I²C helper that sets each sensor's start and stop and the I²C clock. See the [AS5600 guide](as5600.md).
 
 ## Button Config
 
@@ -166,7 +172,7 @@ The Pro Micro's pins can drive about 20 mA each: an LED with a resistor is fine,
 | VID / PID | The USB vendor and product IDs. Give each HeliSR board on one PC its own PID (see below) |
 | USB exchange period | How often the board reports to the PC (default 5 ms) |
 | Remove name | Clears Windows' remembered name for this VID/PID. Windows sometimes keeps showing an old name after a rename; this fixes it |
-| Firmware | Updates the firmware, or puts it on a new Pro Micro: see [Flashing](flashing.md) |
+| Firmware | Updates the firmware, or puts it on a new Pro Micro: one file per board. See [Flashing](flashing.md) |
 | Languages, theme, font size | The app's own look. Russian, Chinese and German translations come from FreeJoy's app; text that's new in HeliSR shows in English |
 
 ## Several boards on one PC
@@ -183,9 +189,11 @@ HeliSRConfigurator --read  my-setup.cfg         save the board's settings to a p
 HeliSRConfigurator --write my-setup.cfg         write a profile to the board
 HeliSRConfigurator --write-defaults             put the factory settings on the board
 HeliSRConfigurator --params 5                   show the live readings for 5 seconds
-HeliSRConfigurator --flash firmware\HeliSR_16MHz.hex                  update the firmware
-HeliSRConfigurator --flash-new firmware\HeliSR_16MHz.hex [--port COM5]   flash a new Pro Micro
+HeliSRConfigurator --flash firmware\HeliSR_Rev3.0_16MHz.hex           update the firmware
+HeliSRConfigurator --flash-new firmware\HeliSR_Rev3.0_16MHz.hex [--port COM5]   flash a new Pro Micro
+HeliSRConfigurator --hex-info firmware\HeliSR_Rev4.0_16MHz.hex        which board a firmware file is for
+HeliSRConfigurator --sensors 5                  Rev 4.0: the AS5600s' state and angles for 5 seconds
 HeliSRConfigurator --save-defaults new.cfg      save the factory settings as a profile (no board needed)
 ```
 
-Add `--device 2` to use the second board in the list.
+Add `--device 2` to use the second board in the list. `--flash` and `--flash-new` check which board the file is for, and stop if it may not suit the board: a connected board whose firmware is for the other board, a new Pro Micro with Rev 4.0 firmware, or a file that doesn't say. Add `--board 4.0` (or `3.0`) to say which board the Pro Micro is on, and the file is flashed if it's for that board.

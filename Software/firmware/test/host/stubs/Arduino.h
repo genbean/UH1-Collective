@@ -17,6 +17,7 @@
 
 unsigned long millis(void);
 unsigned long micros(void);
+void delay(unsigned long ms);
 int analogRead(uint8_t pin);
 
 #endif

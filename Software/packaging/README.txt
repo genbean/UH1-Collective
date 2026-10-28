@@ -1,13 +1,16 @@
 HeliSR Configurator
 ===================
 
-Sets up a Pro Micro (ATmega32U4) on a HeliSR Rev 3.0 board as a game
-controller: buttons, axes, encoders, LEDs, and its USB name. Windows 10 or 11.
+Sets up a Pro Micro (ATmega32U4) on a HeliSR Rev 3.0 or Rev 4.0 board as a
+game controller: buttons, axes, encoders, LEDs, and its USB name. Windows 10
+or 11. Each board has its own firmware: never put Rev 4.0 firmware on a
+Rev 3.0 board (the app checks before it flashes).
 
 First flash of a new Pro Micro
 ------------------------------
 1. Plug the Pro Micro into USB and start HeliSR Configurator.
-2. Advanced Settings -> Firmware: pick "HeliSR (5 V / 16 MHz Pro Micro)".
+2. Advanced Settings -> Firmware: pick "HeliSR Rev 3.0" or "HeliSR Rev 4.0
+   (5 V / 16 MHz Pro Micro)", the revision printed on your board.
 3. Pick the Pro Micro's serial port in the list (a board straight from the
    factory or with an Arduino sketch has one), or "Double tap on RST".
 4. Click "Flash a Pro Micro without HeliSR firmware". With "Double tap on
@@ -29,7 +32,8 @@ After that
 What's in this folder
 ---------------------
 HeliSRConfigurator.exe   the app (also has a command line: run it with --help)
-firmware\                the HeliSR firmware (5 V / 16 MHz Pro Micro)
+firmware\                the HeliSR firmware (5 V / 16 MHz Pro Micro), one file
+                         per board: HeliSR_Rev3.0_16MHz.hex, HeliSR_Rev4.0_16MHz.hex
 profiles\                example profiles
 avrdude\                 avrdude, which writes the firmware
 licenses\                the licences; see THIRD-PARTY-NOTICES.txt

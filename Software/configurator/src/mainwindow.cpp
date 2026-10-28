@@ -115,6 +115,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_boardConfig, &BoardConfig::limitReached, this, &MainWindow::updateReadWriteButtons);
     // AS5600 helper measured a range
     connect(m_boardConfig, &BoardConfig::applyCalibration, this, &MainWindow::applyCalibration);
+    // Rev 4.0: the AS5600 settings live on the board, apart from the profile
+    connect(m_boardConfig, &BoardConfig::writeSensorConfig, this, [this](const hsr_sensor_config_t &config) {
+        m_hidDeviceWorker->writeSensorConfig(config);
+    });
+    connect(m_hidDeviceWorker, &HidDevice::sensorConfigReceived, m_boardConfig, &BoardConfig::sensorConfigReceived);
+    connect(m_hidDeviceWorker, &HidDevice::sensorConfigSent, m_boardConfig, &BoardConfig::sensorConfigSent);
+    connect(m_hidDeviceWorker, &HidDevice::sensorStatusReceived, m_boardConfig, &BoardConfig::sensorStatusReceived);
     // encoder changed
     connect(m_buttonConfig, &ButtonConfig::encoderInputChanged, m_encoderConfig, &EncodersConfig::encoderInputChanged);
     // language changed
@@ -229,10 +236,16 @@ void MainWindow::deviceInfoReceived(bool compatible)
     const hsr_info_t &info = gEnv.pDeviceConfig->info;
     m_advSettings->flasher()->deviceConnected(true, &info);
     m_deviceReady = compatible;
+    if (compatible && m_followDeviceBoard) {
+        // the pages show what this board has; a change rebuilds them once
+        m_boardConfig->setBoard(info.board_id);
+        applyBoardUpdate();
+    }
     m_boardConfig->setDeviceConnected(compatible);
     if (compatible) {
         ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(0, 128, 0);");
-        ui->label_DeviceStatus->setText(tr("Device firmware") + " " + firmwareVersionText());
+        ui->label_DeviceStatus->setText(tr("Device firmware") + " " + firmwareVersionText() + ", "
+                                        + HsrBoard::revisionName(info.board_id));
     } else {
         ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(168, 168, 0);");
         if (info.firmware_version) {
@@ -310,6 +323,13 @@ void MainWindow::applyBoardUpdate()
     m_buttonConfig->setPhysicalInputs(HsrBoard::physicalInputs(pins, a2b.constData()));
     m_axesConfig->setAvailableSources(pins);
     m_ledConfig->setPins(pins);
+}
+
+void MainWindow::showBoard(int boardId, bool followDevice)
+{
+    m_followDeviceBoard = followDevice;
+    m_boardConfig->setBoard(boardId);
+    applyBoardUpdate();
 }
 
 void MainWindow::applyCalibration(int analogSource, int rawMin, int rawMax)
@@ -598,6 +618,10 @@ void MainWindow::loadAppConfig()
     appS->beginGroup("Configs");
     m_cfgDirPath = appS->value("Path", gEnv.pAppSettings->fileName().remove("HeliSRSettings.conf") + "configs").toString();
     appS->endGroup();
+    // the board the pages showed last (before the pages are made)
+    appS->beginGroup("BoardSettings");
+    HsrBoard::setBoard(appS->value("Board", HSR_BOARD_REV30).toInt());
+    appS->endGroup();
 
     //debug tab, only for debug build
     #ifdef QT_DEBUG
@@ -632,6 +656,10 @@ void MainWindow::saveAppConfig()
     appS->beginGroup("Configs");
     appS->setValue("Path", m_cfgDirPath);
     appS->setValue("LastCfg", ui->comboBox_Configs->currentText());
+    appS->endGroup();
+    // save the board shown
+    appS->beginGroup("BoardSettings");
+    appS->setValue("Board", HsrBoard::board());
     appS->endGroup();
     qDebug()<<"done";
 }

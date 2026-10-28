@@ -4,12 +4,12 @@ From a bare Pro Micro to a working game controller in about ten minutes.
 
 ## What you need
 
-- A **HeliSR Rev 3.0 board**, assembled (see [`PCB/HeliSR_Rev3.0`](../../PCB/HeliSR_Rev3.0/README.md)).
+- A **HeliSR board**, assembled: [Rev 3.0](../../PCB/HeliSR_Rev3.0/README.md) or [Rev 4.0](../../PCB/HeliSR_Rev4.0/README.md). Check which one you have: the revision is printed on the board. Each needs its own firmware. (Rev 4.0 hasn't been built and tested yet.)
 - A **5 V / 16 MHz Pro Micro** (ATmega32U4): the SparkFun one or a clone, micro-USB or USB-C. The 3.3 V / 8 MHz Pro Micro isn't supported.
 - A USB **data** cable (some charging cables have no data wires).
 - A PC with **64-bit Windows 10 or 11**.
 
-The board README's "MMJoy2 setup" section is out of date: HeliSR's own firmware and app replace MMJoy2. Everything else in it (wiring, AS5600 preparation) still applies.
+Rev 3.0's README has an "MMJoy2 setup" section that is out of date: HeliSR's own firmware and app replace MMJoy2. Everything else in it (wiring, AS5600 preparation) still applies.
 
 ## 1. Install HeliSR Configurator
 
@@ -24,7 +24,7 @@ If you'd rather not install anything, use `HeliSR-Configurator-x.y.z-portable.zi
 A new Pro Micro comes with a test sketch or an Arduino program, not HeliSR. To put HeliSR on it:
 
 1. Plug the Pro Micro (on its board, or bare) into USB and start **HeliSR Configurator**.
-2. Open **Advanced Settings**. Under **Firmware**, keep **HeliSR (5 V / 16 MHz Pro Micro)**.
+2. Open **Advanced Settings**. Under **Firmware**, pick the one for your board: **HeliSR Rev 3.0** or **HeliSR Rev 4.0 (5 V / 16 MHz Pro Micro)**. Rev 4.0 firmware on a Rev 3.0 board drives pins against the board's chips, so the app asks you to confirm the board before it flashes Rev 4.0 firmware onto a new Pro Micro.
 3. In the list below it, pick the Pro Micro's serial port (COM*n*), if it has one. A board straight from the factory, or one running an Arduino sketch, usually does. If you're not sure, choose **Double tap on RST**.
 4. Click **Flash a Pro Micro without HeliSR firmware**.
    - With a serial port picked, the app restarts the board into its bootloader by itself.
@@ -38,7 +38,7 @@ If it doesn't work, see [Flashing](flashing.md#troubleshooting).
 With no setup at all, HeliSR is already a game controller:
 
 - **IN1–IN16** are buttons 1–16.
-- **AX1–AX4** are the X, Y, Z and Rx axes.
+- **AX1–AX4** are the X, Y, Z and Rx axes. On Rev 4.0 each reads its AS5600 over the whole circle until you set its range (step 5).
 - The device is called **HeliSR**.
 
 Two ways to see it work:
@@ -51,14 +51,15 @@ With nothing wired up, the buttons stay off and the axes sit at one end. That's 
 ## 4. Wire your controls
 
 - **Switches and buttons** go on **J1** (IN1–IN8) and **J2** (IN9–IN16), each between its input pin and a GND pin. The inputs have pull-ups on the board, so an open switch reads off and a closed one reads on.
-- **Pots, Hall sensors and AS5600 angle sensors** go on **AX1–AX4** (J11–J14): VCC, signal, GND.
+- **Rev 3.0: pots, Hall sensors and AS5600 angle sensors** go on **AX1–AX4** (J11–J14): VCC, signal, GND.
+- **Rev 4.0: AS5600 angle sensors** go on **AX1–AX4** (J11–J14), over I²C: SDA, GND, VCC, SCL. Pots and Hall sensors can go on the Pro Micro's spare analog pins (A2, A3, 4, 6, 8, 9, 10) with a soldered wire.
 
-The board README has the [connector pinouts](../../PCB/HeliSR_Rev3.0/README.md#connectors). For an AS5600, read the [AS5600 guide](as5600.md) **before** you power it up with the PROG buttons nearby: its range can be programmed only once.
+The board READMEs have the connector pinouts: [Rev 3.0](../../PCB/HeliSR_Rev3.0/README.md#connectors), [Rev 4.0](../../PCB/HeliSR_Rev4.0/README.md#connectors). For an AS5600, read the [AS5600 guide](as5600.md) first. On Rev 3.0, do so **before** you power it up with the PROG buttons nearby: its range can be programmed only once.
 
 ## 5. Set it up
 
 1. Click **Read config from Device**: the pages now show what's on the board.
-2. Change what you need: button types, which axes are reported, calibration, the device's name. The [user guide](user-guide.md) explains every page.
+2. Change what you need: button types, which axes are reported, calibration, the device's name. The [user guide](user-guide.md) explains every page. On Rev 4.0, set each AS5600's start and stop on the **Board** page ([AS5600 guide](as5600.md#rev-40-setting-the-range-over-i2c)); the board keeps them at once, apart from the rest.
 3. Click **Write config to Device**. The board saves the settings and restarts with them, and the app reconnects by itself.
 
 **Save config to file** keeps a setup as a profile, so you can put it back or share it. Ready-made profiles, including the UH-1 collective, are described in [Profiles](profiles.md).

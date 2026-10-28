@@ -5,13 +5,52 @@ namespace
 {
     const char *const SPARE_LABELS[HSR_SPARE_PINS] = {"TX", "RX", "4", "5", "6", "7", "8", "9", "10", "14", "16"};
     const int PWM_SPARE[HSR_MAX_PWM] = {3, 4, 7, 8};                                   // pins 5, 6, 9, 10
-    const int ANALOG_SPARE[HSR_ANALOG_SOURCES] = {-1, -1, -1, -1, 2, 4, 6, 7, 8};       // pins 4, 6, 8, 9, 10
+    const int ANALOG_SPARE[HSR_ANALOG_SOURCES] = {-1, -1, -1, -1, 2, 4, 6, 7, 8, -1, -1};   // pins 4, 6, 8, 9, 10
     const char *const AXIS_SHORT[HSR_MAX_AXES] = {"X", "Y", "Z", "Rx", "Ry", "Rz", "S1·", "S2·"};
+
+    int g_board = HSR_BOARD_REV30;
 
     QString tr(const char *text)
     {
         return QCoreApplication::translate("HsrBoard", text);
     }
+}
+
+int HsrBoard::board()
+{
+    return g_board;
+}
+
+void HsrBoard::setBoard(int boardId)
+{
+    g_board = boardId == HSR_BOARD_REV40 ? HSR_BOARD_REV40 : HSR_BOARD_REV30;
+}
+
+bool HsrBoard::isRev40()
+{
+    return g_board == HSR_BOARD_REV40;
+}
+
+bool HsrBoard::knownBoard(int boardId)
+{
+    return boardId == HSR_BOARD_REV30 || boardId == HSR_BOARD_REV40;
+}
+
+QString HsrBoard::revisionName(int boardId)
+{
+    if (knownBoard(boardId)) return QStringLiteral("Rev %1.%2").arg(boardId >> 4).arg(boardId & 0xF);
+    return QStringLiteral("0x%1").arg(boardId, 2, 16, QChar('0'));
+}
+
+QString HsrBoard::boardName(int boardId)
+{
+    if (knownBoard(boardId)) return QStringLiteral("HeliSR ") + revisionName(boardId);
+    return tr("board %1").arg(revisionName(boardId));
+}
+
+bool HsrBoard::spareExists(int spareIndex)
+{
+    return spareIndex >= 0 && hsr_spare_exists(uint8_t(g_board), uint8_t(spareIndex));
 }
 
 QString HsrBoard::spareLabel(int spareIndex)
@@ -64,14 +103,17 @@ int HsrBoard::spareOfAnalogSource(int source)
 QString HsrBoard::analogSourceName(int source)
 {
     if (source >= 0 && source < HSR_AX_INPUTS) return QStringLiteral("AX%1").arg(source + 1);
+    if (source == HSR_SOURCE_A2) return tr("Pin %1").arg("A2");
+    if (source == HSR_SOURCE_A3) return tr("Pin %1").arg("A3");
     return spareName(spareOfAnalogSource(source));
 }
 
 bool HsrBoard::analogSourceAvailable(int source, const pin_func_t *pins)
 {
-    if (source >= 0 && source < HSR_AX_INPUTS) return true;
+    if (source < 0 || hsr_source_exists(uint8_t(g_board), uint8_t(source)) == false) return false;
+    if (source < HSR_AX_INPUTS || source == HSR_SOURCE_A2 || source == HSR_SOURCE_A3) return true;
     int spare = spareOfAnalogSource(source);
-    return spare >= 0 && pins[spare] == PIN_AXIS_ANALOG;
+    return spareExists(spare) && pins[spare] == PIN_AXIS_ANALOG;
 }
 
 QString HsrBoard::axisName(int axis)
@@ -89,7 +131,7 @@ QVector<HsrBoard::PhysInput> HsrBoard::physicalInputs(const pin_func_t *pins, co
         list.append({HSR_PHYS_SR_FIRST + i, name, name});
     }
     for (int i = 0; i < HSR_SPARE_PINS; ++i) {
-        if (pins[i] == PIN_BUTTON_GND || pins[i] == PIN_BUTTON_VCC) {
+        if (spareExists(i) && (pins[i] == PIN_BUTTON_GND || pins[i] == PIN_BUTTON_VCC)) {
             list.append({HSR_PHYS_SPARE_FIRST + i, spareName(i), spareLabel(i)});
         }
     }

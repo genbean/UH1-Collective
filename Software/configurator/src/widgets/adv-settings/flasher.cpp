@@ -5,15 +5,26 @@
 #include <QFileInfo>
 #include <QGridLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QToolButton>
 #include "avrflasher.h"
+#include "firmwarefile.h"
+#include "helisrboard.h"
 
 #include <QDebug>
 
-// the installer puts the release firmware here, next to the app (5 V / 16 MHz Pro Micro)
-static const char *const FIRMWARE_FILE = "/firmware/HeliSR_16MHz.hex";
+// the installer puts the release firmware here, next to the app (5 V / 16 MHz Pro Micro), one per board
+static const struct
+{
+    int board;
+    const char *file;
+} FIRMWARE_FILES[] = {
+    {HSR_BOARD_REV30, "/firmware/HeliSR_Rev3.0_16MHz.hex"},
+    {HSR_BOARD_REV40, "/firmware/HeliSR_Rev4.0_16MHz.hex"},
+};
+static const int FIRMWARE_COUNT = int(sizeof(FIRMWARE_FILES) / sizeof(FIRMWARE_FILES[0]));
 static const int BOOTLOADER_WAIT_MS = 10000;
 static const int DOUBLE_TAP_WAIT_MS = 20000;
 
@@ -85,15 +96,19 @@ void Flasher::fillFirmwareList()
 {
     int current = m_firmware->currentIndex();
     m_firmware->clear();
-    QString file = QCoreApplication::applicationDirPath() + FIRMWARE_FILE;
-    QString text = tr("HeliSR (5 V / 16 MHz Pro Micro)");
-    bool found = QFileInfo::exists(file);
-    m_firmware->addItem(found ? text : text + " " + tr("(not found)"), found ? file : QString());
+    bool anyFound = false;
+    for (const auto &fw : FIRMWARE_FILES) {
+        QString file = QCoreApplication::applicationDirPath() + fw.file;
+        QString text = tr("%1 (5 V / 16 MHz Pro Micro)").arg(HsrBoard::boardName(fw.board));
+        bool found = QFileInfo::exists(file);
+        anyFound |= found;
+        m_firmware->addItem(found ? text : text + " " + tr("(not found)"), found ? file : QString());
+    }
     m_firmware->addItem(tr("Another .hex file..."), QString("*"));
     if (current >= 0) {
         m_firmware->setCurrentIndex(current);
-    } else if (found == false) {
-        m_firmware->setCurrentIndex(1);
+    } else if (anyFound == false) {
+        m_firmware->setCurrentIndex(FIRMWARE_COUNT);
     }
 }
 
@@ -115,9 +130,18 @@ void Flasher::deviceConnected(bool isConnect, const hsr_info_t *info)
     if (isConnect && info && info->firmware_version) {
         QString ver = QStringLiteral("%1.%2.%3").arg(info->firmware_version >> 8).arg((info->firmware_version >> 4) & 0xF)
                           .arg(info->firmware_version & 0xF);
-        m_deviceLabel->setText(tr("Connected device: HeliSR firmware v%1, %2 MHz Pro Micro.").arg(ver).arg(info->cpu_mhz));
+        m_deviceLabel->setText(tr("Connected device: HeliSR firmware v%1 for the %2 board, %3 MHz Pro Micro.")
+                                   .arg(ver, HsrBoard::revisionName(info->board_id)).arg(info->cpu_mhz));
+        // offer the firmware for the board it's on
+        if (info->board_id != m_deviceBoard && m_avr->isBusy() == false) {
+            for (int i = 0; i < FIRMWARE_COUNT; ++i) {
+                if (FIRMWARE_FILES[i].board == info->board_id) m_firmware->setCurrentIndex(i);
+            }
+        }
+        m_deviceBoard = info->board_id;
     } else if (isConnect == false) {
         m_deviceLabel->setText(tr("No HeliSR device connected."));
+        m_deviceBoard = 0;
     }
     m_flashButton->setEnabled(isConnect && m_avr->isBusy() == false);
 }
@@ -134,6 +158,32 @@ QString Flasher::chooseHexFile()
         file = QFileDialog::getOpenFileName(this, tr("Open firmware"), QString(), tr("Firmware (*.hex)"));
     }
     return file;
+}
+
+bool Flasher::approveFile(const QString &file, int deviceBoard)
+{
+    FirmwareFile::Info info = FirmwareFile::read(file);
+    FirmwareFile::Check check = FirmwareFile::check(info, deviceBoard, 0);
+    if (check.verdict == FirmwareFile::Ok) {
+        return true;
+    }
+    if (check.verdict == FirmwareFile::Refuse) {
+        flashFinished(false, check.message);
+        return false;
+    }
+    QMessageBox box(QMessageBox::Warning, tr("Which board?"), check.message, QMessageBox::NoButton, this);
+    QString what = info.tagged ? tr("It's on a %1 board: flash it").arg(HsrBoard::revisionName(info.boardId))
+                               : tr("Flash it anyway");
+    QPushButton *flash = box.addButton(what, QMessageBox::AcceptRole);
+    QPushButton *cancel = box.addButton(QMessageBox::Cancel);
+    box.setDefaultButton(cancel);
+    box.exec();
+    if (box.clickedButton() != flash) {
+        m_status->setText(tr("Not flashed."));
+        m_status->setStyleSheet(QString());
+        return false;
+    }
+    return true;
 }
 
 void Flasher::setBusy(bool busy)
@@ -153,6 +203,10 @@ void Flasher::flashConnected()
 {
     m_hexFile = chooseHexFile();
     if (m_hexFile.isEmpty()) return;
+    if (approveFile(m_hexFile, m_deviceBoard) == false) {
+        m_hexFile.clear();
+        return;
+    }
     setBusy(true);
     m_avr->prepare();
     m_status->setText(tr("Restarting the device into its bootloader..."));
@@ -174,6 +228,10 @@ void Flasher::flashNewBoard()
 {
     m_hexFile = chooseHexFile();
     if (m_hexFile.isEmpty()) return;
+    if (approveFile(m_hexFile, 0) == false) {
+        m_hexFile.clear();
+        return;
+    }
     QString port = m_ports->currentData().toString();
     setBusy(true);
     m_avr->prepare();
