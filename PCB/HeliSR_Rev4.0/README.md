@@ -179,8 +179,9 @@ shipped as `firmware\HeliSR_Rev4.0_16MHz.hex`. It:
   one port's PCA9546A channel at a time and reads its AS5600's ANGLE register (address 0x36), scaled to the analog
   inputs' 0–4092. It also reads STATUS, RAW ANGLE and AGC, for the magnet checks and the Configurator's helper;
 - writes each sensor's start and stop to its volatile ZPOS and MPOS at start-up, 1 ms apart, from settings it keeps
-  in EEPROM (the Configurator sets them), reads them back, and writes them again to a sensor that comes back after an
-  error or has lost them. It never burns anything;
+  in EEPROM (the Configurator sets them), and CONF as 0 (the chip's factory settings, over anything burnt in); reads
+  them back, and writes them again to a sensor that comes back after an error or has lost them. It never burns
+  anything;
 - maps channels 2, 1, 3, 0 to AX1–AX4 as above. A stuck bus is freed by pulling A1 low (never driving it high), clocking
   out a half-sent byte and sending a STOP; a port that stuck it is left alone for 250 ms;
 - treats A2 and A3 as spare analog pins (axis sources 9 and 10) instead of AX2 and AX1, and leaves pin 14 out of the

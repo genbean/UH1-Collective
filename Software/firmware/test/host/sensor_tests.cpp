@@ -3,7 +3,8 @@
   simulated I2C bus: the board's PCA9546A switch and an AS5600 on each of its
   channels. No Rev 4.0 board has been built yet, so this is what checks the
   sequences the firmware sends: the channel of each port, the registers, the
-  byte order, the 1 ms waits, the read-back, and what happens when a sensor or
+  byte order, the 1 ms waits, the read-back, CONF set over burnt-in settings,
+  and what happens when a sensor or
   the switch goes missing or the bus sticks.
 
   Part of HeliSR. Copyright (C) 2026 HeliSR contributors.
@@ -30,9 +31,11 @@ extern unsigned long host_millis;
 struct FakeAs5600
 {
 	bool present = true;
-	bool takes_range = true;        // false: ZPOS/MPOS writes don't stick
+	bool takes_range = true;        // false: ZPOS/MPOS/CONF writes don't stick
 	bool holds_bus = false;         // holds SDA low while its channel is connected
 	uint16_t zpos = 0, mpos = 0;    // volatile registers, 0 after power-up
+	uint16_t conf = 0;              // CONF: what's burnt in (burnt_conf) after power-up
+	uint16_t burnt_conf = 0;
 	uint16_t raw = 0;
 	uint8_t status = 0x20;          // MD: magnet detected
 	uint8_t agc = 128;
@@ -45,7 +48,8 @@ struct FakeAs5600
 		if (d > span) d = (d - span < (4096 - span) / 2) ? span : 0;   // past an end: held there
 		return (uint16_t)((uint32_t)d * 4095 / span);
 	}
-	void power_cycle() { zpos = mpos = 0; }
+	void power_cycle() { zpos = mpos = 0; conf = burnt_conf; }
+	void burn_conf(uint16_t v) { burnt_conf = conf = v; }
 	uint8_t reg(uint8_t r) const
 	{
 		switch (r)
@@ -54,6 +58,8 @@ struct FakeAs5600
 		case 0x02: return (uint8_t)zpos;
 		case 0x03: return (uint8_t)(mpos >> 8);
 		case 0x04: return (uint8_t)mpos;
+		case 0x07: return (uint8_t)(conf >> 8);
+		case 0x08: return (uint8_t)conf;
 		case 0x0B: return status;
 		case 0x0C: return (uint8_t)(raw >> 8);
 		case 0x0D: return (uint8_t)raw;
@@ -74,14 +80,19 @@ struct FakeBus
 	int multi_channel = 0;          // transfers with more than one channel connected
 	int burns = 0;                  // writes to the AS5600's BURN register (0xFF)
 	std::vector<std::string> log;
-	unsigned long zpos_written_at[4];
-	int zpos_writes[4], mpos_writes[4];
+	unsigned long zpos_written_at[4], mpos_written_at[4];
+	int zpos_writes[4], mpos_writes[4], conf_writes[4];
 	int mpos_too_soon = 0;          // MPOS written less than 1 ms after ZPOS
+	int conf_too_soon = 0;          // CONF written less than 1 ms after MPOS
 
 	void reset()
 	{
 		*this = FakeBus();
-		for (int c = 0; c < 4; c++) { zpos_written_at[c] = 0; zpos_writes[c] = mpos_writes[c] = 0; }
+		for (int c = 0; c < 4; c++)
+		{
+			zpos_written_at[c] = mpos_written_at[c] = 0;
+			zpos_writes[c] = mpos_writes[c] = conf_writes[c] = 0;
+		}
 	}
 	bool stuck() const
 	{
@@ -140,9 +151,16 @@ uint8_t i2c_write(uint8_t addr, const uint8_t *data, uint8_t len)
 		else
 		{
 			bus.mpos_writes[ch]++;
+			bus.mpos_written_at[ch] = host_millis;
 			if (host_millis - bus.zpos_written_at[ch] < 1) bus.mpos_too_soon++;
 		}
 		if (a->takes_range) (r == 0x01 ? a->zpos : a->mpos) = v;
+	}
+	if (len == 3 && r == 0x07)
+	{
+		bus.conf_writes[ch]++;
+		if (host_millis - bus.mpos_written_at[ch] < 1) bus.conf_too_soon++;
+		if (a->takes_range) a->conf = (uint16_t)(((data[1] & 0x3F) << 8) | data[2]);
 	}
 	return I2C_OK;
 }
@@ -282,10 +300,13 @@ static void t_sensor_range()
 	CHECK(s.port[0].flags & HSR_SENSOR_RANGE_OK);
 	CHECK(s.port[3].flags & HSR_SENSOR_RANGE_OK);
 
-	// the byte order: ZPOS high (bits 11-8) first
-	bool seen = false;
-	for (const std::string &l : bus.log) seen |= l == "W36 01 03 E8";     // 1000 = 0x3E8
+	// the byte order: ZPOS high (bits 11-8) first; CONF set to 0 after MPOS, 1 ms later
+	bool seen = false, conf_seen = false;
+	for (const std::string &l : bus.log) { seen |= l == "W36 01 03 E8"; conf_seen |= l == "W36 07 00 00"; }    // 1000 = 0x3E8
 	CHECK(seen);
+	CHECK(conf_seen);
+	CHECK_EQ(bus.conf_writes[CHANNEL_OF[0]], bus.zpos_writes[CHANNEL_OF[0]]);
+	CHECK_EQ(bus.conf_too_soon, 0);
 
 	// the axis gets ANGLE, which runs across the range
 	chip_of(0).raw = 2000;
@@ -423,6 +444,34 @@ static void t_sensor_silent_restart()
 	CHECK_EQ(status_now().port[2].errors, 0);
 }
 
+static void t_sensor_conf()
+{
+	scenario("AS5600: CONF set to 0 over settings burnt into the chip, and again after a restart");
+	fresh_start();
+	chip_of(0).burn_conf(0x2003);       // watchdog on, low-power mode 3
+	chip_of(1).burn_conf(0x0300);       // 2x slow filter
+	sensors_begin();
+	rotate(1);
+	CHECK_EQ(chip_of(0).conf, 0);
+	CHECK_EQ(chip_of(1).conf, 0);
+	CHECK(status_now().port[0].flags & HSR_SENSOR_RANGE_OK);
+	CHECK_EQ(bus.conf_too_soon, 0);
+
+	// a brown-out brings the burnt settings back: the read-back every third visit catches it
+	chip_of(0).power_cycle();
+	CHECK_EQ(chip_of(0).conf, 0x2003);
+	rotate(4);
+	CHECK_EQ(chip_of(0).conf, 0);
+	CHECK(status_now().port[0].flags & HSR_SENSOR_RANGE_OK);
+	CHECK_EQ(status_now().port[0].errors, 0);
+
+	// bits 15-14 aren't CONF's: a chip that reads them as 1 still counts as set
+	chip_of(2).conf = 0xC000;
+	rotate(4);
+	CHECK(status_now().port[2].flags & HSR_SENSOR_RANGE_OK);
+	CHECK_EQ(bus.burns, 0);
+}
+
 static void t_sensor_wont_take()
 {
 	scenario("AS5600: a chip that won't take a range is retried every third visit, not on every one");
@@ -545,6 +594,7 @@ void run_sensor_tests()
 	t_sensor_clock();
 	t_sensor_unplugged();
 	t_sensor_silent_restart();
+	t_sensor_conf();
 	t_sensor_wont_take();
 	t_sensor_magnet();
 	t_sensor_no_switch();
