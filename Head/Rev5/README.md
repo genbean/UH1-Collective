@@ -6,6 +6,10 @@ Rev 5 is head Rev 4 ([`../Rev4`](../Rev4/README.md)) with the box and both panel
 
 ![Rev 5's panels](renders/HueyHeadR5_Front.png)
 
+![Exploded from the front: the panels, the HeliSR board, the AS5600 module, magnet shaft and pinion, the grip and the friction collar](renders/HueyHeadR5_Exploded.png)
+
+![Exploded from behind: the trigger, its spring, switch, pivot and pull stop, and the HeliSR board's screws](renders/HueyHeadR5_Exploded_Rear.png)
+
 ## Dimensions
 
 | | Rev 4 | Rev 5 (real panels) |
@@ -121,7 +125,35 @@ Closest clearances:
 
 `stl/` has the same parts as Rev 4, named `HueyHeadR5-*`. They print the same way: the body on its rear wall, with tree supports for the neck, the knob and the tube bore, and the panels face down. See [Rev 4's printing table](../Rev4/README.md#printing). For the panels' white labels, set Bambu Studio's wall generator to **Arachne** and the first layer's line width to 0.42 mm (default 0.5): each stroke then prints as one line. The body is 147 cm³ (Rev 4: 166 cm³), the lower panel 16.6 cm³ and the upper panel 6.2 cm³.
 
-The screws are Rev 4's, from the same two kits, except the panels' M3 × 16s (see above).
+The screws are Rev 4's, from the same two kits, except the panels' M3 × 16s (see [Screws](#screws)).
+
+## Screws
+
+Every screw and nut but one is from the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH)) and the HIQTRADEBYJJ set-screw kit ([Amazon B0DG33R714](https://www.amazon.com/dp/B0DG33R714)). The exception is the trigger's pivot, an **M3 × 25 countersunk (ISO 10642 / DIN 7991), bought separately** (the NIULUNBAO M3 set has it): the kits stop at 20 mm. Every M3 and M5 hole a screw threads into is printed with its thread; only the M2 holes are pilots to tap by hand.
+
+| Where | Screw | Into | Qty |
+|---|---|---|---|
+| Lower and upper panels | M3 × 16 countersunk | the M3 thread printed in each corner column | 8 |
+| HeliSR board | M3 × 12 countersunk, from outside the rear wall | through a 4 mm spacer and the board, M3 nut on the board's front | 4 |
+| Tube | M5 × 8 set screw, from the boss's front | the boss's printed M5 thread; the tip goes into the tube's front hole | 1 |
+| Trigger pivot | M3 × 25 countersunk (bought), from the left lug's countersink | through the trigger, 8 mm into the right lug's printed thread | 1 |
+| Trigger pull stop | M3 × 4 set screw, from behind the trigger's arm | the arm's printed M3 thread; its tip meets the seat below | 1 |
+| Pull stop seat | M2 × 8 countersunk, head flush with the mount's face | a 1.6 mm pilot, tapped M2 by hand | 1 |
+| Hat bezel | M2 × 8 countersunk | 1.6 mm pilots in the carrier, tapped M2 by hand | 4 |
+| Hat pivot | M3 × 4 set screw, in the rocker plate's centre | the plate's printed M3 thread (see [Rev 4's hat](../Rev4/Hat/README.md)) | 1 |
+| Friction collar | M4 × 12 countersunk, head 2 mm into one ear | M4 nut in the other ear's pocket | 1 |
+
+Every screw and nut to scale (the ruler is 50 mm):
+
+![Every screw and nut, to scale](renders/HueyHeadR5_ScrewSizes.png)
+
+![The panel screws and the hat's bezel screws](renders/HueyHeadR5_Screws_Panels.png)
+
+![Panels off: the tube's set screw and the HeliSR board's nuts](renders/HueyHeadR5_Screws_Inside.png)
+
+![From behind and below: the HeliSR board's screws, the trigger's pivot, its pull stop and the stop's seat](renders/HueyHeadR5_Screws_Rear.png)
+
+![The friction collar's screw and nut](renders/HueyHeadR5_Screws_Collar.png)
 
 ## Regenerating
 
