@@ -25,7 +25,7 @@ Each folder has its own README with the details: how it works, printing, the par
 | [`PCB/HeliSR_Rev3.0/`](PCB/HeliSR_Rev3.0/README.md) | HeliSR Rev 3.0 board, the previous one: it reads the AS5600s' analog output, and its PROG buttons program each sensor's range once. This revision is frozen: changes go into a new revision folder. Its "MMJoy2 setup" section is out of date; use the software below instead (MMJoy2 is no longer in this repository). |
 | [`BOM/`](BOM) | **The bill of materials for the whole collective:** [`Heli_Collective_Final_BOM.xlsx`](BOM/Heli_Collective_Final_BOM.xlsx) (sheets for everything to buy, the Digi-Key order, the printed parts, dropped parts and sources), [`Heli_Collective_DigiKey.csv`](BOM/Heli_Collective_DigiKey.csv) to upload to Digi-Key's cart, and [`make_final_bom.py`](BOM/make_final_bom.py), the script that writes both. They list the Rev 4.0 board, and count the Digi-Key order already placed for Rev 3.0 as bought: the CSV holds only what's still to order. |
 | [`Software/`](Software/README.md) | **HeliSR firmware and HeliSR Configurator**, with their documentation in [`Software/docs/`](Software/docs) and example profiles, including one for this collective. |
-| [`renders/`](renders) | Pictures and a 3D model of the complete collective. |
+| [`renders/`](renders) | Pictures and a 3D model of the complete collective, and [`make_diagrams.py`](renders/make_diagrams.py), which draws the exploded views, screw maps and screw-size charts in `Base/renders` and `Head/Rev5/renders` from that model. |
 
 ## What you need
 

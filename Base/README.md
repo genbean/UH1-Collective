@@ -18,7 +18,9 @@ Rev 3 also changes four other things from Rev 1:
 
 ![From behind, knob side](renders/rev3_base_rear.png)
 
-`renders/MkIII_Rev3_Assembly.glb` is the whole base in 3D at the down-stop: every printed part in its colour, plus the bearings, strut, tube, clamp, hardware and sensor stand-ins. It opens in Windows 3D Viewer or any glTF viewer. The complete collective, base and head Rev 4 together, is in [`../renders`](../renders): `HeliCollective_Assembly.glb`, and pictures at 0° and at the 32° stop.
+![Exploded: the lever lifted out of the frame, the caps, bearings and covers off, every screw pulled out along its axis](renders/rev3_exploded.png)
+
+`renders/MkIII_Rev3_Assembly.glb` is the whole base in 3D at the down-stop: every printed part in its colour, plus the bearings, strut, tube, clamp, hardware and sensor stand-ins. It opens in Windows 3D Viewer or any glTF viewer. The complete collective, base and head Rev 5 together, is in [`../renders`](../renders): `HeliCollective_Assembly.glb`, and pictures at 0° and at the 32° stop.
 
 `mk3_rev3.py` builds the base. It imports Rev 1's model, `mk3_pivot.py`, for every part the two share, and for the fit parameters you tune with the coupons below.
 
@@ -251,7 +253,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 
 1. **Frame:** tap the eight M3 cover holes, in the pillow blocks and the caps, 11 mm deep. Press an M4 nut into the pocket in each down-stop post's top, and slide an M4 nut into each of the four slots in the pillow blocks' front and back faces (the knob-side block's front one opens on the tower gusset's sloping face).
 2. **Lever:** press the four M4 nuts into the lower half's pockets, lay the USB cable and the sensor lead into the lower half, close the upper half and fit the four M4 cap screws (all M4 × 40; see [Split lever](#split-lever)). Press the bearings onto the trunnions.
-3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, press the M5 × 16 hex bolt's head into the knob's hex pocket, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
+3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, press the M5 × 25 hex bolt's head into the knob's hex pocket, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
 4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
 5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
 6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
@@ -275,6 +277,10 @@ Every screw and nut is from three kits and one pack: the AvrestYPT countersunk k
 | Strut eyes | M4 × 16 countersunk, head on the knob side | M4 nut in the far cheek's pocket | 2 |
 | Strut collar clamp | M4 × 12 countersunk, head 2 mm into the sensor-side ear | M4 nut in the other ear's pocket | 2 |
 | Down-stops | M4 × 16 countersunk, head up | M4 nut in the post's top pocket, plus an M4 lock nut | 2 |
+
+Every screw and nut to scale, to sort them before you start (the ruler is 50 mm):
+
+![Every screw and nut, to scale](renders/rev3_screw_sizes.png)
 
 ![Screws from above](renders/rev3_screws_top.png)
 
