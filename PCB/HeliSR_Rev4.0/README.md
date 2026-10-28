@@ -93,6 +93,9 @@ The order keeps SDA and SCL apart, with GND beside SDA and VCC beside SCL, which
 twist SDA with GND and SCL with VCC, or use a 4-core cable with those pairs. It is **not** the Qwiic / STEMMA QT
 order, on purpose: those boards are 3.3 V and this port is 5 V.
 
+If you make a lead by cutting a pre-made JST SR/SH jumper in half, find which wire is pin 1 with a meter before
+soldering the sensor end: the plug is keyed, but the wires may all be one colour.
+
 | Port | Connector | PCA9546A channel | Pull-ups (SDA, SCL) | Suggested use |
 |---|---|---|---|---|
 | AX1 | J11 | 2 | R1, R2 | Collective (AS5600 in the MkIII base) |
@@ -175,7 +178,15 @@ The HeliSR firmware in `Software/firmware/HeliSR` is written for Rev 3.0. Rev 4.
   reads its AS5600 (address 0x36, RAW ANGLE or ANGLE registers);
 - writes each sensor's start and stop angles at start-up, from settings the Configurator saves;
 - maps channels 2, 1, 3, 0 to AX1–AX4 as above, and pulls A1 low to reset a stuck bus;
-- treats A2 and A3 as spare analog pins instead of AX1–AX4.
+- treats A2 and A3 as spare analog pins instead of AX1–AX4;
+- sets the JTD bit in MCUCR at start-up (written twice, as the ATmega32U4 requires). A0 and A1 are also the JTAG
+  pins TDI and TDO (PF7, PF6); SparkFun ships the Pro Micro with JTAG off in its fuses (high fuse 0xD8), but a clone
+  with JTAG on would otherwise keep both pins from working as plain I/O.
+
+**Keep the builds apart.** Rev 3.0 firmware on a Rev 4.0 board does no harm: it drives the I²C clock line and listens
+on SDA, which only the pull-ups hold, and reads A0–A3 as analog inputs. A Rev 4.0 build on a **Rev 3.0** board would
+drive A0 and A1 against whatever is on AX4 and AX3, and pull pin 2 against U2's QH output, so the Configurator should check the
+board revision before it flashes.
 
 ## Files
 
