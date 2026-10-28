@@ -50,4 +50,4 @@ The firmware and app are complete and tested on a bare Pro Micro:
 
 Testing on built HeliSR boards with real switches and sensors comes next ([PLAN.md](PLAN.md), phase 6).
 
-**Rev 4.0** support is written but has never run on a Rev 4.0 board, because none exists yet. Its sensor code is tested on the PC against a simulated I²C switch and AS5600s, and the app's pages are tested for both boards; what still needs the board is listed in [PLAN.md](PLAN.md#rev-40-support).
+**Rev 4.0** support is written but has never run on a Rev 4.0 board, because none exists yet. Its sensor code is tested on the PC against a simulated I²C switch and AS5600s, the app's pages are tested for both boards, and the Rev 4.0 firmware has run on a bare Pro Micro (USB, settings, the sensor settings, the board check when flashing); what still needs the board is listed in [PLAN.md](PLAN.md#rev-40-support).

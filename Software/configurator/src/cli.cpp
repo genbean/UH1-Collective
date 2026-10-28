@@ -333,8 +333,8 @@ QString sensorConfigLine(const hsr_sensor_config_t &c)
     return line;
 }
 
-// Rev 4.0: the AS5600 settings saved, read back, refused when out of range,
-// and the originals put back. Works without sensors: the board keeps the
+// Rev 4.0: the AS5600 settings saved, read back, kept through a restart,
+// refused when out of range, and the originals put back. Works without sensors: the board keeps the
 // settings whether or not anything answers on its ports.
 int sensorRoundtrip(Session &s)
 {
@@ -356,6 +356,11 @@ int sensorRoundtrip(Session &s)
     out(clock ? "The status reports the new clock: OK" : "FAIL: the status doesn't report the new clock");
     out("Status:    " + sensorLine(gEnv.pDeviceConfig->sensorStatus));
 
+    // kept through a restart: write the main settings back unchanged, which restarts the board
+    bool survived = s.read() && s.write() && s.readSensors()
+                    && memcmp(&test, &gEnv.pDeviceConfig->sensorConfig, sizeof(test)) == 0;
+    out(survived ? "Kept through a restart: OK" : "FAIL: not kept through a restart " + sensorConfigLine(gEnv.pDeviceConfig->sensorConfig));
+
     // out of range: refused, and nothing changes
     hsr_sensor_config_t bad = test;
     bad.range[1] = {100, 150};          // under 18 degrees
@@ -369,7 +374,7 @@ int sensorRoundtrip(Session &s)
     if (s.writeSensors(original) == false || s.readSensors() == false) { out("FAIL: restoring"); return 1; }
     bool restored = memcmp(&original, &gEnv.pDeviceConfig->sensorConfig, sizeof(original)) == 0;
     out(restored ? "Original settings restored: OK" : "FAIL: restored settings differ");
-    return same && clock && refused && kept && restored ? 0 : 1;
+    return same && clock && survived && refused && kept && restored ? 0 : 1;
 }
 }
 
@@ -472,8 +477,11 @@ int Cli::run(const QStringList &args)
             waitUntil([] { return false; }, 250);
             const params_report_t &p = gEnv.pDeviceConfig->paramsReport;
             QString line = QStringLiteral("%1 ms  AX:").arg(t.elapsed(), 5);
+            // the board's analog sources: 0-8, and on Rev 4.0 A2 and A3 too
             for (int i = 0; i < HSR_ANALOG_SOURCES; ++i) {
-                line += QStringLiteral(" %1").arg(p.analog_inputs[i], 4);
+                if (hsr_source_exists(gEnv.pDeviceConfig->info.board_id, uint8_t(i))) {
+                    line += QStringLiteral(" %1").arg(hsr_params_analog(&p, uint8_t(i)), 4);
+                }
             }
             line += "  inputs:";
             for (int i = HSR_MAX_PHYS / 8 - 1; i >= 0; --i) {

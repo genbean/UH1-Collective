@@ -80,7 +80,7 @@ HeliSRConfigurator --ui-test-file a.cfg b.cfg     profiles through every page an
 HeliSRConfigurator --roundtrip                    write, read back and compare, then restore (needs a board)
 HeliSRConfigurator --ui-device-test               the same through the window's Write and Read buttons
 HeliSRConfigurator --hex-info file.hex            which board a firmware file is for
-HeliSRConfigurator --sensor-roundtrip             Rev 4.0: the AS5600 settings saved, read back, refused out of range, restored
+HeliSRConfigurator --sensor-roundtrip             Rev 4.0: the AS5600 settings saved, read back, kept through a restart, refused out of range, restored
 HeliSRConfigurator --ui-screenshot board.png [--board 4.0]   a picture of the Board page (Rev 4.0 with made-up sensor readings)
 ```
 
