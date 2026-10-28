@@ -7,11 +7,13 @@
 #include <mutex>
 #include <string>
 #include "hidapi.h"
+#include "shared/helisr_protocol.h"
 
 // Talks to HeliSR devices over their settings channel (a vendor-defined HID
 // collection, usage page 0xFF00). processData() runs in its own thread: it
-// keeps the device list up to date, polls the live data, and carries out the
-// read, write and bootloader requests the UI makes.
+// keeps the device list up to date, polls the live data (and on Rev 4.0
+// boards the AS5600s' status), and carries out the read, write and
+// bootloader requests the UI makes.
 class HidDevice : public QObject
 {
     Q_OBJECT
@@ -20,6 +22,9 @@ public:
     void getConfigFromDevice();
     void sendConfigToDevice();
     void enterBootloader();
+    //! Rev 4.0: read the AS5600 settings again / save new ones on the board
+    void readSensorConfig();
+    void writeSensorConfig(const hsr_sensor_config_t &config);
 
     void setIsFinish(bool isFinish);
     void setSelectedDevice(int deviceNumber);
@@ -39,6 +44,13 @@ signals:
     //! the device acknowledged the bootloader command and is restarting into it
     void bootloaderStarted(bool isSuccess);
 
+    //! Rev 4.0: the AS5600 settings read (on connecting, or when asked), in DeviceConfig::sensorConfig
+    void sensorConfigReceived(bool isSuccess);
+    //! Rev 4.0: saved on the board (DeviceConfig::sensorConfig is what it now holds), or refused
+    void sensorConfigSent(bool isSuccess);
+    //! Rev 4.0: DeviceConfig::sensorStatus updated (about 20 times a second)
+    void sensorStatusReceived();
+
     void hidDeviceList(const QStringList &deviceNames);
 
 private:
@@ -51,14 +63,16 @@ private:
     };
     QList<Device> m_hidDevicesList;     // guarded by m_mutex
 
-    enum Work { WORK_PARAMS, WORK_READ, WORK_WRITE, WORK_BOOTLOADER };
+    enum Work { WORK_PARAMS, WORK_READ, WORK_WRITE, WORK_BOOTLOADER, WORK_SENSOR_READ, WORK_SENSOR_WRITE };
     std::atomic<int> m_currentWork{WORK_PARAMS};
     std::atomic<bool> m_isFinish{false};
     std::atomic<bool> m_listChanged{false};
 
     hid_device *m_device = nullptr;
     bool m_compatible = false;
+    bool m_sensors = false;             // a Rev 4.0 board: it has the SENSOR commands
     int m_selectedDevice = -1;          // guarded by m_mutex
+    hsr_sensor_config_t m_sensorConfigOut = {};     // guarded by m_mutex
 
     bool transact(uint8_t cmd, uint8_t index, const void *data, int len, uint8_t *reply,
                   int timeoutMs = 250, int tries = 3);
@@ -67,6 +81,9 @@ private:
     bool readConfigFromDevice();
     bool writeConfigToDevice();
     bool startBootloader();
+    bool readSensorConfigFromDevice();
+    bool writeSensorConfigToDevice();
+    bool readSensorStatus();
     void closeDevice();
 
     mutable std::mutex m_mutex;

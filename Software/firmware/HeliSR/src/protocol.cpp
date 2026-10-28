@@ -4,7 +4,7 @@
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy),
   application/Src/usb_endp.c.
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 and Rev 4.0 boards, 2026.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 */
 
@@ -19,6 +19,9 @@
 #include "settings.h"
 #include "usb_helisr.h"
 #include "shared/helisr_protocol.h"
+#if HSR_BOARD_REV == 40
+#include "sensors.h"
+#endif
 
 #define CONFIG_CHUNKS   ((sizeof(dev_config_t) + HSR_PACKET_DATA - 1) / HSR_PACKET_DATA)
 #define PARAMS_PARTS    ((sizeof(params_report_t) + HSR_PACKET_DATA - 1) / HSR_PACKET_DATA)
@@ -31,6 +34,12 @@ static uint32_t busy_until;
 static uint16_t commands, replies_dropped;
 static uint8_t test_mode;
 uint16_t pass_max_us;           // set by the sketch's loop
+
+// Which board this build is for, where the configurator finds it in the .hex
+// before flashing. INFO reads its board ID from here, which keeps the tag in
+// the build.
+static const hsr_build_tag_t build_tag PROGMEM =
+	{ HSR_BUILD_MAGIC, HSR_BOARD_ID, (uint8_t)(F_CPU / 1000000UL), HSR_FIRMWARE_VERSION };
 
 // Send a reply, waiting up to 50 ms for the endpoint. data may point into pkt.
 static void reply(uint8_t status, const void *data, uint8_t len)
@@ -116,7 +125,7 @@ static void __attribute__((noinline)) cmd_info(void)
 	memset(&info, 0, sizeof(info));
 	info.firmware_version = HSR_FIRMWARE_VERSION;
 	info.protocol_version = HSR_PROTOCOL_VERSION;
-	info.board_id = HSR_BOARD_ID;
+	info.board_id = pgm_read_byte(&build_tag.board_id);
 	info.config_version = HSR_CONFIG_VERSION;
 	info.config_size = sizeof(dev_config_t);
 	info.cpu_mhz = F_CPU / 1000000UL;
@@ -141,6 +150,30 @@ static void __attribute__((noinline)) cmd_params(uint8_t index)
 	uint8_t len = min((uint16_t)HSR_PACKET_DATA, (uint16_t)(sizeof(p) - offset));
 	reply(HSR_OK, (uint8_t *)&p + offset, len);
 }
+
+#if HSR_BOARD_REV == 40
+static void __attribute__((noinline)) cmd_sensor_status(void)
+{
+	hsr_sensor_status_t s;
+	sensors_status(&s);
+	reply(HSR_OK, &s, sizeof(s));
+}
+
+// index 0: read; index 1: the new settings, saved and applied at once.
+static void __attribute__((noinline)) cmd_sensor_config(uint8_t index, const uint8_t *data)
+{
+	uint8_t status = HSR_OK;
+	if (index == 1)
+	{
+		hsr_sensor_config_t c;
+		memcpy(&c, data, sizeof(c));
+		status = sensors_set_config(&c);
+	}
+	else if (index != 0)
+		status = HSR_ERR_INDEX;
+	reply(status, sensors_config(), sizeof(hsr_sensor_config_t));
+}
+#endif
 
 #ifdef HSR_TEST_STEP
 // One logic pass with the PC's inputs; the inputs are read from the packet
@@ -227,6 +260,16 @@ static void handle(uint32_t now)
 		}
 		reply(HSR_ERR_COMMAND, 0, 0);
 		break;
+
+#if HSR_BOARD_REV == 40
+	case HSR_CMD_SENSOR_STATUS:
+		cmd_sensor_status();
+		break;
+
+	case HSR_CMD_SENSOR_CONFIG:
+		cmd_sensor_config(index, data);
+		break;
+#endif
 
 #ifdef HSR_TEST_STEP
 	case HSR_CMD_TEST_APPLY:

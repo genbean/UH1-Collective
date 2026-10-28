@@ -16,7 +16,8 @@ FILE *g_trace;
 // ---------------------------------------------- stand-ins for the board --
 
 uint8_t host_eeprom[1024];
-unsigned long millis(void) { return 0; }
+unsigned long host_millis;          // the logic gets its time as an argument; sensors.cpp reads this
+unsigned long millis(void) { return host_millis; }
 unsigned long micros(void) { return 12345; }
 int analogRead(uint8_t pin) { return pin * 7; }
 

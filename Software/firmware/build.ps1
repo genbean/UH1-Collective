@@ -1,13 +1,18 @@
 # Builds the HeliSR firmware with the Arduino IDE's own arduino-cli.
-#   .\build.ps1                 5 V / 16 MHz Pro Micro, without the USB serial port
+#   .\build.ps1                 HeliSR Rev 3.0, 5 V / 16 MHz Pro Micro, without the USB serial port
+#   .\build.ps1 -Board 4.0      HeliSR Rev 4.0 (AS5600s over I2C). Never put this
+#                               build on a Rev 3.0 board: it drives pins the
+#                               board's chips drive too
 #   .\build.ps1 -Serial         with the Arduino USB serial port (for development:
 #                               lets the Arduino IDE upload without a RST double-tap)
 #   .\build.ps1 -Test           test firmware: the PC drives the logic in lockstep
 #                               (test\hsr-lockstep.ps1); not for normal use
 #   .\build.ps1 -Port COM5      build and upload
-# The .hex lands in Software\firmware\build\<variant>\.
+# The .hex lands in Software\firmware\build\<variant>\: noserial, serial and
+# noserial-test for Rev 3.0, the same with "rev40-" in front for Rev 4.0.
+# The options combine (-Board 4.0 -Serial).
 # HeliSR supports the 5 V / 16 MHz Pro Micro only.
-param([string]$Port, [switch]$Serial, [switch]$Test)
+param([string]$Port, [switch]$Serial, [switch]$Test, [ValidateSet('3.0', '4.0')][string]$Board = '3.0')
 
 $ErrorActionPreference = 'Stop'
 $cli = Join-Path $env:LOCALAPPDATA 'Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe'
@@ -18,6 +23,7 @@ if ($Serial) { $variant = 'serial'; $flags = '-DHSR_USB_SERIAL=1' }
 else         { $variant = 'noserial'; $flags = '-DCDC_DISABLED' }
 $clock = '16000000L'
 if ($Test) { $variant = "$variant-test"; $flags = "$flags -DHSR_TEST_STEP" }
+if ($Board -eq '4.0') { $variant = "rev40-$variant"; $flags = "$flags -DHSR_BOARD_REV=40" }
 $out = Join-Path $PSScriptRoot "build\$variant"
 # Each variant keeps its own build cache: arduino-cli fails to clean a shared
 # one when the build flags change.

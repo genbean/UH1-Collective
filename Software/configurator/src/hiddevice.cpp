@@ -15,6 +15,7 @@
 
 static const int DEVICE_SEARCH_DELAY = 1000;    // ms between device list updates
 static const int PARAMS_PERIOD = 10;            // ms between live data reads
+static const int SENSOR_PERIOD = 50;            // ms between AS5600 status reads (Rev 4.0)
 static const ushort SETTINGS_USAGE_PAGE = 0xFF00;
 static const int RESTART_WAIT = 700;              // ms for a restarting device to drop off the bus
 
@@ -75,6 +76,7 @@ void HidDevice::processData()
     int openedDevice = -1;
     bool disconnectedSent = false;
     QElapsedTimer paramsTimer;
+    QElapsedTimer sensorTimer;
     QElapsedTimer infoTimer;
 
     while (m_isFinish == false)
@@ -110,10 +112,14 @@ void HidDevice::processData()
                     openedDevice = selected;
                     disconnectedSent = false;
                     m_compatible = compatible;
+                    m_sensors = compatible && gEnv.pDeviceConfig->info.board_id == HSR_BOARD_REV40;
                     infoTimer.start();
                     qDebug().nospace() << "Opened HeliSR device " << selected + 1;
                     emit deviceConnected();
                     emit deviceInfoReceived(m_compatible);
+                    if (m_sensors) {
+                        emit sensorConfigReceived(readSensorConfigFromDevice());
+                    }
                 }
             }
         }
@@ -146,6 +152,16 @@ void HidDevice::processData()
             m_currentWork = WORK_PARAMS;
             break;
 
+        case WORK_SENSOR_READ:
+            emit sensorConfigReceived(m_sensors && readSensorConfigFromDevice());
+            m_currentWork = WORK_PARAMS;
+            break;
+
+        case WORK_SENSOR_WRITE:
+            emit sensorConfigSent(m_sensors && writeSensorConfigToDevice());
+            m_currentWork = WORK_PARAMS;
+            break;
+
         case WORK_BOOTLOADER:
             if (startBootloader()) {
                 closeDevice();
@@ -171,6 +187,12 @@ void HidDevice::processData()
                 }
                 QThread::msleep(50);
                 break;
+            }
+            if (m_sensors && (sensorTimer.isValid() == false || sensorTimer.elapsed() >= SENSOR_PERIOD)) {
+                sensorTimer.start();
+                if (readSensorStatus()) {
+                    emit sensorStatusReceived();
+                }
             }
             if (paramsTimer.isValid() && paramsTimer.elapsed() < PARAMS_PERIOD) {
                 QThread::msleep(1);
@@ -240,8 +262,10 @@ bool HidDevice::readInfo()
                        << info.protocol_version << ", board " << Qt::hex << info.board_id << Qt::dec
                        << ", settings v" << info.config_version << " (" << info.config_size << " bytes), "
                        << info.cpu_mhz << " MHz, stack free " << info.stack_free << " B";
+    // and a board this app knows (a newer board needs a newer app)
     return info.protocol_version == HSR_PROTOCOL_VERSION && info.config_version == HSR_CONFIG_VERSION
-           && info.config_size == sizeof(dev_config_t);
+           && info.config_size == sizeof(dev_config_t)
+           && (info.board_id == HSR_BOARD_REV30 || info.board_id == HSR_BOARD_REV40);
 }
 
 bool HidDevice::readParams()
@@ -327,6 +351,49 @@ bool HidDevice::startBootloader()
     return true;
 }
 
+bool HidDevice::readSensorConfigFromDevice()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    if (transact(HSR_CMD_SENSOR_CONFIG, 0, nullptr, 0, reply) == false || reply[3] != HSR_OK) {
+        qDebug() << "Reading the AS5600 settings failed";
+        return false;
+    }
+    memcpy(&gEnv.pDeviceConfig->sensorConfig, reply + HSR_PACKET_HEADER, sizeof(hsr_sensor_config_t));
+    return true;
+}
+
+bool HidDevice::writeSensorConfigToDevice()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    hsr_sensor_config_t config;
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        config = m_sensorConfigOut;
+    }
+    // saving to EEPROM takes a few ms per changed byte
+    if (transact(HSR_CMD_SENSOR_CONFIG, 1, &config, sizeof(config), reply, 500, 1) == false) {
+        qDebug() << "No answer to SENSOR_CONFIG";
+        return false;
+    }
+    // the reply carries what the board holds now, refused or not
+    memcpy(&gEnv.pDeviceConfig->sensorConfig, reply + HSR_PACKET_HEADER, sizeof(hsr_sensor_config_t));
+    if (reply[3] != HSR_OK) {
+        qDebug() << "SENSOR_CONFIG refused, status" << reply[3];
+        return false;
+    }
+    return true;
+}
+
+bool HidDevice::readSensorStatus()
+{
+    uint8_t reply[HSR_PACKET_SIZE];
+    if (transact(HSR_CMD_SENSOR_STATUS, 0, nullptr, 0, reply, 100, 1) == false || reply[3] != HSR_OK) {
+        return false;
+    }
+    memcpy(&gEnv.pDeviceConfig->sensorStatus, reply + HSR_PACKET_HEADER, sizeof(hsr_sensor_status_t));
+    return true;
+}
+
 // another device selected in comboBox
 void HidDevice::setSelectedDevice(int deviceNumber)
 {
@@ -359,4 +426,18 @@ void HidDevice::sendConfigToDevice()
 void HidDevice::enterBootloader()
 {
     m_currentWork = WORK_BOOTLOADER;
+}
+
+void HidDevice::readSensorConfig()
+{
+    m_currentWork = WORK_SENSOR_READ;
+}
+
+void HidDevice::writeSensorConfig(const hsr_sensor_config_t &config)
+{
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_sensorConfigOut = config;
+    }
+    m_currentWork = WORK_SENSOR_WRITE;
 }

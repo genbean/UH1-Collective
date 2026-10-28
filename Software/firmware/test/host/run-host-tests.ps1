@@ -1,5 +1,8 @@
 # Builds and runs the HeliSR PC tests: the firmware's own logic files,
-# compiled for the PC with stand-ins for the board, driven by scripted inputs.
+# compiled for the PC with stand-ins for the board, driven by scripted inputs,
+# and Rev 4.0's AS5600 code against a simulated I2C bus. The logic is the same
+# for both boards; the build is Rev 4.0's (HSR_BOARD_REV=40) so that the
+# sensor code and the A2/A3 sources are in it.
 #   .\run-host-tests.ps1                      run the scenario tests
 #   .\run-host-tests.ps1 -FreeJoy <path>      also compare with FreeJoy's original code
 #                                             (path to a FreeJoy source checkout)
@@ -25,14 +28,14 @@ $fw = Join-Path $here '..\..\HeliSR\src'
 $out = Join-Path $here 'build'
 New-Item -ItemType Directory -Force $out | Out-Null
 
-$sources = @('sim.cpp', 'tests.cpp', 'main.cpp', 'random_settings.cpp' | ForEach-Object { Join-Path $here $_ })
-$sources += @('settings.cpp', 'buttons.cpp', 'axes.cpp', 'leds.cpp', 'pipeline.cpp', 'joy_layout.cpp' | ForEach-Object { Join-Path $fw $_ })
+$sources = @('sim.cpp', 'tests.cpp', 'sensor_tests.cpp', 'main.cpp', 'random_settings.cpp' | ForEach-Object { Join-Path $here $_ })
+$sources += @('settings.cpp', 'buttons.cpp', 'axes.cpp', 'leds.cpp', 'pipeline.cpp', 'joy_layout.cpp', 'sensors.cpp' | ForEach-Object { Join-Path $fw $_ })
 
 # Trap (rather than report) undefined behaviour such as signed overflow, so no
 # runtime library is needed; -ftrapv covers signed + - * as well.
 $flags = @('-std=gnu++17', '-O1', '-g', '-Wall', '-Wextra', '-Wno-unused-parameter',
            '-fsanitize=undefined', '-fsanitize-trap=undefined', '-ftrapv',
-           "-I$(Join-Path $here 'stubs')", "-I$fw", '-static')
+           "-I$(Join-Path $here 'stubs')", "-I$fw", '-DHSR_BOARD_REV=40', '-static')
 
 if ($FreeJoy) {
     $fj = Join-Path $FreeJoy 'application'

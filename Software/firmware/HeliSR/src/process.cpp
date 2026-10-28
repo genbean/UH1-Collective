@@ -14,7 +14,7 @@
 #include "usb_helisr.h"
 #include "shared/helisr_protocol.h"
 
-static uint16_t analog[HSR_ANALOG_SOURCES];
+static uint16_t analog[HSR_BOARD_SOURCES];
 static uint8_t report[1 + HSR_MAX_REPORT_SIZE];     // report ID, then the report
 
 void process_init(void)
@@ -24,6 +24,7 @@ void process_init(void)
 
 void process_run(uint32_t now_ms)
 {
+	board_poll();
 	uint16_t sr = board_read_inputs();
 	uint16_t spare = board_read_spare_buttons();
 	board_read_analog(analog);

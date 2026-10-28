@@ -6,6 +6,8 @@ DeviceConfig::DeviceConfig()
     hsr_config_defaults(&config);
     paramsReport = {};
     info = {};
+    sensorConfig = {};
+    sensorStatus = {};
 }
 
 void DeviceConfig::resetConfig()

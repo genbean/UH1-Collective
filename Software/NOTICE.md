@@ -57,6 +57,10 @@ Thanks to the FreeJoy team for publishing their work under a free licence.
 - `docs/` (new): quick start, user guide, flashing, AS5600 and profile guides, and development notes, written for HeliSR.
 - `profiles/` (new): example profiles, including the UH-1 collective, and the script that makes them. The app copies them to `Documents\HeliSR\configs\examples` (`main.cpp`); `--save-defaults` and `--ui-test-file` added to the command line.
 
+**2026-10-27: the HeliSR Rev 4.0 board**
+- `firmware/`: a second build for HeliSR Rev 4.0 (`build.ps1 -Board 4.0`): the shift registers on new pins, and the AS5600s read over I²C through a PCA9546A (`i2c.cpp`, `sensors.cpp`, new), with their start and stop kept in EEPROM and written to the sensors at start-up. Every build carries a board tag, which INFO reports. The settings layout is unchanged; the live data gains A2/A3 readings at its end, and the protocol two Rev 4.0 commands.
+- `configurator/`: the pages follow the board; a new I²C AS5600 helper for Rev 4.0 (`widgets/board/as5600i2chelper.*`); the flasher checks the board tag in a `.hex` before flashing (`firmwarefile.*`, new). `widgets/encoders/encodersconfig.cpp`: FreeJoy's encoder-input bookkeeping read past its 8 rows when more than 8 inputs of one kind existed for a moment (while settings load), and crashed; it now keeps full sorted lists.
+
 ## Third-party components
 
 - **Arduino AVR core** (the firmware is built on it), https://github.com/arduino/ArduinoCore-avr. LGPL-2.1 or later. `usb_helisr.cpp` follows its HID library's descriptor handling.
