@@ -45,6 +45,10 @@ ENGRAVE = 0.6                   # label depth
 # Routed Gothic Narrow (Darren Embry, SIL Open Font License 1.1, bundled in ../../fonts): a digitized Leroy lettering
 # template, the closest free match to the engraved military lettering on the real UH-1 panels
 FONT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "fonts", "routed-gothic", "routed-gothic-narrow.ttf")
+# Its strokes are 0.13 x the cap height: 0.40 mm at 3 mm and 0.31 mm at 2.3 mm, under a 0.4 mm nozzle's line, so the
+# slicer drops pieces of them. Every letter is grown this much all round (strokes 0.5-0.6 mm) and the letters are
+# spaced out by twice it, so the gaps between them stay the font's (EXT's X and T are only 0.2 mm apart).
+STROKE_GROW = 0.1
 
 # Lower box: the real UH-1 lower panel (measured by the user) is 85 mm wide, 69.01 mm tall on the right and 47.03 mm on
 # the left. Its bottom edge runs 13 mm flat from the left corner, then a 51.8 mm diagonal, then 25 mm flat to the right
@@ -216,7 +220,8 @@ _CAP = _font["OS/2"].sCapHeight
 
 
 def text(s, h, x, z, anchor="c"):
-    """Text with cap height h, centred (anchor 'c') on (x, z) in the panel plane, reading left to right."""
+    """Text with cap height h, centred (anchor 'c') on (x, z) in the panel plane, reading left to right. The letters
+    are grown and spaced out by STROKE_GROW."""
     k = h / _CAP
     polys, pen_x = [], 0.0
     for ch in s:
@@ -225,11 +230,12 @@ def text(s, h, x, z, anchor="c"):
             continue
         pen = FlatPen(_gs)
         _gs[g].draw(pen)
-        polys += [[(pen_x + px * k, py * k) for px, py in poly] for poly in pen.polys]
-        pen_x += _hmtx[g][0] * k
+        polys += [[(pen_x + STROKE_GROW + px * k, py * k) for px, py in poly] for poly in pen.polys]
+        pen_x += _hmtx[g][0] * k + 2 * STROKE_GROW
     if not polys:
         return mf.CrossSection()
-    c = mf.CrossSection(polys, mf.FillRule.NonZero)
+    # simplify: the offset leaves sub-micron edges that the float32 STL collapses into holes
+    c = mf.CrossSection(polys, mf.FillRule.NonZero).offset(STROKE_GROW, mf.JoinType.Round).simplify(0.001)
     dx = -pen_x / 2 if anchor == "c" else 0.0
     return c.translate((x + dx, z - h / 2))
 
@@ -412,7 +418,7 @@ def arc_text(s, h, cx, cz, r, top=True, gap=0.15):
     widths = []
     for ch in s:
         g = _cmap.get(ord(ch))
-        widths.append((_hmtx[g][0] * h / _CAP if g is not None else h * 0.5) + gap)
+        widths.append((_hmtx[g][0] * h / _CAP if g is not None else h * 0.5) + gap + 2 * STROKE_GROW)
     total = sum(widths) / r                                        # radians
     c = mf.CrossSection()
     a = total / 2 if top else -total / 2
@@ -436,14 +442,14 @@ def arc_text(s, h, cx, cz, r, top=True, gap=0.15):
 # side, RETR under it (the two toggles' rows mirror each other); SEARCH CONT and EXT over the hat, a double-headed
 # arrow under it, from side to side, and RETR below; STOP and REL stacked left of the ENGINE IDLE ring.
 LABEL_H = 3.0
-GOV_LABELS = [("vtext", "GOV", -5.6, -19.3), ("text", "INCR", 0.0, -14.6), ("vtext", "RPM", 5.6, -19.3),
-              ("text", "DECR", 0.0, 12.0)]
+GOV_LABELS = [("vtext", "GOV", -5.5, -19.3), ("text", "INCR", 0.25, -14.6), ("vtext", "RPM", 6.25, -19.3),
+              ("text", "DECR", 0.0, 12.0)]   # GOV as near the corner screw as it goes; INCR and RPM right of it, 0.6 mm apart
 LDG_EXT_LABELS = [("text", "LDG LT", 0.0, -18.8), ("text", "EXT", 0.0, -14.6), ("vtext", "OFF", 10.3, -6.0),
                   ("text", "RETR", 0.0, 12.0)]
 SEARCH_LABELS = [("small", "SEARCH CONT", 0.0, -20.0), ("small", "EXT", 0.0, -16.0), ("arrow", None, 18.0, 15.8),
                  ("text", "RETR", 0.0, 20.0)]           # round the 28 mm cap: EXT over it, the arrow and RETR under it
 PB4_BEZEL_D = 17.6                              # Same Sky PB4: the cap's bezel in front of the panel (datasheet, 7.2 mm proud)
-ENGINE_IDLE_R = PB4_BEZEL_D / 2 + 0.6 + 2.3 / 2  # ENGINE / IDLE's middle radius: the 2.3 mm letters clear the bezel by 0.6 mm
+ENGINE_IDLE_R = PB4_BEZEL_D / 2 + 0.6 + STROKE_GROW + 2.3 / 2  # ENGINE / IDLE's middle radius: the 2.3 mm letters clear the bezel by 0.6 mm
 STOP_REL_LABELS = [("vtext", "STOP", -16.9, -5.8), ("vtext", "REL", -13.5, -3.7), ("arc", "ENGINE", ENGINE_IDLE_R, True),
                    ("arc", "IDLE", ENGINE_IDLE_R, False)]
 SL_LABELS = [("text", "SL", 0.0, -15.6), ("text", "ON", 0.0, -11.4), ("text", "STOW", 0.0, 15.0)]
