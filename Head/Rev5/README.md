@@ -2,7 +2,7 @@
 
 Rev 5 is head Rev 4 ([`../Rev4`](../Rev4/README.md)) with the box and both panels cut to the real UH-1 panels' dimensions. The dimensions come from **dcval**'s scaled drawing of the panels, and the switch and label layout from **Kornskydiver**'s photos of a real UH-1 head. Both were posted in the ED Forums thread [Huey Collective Measurements](https://forum.dcs.world/topic/152333-huey-collective-measurements/); copies, with credits, are in [`../reference`](../reference/README.md). The switches are moved to where the drawing has them, and everything is checked for collisions. The throttle (its grip built from the MkII grip of [DIY Helicopter Collective Hall Effect](https://www.thingiverse.com/thing:5226353) by **Gazmac52** ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))), the friction knob (its shape measured off hotpretzel's knob, [CC BY-NC](https://www.thingiverse.com/thing:4284120): it and `HueyHeadR5-Body.stl` are for non-commercial use only), the starter trigger and its mount (with the M2 pull-stop seat), the leads' hole, the AS5600 pod and the 4-way hat work as in Rev 4. For them, and for the assembly steps, see Rev 4's README.
 
-**Status:** designed and checked in CAD only. Nothing has been printed. The BOM in [`../../BOM`](../../BOM) still lists Rev 4.
+**Status:** designed and checked in CAD only. Nothing has been printed. The BOM in [`../../BOM`](../../BOM) lists Rev 5.
 
 ![Rev 5's panels](renders/HueyHeadR5_Front.png)
 

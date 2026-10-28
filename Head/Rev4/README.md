@@ -224,7 +224,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | APEM 636H/2 toggle, ON-ON (679-1217-ND) | 1 | LDG LT ON (IN7) |
 | Same Sky PB4-M-BK-D-67 push button (2223-PB4-M-BK-D-67-ND) | 1 | STOP REL (IN13) |
 | TE 1825910-6 tact switch, 6 × 6 mm (450-1650-ND) | 5 | SEARCH CONT hat (IN9–IN12) and starter trigger (IN14) |
-| HeliSR Rev 3.0 board with its Pro Micro and JST cables | 1 | `../../PCB/HeliSR_Rev3.0`; the throttle module goes on AX4 (J14) |
+| HeliSR board (Rev 4.0, or Rev 3.0) with its Pro Micro and JST cables | 1 | `../../PCB/HeliSR_Rev4.0`; the throttle module goes on AX4 (J14) |
 | Hot glue | a dab | Holds the AS5600 module at the front of its grooves |
 | Ballast, steel or lead | ~50 g | Only if the base's gas strut lifts too much |
 

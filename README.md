@@ -7,7 +7,7 @@ A 3D-printed, desk-mounted collective for helicopter flight simulators, modelled
 - **The lever** is a 25 mm carbon-fibre tube in a printed base that screws to the desk. It pivots on two ball bearings, a gas strut balances the head's weight, and a knob sets the friction. It travels 32° to a fixed stop. The lever is two-thirds as long as the real one and starts level, so your hand rises about as far as on a real Huey (9.4 in against 9.25 in).
 - **The head** is the Huey's collective switch box: GOV RPM, landing light and search light toggles, the 4-way search light hat, the STOP REL button and the starter trigger. Under it, the twist-grip throttle turns 181° between two hard stops, idle and full open, and stays where you leave it.
 - **Sensors:** two AS5600 magnetic angle sensors, one for the lever in the base and one for the throttle in the head. There are no potentiometers to wear out.
-- **Electronics:** the HeliSR board, a small PCB that carries a Pro Micro, sits in the head and reads 16 switch inputs and 4 analog inputs. Only the USB cable comes out of the base.
+- **Electronics:** the HeliSR board, a small PCB that carries a Pro Micro, sits in the head. It reads 16 switch inputs, and the AS5600s over I²C on four sensor ports. Only the USB cable comes out of the base.
 - **Software:** the HeliSR firmware and a Windows app, HeliSR Configurator. The app flashes the board, assigns each switch position to a game button and calibrates the axes. Both are based on FreeJoy.
 
 More pictures: [from the side](renders/HeliCollective_side.png) and [at the 32° stop](renders/HeliCollective_32deg.png). [`renders/HeliCollective_Assembly.glb`](renders/HeliCollective_Assembly.glb) is the whole collective in 3D; it opens in Windows 3D Viewer or any glTF viewer.
@@ -21,8 +21,9 @@ Each folder has its own README with the details: how it works, printing, the par
 | [`Base/`](Base/README.md) | **MkIII base, Rev 3.** The pivot, bearings, split lever, gas strut, friction knob, stops and the collective's AS5600. Ready-to-print STLs, fit-test coupons, a STEP assembly and the Python script that makes them. |
 | [`Head/Rev5/`](Head/Rev5/README.md) | **Huey head, Rev 5: the current head.** The switch box in one print, cut to the real UH-1 panels' dimensions, with the throttle grip and its gears, the throttle's AS5600, the starter trigger and the search light hat, and a collision check (`check_r5.py`). STLs and scripts. The BOM lists it. |
 | [`Head/Rev4/`](Head/Rev4/README.md) | Head Rev 4: the same head in a larger box (107 × 75 mm lower panel), kept as a fallback in case everything doesn't fit in Rev 5. Rev 5's README refers to it for assembly. |
-| [`PCB/HeliSR_Rev3.0/`](PCB/HeliSR_Rev3.0/README.md) | **HeliSR Rev 3.0 board.** KiCad files, Gerbers, connector pinouts, AS5600 notes and the board's assembly order. This revision is frozen: changes go into a new revision folder. Its "MMJoy2 setup" section is out of date; use the software below instead (MMJoy2 is no longer in this repository). |
-| [`BOM/`](BOM) | **The bill of materials for the whole collective:** [`Heli_Collective_Final_BOM.xlsx`](BOM/Heli_Collective_Final_BOM.xlsx) (sheets for everything to buy, the Digi-Key order, the printed parts, dropped parts and sources), [`Heli_Collective_DigiKey.csv`](BOM/Heli_Collective_DigiKey.csv) to upload to Digi-Key's cart, and [`make_final_bom.py`](BOM/make_final_bom.py), the script that writes both. |
+| [`PCB/HeliSR_Rev4.0/`](PCB/HeliSR_Rev4.0/README.md) | **HeliSR Rev 4.0 board: the one to build.** Rev 3.0's switch inputs, with four I²C ports for the AS5600s, through a PCA9546A switch, in place of the analog inputs. KiCad files, Gerbers, the board's own BOM, connector pinouts, how to prepare the AS5600 modules, and the assembly order. |
+| [`PCB/HeliSR_Rev3.0/`](PCB/HeliSR_Rev3.0/README.md) | HeliSR Rev 3.0 board, the previous one: it reads the AS5600s' analog output, and its PROG buttons program each sensor's range once. This revision is frozen: changes go into a new revision folder. Its "MMJoy2 setup" section is out of date; use the software below instead (MMJoy2 is no longer in this repository). |
+| [`BOM/`](BOM) | **The bill of materials for the whole collective:** [`Heli_Collective_Final_BOM.xlsx`](BOM/Heli_Collective_Final_BOM.xlsx) (sheets for everything to buy, the Digi-Key order, the printed parts, dropped parts and sources), [`Heli_Collective_DigiKey.csv`](BOM/Heli_Collective_DigiKey.csv) to upload to Digi-Key's cart, and [`make_final_bom.py`](BOM/make_final_bom.py), the script that writes both. **They still list the Rev 3.0 board's parts and its 3-core sensor lead:** for the board, use Rev 4.0's own BOM. |
 | [`Software/`](Software/README.md) | **HeliSR firmware and HeliSR Configurator**, with their documentation in [`Software/docs/`](Software/docs) and example profiles, including one for this collective. |
 | [`renders/`](renders) | Pictures and a 3D model of the complete collective. |
 
@@ -31,11 +32,11 @@ Each folder has its own README with the details: how it works, printing, the par
 The full list, with quantities, part numbers, links and prices, is the [BOM spreadsheet](BOM/Heli_Collective_Final_BOM.xlsx). In outline:
 
 **Electronics**
-- The HeliSR Rev 3.0 PCB: send [`HeliSR_Rev3.0_Gerbers.zip`](PCB/HeliSR_Rev3.0/HeliSR_Rev3.0_Gerbers.zip) to any PCB maker (2 layers, 39.3 × 33.6 mm).
-- The parts that solder onto it, from Digi-Key: [`Heli_Collective_DigiKey.csv`](BOM/Heli_Collective_DigiKey.csv) loads them into the cart.
+- The HeliSR Rev 4.0 PCB: send [`HeliSR_Rev4.0_Gerbers.zip`](PCB/HeliSR_Rev4.0/HeliSR_Rev4.0_Gerbers.zip) to any PCB maker (2 layers, 39.3 × 33.6 mm).
+- The parts that solder onto it, from Digi-Key: [`HeliSR_Rev4.0_Board_BOM.xlsx`](PCB/HeliSR_Rev4.0/HeliSR_Rev4.0_Board_BOM.xlsx) lists them with Digi-Key part numbers. (The collective's [`Heli_Collective_DigiKey.csv`](BOM/Heli_Collective_DigiKey.csv) still has the Rev 3.0 board's parts.)
 - A **5 V / 16 MHz Pro Micro** (ATmega32U4). This build uses a USB-C clone; the 3.3 V / 8 MHz version isn't supported.
 - Two AS5600 magnetic angle sensor modules, with their magnets.
-- JST SR 1.0 mm cables for the board, a 3-core lead for the base's sensor, and a USB-A to USB-C cable. The USB cable runs up through the base and the tube and is spliced inside the head; the BOM's notes explain how.
+- JST SR 1.0 mm cables for the board, a 4-core lead for the base's sensor (SDA, GND, VCC, SCL), and a USB-A to USB-C cable. The USB cable runs up through the base and the tube and is spliced inside the head; the BOM's notes explain how.
 
 **Head**
 - Four APEM 600H toggle switches, a Same Sky PB4 push button and five TE 6 × 6 mm tact switches (four for the hat, one for the starter trigger).
@@ -58,14 +59,14 @@ The full list, with quantities, part numbers, links and prices, is the [BOM spre
 
 Each step points to the README that covers it.
 
-1. **Order the parts** from the [BOM](BOM/Heli_Collective_Final_BOM.xlsx), and the PCBs from the Gerbers.
+1. **Order the parts** from the [BOM](BOM/Heli_Collective_Final_BOM.xlsx), the board's parts from [Rev 4.0's board BOM](PCB/HeliSR_Rev4.0/HeliSR_Rev4.0_Board_BOM.xlsx), and the PCBs from the Gerbers.
 2. **Print the fit-test coupons first**, with the filament and settings you'll use, and try them on your carbon tube, bearings and sensor modules: the [base's coupons](Base/README.md#fit-test-coupons-print-these-before-the-big-parts), and the head's O-ring and sensor seat coupons (Rev 5's, printed as in [Head Rev 4, Printing](Head/Rev4/README.md#printing)). If a fit is off, change its setting in the script and rebuild the STLs.
-3. **Build the HeliSR board** ([assembly order](PCB/HeliSR_Rev3.0/README.md#assembly-order)) and fit the Pro Micro.
-4. **Flash and test it** with HeliSR Configurator: the [quick start](Software/docs/quick-start.md) goes from a bare Pro Micro to a working controller. Check every input now, before it goes into the head.
-5. **Prepare the two AS5600 modules:** remove R1, keep R4 and wire DIR (to VCC on the base's sensor, to GND on the throttle's). See the [AS5600 guide](Software/docs/as5600.md).
+3. **Build the HeliSR board** ([assembly order](PCB/HeliSR_Rev4.0/README.md#assembly-order)) and fit the Pro Micro.
+4. **Flash and test it** with HeliSR Configurator: the [quick start](Software/docs/quick-start.md) goes from a bare Pro Micro to a working controller. Check every input now, before it goes into the head. Rev 4.0 needs its own firmware build (see [Status](#status)).
+5. **Prepare the two AS5600 modules:** remove R1 and R4, wire DIR (to VCC on the base's sensor, to GND on the throttle's), check for about 1 µF on VDD3V3, and measure the module's pull-ups. See the Rev 4.0 board's [AS5600 modules](PCB/HeliSR_Rev4.0/README.md#as5600-modules).
 6. **Print and assemble the base** ([Base, Assembly](Base/README.md#assembly)). The USB cable and the sensor lead go into the lever halves before you close them, and the tube is cut, drilled and fitted at the end.
 7. **Print and assemble the head** (Head Rev 5: see its [README](Head/Rev5/README.md) and [Rev 4's assembly steps](Head/Rev4/README.md#assembly), which it follows): the throttle parts, the starter trigger, the grip on the tube, the head pressed onto the tube, then the board, switches and panels.
-8. **Program the two AS5600s** with the board's PROG1 (collective) and PROG4 (throttle) buttons. Each sensor can only be programmed once, so read the [AS5600 guide](Software/docs/as5600.md) first.
+8. **Set the two AS5600s' ranges** in HeliSR Configurator: the collective on AX1, the throttle on AX4. On Rev 4.0 the firmware writes each range to its sensor over I²C at every start-up and burns nothing, so it can be set again whenever you like. (On Rev 3.0, the PROG1 and PROG4 buttons burn it once: see the [AS5600 guide](Software/docs/as5600.md).)
 9. **Balance and set the friction** ([Base, Setting it](Base/README.md#setting-it)).
 10. **Load the UH-1 profile** in HeliSR Configurator, calibrate the axes, and bind the buttons in your sim ([Profiles](Software/docs/profiles.md#uh-1-collective-helisr-head)).
 
@@ -74,8 +75,9 @@ Each step points to the README that covers it.
 As of October 2026 this is a complete design that hasn't been built yet.
 
 - **Base (Rev 3) and head (Rev 5):** designed, and checked in CAD for collisions and fits through the whole travel. Neither has been printed yet. Earlier head fits were tuned with coupons on an aluminium tube, so check them on the carbon tube.
-- **HeliSR Rev 3.0 board:** bare PCBs are ordered, but no board has been built or tested yet.
-- **Software:** complete, and tested on a bare Pro Micro only. It hasn't run on a built board with real switches and sensors yet.
+- **HeliSR Rev 4.0 board:** designed and checked (design rules, and every pad's net against the chips' datasheets), not built yet.
+- **HeliSR Rev 3.0 board:** bare PCBs are ordered, but no board has been built or tested. Rev 4.0 replaces it.
+- **Software:** the firmware and HeliSR Configurator in [`Software/`](Software/README.md) support Rev 3.0, and are tested on a bare Pro Micro only. Rev 4.0 support (the I²C sensors, and setting their ranges in the app) is written and tested on the PC and a bare Pro Micro, but isn't in this repository yet. Neither has run on a built board with real switches and sensors.
 
 Expect changes once the first one is built.
 

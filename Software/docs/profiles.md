@@ -16,7 +16,7 @@ The factory settings: IN1–IN16 are buttons 1–16, AX1–AX4 are the X, Y, Z a
 
 ## UH-1 collective (HeliSR head)
 
-For the UH-1 collective built from this project: the Huey head ([`Head/Rev4`](../../Head/Rev4/README.md), controls as in [`Head`](../../Head/README.md#controls)) on a HeliSR Rev 3.0 board, the collective's AS5600 in the MkIII base on AX1, and the throttle's AS5600 on AX4. The device is called **UH-1 Collective**.
+For the UH-1 collective built from this project: the Huey head ([`Head/Rev5`](../../Head/Rev5/README.md), controls as in [Head Rev 4](../../Head/Rev4/README.md#controls)) on a HeliSR board, the collective's AS5600 in the MkIII base on AX1, and the throttle's AS5600 on AX4. The device is called **UH-1 Collective**.
 
 **Axes:**
 
