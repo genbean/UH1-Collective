@@ -48,7 +48,7 @@ HeliSRConfigurator --roundtrip                  write, read back and compare, th
 HeliSRConfigurator --ui-test 200 [--seed n] [--board 4.0]   random settings through every page and back
 HeliSRConfigurator --ui-test-file a.cfg b.cfg   profiles through every page and back
 HeliSRConfigurator --ui-device-test             the window's Write and Read buttons with a board
-HeliSRConfigurator --sensor-roundtrip           Rev 4.0: the AS5600 settings saved, read back and restored
+HeliSRConfigurator --sensor-roundtrip           Rev 4.0: the AS5600 settings saved, read back, kept through a restart, restored
 HeliSRConfigurator --ui-screenshot board.png [--board 4.0]   a picture of the Board page
 ```
 

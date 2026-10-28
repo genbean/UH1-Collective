@@ -159,7 +159,7 @@ As5600I2cHelper::As5600I2cHelper(QWidget *parent)
             r.zpos = p.raw_angle;
             r.mpos = uint16_t(m_startRaw);
             done = tr("Saved on the board, the other way round: the angle falls from your start to your stop (the sensor's "
-                      "DIR wiring), so the output runs from 4095 at your start to 0 at your stop (%1 of travel). Tick Invert "
+                      "DIR wiring), so the output runs from 4095 at your start to 0 at your stop (%1 of travel). Tick Inverted "
                       "on the axes using AX%2, or wire DIR to the other side and set the range again.")
                        .arg(degrees(-travel)).arg(port() + 1);
             color = ORANGE;

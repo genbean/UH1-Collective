@@ -509,6 +509,10 @@ static void t_sensor_stuck_bus()
 
 static void t_a2_a3_sources()
 {
+	// Not in the lockstep trace: its test steps carry sources 0-8 only, and
+	// Rev 3.0's test firmware, which replays it, has no sources 9 and 10.
+	FILE *trace = g_trace;
+	g_trace = NULL;
 	scenario("Rev 4.0: A2 and A3 as axis sources, and in the live data");
 	settings_defaults(&g_config);
 	g_config.axis_config[0].source_main = HSR_SOURCE_A2;
@@ -529,6 +533,7 @@ static void t_a2_a3_sources()
 	CHECK_EQ(hsr_params_analog(&p, HSR_SOURCE_A3), 1234);
 	CHECK_EQ(hsr_params_analog(&p, 0), HSR_RAW_MAX / 2);
 	CHECK_EQ(hsr_params_analog(&p, 11), 0);
+	g_trace = trace;
 }
 
 void run_sensor_tests()

@@ -2,7 +2,7 @@
 
 Status, 2026-10-25: **phases 0-5 and 7 are done**; phase 6 waits for the built boards. See [Phase 1 results](#phase-1-results), [Phase 2 results](#phase-2-results), [Phase 3 results](#phase-3-results), [Phase 4 results](#phase-4-results), [Phase 5 results](#phase-5-results) and [Phase 7 results](#phase-7-results). Everything has run on a bare Pro Micro; nothing has run on a HeliSR board yet.
 
-2026-10-27: **HeliSR Rev 4.0 support** added, with its own firmware build: see [Rev 4.0 support](#rev-40-support). No Rev 4.0 board exists yet, so it is tested on the PC and through the app's pages only.
+2026-10-27: **HeliSR Rev 4.0 support** added, with its own firmware build: see [Rev 4.0 support](#rev-40-support). No Rev 4.0 board exists yet, so it is tested on the PC, through the app's pages, and on a bare Pro Micro.
 
 ## Goal
 
@@ -427,11 +427,12 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
 | Build | Flash (of 28,672) | RAM (of 2,560) |
 |---|---|---|
 | Rev 3.0, release | 21,450 B (74 %); was 21,398 | 2,093 B (81 %), unchanged |
+| Rev 3.0, test (`-Test`) | 21,972 B; was 21,916 | 2,094 B, unchanged |
 | Rev 4.0, release | 24,188 B (84 %) | 2,174 B (84 %) |
 | Rev 4.0, test (`-Test`) | 24,738 B | 2,175 B |
 | Rev 4.0, USB serial (`-Serial`) | 24,978 B | 2,284 B |
 
-Rev 4.0's extra 81 B of RAM are the sensors' state (40 B), their settings (18 B) and the two extra analog sources. Rev 3.0's lowest unused stack was 208 B under live data (phase 5), so Rev 4.0's should be about 125 B: thin but workable. Measure it once Rev 4.0 firmware runs (INFO's stack figure).
+Rev 4.0's extra 81 B of RAM are the sensors' state (40 B), their settings (18 B) and the two extra analog sources. Its lowest unused stack, measured on the bare Pro Micro, is **150 B** after 20 s of the app polling live data and sensor status (159-179 B in the shorter tests). Rev 3.0's is 236-256 B in the same tests (208 B in phase 5's heavier run). Thinner, but enough; don't add stack-hungry features to Rev 4.0 without measuring.
 
 **Tested without a Rev 4.0 board:**
 
@@ -448,7 +449,25 @@ Rev 4.0's extra 81 B of RAM are the sensors' state (40 B), their settings (18 B)
 
 **Found on the way, not Rev 4.0's:** `--ui-test 200` crashed on this PC, on the unchanged code too. FreeJoy's encoder page kept only 8 encoder inputs of each kind and read past its rows when a ninth existed for a moment, while settings load one button at a time. It now keeps full sorted lists (`encodersconfig.cpp`). Loading a profile with 8 encoders over another could have crashed the window the same way.
 
-**On the Pro Micro:** not run yet (no Pro Micro was connected): Rev 3.0's `hsr-usb-test.ps1` checks, `--roundtrip`, `--ui-device-test` and `--flash`, and, on the bare Pro Micro only (never on a Rev 3.0 board), Rev 4.0 firmware's INFO, `--sensor-roundtrip`, `--sensors` (every port "no switch") and its stack figure.
+**On the bare Pro Micro** (the OSOYOO clone, on no board), 2026-10-27:
+
+| Check | Rev 3.0 firmware (this branch) | Rev 4.0 firmware |
+|---|---|---|
+| `--flash` and the board check | ✅ the Rev 4.0 file refused while Rev 3.0 firmware ran; the Rev 3.0 file written and verified, settings kept | ✅ flashed with `--board 4.0`; the Rev 3.0 file then refused until `--board 3.0` |
+| INFO | ✅ board 0x30, settings v2, 236-256 B stack never used | ✅ board 0x40, settings kept, 150-179 B |
+| `hsr-usb-test.ps1` info, params, rawjoy, badcommit | ✅ | ✅ info, rawjoy |
+| `hsr-logic-test.ps1` | ✅ all but the Windows joystick API check (below) | ✅ the same |
+| `hsr-lockstep.ps1`, on the Rev 3.0 test firmware | ✅ 56 of 56 scenarios (58,979 passes) identical; 220 B stack never used | not run |
+| `--roundtrip`, `--ui-device-test` | ✅ | ✅ (the pages on Rev 4.0) |
+| `--params` | ✅ 9 sources | ✅ 11 sources |
+| `--sensors`, `--sensor-roundtrip` | ✅ refused: not a Rev 4.0 board | ✅ every port "no switch" (no PCA9546A), the switch reset about 4 times a second (one per 250 ms); the settings saved, read back, kept through a restart, refused out of range, restored |
+
+Found on the Pro Micro:
+- **`--params` crashed** in the app: its loop over the analog sources read past the 9 that `analog_inputs` holds. Fixed (it now prints the board's sources).
+- **Windows' joystick API (winmm) reports the board with 0 axes and 0 buttons**, with this branch's firmware and with the unchanged firmware alike, so it isn't the change. The raw HID reports are right (11 bytes: 16 buttons, 4 axes), and Windows still has this VID/PID cached as "UH-1 Collective" from phase 7. Probably Windows' cached state; replugging the board, or **Remove name**, may clear it. Not looked into further.
+- **`--info` showed all zeros twice** right after the board reappeared: when the device list changes, the worker reopens the board and clears the shared INFO copy before reading it again, while the command line prints. Unchanged code; a second `--info` is right. Not fixed.
+
+Left on the Pro Micro: this branch's Rev 3.0 release build, with the board's settings as they were (read back identical to a backup taken first).
 
 **Not tested: waits for a Rev 4.0 board:**
 - the shift registers on pins 14 and A0;
@@ -457,5 +476,5 @@ Rev 4.0's extra 81 B of RAM are the sensors' state (40 B), their settings (18 B)
 - the JTD write on a clone with JTAG on;
 - A2 and A3 read by the ADC (the pipeline side is tested on the PC);
 - the I²C helper with real sensors: Set start, Set stop, the direction it detects, the clock change, the board-page states;
-- pass times and the stack at each clock;
+- pass times and the stack at each clock with a switch and sensors answering (the bare Pro Micro only takes the quick no-answer path; its longest pass was 3.4 ms, as on Rev 3.0);
 - the flasher's dialogs in the window (the check behind them is the command line's, tested above).
