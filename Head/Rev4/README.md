@@ -110,7 +110,11 @@ IN8, IN15, IN16, AX2 and AX3 are spare.
 
 ### Wiring and programming
 
-The throttle AS5600 goes on **AX4 (J14)** of the HeliSR Rev 3.0 board, with **DIR to GND**, and is programmed with **PROG4**. With the upper panel off, PROG4 is at the top of the board.
+The throttle AS5600 goes on **AX4 (J14)**, with **DIR to GND** either way. The module's pads are in two columns of through-holes on opposite edges: **VCC, OUT, GND** along one, **DIR, SCL, SDA, GPO** along the other. The pod is open above the whole board between its side rails, so wires from either column, and the DIR jumper across the back, go straight up and out of the top.
+
+**HeliSR Rev 4.0 (I²C):** four wires, **VCC, GND, SDA and SCL**, to the AX4 port (pin 1 SDA, 2 GND, 3 VCC, 4 SCL). Also remove the module's R4 (1 kΩ from GPO to GND) so the chip isn't in its OUT-pin programming mode, and measure its SDA and SCL pull-ups first (see [`PCB/HeliSR_Rev4.0`](../../PCB/HeliSR_Rev4.0/README.md)). The firmware sets the idle and full-open angles over I²C; nothing is burnt into the chip.
+
+**HeliSR Rev 3.0 (analog):** three wires, **VCC, OUT and GND**, keeping R4, and the range is programmed with **PROG4**. With the upper panel off, PROG4 is at the top of the board.
 1. Roll the grip to the idle stop, hold it there and press PROG4 for about a second.
 2. Roll it to full open and press PROG4 again.
 3. AX4 should now follow the grip: 0 at the idle stop and full scale at full open. Set the sim's idle point a little above 0.
@@ -238,8 +242,8 @@ With the lower panel off, everything inside the box goes in through its open fro
    2. Bring the shaft in through the front, over the pod.
    3. Lower it through the pod's open middle and the web. Its pin goes into the bearing hole below the pinion, and its hex slides into the pinion (a 0.15 mm clearance; a drop of glue or a wrap of tape takes up play).
 4. **AS5600 module:**
-   1. Remove the 0 Ω R1, tie DIR to GND, and solder the VCC, OUT and GND wires to its pin row.
-   2. Slide it chip-down into its grooves from the front of the pod, pin row on the front edge, until it stops.
+   1. Remove the 0 Ω R1, tie DIR to GND with a jumper across the back of the board, and solder the wires in from the back: VCC, GND, SDA and SCL for HeliSR Rev 4.0 (also remove R4), or VCC, OUT and GND for Rev 3.0 (see [Wiring and programming](#wiring-and-programming)).
+   2. Slide it chip-down into its grooves from the front of the pod, one pad column on the front edge and the other at the back, until it stops.
    3. Put a dab of hot glue at the front, and lead the wires up out of the top.
 5. **Throttle stops:** nothing to fit. The grip's lug runs between the groove's two end walls, which are the idle and full-open stops.
 6. **Starter trigger** (the mount is open at the back until the trigger goes on):
