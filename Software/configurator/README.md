@@ -6,7 +6,7 @@ The setup app for the HeliSR firmware: a Pro Micro (ATmega32U4) on a HeliSR Rev 
 
 | Page | What it sets |
 |---|---|
-| **Board** | Which board (it follows the connected one), its fixed inputs (IN1–IN16 and AX1–AX4, with live AX readings; on Rev 4.0 each AS5600's state, and A2/A3), what each spare Pro Micro pin does (button, analog axis, LED, PWM), a summary of the setup, and the AS5600 helper: PROG1/PROG4 programming on Rev 3.0, start/stop and I²C clock over I²C on Rev 4.0 |
+| **Board** | Which board (it follows the connected one), its fixed inputs (IN1–IN16 and AX1–AX4, with live AX readings; on Rev 4.0 each AS5600's state, and A2/A3), what each spare Pro Micro pin does (button, analog axis, LED, PWM), a summary of the setup, and the AS5600 helper: PROG1/PROG4 programming on Rev 3.0, start/stop, I²C clock and register-level diagnostics over I²C on Rev 4.0 |
 | **Button Config** | 64 logical buttons, each fed by a physical input chosen by name (IN5, Pin TX, X range 2 ...). FreeJoy's button types, plus **Switch center** (on while an input and the next one are both off). 5 shift layers, timers, debounce |
 | **Axes Config** | 8 axes (X–Slider 2) from AX1–AX4, analog spare pins, or an encoder; calibration, filtering, dead band, functions, axis-to-button ranges |
 | **Axes Curves** | 11-point curves |
@@ -36,6 +36,7 @@ HeliSRConfigurator --flash HeliSR_Rev3.0_16MHz.hex     update the connected boar
 HeliSRConfigurator --flash-new HeliSR_Rev3.0_16MHz.hex [--port COM5]   a Pro Micro without HeliSR firmware
 HeliSRConfigurator --hex-info HeliSR_Rev4.0_16MHz.hex  which board a firmware file is for
 HeliSRConfigurator --sensors 5                  Rev 4.0: the AS5600s' state and angles
+HeliSRConfigurator --sensor-debug [1-4] [--clear]   Rev 4.0: every register of each sensor, decoded, with counters and hints
 HeliSRConfigurator --save-defaults new.cfg      the factory settings as a profile (no board needed)
 ```
 

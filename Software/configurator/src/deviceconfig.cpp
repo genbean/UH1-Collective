@@ -8,6 +8,7 @@ DeviceConfig::DeviceConfig()
     info = {};
     sensorConfig = {};
     sensorStatus = {};
+    sensorDebug = {};
 }
 
 void DeviceConfig::resetConfig()

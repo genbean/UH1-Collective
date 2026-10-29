@@ -1,6 +1,9 @@
 #include "as5600i2chelper.h"
+#include <QClipboard>
 #include <QComboBox>
+#include <QFontDatabase>
 #include <QGridLayout>
+#include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QProgressBar>
@@ -10,6 +13,7 @@
 #include "global.h"
 
 static const char *const AX_CONNECTOR[HSR_AX_INPUTS] = {"J11", "J12", "J13", "J14"};
+static const int AX_CHANNEL[HSR_AX_INPUTS] = {2, 1, 3, 0};     // PCA9546A channels (PCB/HeliSR_Rev4.0/README.md)
 static const int CLOCKS_KHZ[] = {100, 50, 25, 10};
 
 static const QString GREEN = QStringLiteral("rgb(0, 128, 0)");
@@ -96,12 +100,50 @@ As5600I2cHelper::As5600I2cHelper(QWidget *parent)
 
     m_apply = new QPushButton(this);
     layout->addWidget(m_apply);
+
+    m_debugBox = new QGroupBox(this);
+    m_debugBox->setObjectName("sensorDiagnostics");
+    m_debugBox->setCheckable(true);
+    m_debugBox->setChecked(false);
+    QVBoxLayout *debugLayout = new QVBoxLayout(m_debugBox);
+    m_debugText = new QLabel(m_debugBox);
+    m_debugText->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    m_debugText->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    m_debugText->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    m_debugText->setWordWrap(true);
+    debugLayout->addWidget(m_debugText);
+    m_debugHints = new QLabel(m_debugBox);
+    m_debugHints->setWordWrap(true);
+    debugLayout->addWidget(m_debugHints);
+    QHBoxLayout *debugButtons = new QHBoxLayout;
+    m_clearCounters = new QPushButton(m_debugBox);
+    m_copyDebug = new QPushButton(m_debugBox);
+    debugButtons->addWidget(m_clearCounters);
+    debugButtons->addWidget(m_copyDebug);
+    debugButtons->addStretch(1);
+    debugLayout->addLayout(debugButtons);
+    layout->addWidget(m_debugBox);
     layout->addStretch(1);
+
+    connect(m_debugBox, &QGroupBox::toggled, this, [this] {
+        m_haveDebug = m_debugFailed = false;
+        updateDebugPort();
+        showDebug();
+    });
+    connect(m_clearCounters, &QPushButton::clicked, this, [this] { emit clearSensorCounters(port()); });
+    connect(m_copyDebug, &QPushButton::clicked, this, [this] {
+        QString text = m_debugText->text();
+        if (m_debugHints->text().isEmpty() == false) text += "\n" + m_debugHints->text();
+        QGuiApplication::clipboard()->setText(text);
+    });
 
     connect(m_port, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] {
         cancelRange();
         showRange();
         sensorStatusReceived();
+        m_haveDebug = m_debugFailed = false;
+        updateDebugPort();
+        showDebug();
         updateControls();
     });
     // activated: only the user's choice, not the combo following the board
@@ -226,6 +268,10 @@ void As5600I2cHelper::retranslateUi()
     m_setStop->setText(tr("Set stop"));
     m_wholeCircle->setText(tr("Whole circle"));
     m_apply->setText(tr("Use the sensor's whole output as the calibration"));
+    m_debugBox->setTitle(tr("Diagnostics: every register of this port's sensor"));
+    m_clearCounters->setText(tr("Clear counters"));
+    m_copyDebug->setText(tr("Copy"));
+    showDebug();
     if (m_status->text().isEmpty() || m_connected == false) {
         setStatus(m_connected ? QString() : tr("Connect a HeliSR Rev 4.0 board to set its sensors."));
     }
@@ -246,6 +292,9 @@ void As5600I2cHelper::setDeviceConnected(bool connected)
     m_connected = connected;
     m_haveStatus = false;
     m_sending = false;
+    m_haveDebug = m_debugFailed = false;
+    updateDebugPort();
+    showDebug();
     if (connected == false) {
         m_haveConfig = false;
         if (m_tracking) {
@@ -316,6 +365,183 @@ void As5600I2cHelper::updateControls()
     m_apply->setEnabled(m_connected);
     m_raw->setEnabled(m_connected && m_haveStatus);
     m_out->setEnabled(m_connected && m_haveStatus);
+    m_clearCounters->setEnabled(m_connected && m_haveDebug);
+    m_copyDebug->setEnabled(m_haveDebug);
+}
+
+// ------------------------------------------------------------- diagnostics --
+
+void As5600I2cHelper::showEvent(QShowEvent *event)
+{
+    QGroupBox::showEvent(event);
+    updateDebugPort();
+}
+
+void As5600I2cHelper::hideEvent(QHideEvent *event)
+{
+    QGroupBox::hideEvent(event);
+    updateDebugPort();
+}
+
+// full reads only while someone looks at them: each holds the board's passes up
+void As5600I2cHelper::updateDebugPort()
+{
+    int wanted = (m_connected && m_debugBox->isChecked() && isVisible()) ? port() : -1;
+    if (wanted != m_debugPortSent) {
+        m_debugPortSent = wanted;
+        emit sensorDebugPort(wanted);
+    }
+}
+
+void As5600I2cHelper::sensorDebugReceived(bool isSuccess)
+{
+    if (m_debugBox->isChecked() == false) return;
+    if (isSuccess && gEnv.pDeviceConfig->sensorDebug.port != port()) return;   // for the port before
+    m_haveDebug = isSuccess;
+    m_debugFailed = isSuccess == false;
+    showDebug();
+    updateControls();
+}
+
+void As5600I2cHelper::showDebug()
+{
+    m_debugText->setVisible(m_debugBox->isChecked());
+    m_debugHints->setVisible(m_debugBox->isChecked());
+    m_clearCounters->setVisible(m_debugBox->isChecked());
+    m_copyDebug->setVisible(m_debugBox->isChecked());
+    if (m_debugBox->isChecked() == false) return;
+
+    QString text;
+    QStringList hints;
+    if (m_connected == false) {
+        text = tr("Connect a HeliSR Rev 4.0 board.");
+    } else if (m_debugFailed) {
+        text = tr("The board didn't answer the diagnostics request. Its firmware may be older than this app: update it on "
+                  "the Advanced Settings page.");
+    } else if (m_haveDebug == false) {
+        text = tr("Reading...");
+    } else {
+        const hsr_sensor_debug_t &d = gEnv.pDeviceConfig->sensorDebug;
+        const hsr_sensor_range_t *saved = m_haveConfig ? &gEnv.pDeviceConfig->sensorConfig.range[port()] : nullptr;
+        text = debugLines(d, saved).join('\n');
+        hints = debugHints(d);
+    }
+    if (m_debugText->text() != text) {
+        m_debugText->setText(text);
+    }
+    QString hintText = hints.join('\n');
+    if (m_debugHints->text() != hintText) {
+        m_debugHints->setText(hintText);
+        m_debugHints->setStyleSheet(hints.isEmpty() ? QString()
+                                                    : QStringLiteral("color: white; background-color: %1; padding: 4px;").arg(ORANGE));
+    }
+}
+
+static int be12(const uint8_t *b, int mask = 0x0F)
+{
+    return ((b[0] & mask) << 8) | b[1];
+}
+
+static QString hex2(int v)
+{
+    return QStringLiteral("0x") + QString::number(v, 16).rightJustified(2, QLatin1Char('0')).toUpper();
+}
+
+QStringList As5600I2cHelper::debugLines(const hsr_sensor_debug_t &d, const hsr_sensor_range_t *saved)
+{
+    QStringList lines;
+    int n = qBound(0, int(d.port), HSR_AX_INPUTS - 1);
+    int channel = AX_CHANNEL[n];
+    if (d.result == HSR_SENSOR_NO_SWITCH || d.result == HSR_SENSOR_BUS_ERROR) {
+        lines << tr("AX%1 (%2), switch channel %3: %4. Nothing read.").arg(n + 1).arg(AX_CONNECTOR[n]).arg(channel)
+                     .arg(stateText(d.result));
+    } else {
+        QString sw = d.switch_control == (1 << channel) ? tr("connected") : tr("expected %1").arg(hex2(1 << channel));
+        lines << tr("AX%1 (%2), switch channel %3: control %4 (%5)").arg(n + 1).arg(AX_CONNECTOR[n]).arg(channel)
+                     .arg(hex2(d.switch_control)).arg(sw);
+        if (d.result == HSR_SENSOR_NO_SENSOR) {
+            lines << tr("Nothing answers at 0x36 behind it: no sensor, or a broken SDA/SCL/VCC/GND wire.");
+        }
+    }
+
+    if (d.result == HSR_SENSOR_OK) {
+        int zmco = d.conf_regs[0] & 3;
+        int zpos = be12(&d.conf_regs[1]), mpos = be12(&d.conf_regs[3]), mang = be12(&d.conf_regs[5]);
+        int conf = be12(&d.conf_regs[7], 0x3F);
+        lines << (zmco == 0 ? tr("ZMCO   0: never burnt")
+                            : tr("ZMCO   %1: start/stop burnt into the chip %1 time(s); HeliSR writes its own over them")
+                                  .arg(zmco));
+        QString range = tr("ZPOS %1 (%2)  MPOS %3 (%4)  MANG %5").arg(zpos, 4).arg(degrees(zpos)).arg(mpos, 4)
+                            .arg(degrees(mpos)).arg(mang);
+        if (saved) {
+            bool whole = saved->zpos == saved->mpos;
+            int wz = whole ? 0 : saved->zpos, wm = whole ? 0 : saved->mpos;
+            range += (zpos == wz && mpos == wm) ? tr("  = the saved range") : tr("  (saved: %1, %2)").arg(wz).arg(wm);
+        }
+        lines << range;
+
+        static const char *const pm[] = {"normal", "LPM1", "LPM2", "LPM3"};
+        static const char *const outs[] = {"analog 0-100%", "analog 10-90%", "PWM", "reserved"};
+        static const int pwmf[] = {115, 230, 460, 920};
+        static const int sf[] = {16, 8, 4, 2};
+        static const char *const fth[] = {"off", "6", "7", "9", "18", "21", "24", "10"};
+        lines << tr("CONF   %1: %2 power, hysteresis %3, output %4 (%5 Hz), slow filter %6x, fast filter %7, watchdog %8")
+                     .arg(QStringLiteral("0x%1").arg(conf, 4, 16, QLatin1Char('0')))
+                     .arg(pm[conf & 3]).arg((conf >> 2) & 3).arg(outs[(conf >> 4) & 3]).arg(pwmf[(conf >> 6) & 3])
+                     .arg(sf[(conf >> 8) & 3]).arg(fth[(conf >> 10) & 7]).arg((conf >> 13) & 1 ? tr("on") : tr("off"))
+              + (conf == 0 ? QString() : tr(" (HeliSR sets 0)"));
+
+        int status = d.out_regs[0];
+        QStringList bits;
+        if (status & 0x20) bits << tr("MD magnet detected");
+        if (status & 0x10) bits << tr("ML too weak");
+        if (status & 0x08) bits << tr("MH too strong");
+        if ((status & 0x20) == 0) bits << tr("no magnet");
+        lines << tr("STATUS %1: %2").arg(hex2(status)).arg(bits.join(", "));
+        int raw = be12(&d.out_regs[1]), angle = be12(&d.out_regs[3]);
+        lines << tr("RAW ANGLE %1 (%2)  ANGLE %3 (the axis' reading)").arg(raw, 4).arg(degrees(raw)).arg(angle, 4);
+        lines << tr("AGC %1 of 255  MAGNITUDE %2").arg(d.mag_regs[0], 3).arg(be12(&d.mag_regs[1]));
+    }
+
+    const hsr_sensor_counters_t &c = d.counters;
+    QString agc = c.agc_min <= c.agc_max ? QStringLiteral("%1-%2").arg(c.agc_min).arg(c.agc_max) : QStringLiteral("-");
+    lines << tr("Since start-up or Clear: range written %1, lost %2, magnet faults %3, AGC %4, last failure: %5")
+                 .arg(c.range_writes).arg(c.range_lost).arg(c.magnet_faults).arg(agc)
+                 .arg(c.last_failure ? stateText(c.last_failure) : tr("none"));
+    return lines;
+}
+
+QStringList As5600I2cHelper::debugHints(const hsr_sensor_debug_t &d)
+{
+    QStringList hints;
+    const hsr_sensor_counters_t &c = d.counters;
+    if (d.result == HSR_SENSOR_OK) {
+        int agc = d.mag_regs[0];
+        int status = d.out_regs[0];
+        if ((status & 0x20) == 0) {
+            hints << tr("No magnet seen: check it's fitted, diametrically magnetised, and centred over the chip.");
+        } else if (agc >= 230 || (status & 0x10)) {
+            hints << tr("AGC near the top: the field is weak. Bring the magnet closer (0.5-3 mm), or use a stronger one.");
+        } else if (agc <= 25 || (status & 0x08)) {
+            hints << tr("AGC near the bottom: the field is strong. Move the magnet a little further away.");
+        }
+        if ((d.conf_regs[0] & 3) == 3) {
+            hints << tr("This chip has no burns left (ZMCO 3). HeliSR never burns, so that doesn't matter here.");
+        }
+    }
+    if (c.agc_min <= c.agc_max && c.agc_max - c.agc_min > 30) {
+        hints << tr("AGC moved by %1 as the control was used: the magnet's distance changes as it turns (wobble, or "
+                    "off-centre).").arg(c.agc_max - c.agc_min);
+    }
+    if (c.range_lost) {
+        hints << tr("The sensor restarted %1 time(s) without a failed transfer: check its VCC and GND on the cable.")
+                     .arg(c.range_lost);
+    }
+    if (c.magnet_faults > 2) {
+        hints << tr("The magnet went out of range %1 times: it may be loose, or at the edge of its distance.")
+                     .arg(c.magnet_faults);
+    }
+    return hints;
 }
 
 void As5600I2cHelper::showRange()

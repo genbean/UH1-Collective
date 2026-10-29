@@ -47,6 +47,7 @@ public:
     void sensorConfigReceived(bool isSuccess);
     void sensorStatusReceived();
     void sensorConfigSent(bool isSuccess);
+    void sensorDebugReceived(bool isSuccess);
 
 public slots:
     void setA2bCounts(const QVector<int> &counts);
@@ -60,6 +61,10 @@ signals:
     void boardChanged(int boardId);
     //! Rev 4.0: save these AS5600 settings on the board
     void writeSensorConfig(const hsr_sensor_config_t &config);
+    //! Rev 4.0: read this AX port's sensor in full a few times a second (-1: stop)
+    void sensorDebugPort(int port);
+    //! Rev 4.0: start this port's counters again
+    void clearSensorCounters(int port);
 
 private:
     void setTexts();

@@ -16,6 +16,8 @@
 static const int DEVICE_SEARCH_DELAY = 1000;    // ms between device list updates
 static const int PARAMS_PERIOD = 10;            // ms between live data reads
 static const int SENSOR_PERIOD = 50;            // ms between AS5600 status reads (Rev 4.0)
+static const int SENSOR_DEBUG_PERIOD = 250;     // ms between full reads of one AS5600, when asked:
+                                                // each holds the board's passes up for 3-30 ms
 static const ushort SETTINGS_USAGE_PAGE = 0xFF00;
 static const int RESTART_WAIT = 700;              // ms for a restarting device to drop off the bus
 
@@ -77,6 +79,7 @@ void HidDevice::processData()
     bool disconnectedSent = false;
     QElapsedTimer paramsTimer;
     QElapsedTimer sensorTimer;
+    QElapsedTimer sensorDebugTimer;
     QElapsedTimer infoTimer;
 
     while (m_isFinish == false)
@@ -193,6 +196,11 @@ void HidDevice::processData()
                 if (readSensorStatus()) {
                     emit sensorStatusReceived();
                 }
+            }
+            if (m_sensors && m_debugPort >= 0 &&
+                (sensorDebugTimer.isValid() == false || sensorDebugTimer.elapsed() >= SENSOR_DEBUG_PERIOD)) {
+                sensorDebugTimer.start();
+                emit sensorDebugReceived(readSensorDebug(m_debugPort));
             }
             if (paramsTimer.isValid() && paramsTimer.elapsed() < PARAMS_PERIOD) {
                 QThread::msleep(1);
@@ -394,6 +402,23 @@ bool HidDevice::readSensorStatus()
     return true;
 }
 
+bool HidDevice::readSensorDebug(int port)
+{
+    if (port < 0 || port >= HSR_AX_INPUTS) return false;
+    uint8_t index = uint8_t(port);
+    int clear = port;
+    if (m_clearPort.compare_exchange_strong(clear, -1)) {
+        index |= HSR_SENSOR_DEBUG_CLEAR;
+    }
+    uint8_t reply[HSR_PACKET_SIZE];
+    // one try: a repeat would clear the counters again, or hold the board up again
+    if (transact(HSR_CMD_SENSOR_DEBUG, index, nullptr, 0, reply, 250, 1) == false || reply[3] != HSR_OK) {
+        return false;
+    }
+    memcpy(&gEnv.pDeviceConfig->sensorDebug, reply + HSR_PACKET_HEADER, sizeof(hsr_sensor_debug_t));
+    return true;
+}
+
 // another device selected in comboBox
 void HidDevice::setSelectedDevice(int deviceNumber)
 {
@@ -440,4 +465,14 @@ void HidDevice::writeSensorConfig(const hsr_sensor_config_t &config)
         m_sensorConfigOut = config;
     }
     m_currentWork = WORK_SENSOR_WRITE;
+}
+
+void HidDevice::setSensorDebugPort(int port)
+{
+    m_debugPort = port;
+}
+
+void HidDevice::clearSensorCounters(int port)
+{
+    m_clearPort = port;
 }

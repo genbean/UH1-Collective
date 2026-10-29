@@ -104,6 +104,8 @@ BoardConfig::BoardConfig(QWidget *parent)
     m_as5600i2c = new As5600I2cHelper(this);
     connect(m_as5600i2c, &As5600I2cHelper::applyCalibration, this, &BoardConfig::applyCalibration);
     connect(m_as5600i2c, &As5600I2cHelper::writeSensorConfig, this, &BoardConfig::writeSensorConfig);
+    connect(m_as5600i2c, &As5600I2cHelper::sensorDebugPort, this, &BoardConfig::sensorDebugPort);
+    connect(m_as5600i2c, &As5600I2cHelper::clearSensorCounters, this, &BoardConfig::clearSensorCounters);
     columns->addWidget(m_as5600i2c, 4);
 
     // the user's choice; a connected device's board is set through setBoard()
@@ -402,6 +404,11 @@ void BoardConfig::sensorStatusReceived()
 void BoardConfig::sensorConfigSent(bool isSuccess)
 {
     m_as5600i2c->sensorConfigSent(isSuccess);
+}
+
+void BoardConfig::sensorDebugReceived(bool isSuccess)
+{
+    m_as5600i2c->sensorDebugReceived(isSuccess);
 }
 
 void BoardConfig::resetAllPins()
