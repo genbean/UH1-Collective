@@ -25,6 +25,10 @@ uint16_t sensors_value(uint8_t n);
 void sensors_status(hsr_sensor_status_t *s);
 const hsr_sensor_config_t *sensors_config(void);
 
+// Read AX port n's (0-3) sensor in full, now, with its counters; clear set:
+// start the counters again afterwards. d may be the reply packet itself.
+void sensors_debug(uint8_t n, uint8_t clear, hsr_sensor_debug_t *d);
+
 // Check, save and apply new settings (the sensors get their new ranges on
 // their next visits). HSR_OK, or HSR_ERR_VALUE with nothing changed.
 uint8_t sensors_set_config(const hsr_sensor_config_t *c);

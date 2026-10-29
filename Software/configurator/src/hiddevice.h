@@ -25,6 +25,10 @@ public:
     //! Rev 4.0: read the AS5600 settings again / save new ones on the board
     void readSensorConfig();
     void writeSensorConfig(const hsr_sensor_config_t &config);
+    //! Rev 4.0: read this AX port's sensor in full (SENSOR_DEBUG) a few times a second; -1 stops
+    void setSensorDebugPort(int port);
+    //! Rev 4.0: start this port's counters again (with its next SENSOR_DEBUG read)
+    void clearSensorCounters(int port);
 
     void setIsFinish(bool isFinish);
     void setSelectedDevice(int deviceNumber);
@@ -50,6 +54,8 @@ signals:
     void sensorConfigSent(bool isSuccess);
     //! Rev 4.0: DeviceConfig::sensorStatus updated (about 20 times a second)
     void sensorStatusReceived();
+    //! Rev 4.0: DeviceConfig::sensorDebug updated (the port setSensorDebugPort named), or not answered
+    void sensorDebugReceived(bool isSuccess);
 
     void hidDeviceList(const QStringList &deviceNames);
 
@@ -67,6 +73,8 @@ private:
     std::atomic<int> m_currentWork{WORK_PARAMS};
     std::atomic<bool> m_isFinish{false};
     std::atomic<bool> m_listChanged{false};
+    std::atomic<int> m_debugPort{-1};
+    std::atomic<int> m_clearPort{-1};
 
     hid_device *m_device = nullptr;
     bool m_compatible = false;
@@ -84,6 +92,7 @@ private:
     bool readSensorConfigFromDevice();
     bool writeSensorConfigToDevice();
     bool readSensorStatus();
+    bool readSensorDebug(int port);
     void closeDevice();
 
     mutable std::mutex m_mutex;

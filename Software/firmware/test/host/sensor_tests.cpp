@@ -39,6 +39,8 @@ struct FakeAs5600
 	uint16_t raw = 0;
 	uint8_t status = 0x20;          // MD: magnet detected
 	uint8_t agc = 128;
+	uint16_t magnitude = 1800;
+	uint8_t zmco = 0;               // times burnt
 
 	uint16_t angle() const
 	{
@@ -54,6 +56,7 @@ struct FakeAs5600
 	{
 		switch (r)
 		{
+		case 0x00: return zmco;
 		case 0x01: return (uint8_t)(zpos >> 8);
 		case 0x02: return (uint8_t)zpos;
 		case 0x03: return (uint8_t)(mpos >> 8);
@@ -66,6 +69,8 @@ struct FakeAs5600
 		case 0x0E: return (uint8_t)(angle() >> 8);
 		case 0x0F: return (uint8_t)angle();
 		case 0x1A: return agc;
+		case 0x1B: return (uint8_t)(magnitude >> 8);
+		case 0x1C: return (uint8_t)magnitude;
 		default:   return 0;
 		}
 	}
@@ -170,6 +175,14 @@ uint8_t i2c_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint8_t len)
 	if (bus.stuck()) return I2C_BUS_ERROR;
 	snprintf(text, sizeof(text), "R%02X %02X x%d", addr, reg, len);
 	bus.log.push_back(text);
+	if (addr == 0x70)
+	{
+		// the "register" byte is a write of the control register; the read returns it
+		if (!bus.switch_present) return I2C_NACK;
+		bus.control = reg;
+		for (int i = 0; i < len; i++) buf[i] = bus.control;
+		return I2C_OK;
+	}
 	int ch;
 	FakeAs5600 *a = (addr == 0x36) ? bus.connected(&ch) : NULL;
 	if (!a) return I2C_NACK;
@@ -229,6 +242,11 @@ static void t_sensor_layout()
 	CHECK_EQ(offsetof(params_report_t, analog_inputs_a2a3), 69);   // after the rest
 	CHECK_EQ(HSR_CMD_SENSOR_STATUS, 9);
 	CHECK_EQ(HSR_CMD_SENSOR_CONFIG, 10);
+	CHECK_EQ(HSR_CMD_SENSOR_DEBUG, 11);
+	CHECK_EQ(sizeof(hsr_sensor_debug_t), 26);
+	CHECK(sizeof(hsr_sensor_debug_t) <= HSR_PACKET_DATA);
+	CHECK_EQ(offsetof(hsr_sensor_debug_t, conf_regs), 3);
+	CHECK_EQ(offsetof(hsr_sensor_debug_t, counters), 20);
 	CHECK(hsr_spare_exists(HSR_BOARD_REV30, 9) && !hsr_spare_exists(HSR_BOARD_REV40, 9));
 	CHECK(hsr_spare_exists(HSR_BOARD_REV40, 10) && !hsr_spare_exists(HSR_BOARD_REV40, 11));
 	CHECK(hsr_source_exists(HSR_BOARD_REV30, 8) && !hsr_source_exists(HSR_BOARD_REV30, HSR_SOURCE_A2));
@@ -556,6 +574,148 @@ static void t_sensor_stuck_bus()
 	CHECK_EQ(bus.multi_channel, 0);
 }
 
+static uint16_t be12(const uint8_t *b, uint8_t mask = 0x0F) { return (uint16_t)(((b[0] & mask) << 8) | b[1]); }
+
+static hsr_sensor_debug_t debug_of(int port, bool clear = false)
+{
+	hsr_sensor_debug_t d;
+	memset(&d, 0xEE, sizeof(d));
+	sensors_debug((uint8_t)port, clear, &d);
+	return d;
+}
+
+static void t_sensor_debug()
+{
+	scenario("AS5600 diagnostics: every register read on demand, read only");
+	fresh_start();
+	FakeAs5600 &a = chip_of(1);
+	a.raw = 2345;
+	a.zmco = 1;
+	a.agc = 140;
+	a.magnitude = 0x6A5;
+	sensors_begin();
+	hsr_sensor_config_t c = config_with(1, 500, 2500);
+	sensors_set_config(&c);
+	rotate(3);
+
+	size_t from = bus.log.size();
+	hsr_sensor_debug_t d = debug_of(1);
+	CHECK_EQ(d.port, 1);
+	CHECK_EQ(d.result, HSR_SENSOR_OK);
+	CHECK_EQ(d.switch_control, 1 << CHANNEL_OF[1]);
+	CHECK_EQ(d.conf_regs[0], 1);                        // ZMCO: burnt once
+	CHECK_EQ(be12(&d.conf_regs[1]), 500);               // ZPOS
+	CHECK_EQ(be12(&d.conf_regs[3]), 2500);              // MPOS
+	CHECK_EQ(be12(&d.conf_regs[7], 0x3F), 0);           // CONF
+	CHECK_EQ(d.out_regs[0], 0x20);                      // STATUS
+	CHECK_EQ(be12(&d.out_regs[1]), 2345);               // RAW ANGLE
+	CHECK_EQ(be12(&d.out_regs[3]), a.angle());          // ANGLE
+	CHECK_EQ(d.mag_regs[0], 140);                       // AGC
+	CHECK_EQ(be12(&d.mag_regs[1]), 0x6A5);              // MAGNITUDE
+	CHECK_EQ(d.counters.range_writes, 2);               // at start-up, and for the new range
+	CHECK_EQ(d.counters.range_lost, 0);
+	CHECK_EQ(d.counters.magnet_faults, 0);
+	CHECK_EQ(d.counters.last_failure, 0);
+	CHECK(d.counters.agc_min == 140 && d.counters.agc_max == 140);
+	bool wrote = false;
+	for (size_t i = from; i < bus.log.size(); i++) wrote |= bus.log[i].compare(0, 3, "W36") == 0;
+	CHECK(!wrote);                                      // nothing written to the sensor
+	CHECK_EQ(bus.burns, 0);
+	CHECK_EQ(bus.multi_channel, 0);
+
+	// the passes carry on after it, on their own channels
+	rotate(1);
+	for (int p = 0; p < 4; p++) CHECK_EQ(status_now().port[p].state, HSR_SENSOR_OK);
+	CHECK_EQ(status_now().port[1].errors, 0);
+	CHECK_EQ(bus.multi_channel, 0);
+}
+
+static void t_sensor_counters()
+{
+	scenario("AS5600 diagnostics: magnet faults, AGC spread, restarts and failures counted, and cleared");
+	fresh_start();
+	sensors_begin();
+	hsr_sensor_config_t c = config_with(0, 1000, 3000);
+	sensors_set_config(&c);
+	rotate(3);
+	FakeAs5600 &a = chip_of(0);
+	for (int i = 0; i < 2; i++)
+	{
+		a.status = 0x00; rotate(3);                     // magnet gone, and back: twice
+		a.status = 0x20; rotate(3);
+	}
+	a.status = 0x20 | 0x08; rotate(3);                  // too strong
+	a.status = 0x20; rotate(3);
+	a.agc = 90;  rotate(3);
+	a.agc = 210; rotate(3);
+	a.power_cycle(); rotate(4);                         // a silent restart: the range read back gone
+	hsr_sensor_debug_t d = debug_of(0);
+	CHECK_EQ(d.counters.magnet_faults, 3);
+	CHECK(d.counters.agc_min == 90 && d.counters.agc_max == 210);
+	CHECK_EQ(d.counters.range_lost, 1);
+	CHECK_EQ(d.counters.range_writes, 3);               // at start-up, the new range, after the restart
+	CHECK(chip_of(0).zpos == 1000 && chip_of(0).mpos == 3000);
+	CHECK_EQ(d.counters.last_failure, 0);
+	CHECK_EQ(debug_of(3).counters.magnet_faults, 0);    // each port its own
+
+	// cleared after reading: this read still has them, the next one starts again
+	d = debug_of(0, true);
+	CHECK_EQ(d.counters.magnet_faults, 3);
+	d = debug_of(0);
+	CHECK(d.counters.magnet_faults == 0 && d.counters.range_lost == 0 && d.counters.range_writes == 0);
+	CHECK(d.counters.agc_min == 255 && d.counters.agc_max == 0);
+	rotate(3);
+	CHECK(debug_of(0).counters.agc_min == 210);
+
+	// a sensor unplugged: the switch answered, the sensor didn't
+	chip_of(2).present = false;
+	d = debug_of(2);
+	CHECK_EQ(d.result, HSR_SENSOR_NO_SENSOR);
+	CHECK_EQ(d.switch_control, 1 << CHANNEL_OF[2]);
+	CHECK(d.conf_regs[1] == 0 && d.out_regs[0] == 0 && d.mag_regs[0] == 0);
+	rotate(1);
+	CHECK_EQ(debug_of(2).counters.last_failure, HSR_SENSOR_NO_SENSOR);
+	chip_of(2).present = true;
+	rotate(2);
+	CHECK_EQ(debug_of(2).counters.last_failure, HSR_SENSOR_NO_SENSOR);   // kept once it's back
+
+	// no switch: nothing read at all
+	bus.switch_present = false;
+	d = debug_of(0);
+	CHECK_EQ(d.result, HSR_SENSOR_NO_SWITCH);
+	CHECK_EQ(d.switch_control, 0);
+	bus.switch_present = true;
+	rotate(2);
+}
+
+static void t_sensor_debug_stuck()
+{
+	scenario("AS5600 diagnostics: a port that stuck the bus is left alone for 250 ms, then tried and freed");
+	fresh_start();
+	sensors_begin();
+	rotate(1);
+	chip_of(3).holds_bus = true;
+	rotate(1);
+	CHECK_EQ(status_now().port[3].state, HSR_SENSOR_BUS_ERROR);
+	int recoveries = bus.recoveries;
+	size_t from = bus.log.size();
+	hsr_sensor_debug_t d = debug_of(3);
+	CHECK_EQ(d.result, HSR_SENSOR_BUS_ERROR);
+	CHECK_EQ(bus.recoveries, recoveries);               // not tried: no transfer, no reset
+	CHECK_EQ(bus.log.size(), from);
+	CHECK_EQ(d.counters.last_failure, HSR_SENSOR_BUS_ERROR);
+	host_millis += 300;
+	d = debug_of(3);
+	CHECK_EQ(d.result, HSR_SENSOR_BUS_ERROR);
+	CHECK_EQ(bus.recoveries, recoveries + 1);           // tried, stuck again, freed at once
+	CHECK_EQ(bus.control, 0);
+	chip_of(3).holds_bus = false;
+	host_millis += 300;
+	CHECK_EQ(debug_of(3).result, HSR_SENSOR_OK);
+	rotate(2);
+	CHECK_EQ(status_now().port[0].state, HSR_SENSOR_OK);
+}
+
 static void t_a2_a3_sources()
 {
 	// Not in the lockstep trace: its test steps carry sources 0-8 only, and
@@ -599,5 +759,8 @@ void run_sensor_tests()
 	t_sensor_magnet();
 	t_sensor_no_switch();
 	t_sensor_stuck_bus();
+	t_sensor_debug();
+	t_sensor_counters();
+	t_sensor_debug_stuck();
 	t_a2_a3_sources();
 }

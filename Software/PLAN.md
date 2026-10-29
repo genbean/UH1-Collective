@@ -478,3 +478,22 @@ Left on the Pro Micro: this branch's Rev 3.0 release build, with the board's set
 - the I²C helper with real sensors: Set start, Set stop, the direction it detects, the clock change, the board-page states;
 - pass times and the stack at each clock with a switch and sensors answering (the bare Pro Micro only takes the quick no-answer path; its longest pass was 3.4 ms, as on Rev 3.0);
 - the flasher's dialogs in the window (the check behind them is the command line's, tested above).
+
+### AS5600 diagnostics
+
+2026-10-28. The I²C helper had each port's state, STATUS, AGC, raw and output angles, failed transfers and bus resets (SENSOR_STATUS). For finding magnet, cable and chip problems on a real board it now also shows every register of one port's sensor, decoded, with counters and hints.
+
+- **A third command, SENSOR_DEBUG** (11; index = port, `| 0x80` clears its counters after the read), answered with `hsr_sensor_debug_t` (26 B): the PCA9546A's control register read back after connecting the port; the AS5600's 0x00-0x08 (ZMCO, ZPOS, MPOS, MANG, CONF), 0x0B-0x0F (STATUS, RAW ANGLE, ANGLE) and 0x1A-0x1C (AGC, MAGNITUDE) as sent, in four reads; and the port's counters.
+- **Read only when asked,** not in the passes, so the passes' timing is unchanged: a full read holds the board up for about 3 ms at 100 kHz, 30 ms at 10 kHz (calculated). The app reads one port four times a second, only while Diagnostics is ticked and the helper shows. The reply is built in the packet, so it costs no stack. Nothing is written to the sensor. A port that stuck the bus is left alone for 250 ms, as the passes do.
+- **Counters** per port, kept by the passes (6 B each, 24 B of RAM): range writes; range lost (the read-back found ZPOS/MPOS/CONF gone with no failed transfer, i.e. the sensor restarted); magnet faults (STATUS left "good"); the last failure's state; AGC lowest and highest.
+- **The helper** gets a Diagnostics box (off by default): the registers decoded (ZMCO as burn count, CONF field by field, STATUS bits, degrees), ZPOS/MPOS against the saved range, the counters, Clear counters and Copy. Hints when AGC is near either end, when AGC spread more than 30 as the control moved (a wobbling or off-centre magnet), when the sensor restarted, and when the magnet went out of range repeatedly. `HeliSRConfigurator --sensor-debug [1-4] [--clear]` prints the same.
+- Older Rev 4.0 firmware answers ERR_COMMAND; the helper says to update it.
+
+| Build | Flash | RAM |
+|---|---|---|
+| Rev 3.0, release | 21,450 B, unchanged | 2,093 B, unchanged |
+| Rev 4.0, release | 24,886 B (86 %); was 24,246 | 2,198 B (85 %); was 2,174 |
+
+Tested: PC tests 416 of 416 (64 new): every register and the switch's read-back decoded in place; nothing written to the sensor and nothing burnt; the passes carry on after a read; the counters (three magnet faults, AGC 90-210, one silent restart, three range writes) and clearing them; a missing sensor (switch read, sensor not), a missing switch, and a stuck port (left alone for 250 ms, then tried and the bus freed). `--ui-test` now also checks the helper's decoding of known replies (each register's line, the saved-range comparison, CONF's fields, the hints and when they don't appear); it passes on both boards, as do 200 random setups each and the 3 example profiles. With the bare Pro Micro on the earlier Rev 4.0 build, the Diagnostics box said the firmware doesn't know the command, as it should.
+
+Not tested, waits for a Rev 4.0 board: the PCA9546A read-back through a repeated start; real ZMCO, MAGNITUDE and AGC values (the hint thresholds are guesses from the datasheet's 0-255 AGC range at 5 V); how long a full read holds a pass at each clock; the stack with the counters (24 B less RAM than the 150 B measured).

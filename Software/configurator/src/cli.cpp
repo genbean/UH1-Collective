@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <cstdio>
 #include <cstring>
+#include "as5600i2chelper.h"
 #include "avrflasher.h"
 #include "configtofile.h"
 #include "deviceconfig.h"
@@ -24,7 +25,7 @@ namespace
 {
 const QStringList COMMANDS = {"--info", "--read", "--write", "--write-defaults", "--params", "--flash",
                               "--flash-new", "--roundtrip", "--save-defaults", "--hex-info", "--sensors",
-                              "--sensor-roundtrip", "--help"};
+                              "--sensor-roundtrip", "--sensor-debug", "--help"};
 
 void out(const QString &text)
 {
@@ -95,6 +96,9 @@ public:
         QObject::connect(m_dev, &HidDevice::sensorConfigReceived, &m_context, [this](bool ok) { m_sensorReadResult = ok ? 1 : 0; });
         QObject::connect(m_dev, &HidDevice::sensorConfigSent, &m_context, [this](bool ok) { m_sensorWriteResult = ok ? 1 : 0; });
         QObject::connect(m_dev, &HidDevice::sensorStatusReceived, &m_context, [this] { m_sensorStatusCount++; });
+        QObject::connect(m_dev, &HidDevice::sensorDebugReceived, &m_context, [this](bool ok) {
+            m_sensorDebugResult = ok ? 1 : 0;
+        });
         m_thread.start();
     }
 
@@ -172,6 +176,19 @@ public:
         return waitUntil([&] { return m_sensorStatusCount >= target; }, timeoutMs);
     }
 
+    //! Rev 4.0: one full read of AX port n's sensor (SENSOR_DEBUG), into DeviceConfig::sensorDebug
+    bool sensorDebug(int port, bool clear)
+    {
+        if (clear) m_dev->clearSensorCounters(port);
+        m_sensorDebugResult = -1;
+        m_dev->setSensorDebugPort(port);
+        bool ok = waitUntil([&] {
+            return m_sensorDebugResult == 0 || (m_sensorDebugResult == 1 && gEnv.pDeviceConfig->sensorDebug.port == port);
+        }, 3000) && m_sensorDebugResult == 1;
+        m_dev->setSensorDebugPort(-1);
+        return ok;
+    }
+
     int paramsCount() const { return m_paramsCount; }
     bool compatible() const { return m_compatible; }
     QStringList names() const { return m_names; }
@@ -191,6 +208,7 @@ private:
     int m_sensorReadResult = -1;
     int m_sensorWriteResult = -1;
     int m_sensorStatusCount = 0;
+    int m_sensorDebugResult = -1;
 };
 
 void printInfo(const QStringList &names)
@@ -399,7 +417,7 @@ int Cli::run(const QStringList &args)
         out("HeliSR Configurator " APP_VERSION);
         out("  --info | --read <file.cfg> | --write <file.cfg> | --write-defaults | --params [s]");
         out("  --flash <file.hex> | --flash-new <file.hex> [--port COMx] [--board 3.0|4.0] | --roundtrip   [--device <n>]");
-        out("  --sensors [s] | --sensor-roundtrip   (HeliSR Rev 4.0 boards)");
+        out("  --sensors [s] | --sensor-roundtrip | --sensor-debug [1-4] [--clear]   (HeliSR Rev 4.0 boards)");
         out("  --save-defaults <file.cfg> | --hex-info <file.hex>   (no device needed)");
         out("--flash checks which board the file is for. --board says which board the Pro Micro is on, when");
         out("its firmware doesn't (a new Pro Micro) or says another one.");
@@ -499,13 +517,39 @@ int Cli::run(const QStringList &args)
     if (args.contains("--roundtrip")) {
         return roundtrip(s);
     }
-    if (args.contains("--sensors") || args.contains("--sensor-roundtrip")) {
+    if (args.contains("--sensors") || args.contains("--sensor-roundtrip") || args.contains("--sensor-debug")) {
         if (gEnv.pDeviceConfig->info.board_id != HSR_BOARD_REV40) {
             out("The device isn't a HeliSR Rev 4.0 board: it has no I2C sensors.");
             return 1;
         }
         if (args.contains("--sensor-roundtrip")) {
             return sensorRoundtrip(s);
+        }
+        if (args.contains("--sensor-debug")) {
+            // every port, or the one given (1-4)
+            int only = value("--sensor-debug").toInt();
+            if (value("--sensor-debug").startsWith("--") == false && value("--sensor-debug").isEmpty() == false
+                && (only < 1 || only > HSR_AX_INPUTS)) {
+                out("--sensor-debug takes a port, 1-4");
+                return 2;
+            }
+            bool haveConfig = s.readSensors();
+            int failed = 0;
+            for (int n = 0; n < HSR_AX_INPUTS; ++n) {
+                if (only && n != only - 1) continue;
+                if (s.sensorDebug(n, args.contains("--clear")) == false) {
+                    out(QStringLiteral("AX%1: no answer to SENSOR_DEBUG (firmware older than this app?)").arg(n + 1));
+                    failed++;
+                    continue;
+                }
+                const hsr_sensor_debug_t &d = gEnv.pDeviceConfig->sensorDebug;
+                const hsr_sensor_range_t *saved = haveConfig ? &gEnv.pDeviceConfig->sensorConfig.range[n] : nullptr;
+                for (const QString &line : As5600I2cHelper::debugLines(d, saved)) out(line);
+                for (const QString &hint : As5600I2cHelper::debugHints(d)) out("Hint: " + hint);
+                if (args.contains("--clear")) out("Counters cleared.");
+                out(QString());
+            }
+            return failed ? 1 : 0;
         }
         if (s.readSensors()) out("Settings: " + sensorConfigLine(gEnv.pDeviceConfig->sensorConfig));
         int seconds = qMax(1, value("--sensors").toInt());

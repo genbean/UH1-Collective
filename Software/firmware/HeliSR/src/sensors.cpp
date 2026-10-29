@@ -25,6 +25,9 @@
   that stuck it is left alone for 250 ms, so the others carry on; a switch
   that doesn't answer is reset at most every 250 ms.
 
+  sensors_debug() reads one port's sensor in full, apart from the passes, for
+  the helper's diagnostics; the passes only keep its counters.
+
   sensors_poll() only uses i2c.h, so the PC tests run it against a simulated
   bus (test/host/sensor_tests.cpp).
 */
@@ -40,6 +43,7 @@
 
 #define SWITCH_ADDR     0x70
 #define AS5600_ADDR     0x36
+#define REG_ZMCO        0x00
 #define REG_ZPOS        0x01    // ZPOS (2 bytes), then MPOS (2 bytes)
 #define REG_MPOS        0x03
 #define REG_CONF        0x07    // after MANG; bits 13-0
@@ -64,7 +68,8 @@ static const uint8_t PORT_CHANNEL[HSR_AX_INPUTS] PROGMEM = { 2, 1, 3, 0 };
 
 static hsr_sensor_config_t cfg;
 static hsr_sensor_port_t port[HSR_AX_INPUTS];
-static uint8_t need_range;          // bit n: port n's sensor must get its start and stop
+static hsr_sensor_counters_t counters[HSR_AX_INPUTS];
+static uint8_t need_range;         // bit n: port n's sensor must get its start and stop
 static uint8_t next_port, turn;
 static uint8_t bus_resets;
 static uint8_t recovered;           // a recovery has run (last_recover_ms is set)
@@ -110,6 +115,17 @@ static void range_of(uint8_t n, uint16_t *z, uint16_t *m)
 	if (*z == *m) *z = *m = 0;
 }
 
+static void count(uint8_t *c)
+{
+	if (*c < 255) (*c)++;
+}
+
+static void clear_counters(uint8_t n)
+{
+	memset(&counters[n], 0, sizeof(counters[n]));
+	counters[n].agc_min = 255;
+}
+
 static uint8_t recovered_lately(void)
 {
 	return recovered && (uint16_t)((uint16_t)millis() - last_recover_ms) < RECOVER_MS;
@@ -141,6 +157,7 @@ static void port_failed(uint8_t n, uint8_t res, uint8_t state)
 	}
 	else
 		p->state = state;
+	counters[n].last_failure = p->state;
 }
 
 static uint8_t write_reg2(uint8_t reg, uint16_t v)
@@ -165,6 +182,8 @@ static uint8_t check_range(uint8_t n, uint8_t rewrite)
 		port[n].flags |= HSR_SENSOR_RANGE_OK;
 	else
 	{
+		// they were there and have gone, with no failed transfer: the sensor restarted
+		if (rewrite && (port[n].flags & HSR_SENSOR_RANGE_OK)) count(&counters[n].range_lost);
 		port[n].flags &= (uint8_t)~HSR_SENSOR_RANGE_OK;
 		if (rewrite) need_range |= (uint8_t)(1 << n);
 	}
@@ -175,6 +194,7 @@ static uint8_t write_range(uint8_t n)
 {
 	uint16_t z, m;
 	range_of(n, &z, &m);
+	count(&counters[n].range_writes);
 	uint8_t res = write_reg2(REG_ZPOS, z);
 	if (res != I2C_OK) return res;
 	delay(1);
@@ -232,14 +252,22 @@ void sensors_poll(void)
 		res = i2c_read(AS5600_ADDR, REG_STATUS, b, 3);
 		if (res == I2C_OK)
 		{
+			uint8_t was = p->state;
 			p->status = b[0];
 			p->raw_angle = (uint16_t)(((b[1] & 0x0F) << 8) | b[2]);
 			p->state = state_of(b[0]);
+			if (was == HSR_SENSOR_OK && p->state != HSR_SENSOR_OK) count(&counters[n].magnet_faults);
 		}
 		break;
 	case 1:
 		res = i2c_read(AS5600_ADDR, REG_AGC, b, 1);
-		if (res == I2C_OK) p->agc = b[0];
+		if (res == I2C_OK)
+		{
+			p->agc = b[0];
+			hsr_sensor_counters_t *c = &counters[n];
+			if (b[0] < c->agc_min) c->agc_min = b[0];
+			if (b[0] > c->agc_max) c->agc_max = b[0];
+		}
 		break;
 	default:
 		res = check_range(n, 1);
@@ -252,6 +280,7 @@ void sensors_begin(void)
 {
 	load();
 	memset(port, 0, sizeof(port));
+	for (uint8_t n = 0; n < HSR_AX_INPUTS; n++) clear_counters(n);
 	need_range = 0x0F;
 	next_port = turn = 0;
 	bus_resets = recovered = 0;
@@ -270,6 +299,50 @@ void sensors_status(hsr_sensor_status_t *s)
 	s->i2c_khz = cfg.i2c_khz;
 	s->bus_resets = bus_resets;
 	memcpy(s->port, port, sizeof(port));
+}
+
+// A write to the PCA9546A sets its control register and a read returns it, so
+// i2c_read() connects the port's channel and reads it back in one go. The
+// sensor is read in four blocks, each starting where the passes start theirs,
+// rather than in one read across the reserved addresses between them.
+void sensors_debug(uint8_t n, uint8_t clear, hsr_sensor_debug_t *d)
+{
+	memset(d, 0, sizeof(*d));
+	d->port = n;
+	uint8_t res, failed;
+	if (port[n].state == HSR_SENSOR_BUS_ERROR && recovered_lately())
+	{
+		res = I2C_BUS_ERROR;        // it stuck the bus: left alone, as the passes do
+		failed = HSR_SENSOR_BUS_ERROR;
+	}
+	else
+	{
+		failed = HSR_SENSOR_NO_SWITCH;
+		res = i2c_read(SWITCH_ADDR, (uint8_t)(1 << pgm_read_byte(&PORT_CHANNEL[n])), &d->switch_control, 1);
+		if (res == I2C_OK)
+		{
+			failed = HSR_SENSOR_NO_SENSOR;
+			res = i2c_read(AS5600_ADDR, REG_ZMCO, d->conf_regs, 9);
+			if (res == I2C_OK) res = i2c_read(AS5600_ADDR, REG_STATUS, d->out_regs, 3);
+			if (res == I2C_OK) res = i2c_read(AS5600_ADDR, REG_ANGLE, d->out_regs + 3, 2);
+			if (res == I2C_OK) res = i2c_read(AS5600_ADDR, REG_AGC, d->mag_regs, 3);
+		}
+		if (res == I2C_BUS_ERROR)
+		{
+			failed = HSR_SENSOR_BUS_ERROR;
+			recover(1);
+		}
+	}
+	if (res != I2C_OK)
+	{
+		uint8_t sw = d->switch_control;
+		memset(d, 0, sizeof(*d));       // nothing half-read
+		d->port = n;
+		d->switch_control = failed == HSR_SENSOR_NO_SENSOR ? sw : 0;
+	}
+	d->result = res == I2C_OK ? (uint8_t)HSR_SENSOR_OK : failed;
+	d->counters = counters[n];
+	if (clear) clear_counters(n);
 }
 
 const hsr_sensor_config_t *sensors_config(void)

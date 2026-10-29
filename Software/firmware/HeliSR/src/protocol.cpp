@@ -173,6 +173,15 @@ static void __attribute__((noinline)) cmd_sensor_config(uint8_t index, const uin
 		status = HSR_ERR_INDEX;
 	reply(status, sensors_config(), sizeof(hsr_sensor_config_t));
 }
+
+// Built in the packet, so nothing is copied onto the stack.
+static void __attribute__((noinline)) cmd_sensor_debug(uint8_t index, uint8_t *data)
+{
+	uint8_t n = index & (uint8_t)~HSR_SENSOR_DEBUG_CLEAR;
+	if (n >= HSR_AX_INPUTS) { reply(HSR_ERR_INDEX, 0, 0); return; }
+	sensors_debug(n, index & HSR_SENSOR_DEBUG_CLEAR, (hsr_sensor_debug_t *)data);
+	reply(HSR_OK, data, sizeof(hsr_sensor_debug_t));
+}
 #endif
 
 #ifdef HSR_TEST_STEP
@@ -268,6 +277,10 @@ static void handle(uint32_t now)
 
 	case HSR_CMD_SENSOR_CONFIG:
 		cmd_sensor_config(index, data);
+		break;
+
+	case HSR_CMD_SENSOR_DEBUG:
+		cmd_sensor_debug(index, data);
 		break;
 #endif
 

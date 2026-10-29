@@ -122,6 +122,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_hidDeviceWorker, &HidDevice::sensorConfigReceived, m_boardConfig, &BoardConfig::sensorConfigReceived);
     connect(m_hidDeviceWorker, &HidDevice::sensorConfigSent, m_boardConfig, &BoardConfig::sensorConfigSent);
     connect(m_hidDeviceWorker, &HidDevice::sensorStatusReceived, m_boardConfig, &BoardConfig::sensorStatusReceived);
+    connect(m_boardConfig, &BoardConfig::sensorDebugPort, this, [this](int port) {
+        m_hidDeviceWorker->setSensorDebugPort(port);
+    });
+    connect(m_boardConfig, &BoardConfig::clearSensorCounters, this, [this](int port) {
+        m_hidDeviceWorker->clearSensorCounters(port);
+    });
+    connect(m_hidDeviceWorker, &HidDevice::sensorDebugReceived, m_boardConfig, &BoardConfig::sensorDebugReceived);
     // encoder changed
     connect(m_buttonConfig, &ButtonConfig::encoderInputChanged, m_encoderConfig, &EncodersConfig::encoderInputChanged);
     // language changed
