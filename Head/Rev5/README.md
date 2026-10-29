@@ -123,7 +123,7 @@ Closest clearances:
 
 ## Parts
 
-`stl/` has the same parts as Rev 4, named `HueyHeadR5-*`. They print the same way: the body on its rear wall, with tree supports for the neck, the knob and the tube bore, and the panels face down. See [Rev 4's printing table](../Rev4/README.md#printing). For the panels' white labels, set Bambu Studio's wall generator to **Arachne** and the first layer's line width to 0.42 mm (default 0.5): each stroke then prints as one line. The body is 147 cm³ (Rev 4: 166 cm³), the lower panel 16.6 cm³ and the upper panel 6.2 cm³.
+`stl/` has the same parts as Rev 4, named `HueyHeadR5-*`. They print the same way: the body on its rear wall, with tree supports for the neck, the knob and the tube bore, and the panels face down. See [Rev 4's printing table](../Rev4/README.md#printing). For the panels' white labels, set Bambu Studio's wall generator to **Arachne** and the first layer's line width to 0.42 mm (default 0.5): each stroke then prints as one line. The thicker letters and Arachne together were the fix for broken labels on a P1S with AMS (see [Rev 4's steps](../Rev4/README.md#white-labels-on-a-p1s-with-ams)). The body is 147 cm³ (Rev 4: 166 cm³), the lower panel 16.6 cm³ and the upper panel 6.2 cm³.
 
 The screws are Rev 4's, from the same two kits, except the panels' M3 × 16s (see [Screws](#screws)).
 
