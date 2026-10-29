@@ -167,6 +167,7 @@ The labels are recessed 0.6 mm into each panel's face. The `-WhiteText` file is 
 3. Press **F** (lay on face) and click the panel's front face.
 4. Use 0.2 mm layers with a 0.2 mm first layer. White then covers layers 1–3 and the rest is black. Leave the prime tower on.
 5. The textured PEI plate gives the panels a crinkle finish like the real ones.
+6. **Wall generator: Arachne** (Quality, with the Advanced switch on) and a **first-layer line width of 0.42 mm** (default 0.5). The labels are thin: with the default Classic generator the slicer drops pieces of the letters and they print garbled. Arachne prints each stroke as one line. Confirmed on a P1S: with Arachne and the Rev 5 panels, whose letters are grown 0.1 mm (0.5-0.6 mm strokes), every label prints legibly. Rev 4's panels have 0.4 mm strokes; they print better with Arachne than without, but the small labels stay marginal.
 
 The 4-way hat is new in Rev 4 and needs no MkII parts: see [`Hat/README.md`](Hat/README.md) for how it goes together.
 
