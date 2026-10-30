@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QGroupBox>
 #include <QPushButton>
 #include <QTabWidget>
 #include <QRandomGenerator>
@@ -9,6 +10,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include "as5600i2chelper.h"
 #include "deviceconfig.h"
 #include "global.h"
 #include "boardconfig.h"
@@ -346,6 +348,77 @@ QStringList throughPages(MainWindow &window, dev_config_t expected)
 }
 }
 
+// The Rev 4.0 helper's decoding of a SENSOR_DEBUG reply (no device needed):
+// what each line says for known registers, and when the hints appear.
+static QStringList diagnosticsDecoding()
+{
+    QStringList fails;
+    auto expect = [&](const QStringList &lines, const QString &text, bool wanted = true) {
+        if (lines.join('\n').contains(text) != wanted) {
+            fails << QStringLiteral("  %1 \"%2\" in:\n    %3").arg(wanted ? "missing" : "unexpected", text,
+                                                              lines.join("\n    "));
+        }
+    };
+    // AX1: ZPOS 3412, MPOS 3801, CONF 0, MD, raw 3602, angle 2002, AGC 131, MAGNITUDE 1650
+    hsr_sensor_debug_t d = {0, HSR_SENSOR_OK, 0x04, {0, 0x0D, 0x54, 0x0E, 0xD9, 0, 0, 0, 0}, {0x20, 0x0E, 0x12, 0x07, 0xD2},
+                            {131, 0x06, 0x72}, {1, 0, 0, 0, 118, 152}};
+    hsr_sensor_range_t saved = {3412, 3801};
+    QStringList lines = As5600I2cHelper::debugLines(d, &saved);
+    expect(lines, "control 0x04 (connected)");
+    expect(lines, "ZMCO   0: never burnt");
+    expect(lines, "ZPOS 3412 (299.9°)  MPOS 3801 (334.1°)  MANG 0  = the saved range");
+    expect(lines, "CONF   0x0000: normal power, hysteresis 0, output analog 0-100% (115 Hz), slow filter 16x, fast filter off, watchdog off");
+    expect(lines, "STATUS 0x20: MD magnet detected");
+    expect(lines, "RAW ANGLE 3602 (316.6°)  ANGLE 2002");
+    expect(lines, "AGC 131 of 255  MAGNITUDE 1650");
+    expect(lines, "range written 1, lost 0, magnet faults 0, AGC 118-152, last failure: none");
+    QStringList hints = As5600I2cHelper::debugHints(d);
+    expect(hints, "AGC moved by 34");
+    expect(hints, "restarted", false);
+    expect(hints, "weak", false);
+
+    // burnt twice, CONF with watchdog, 2x filter and LPM3, a range not the saved one, weak magnet, a restart
+    d.conf_regs[0] = 2;
+    d.conf_regs[7] = 0x23;
+    d.conf_regs[8] = 0x03;
+    d.out_regs[0] = 0x30;
+    d.mag_regs[0] = 250;
+    d.counters = {3, 1, 4, HSR_SENSOR_NO_SENSOR, 240, 252};
+    saved = {100, 1100};
+    lines = As5600I2cHelper::debugLines(d, &saved);
+    expect(lines, "ZMCO   2: start/stop burnt into the chip 2 time(s)");
+    expect(lines, "(saved: 100, 1100)");
+    expect(lines, "CONF   0x2303: LPM3 power");
+    expect(lines, "slow filter 2x");
+    expect(lines, "watchdog on (HeliSR sets 0)");
+    expect(lines, "ML too weak");
+    expect(lines, "last failure: no sensor");
+    hints = As5600I2cHelper::debugHints(d);
+    expect(hints, "the field is weak");
+    expect(hints, "restarted 1 time(s)");
+    expect(hints, "out of range 4 times");
+    expect(hints, "AGC moved", false);
+    QStringList whole = As5600I2cHelper::debugLines(d, nullptr);
+    expect(whole, "saved", false);
+
+    // nothing behind the switch; no switch at all
+    hsr_sensor_debug_t none = {};
+    none.port = 2;
+    none.result = HSR_SENSOR_NO_SENSOR;
+    none.switch_control = 0x08;
+    none.counters.agc_min = 255;
+    lines = As5600I2cHelper::debugLines(none, nullptr);
+    expect(lines, "AX3 (J13), switch channel 3: control 0x08 (connected)");
+    expect(lines, "Nothing answers at 0x36");
+    expect(lines, "ZPOS", false);
+    expect(lines, "AGC -,");
+    none.result = HSR_SENSOR_NO_SWITCH;
+    none.switch_control = 0;
+    expect(As5600I2cHelper::debugLines(none, nullptr), "Nothing read.");
+    expect(As5600I2cHelper::debugHints(none), "AGC", false);
+    return fails;
+}
+
 // The Board page as a picture. Rev 4.0 has no board yet, so its I2C helper is
 // shown with made-up readings (the window is told a Rev 4.0 device is there):
 // a way to look at the page, not a test of it.
@@ -368,6 +441,13 @@ static int screenshot(MainWindow &window, const QString &file)
         window.boardConfig()->sensorConfigReceived(true);
         window.boardConfig()->sensorStatusReceived();
         window.boardConfig()->updateLiveData();
+        // AX1's diagnostics: its registers as read, and an AGC that moved as it turned
+        if (QGroupBox *diag = window.findChild<QGroupBox *>("sensorDiagnostics")) {
+            diag->setChecked(true);
+            d->sensorDebug = {0, HSR_SENSOR_OK, 0x04, {0, 0x0D, 0x54, 0x0E, 0xD9, 0, 0, 0, 0}, {0x20, 0x0E, 0x12, 0x07, 0xD2},
+                              {131, 0x06, 0x72}, {1, 0, 0, 0, 118, 152}};
+            window.boardConfig()->sensorDebugReceived(true);
+        }
     }
     QTabWidget *tabs = window.findChild<QTabWidget *>("tabWidget");
     QWidget *page = window.findChild<QWidget *>("tab_PinConfig");
@@ -464,6 +544,10 @@ int UiTest::run(MainWindow &window, const QStringList &args)
         return failedFiles || files == 0 ? 1 : 0;
     }
     int failed = 0;
+    QStringList decoding = diagnosticsDecoding();
+    out(decoding.isEmpty() ? "AS5600 diagnostics decoded as expected" : "FAIL: AS5600 diagnostics decoding");
+    for (const QString &f : decoding) out(f);
+    failed += decoding.isEmpty() ? 0 : 1;
     for (int n = 0; n < count; ++n) {
         QStringList diffs = throughPages(window, randomConfig(rng));
         if (diffs.isEmpty()) {

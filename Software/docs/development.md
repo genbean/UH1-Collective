@@ -46,7 +46,7 @@ Qt 6 with MinGW, then `qmake` and `mingw32-make`: see [configurator/README.md](.
 
 The board is a USB composite device: a joystick that games read, and a vendor-defined HID collection (usage page 0xFF00) that only the configurator uses. Each settings packet is 64 bytes: report ID, command, index, status and 60 bytes of data, and the board answers every command. INFO comes first; the app refuses a board whose protocol version, settings version or settings size differs from its own, or whose board ID it doesn't know. Settings go over in 60-byte chunks (READ / WRITE), then COMMIT with a CRC-16; the board saves them to EEPROM and restarts so Windows sees the new name and layout. `helisr_protocol.h` has the details.
 
-Both boards have the same settings layout and protocol version; INFO's board ID (0x30 or 0x40) says which board it is. Rev 4.0 adds two commands: SENSOR_STATUS (each AS5600's state, raw angle, output angle, AGC and error count, about 20 times a second while the app is open) and SENSOR_CONFIG (the I²C clock and each sensor's start and stop). The sensor settings are kept in EEPROM apart from the main settings and saved at once, without a restart: like Rev 3.0's burnt-in angles, they belong to the board's sensors, not to a profile. The live data's A2/A3 readings come after the older fields, so the Rev 3.0 layout is unchanged.
+Both boards have the same settings layout and protocol version; INFO's board ID (0x30 or 0x40) says which board it is. Rev 4.0 adds three commands: SENSOR_STATUS (each AS5600's state, raw angle, output angle, AGC and error count, about 20 times a second while the app is open), SENSOR_CONFIG (the I²C clock and each sensor's start and stop) and SENSOR_DEBUG (one port's sensor read in full, every register as the chip sent it, with that port's counters; only while the helper's Diagnostics box is ticked, as each read holds the board up for a few ms). The sensor settings are kept in EEPROM apart from the main settings and saved at once, without a restart: like Rev 3.0's burnt-in angles, they belong to the board's sensors, not to a profile. The live data's A2/A3 readings come after the older fields, so the Rev 3.0 layout is unchanged.
 
 ## Testing
 
@@ -54,11 +54,11 @@ Both boards have the same settings layout and protocol version; INFO's board ID 
 
 ```powershell
 cd Software\firmware\test\host
-.\run-host-tests.ps1                               # 344 checks: 192 of the firmware's logic, 152 of Rev 4.0's sensor code
+.\run-host-tests.ps1                               # 416 checks: 192 of the firmware's logic, 224 of Rev 4.0's sensor code
 .\run-host-tests.ps1 -FreeJoy <FreeJoy checkout>   # also compare with FreeJoy's own code on random settings
 ```
 
-The sensor checks run `sensors.cpp` against a model of the board's PCA9546A and an AS5600 on each channel: the channel of each port, the registers and byte order, the 1 ms waits between ZPOS, MPOS and CONF, the read-back, CONF set over settings burnt into a chip, that nothing is ever burnt, and what happens when a sensor is unplugged or restarts, the switch is missing, or the bus sticks. The model follows the datasheets as the code reads them, so it can't show that the chips agree: that waits for a Rev 4.0 board.
+The sensor checks run `sensors.cpp` against a model of the board's PCA9546A and an AS5600 on each channel: the channel of each port, the registers and byte order, the 1 ms waits between ZPOS, MPOS and CONF, the read-back, CONF set over settings burnt into a chip, that nothing is ever burnt, the diagnostics read and its counters, and what happens when a sensor is unplugged or restarts, the switch is missing, or the bus sticks. The model follows the datasheets as the code reads them, so it can't show that the chips agree: that waits for a Rev 4.0 board.
 
 **The same scenarios on a Pro Micro**, in lockstep with the PC:
 
@@ -81,6 +81,7 @@ HeliSRConfigurator --roundtrip                    write, read back and compare, 
 HeliSRConfigurator --ui-device-test               the same through the window's Write and Read buttons
 HeliSRConfigurator --hex-info file.hex            which board a firmware file is for
 HeliSRConfigurator --sensor-roundtrip             Rev 4.0: the AS5600 settings saved, read back, kept through a restart, refused out of range, restored
+HeliSRConfigurator --sensor-debug [1-4] [--clear] Rev 4.0: every register of each sensor (or one), decoded, with counters and hints
 HeliSRConfigurator --ui-screenshot board.png [--board 4.0]   a picture of the Board page (Rev 4.0 with made-up sensor readings)
 ```
 

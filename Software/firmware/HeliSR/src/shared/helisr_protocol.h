@@ -16,7 +16,7 @@
   The device answers each command with a packet carrying the same command
   number. Status is HSR_OK or an HSR_ERR_ code.
 
-  Both boards speak protocol 1. Rev 4.0 adds the two SENSOR commands, which
+  Both boards speak protocol 1. Rev 4.0 adds the three SENSOR commands, which
   Rev 3.0 answers with HSR_ERR_COMMAND: INFO's board_id says which to expect.
 */
 
@@ -57,6 +57,8 @@ enum
 	HSR_CMD_SENSOR_STATUS,  // -> hsr_sensor_status_t
 	HSR_CMD_SENSOR_CONFIG,  // index 0: read; index 1: data = hsr_sensor_config_t, saved
 	                        // and applied at once (no restart) -> hsr_sensor_config_t
+	HSR_CMD_SENSOR_DEBUG,   // index = port 0-3, | HSR_SENSOR_DEBUG_CLEAR to clear its counters
+	                        // after reading them -> hsr_sensor_debug_t
 
 	// Test builds only (HSR_TEST_STEP): the PC drives the logic in lockstep
 	HSR_CMD_TEST_APPLY = 0x70,  // restart the logic from the settings in RAM and enter
@@ -169,6 +171,39 @@ typedef struct
 	uint8_t             bus_resets;     // bus recoveries since start-up (stops at 255)
 	hsr_sensor_port_t   port[4];        // AX1-AX4
 } hsr_sensor_status_t;
+
+/* SENSOR_DEBUG: one port's sensor read in full when asked, apart from the
+   passes (four reads: 3 ms at 100 kHz, 30 ms at 10 kHz, so not for polling
+   fast), and the port's counters. The registers are as the chip sent them,
+   unused bits included. */
+#define HSR_SENSOR_DEBUG_CLEAR  0x80
+
+typedef struct
+{
+	// since start-up or the last clear; each stops at 255
+	uint8_t     range_writes;   // times ZPOS, MPOS and CONF were written
+	uint8_t     range_lost;     // times the read-back found them gone with no failed transfer:
+	                            // the sensor restarted (a brown-out on its cable)
+	uint8_t     magnet_faults;  // times STATUS went from a good magnet to none, weak or strong
+	uint8_t     last_failure;   // HSR_SENSOR_NO_SENSOR / _NO_SWITCH / _BUS_ERROR of the last
+	                            // failed transfer, 0 if none
+	uint8_t     agc_min;        // the lowest and highest AGC read (255 and 0 until read):
+	uint8_t     agc_max;        // a magnet that wobbles or moves spreads them
+} hsr_sensor_counters_t;
+
+typedef struct
+{
+	uint8_t     port;           // 0-3: AX1-AX4
+	uint8_t     result;         // HSR_SENSOR_OK if every register was read, else
+	                            // _NO_SWITCH, _NO_SENSOR or _BUS_ERROR (the rest is 0)
+	uint8_t     switch_control; // the PCA9546A's control register, read back after connecting
+	                            // the port: 1 << the port's channel
+	uint8_t     conf_regs[9];   // the AS5600's 0x00-0x08: ZMCO (bits 1-0: times ZPOS/MPOS
+	                            // were burnt), ZPOS, MPOS, MANG, CONF (high bytes first)
+	uint8_t     out_regs[5];    // 0x0B-0x0F: STATUS, RAW ANGLE, ANGLE
+	uint8_t     mag_regs[3];    // 0x1A-0x1C: AGC, MAGNITUDE (12 bits)
+	hsr_sensor_counters_t counters;
+} hsr_sensor_debug_t;
 #pragma pack(pop)
 
 /* A start and stop the firmware accepts. */
@@ -211,6 +246,7 @@ typedef struct
 static_assert(sizeof(hsr_build_tag_t) == 20, "hsr_build_tag_t layout");
 static_assert(sizeof(hsr_sensor_config_t) == 18, "hsr_sensor_config_t layout");
 static_assert(sizeof(hsr_sensor_status_t) == 42, "hsr_sensor_status_t layout");
+static_assert(sizeof(hsr_sensor_debug_t) == 26, "hsr_sensor_debug_t layout");
 #endif
 
 /* CRC-16/CCITT-FALSE (poly 0x1021, init 0xFFFF), over the whole dev_config_t. */
