@@ -544,8 +544,10 @@ int Cli::run(const QStringList &args)
                 }
                 const hsr_sensor_debug_t &d = gEnv.pDeviceConfig->sensorDebug;
                 const hsr_sensor_range_t *saved = haveConfig ? &gEnv.pDeviceConfig->sensorConfig.range[n] : nullptr;
-                for (const QString &line : As5600I2cHelper::debugLines(d, saved)) out(line);
-                for (const QString &hint : As5600I2cHelper::debugHints(d)) out("Hint: " + hint);
+                // the console's code page may have no ² or °
+                auto plain = [](QString s) { return s.replace(QChar(0x00B2), '2').replace(QChar(0x00B0), " deg"); };
+                for (const QString &line : As5600I2cHelper::debugLines(d, saved)) out(plain(line));
+                for (const QString &hint : As5600I2cHelper::debugHints(d)) out("Hint: " + plain(hint));
                 if (args.contains("--clear")) out("Counters cleared.");
                 out(QString());
             }
