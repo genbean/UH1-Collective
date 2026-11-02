@@ -52,7 +52,8 @@ def main():
     up, _ = h.upper_panel()
     parts = {"body": body, "lower_panel": tilt(lp), "upper_panel": tilt(up), "trigger": h.trigger()}
     sw = {"GOV": toggle_body(*h.GOV, 0.0), "LDG_EXT": toggle_body(*h.LDG_EXT, 0.0),
-          "STOP_REL": ycyl(*h.STOP_REL, 12.0, 0, 16.0) + ycyl(*h.STOP_REL, 18.0, 0, 3.0),
+          "STOP_REL": ycyl(*h.STOP_REL, 12.0, h.PLUG_H, 16.0) + ycyl(*h.STOP_REL, 18.0, h.PLUG_H, h.PLUG_H + 1.5),   # its
+          # nut on the plug: 1.5 mm is all the room the head's cut leaves behind it
           "SL": toggle_body(*h.SL, h.UY), "LDG_ON": toggle_body(*h.LDG_ON, h.UY)}
     parts.update({k: tilt(v) for k, v in sw.items()})
     parts.update({k: tilt(v) for k, v in helisr().items()})
