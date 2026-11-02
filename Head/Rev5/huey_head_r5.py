@@ -673,7 +673,7 @@ SCREW_ANGLE = 0.0                # the set screw points this many degrees left o
 GRUB_L = 8.0                     # M5 x 8 set screw (set-screw kit) in an M5 thread tapped in the boss's front
 GRUB_TIP = TY - TUBE_OD / 2 + 0.9   # its tip, through the tube's front wall, 0.1 short of the wall's inside
 # The pinion fills its 6 mm pocket to 0.2 mm off the floor and the ceiling, so it has 0.4 mm of end play (it had 1.2),
-# and is the same both ways up: teeth to both faces, chamfered at the tips (throttle script). The O-rings hold the grip
+# and goes in shoulder down: a plain shoulder under its teeth clears the grip's neck (throttle script). The O-rings hold the grip
 # up to (at most) the ceiling, 0.5 mm over GEAR_Z, so the lower teeth reach below the grip gear's modelled bottom:
 # the throttle script runs the grip's teeth further down to meet them (GEAR_DOWN).
 PINION_Z = (GEAR_Z[0] - 0.3, CEILING - 0.2)     # the whole pinion
