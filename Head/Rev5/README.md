@@ -190,7 +190,7 @@ python throttle_r5.py ../source/MkII-Grip-bore-relieved-25mm.stl stl
 python check_r5.py
 ```
 
-The exploded views, screw maps and the pinion diagram come from [`../../renders/make_diagrams.py`](../../renders/make_diagrams.py), which reads the collective's assembly GLB. Its pinion was swapped in from `throttle_r5.pinion()` on 2026-11-02. Re-run the script after the GLB changes. `HueyHeadR5_Front`, `_Inside`, `_Body` and `_PocketWindow` were drawn before the pinion changed, and no script for them is in the repo. The shoulder is too small to show in them.
+Every image in `renders/` comes from [`../../renders/make_diagrams.py`](../../renders/make_diagrams.py), which reads the collective's assembly GLB: the exploded views, screw maps, the pinion and toggle-box diagrams, and the assembled views on navy (`HueyHeadR5_Front`, `_Inside`, `_Body`, `_PocketWindow`, in `head_scenes()`). The GLB's pinion, panels, panel text and upper toggles were swapped in from the current scripts on 2026-11-02. When a part changes, put its new mesh into the GLB (head frame to the collective's: `TO_HEAD` in `make_diagrams.py`, inverted) and re-run the script.
 
 The outline is set by `PANEL_W`, `PANEL_HR`, `PANEL_HL` and `DIAG_U`, and the upper box by `UX0`, `UX1`, `UZ1` and `UY`, at the top of `huey_head_r5.py`. The switch positions are `GOV`, `SEARCH`, `LDG_EXT`, `STOP_REL`, `SL` and `LDG_ON`, and the labels are in `lower_labels()` and `upper_labels()`.
 

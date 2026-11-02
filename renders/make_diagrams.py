@@ -11,7 +11,8 @@ writes
     ../Head/Rev5/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png, HueyHeadR5_ScrewSizes.png,
     HueyHeadR5_Screws_Panels.png, HueyHeadR5_Screws_Inside.png, HueyHeadR5_Screws_Rear.png, HueyHeadR5_Screws_Collar.png,
     HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/Rev5/stl/HueyHeadR5-Pinion.stl too),
-    HueyHeadR5_ToggleBoxes.png, HueyHeadR5_ToggleBoxes_Switches.png (the panels' backs)
+    HueyHeadR5_ToggleBoxes.png, HueyHeadR5_ToggleBoxes_Switches.png (the panels' backs),
+    HueyHeadR5_Front.png, HueyHeadR5_Inside.png, HueyHeadR5_Body.png, HueyHeadR5_PocketWindow.png (assembled, on navy)
 
 Re-run it after the GLB is regenerated. Two screws the GLB leaves out are added here: the head's pull-stop seat (M2 x 8,
 STOP_SCREW and MOUNT_FACE in huey_head_r5.py) and the hat's pivot set screw (M3 x 4, Hat/hat_r5.py).
@@ -575,6 +576,59 @@ def toggle_boxes_view(H):
         print("wrote", name)
 
 
+NAVY = (51, 52, 74)
+LIGHT = (205, 208, 216)                                 # the body, as the panels' views show it
+
+
+def scene(items, view, up, out, focus, parallel=False, zoom=1.0, size=(1000, 900)):
+    """A plain view on navy, as the README's head views are drawn: items are (mesh, colour)."""
+    p = pv.Plotter(off_screen=True, window_size=size, lighting="light kit")
+    p.set_background(NAVY)
+    for m, col in items:
+        p.add_mesh(to_pv(m), color=col, smooth_shading=True, split_sharp_edges=True, feature_angle=35, ambient=0.25,
+                   diffuse=0.8, specular=0.1)
+    pts = np.vstack([m.bounds for m in focus])
+    lo, hi = pts.min(0), pts.max(0)
+    ctr = (lo + hi) / 2
+    view = np.asarray(view, float) / np.linalg.norm(view)
+    p.camera_position = [tuple(ctr + view * 1000), tuple(ctr), tuple(up)]
+    if parallel:
+        p.enable_parallel_projection()
+    p.reset_camera(bounds=(lo[0], hi[0], lo[1], hi[1], lo[2], hi[2]))
+    p.camera.zoom(zoom)
+    p.enable_anti_aliasing("ssaa")
+    p.screenshot(out)
+    p.close()
+    print("wrote", os.path.relpath(out, HERE))
+
+
+def head_scenes(H):
+    """The README's assembled views of Rev 5: the panels straight on, inside with the panels off, the body alone, and
+    the pinion through its window behind STOP REL."""
+    n_out = -tilt_dir((0, 1, 0))                         # out of the panels' faces
+    up = tilt_dir((0, 0, 1))
+    side = tilt_dir((1, 0, 0))
+    m = lambda k: H[k].mesh
+    BLACK, WHITE, GREY = (34, 34, 36), (240, 240, 240), (92, 94, 104)
+    ORANGE, YELLOW, GREEN, BLUE, PURPLE = (200, 100, 30), (215, 190, 30), (40, 140, 60), (40, 70, 190), (170, 40, 170)
+    body = [(m("Body"), LIGHT)]
+    panels = [(m("Lower panel"), BLACK), (m("Upper panel"), BLACK), (m("Lower panel text"), WHITE),
+              (m("Upper panel text"), WHITE)]
+    front_hw = [(m("Lower toggles and STOP REL"), GREY), (m("Upper toggles"), GREY), (m("Lower switch nuts"), GREY),
+                (m("Upper switch nuts"), GREY), (m("Search hat cap"), GREY), (m("Hat bezel and rocker"), GREY)]
+    scene(body + panels + front_hw, n_out, up, os.path.join(HEAD_OUT, "HueyHeadR5_Front.png"),
+          focus=[m("Lower panel"), m("Upper panel")], parallel=True, zoom=1.0)
+    inside = [(m("Lower toggles and STOP REL"), ORANGE), (m("Upper toggles"), ORANGE), (m("Hat tact switches"), YELLOW),
+              (m("HeliSR board"), GREEN), (m("Pro Micro"), BLUE), (m("AS5600 module"), PURPLE),
+              (m("AS5600 chip"), PURPLE)]
+    scene(body + inside, n_out + 0.35 * side + 0.3 * up, up, os.path.join(HEAD_OUT, "HueyHeadR5_Inside.png"),
+          focus=[m("Body")], zoom=1.05)
+    scene(body, n_out - 0.3 * side + 0.55 * up, up, os.path.join(HEAD_OUT, "HueyHeadR5_Body.png"),
+          focus=[m("Body")], zoom=1.15)
+    scene(body + [(m("Pinion"), ORANGE)], n_out, up, os.path.join(HEAD_OUT, "HueyHeadR5_PocketWindow.png"),
+          focus=[m("Body")], parallel=True, zoom=1.25)
+
+
 # ---------------------------------------------------------------------------------------------------- base view
 def base_views(src):
     B = base_items(src)
@@ -794,6 +848,7 @@ if __name__ == "__main__":
     H = head_views(src)
     pinion_view(head_items(src))                      # head_views leaves its parts exploded
     toggle_boxes_view(head_items(src))
+    head_scenes(head_items(src))
     head_chart(H)
     B = base_views(src)
     base_chart(B)
