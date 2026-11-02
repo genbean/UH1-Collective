@@ -9,7 +9,8 @@ axis, toward its head, in the exploded views.
 writes
     ../Base/renders/rev3_exploded.png, rev3_screw_sizes.png
     ../Head/Rev5/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png, HueyHeadR5_ScrewSizes.png,
-    HueyHeadR5_Screws_Panels.png, HueyHeadR5_Screws_Inside.png, HueyHeadR5_Screws_Rear.png, HueyHeadR5_Screws_Collar.png
+    HueyHeadR5_Screws_Panels.png, HueyHeadR5_Screws_Inside.png, HueyHeadR5_Screws_Rear.png, HueyHeadR5_Screws_Collar.png,
+    HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/Rev5/stl/HueyHeadR5-Pinion.stl too)
 
 Re-run it after the GLB is regenerated. Two screws the GLB leaves out are added here: the head's pull-stop seat (M2 x 8,
 STOP_SCREW and MOUNT_FACE in huey_head_r5.py) and the hat's pivot set screw (M3 x 4, Hat/hat_r5.py).
@@ -464,7 +465,7 @@ def head_views(src):
              ("HeliSR board + Pro Micro", "on four 4 mm spacers on the rear wall", ["HeliSR board"]),
              ("AS5600 module", "chip down, slides into its grooves from the front", ["AS5600 module"]),
              ("Magnet shaft + magnet", "down through the web into the pinion's hex", ["Magnet shaft"]),
-             ("Pinion", "up through the neck, sideways into its pocket", ["Pinion"]),
+             ("Pinion", "shoulder down: up through the neck, sideways into its pocket", ["Pinion"]),
              ("Body", "one print: box, neck, tube boss and trigger mount", ["Body"]),
              ("Throttle grip", "with an O-ring in each end of its bore", ["Throttle grip"]),
              ("O-ring", "in the ceiling's groove", ["O-ring ceiling"]),
@@ -494,6 +495,54 @@ def head_views(src):
              os.path.join(HEAD_OUT, "HueyHeadR5_Exploded_Rear.png"), size=(1500, 1300),
              focus=[H["Body"], H["Trigger"], H["pivot"]], zoom=0.95)
     return H
+
+
+PINION_STL = os.path.join(HERE, "..", "Head", "Rev5", "stl", "HueyHeadR5-Pinion.stl")
+PX, PY, SPIN = 5.29 + 26.0 * np.cos(np.radians(15.0)), 18.52 + 26.0 * np.sin(np.radians(15.0)), np.radians(15.0)
+
+
+def pinion_view(H):
+    """Which way up the pinion goes: in the head, shoulder down over the grip's neck, and on the bed, shoulder up (as
+    HueyHeadR5-Pinion.stl is exported). Both seen side-on, square to the line of centres, from a little below/above."""
+    p = H["Pinion"].mesh
+    z0, z1 = p.bounds[0][2], p.bounds[1][2]
+    def zcut(m, za, zb):
+        b = trimesh.creation.box(bounds=[m.bounds[0] - 1, m.bounds[1] + 1])
+        b.vertices[:, 2] = np.where(b.vertices[:, 2] < m.bounds[0][2], za, zb)
+        return m.intersection(b, engine="manifold")
+    g = zcut(H["Throttle grip"].mesh, z0 - 6.0, z1 + 1.5)
+    s = zcut(H["Magnet shaft"].mesh, z0 - 10.0, z1 + 4.0)
+    side = np.array([np.sin(SPIN), -np.cos(SPIN), 0.0])           # square to the line of centres, toward the front
+    toward = np.array([np.cos(SPIN), np.sin(SPIN), 0.0])          # tube -> pinion
+    a_items = [Item("grip", g, H["Throttle grip"].color), Item("Pinion", p, H["Pinion"].color),
+               Item("shaft", s, H["Magnet shaft"].color)]
+    sh = np.array([PX, PY, z0]) + side * 8.7 + np.array([0, 0, 0.3])          # the shoulder, at the root circle
+    tooth = np.array([PX, PY, z1]) + side * 10.4 + np.array([0, 0, -1.5])
+    neck = np.array([5.29, 18.52, z0 - 2.0]) + (toward * np.cos(0.5) + side * np.sin(0.5)) * 16.7   # in view, by the pinion
+    ia, pa = render(a_items, side + np.array([0, 0, -0.3]), (0, 0, 1), size=(900, 700), anchors=[sh, tooth, neck],
+                    focus=[a_items[1]], zoom=0.85)
+    b = trimesh.load(PINION_STL)
+    zb = b.bounds[0][2]
+    bc = b.bounds.mean(0)
+    bed = trimesh.creation.box((34, 34, 1.0)).apply_translation((bc[0], bc[1], zb - 0.5))
+    b_items = [Item("bed", bed, (150, 156, 165)), Item("Pinion", b, H["Pinion"].color)]
+    bt = b.bounds[1][2]
+    sh_b = np.array([bc[0], bc[1], bt - 0.3]) + side * 8.7
+    tooth_b = np.array([bc[0], bc[1], zb + 1.5]) + side * 10.4
+    ib, pb = render(b_items, side + np.array([0, 0, 0.35]), (0, 0, 1), size=(900, 700), anchors=[sh_b, tooth_b],
+                    focus=[b_items[1]], zoom=0.85)
+    img = Image.new("RGB", (ia.size[0] + ib.size[0], max(ia.size[1], ib.size[1])), "white")
+    img.paste(ia, (0, 0))
+    img.paste(ib, (ia.size[0], 0))
+    px = pa + [(x + ia.size[0], y) for x, y in pb]
+    labels = [("In the head: shoulder DOWN", "the plain 0.6 mm band at the bottom face, toward the grip's neck", [0]),
+              ("Full-width teeth", "square to the top face, under the bearing web", [1]),
+              ("Grip's neck", "rises 0.2 mm into the pinion's bottom face at worst: the shoulder clears it", [2]),
+              ("On the bed: shoulder UP", "print it as the STL comes, toothed face down", [3]),
+              ("Toothed face on the bed", "0.3 mm chamfer at the tips for the elephant's foot", [4])]
+    compose(img, px, labels, "Huey head Rev 5: which way up the pinion goes",
+            "Left, in the head beside the grip's gear (seen from the front). Right, as printed. Fitted upside down, its "
+            "teeth would hit the grip's neck.", os.path.join(HEAD_OUT, "HueyHeadR5_Pinion.png"))
 
 
 # ---------------------------------------------------------------------------------------------------- base view
@@ -713,6 +762,7 @@ if __name__ == "__main__":
     pv.OFF_SCREEN = True
     src = load()
     H = head_views(src)
+    pinion_view(head_items(src))                      # head_views leaves its parts exploded
     head_chart(H)
     B = base_views(src)
     base_chart(B)

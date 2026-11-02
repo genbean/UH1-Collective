@@ -127,6 +127,15 @@ Closest clearances:
 
 The screws are Rev 4's, from the same two kits, except the panels' M3 × 16s (see [Screws](#screws)).
 
+### The pinion goes in one way up
+
+The pinion (`HueyHeadR5-Pinion.stl`) is the one part that doesn't print as it does in Rev 4. Rev 4's pinion has its tooth tips chamfered at 45° at both faces, so it fits either way up, but those chamfers leave only 3.2 mm of its 5.6 mm face at the pitch circle and 1.2 mm at the tips. Rev 5's pinion has full-width teeth (5.0 mm at every radius) over a plain 0.6 mm **shoulder** at one face, cut just under the root circle. That shoulder is what clears the grip's neck, which rises 0.2 mm into the pinion's bottom face when the grip is pushed up to the ceiling. The other face has nothing near it.
+
+- **Print it shoulder up**, toothed face on the bed, as the STL comes. The step is then on top and needs no support. The bed face has a 0.3 mm chamfer on the tips for the elephant's foot.
+- **Fit it shoulder down**, toward the grip's neck, when you push it up the neck and sideways into its pocket. Fitted upside down, its teeth hit the grip's neck as the grip slides up into mesh.
+
+![Which way up the pinion goes: shoulder down in the head, shoulder up on the bed](renders/HueyHeadR5_Pinion.png)
+
 ## Screws
 
 Every screw and nut but one is from the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH)) and the HIQTRADEBYJJ set-screw kit ([Amazon B0DG33R714](https://www.amazon.com/dp/B0DG33R714)). The exception is the trigger's pivot, an **M3 × 25 countersunk (ISO 10642 / DIN 7991), bought separately** (the NIULUNBAO M3 set has it): the kits stop at 20 mm. Every M3 and M5 hole a screw threads into is printed with its thread; only the M2 holes are pilots to tap by hand.
@@ -164,6 +173,8 @@ python huey_head_r5.py stl
 python throttle_r5.py ../source/MkII-Grip-bore-relieved-25mm.stl stl
 python check_r5.py
 ```
+
+The exploded views, screw maps and the pinion diagram come from [`../../renders/make_diagrams.py`](../../renders/make_diagrams.py), which reads the collective's assembly GLB. Its pinion was swapped in from `throttle_r5.pinion()` on 2026-11-02. Re-run the script after the GLB changes. `HueyHeadR5_Front`, `_Inside`, `_Body` and `_PocketWindow` were drawn before the pinion changed, and no script for them is in the repo. The shoulder is too small to show in them.
 
 The outline is set by `PANEL_W`, `PANEL_HR`, `PANEL_HL` and `DIAG_U`, and the upper box by `UX0`, `UX1`, `UZ1` and `UY`, at the top of `huey_head_r5.py`. The switch positions are `GOV`, `SEARCH`, `LDG_EXT`, `STOP_REL`, `SL` and `LDG_ON`, and the labels are in `lower_labels()` and `upper_labels()`.
 
