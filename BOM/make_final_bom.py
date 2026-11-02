@@ -267,7 +267,7 @@ PRINTED = [
     ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-Bezel.stl", 1, "Front face down"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "Flat; the magnet shaft presses into its hex"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
     ("Base", "Base/stl/coupons/coupon_trunnion.stl, coupon_bearing_seat.stl, coupon_tube_socket.stl", 1,
      "Fit-test coupons: print first and tune mk3_pivot.py (the socket with the carbon tube)"),
