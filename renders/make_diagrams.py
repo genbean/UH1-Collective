@@ -10,7 +10,8 @@ writes
     ../Base/renders/rev3_exploded.png, rev3_screw_sizes.png
     ../Head/Rev5/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png, HueyHeadR5_ScrewSizes.png,
     HueyHeadR5_Screws_Panels.png, HueyHeadR5_Screws_Inside.png, HueyHeadR5_Screws_Rear.png, HueyHeadR5_Screws_Collar.png,
-    HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/Rev5/stl/HueyHeadR5-Pinion.stl too)
+    HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/Rev5/stl/HueyHeadR5-Pinion.stl too),
+    HueyHeadR5_ToggleBoxes.png, HueyHeadR5_ToggleBoxes_Switches.png (the panels' backs)
 
 Re-run it after the GLB is regenerated. Two screws the GLB leaves out are added here: the head's pull-stop seat (M2 x 8,
 STOP_SCREW and MOUNT_FACE in huey_head_r5.py) and the hat's pivot set screw (M3 x 4, Hat/hat_r5.py).
@@ -545,6 +546,35 @@ def pinion_view(H):
             "teeth would hit the grip's neck.", os.path.join(HEAD_OUT, "HueyHeadR5_Pinion.png"))
 
 
+def toggle_boxes_view(H):
+    """The panels' backs: the 10 mm boxes round the toggles (TOGGLE_BOX_H, TOGGLE_WALLS in huey_head_r5.py), with
+    the toggles dropped in them, from behind."""
+    items = [Item(k, H[k].mesh, (178, 182, 190)) for k in ("Lower panel", "Upper panel")]   # grey: black hides the walls
+    view = tilt_dir((0.3, 1.0, 0.45))                            # from behind, a little to the right and above
+
+    def body(x, z, y0):
+        """An APEM 600H's body (14.65 x 29.7 x 26 mm, lugs straight) behind a panel's back at box y = y0."""
+        m = trimesh.creation.box(bounds=[[x - 7.35, y0, z - 14.85], [x + 7.35, y0 + 26.0, z + 14.85]])
+        m.vertices = np.array([tilt_pt(*v) for v in m.vertices])
+        return Item("toggle", m, (60, 64, 72))
+
+    # dropped down their bushings: a quarter inch on the lower panel (GOV, LDG LT), 2 mm on the upper (SL, LDG LT ON),
+    # where the Pro Micro stops them (box frame (x, z) of each toggle, from huey_head_r5.py)
+    bodies = [body(-22.81, 43.96, 6.35), body(33.39, 43.96, 6.35), body(-6.51, 88.36, 5.0 + 2.0),
+              body(17.09, 88.36, 5.0 + 2.0)]
+    for name, its, sub in (("HueyHeadR5_ToggleBoxes.png", items, "The panels from behind"),
+                           ("HueyHeadR5_ToggleBoxes_Switches.png", items + bodies,
+                            "With the toggles' bodies dropped in: 1/4 in on the lower panel, 2 mm on the upper")):
+        img, _ = render(its, view, tilt_dir((0, 0, 1)), size=(1400, 1200), focus=items, zoom=1.0, crop=True)
+        canvas = Image.new("RGB", (img.size[0], img.size[1] + 96), "white")
+        canvas.paste(img, (0, 96))
+        d = ImageDraw.Draw(canvas)
+        d.text((30, 18), "Huey head Rev 5: 10 mm boxes round the toggles", font=font(30, True), fill=INK)
+        d.text((30, 58), sub, font=font(18), fill=SUB)
+        canvas.save(os.path.join(HEAD_OUT, name), optimize=True)
+        print("wrote", name)
+
+
 # ---------------------------------------------------------------------------------------------------- base view
 def base_views(src):
     B = base_items(src)
@@ -763,6 +793,7 @@ if __name__ == "__main__":
     src = load()
     H = head_views(src)
     pinion_view(head_items(src))                      # head_views leaves its parts exploded
+    toggle_boxes_view(head_items(src))
     head_chart(H)
     B = base_views(src)
     base_chart(B)

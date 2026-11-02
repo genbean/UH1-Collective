@@ -136,6 +136,24 @@ The pinion (`HueyHeadR5-Pinion.stl`) is the one part that doesn't print as it do
 
 ![Which way up the pinion goes: shoulder down in the head, shoulder up on the bed](renders/HueyHeadR5_Pinion.png)
 
+### Boxes round the toggles
+
+Each toggle sits in a box on its panel's back, 10 mm tall (`TOGGLE_BOX_H`). The box's inside is the 15.0 × 30.4 mm recess the bodies already fit. With a box, you can drop a toggle down its bushing until its front nut is flush with the thread's end, and it can't turn as you tighten the nuts.
+
+- **Wall thickness:** each wall is as thick as the head leaves room for, up to 2 mm, 0.25 mm clear of the box walls, the corner columns, the neck's cuts and the Pro Micro (`TOGGLE_WALLS`).
+  - **Lower toggles (GOV, LDG LT):** 0.55 mm at the outer side and the top.
+  - **Upper toggles (SL, LDG LT ON):** 0.35 mm at the outer side and 0.45 mm at the top, only 0.1 mm clear of the upper box's walls. Those walls are thinner than a 0.4 mm nozzle's line. Check that your slicer keeps them: in Bambu Studio, turn on *Detect thin wall*, or use the Arachne wall generator.
+- **How far each toggle drops:**
+  - **Lower toggles:** they drop the full 1/4". Bend LDG LT's lugs: straight, they meet the head about 6.5 mm down.
+  - **Upper toggles:** they drop 2 mm at most. Any lower and their bodies hit the Pro Micro.
+- **Rear nut:** a nut on the bushing behind the panel goes in flats-to-the-long-walls. It fits if it's no more than about 14.6 mm across the flats.
+
+STOP REL no longer has a recess round it: its nut sits on the panel's plug. Behind the plug the head's cut leaves 1.5 mm for the nut (the recess gave 3.3 mm).
+
+![The panels from behind, with the boxes round the toggles](renders/HueyHeadR5_ToggleBoxes.png)
+
+![The same, with the toggles' bodies dropped into the boxes](renders/HueyHeadR5_ToggleBoxes_Switches.png)
+
 ## Screws
 
 Every screw and nut but one is from the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH)) and the HIQTRADEBYJJ set-screw kit ([Amazon B0DG33R714](https://www.amazon.com/dp/B0DG33R714)). The exception is the trigger's pivot, an **M3 × 25 countersunk (ISO 10642 / DIN 7991), bought separately** (the NIULUNBAO M3 set has it): the kits stop at 20 mm. Every M3 and M5 hole a screw threads into is printed with its thread; only the M2 holes are pilots to tap by hand.
