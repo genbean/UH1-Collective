@@ -323,35 +323,37 @@ UPPER_COLUMNS = [(UX0 + 4.5, UZ1 - 4.5), (UX1 - 4.5, UZ1 - 4.5), (UX1 - 4.5, UZ0
 PLUG_H, PLUG_CLR = 1.8, 0.25
 NUT_RELIEF = {"toggle": (15.0, 30.4)}   # the bodies sit against the panel (w x h: a rectangle); STOP REL's nut on the plug
 # A box round each toggle's relief, TOGGLE_BOX_H tall from the panel's back, so a toggle dropped down its bushing (about
-# 1/4", its front nut flush with the thread's end) can't turn as its nuts are tightened. Its walls are as thick as the
-# head leaves room for, up to 2 mm: (left, right, top, bottom), 0.25 mm clear of the box's walls and columns, the neck's
-# cuts and the Pro Micro. LDG LT's bottom wall stops at 1.5 to leave room round STOP REL's nut. The upper toggles'
-# outer and top walls get only 0.1 mm: their boxes sit 0.47 and 0.56 mm from the upper box's walls. The upper
-# toggles drop 2 mm at most: any lower and they hit the Pro Micro.
-TOGGLE_BOX_H = 10.0
-TOGGLE_WALLS = {"GOV": (0.55, 2.0, 0.55, 1.45), "LDG_EXT": (2.0, 0.55, 0.55, 1.5),
-                "SL": (0.35, 1.1, 0.45, 0.55), "LDG_ON": (1.1, 0.35, 0.45, 0.55)}
+# 1/4", its front nut flush with the thread's end) can't turn as its nuts are tightened. Its walls are TOGGLE_WALL
+# thick all round, kept inside the plug's outline (so they clear the box's walls as the plug does) and cut back where
+# they meet a corner column's relief (the columns' 7.2 mm). The upper toggles drop 2 mm at most: any lower and their
+# bodies, lugs straight, hit the Pro Micro.
+TOGGLE_BOX_H, TOGGLE_WALL = 10.0, 2.0
 
 
-def toggle_box(x, z, walls, y0):
-    """Box frame: the walls round a toggle's relief, from the panel's back (y0) back TOGGLE_BOX_H."""
+def toggle_box(x, z, y0, opening, columns):
+    """Box frame: the walls round a toggle's relief, from the panel's back (y0) back TOGGLE_BOX_H, inside the plug's
+    outline (opening, the box's inside) and clear of the panel's corner columns."""
     w, h_ = NUT_RELIEF["toggle"]
-    l, r, t, b = walls
-    ring = rect(x - w / 2 - l, z - h_ / 2 - b, x + w / 2 + r, z + h_ / 2 + t) - rect(x - w / 2, z - h_ / 2, x + w / 2, z + h_ / 2)
+    t = TOGGLE_WALL
+    ring = rect(x - w / 2 - t, z - h_ / 2 - t, x + w / 2 + t, z + h_ / 2 + t) - rect(x - w / 2, z - h_ / 2, x + w / 2, z + h_ / 2)
+    ring = ring ^ opening.offset(-PLUG_CLR, mf.JoinType.Miter)
+    for cx, cz in columns:
+        ring -= circle(7.2, cx, cz)
     return prism(ring, y0 - 0.01, y0 + TOGGLE_BOX_H)
 
 # Switch positions (u, v from the panel's top left), after the user's drawing of the real UH-1 panels, with the user's
 # rules: each panel's two toggles are mirror images about its centre line (the same height, the same distance from each
 # side), and the search hat is centred between the lower two: across the panel and at their height. The lower toggles are 14.4 mm in from the sides (the
 # drawing's 13.4 and 15.4, averaged). The upper ones are 15.7 mm in, the drawing's LDG LT ON: any closer to the side and
-# their bodies hit the panel screws' columns in the corners.
+# their bodies hit the panel screws' columns in the corners. They're centred up and down the upper panel (the drawing
+# had them 19.1 mm under the top, 1.4 mm high), so their boxes (TOGGLE_BOX_H) get 2 mm walls at the top too.
 TOGGLE_IN, UPPER_TOGGLE_IN = 14.4, 15.7
 GOV = panel_uv(TOGGLE_IN, 22.5)
 LDG_EXT = panel_uv(PANEL_W - TOGGLE_IN, 22.5)
 SEARCH = ((GOV[0] + LDG_EXT[0]) / 2, GOV[1])     # midway between the two toggles
 STOP_REL = panel_uv(70.8, 49.9)     # in the ENGINE IDLE ring
-SL = (UX0 + UPPER_TOGGLE_IN, UZ1 - 19.1)
-LDG_ON = (UX1 - UPPER_TOGGLE_IN, UZ1 - 19.1)
+SL = (UX0 + UPPER_TOGGLE_IN, (UZ0 + UZ1) / 2)
+LDG_ON = (UX1 - UPPER_TOGGLE_IN, (UZ0 + UZ1) / 2)
 
 # Rib along the front of the upper box's floor: the upper panel's bottom edge bears on it when the panel is
 # pushed in. Its back face is chamfered at 45 degrees so it prints off the floor.
@@ -1026,7 +1028,7 @@ def lower_panel(front):
     holes = [(x, z, 7.2) for x, z in COLUMNS] + [(*GOV, NUT_RELIEF["toggle"]), (*LDG_EXT, NUT_RELIEF["toggle"]),
                                                (*SEARCH, 2 * HAT_R + 1.0)]   # STOP REL's nut sits on the plug
     p += prism(plug(opening, holes), -0.01, PLUG_H)
-    p += toggle_box(*GOV, TOGGLE_WALLS["GOV"], 0.0) + toggle_box(*LDG_EXT, TOGGLE_WALLS["LDG_EXT"], 0.0)
+    p += toggle_box(*GOV, 0.0, opening, COLUMNS) + toggle_box(*LDG_EXT, 0.0, opening, COLUMNS)
     p -= prism(toggle_cut(*GOV) + toggle_cut(*LDG_EXT) + large_pb_cut(*STOP_REL), -PANEL_T - 1, PLUG_H + 1)
     for x, z in COLUMNS:
         p -= csk(x, z, -PANEL_T, +1, PANEL_CSK)
@@ -1045,7 +1047,7 @@ def upper_panel():
     opening = UPPER_IN.offset(-WALL, mf.JoinType.Miter)
     holes = [(x, z, 7.2) for x, z in UPPER_COLUMNS] + [(*SL, NUT_RELIEF["toggle"]), (*LDG_ON, NUT_RELIEF["toggle"])]
     p += prism(plug(opening, holes), UY - 0.01, UY + PLUG_H)
-    p += toggle_box(*SL, TOGGLE_WALLS["SL"], UY) + toggle_box(*LDG_ON, TOGGLE_WALLS["LDG_ON"], UY)
+    p += toggle_box(*SL, UY, opening, UPPER_COLUMNS) + toggle_box(*LDG_ON, UY, opening, UPPER_COLUMNS)
     p -= prism(toggle_cut(*SL) + toggle_cut(*LDG_ON), UY - PANEL_T - 1, UY + PLUG_H + 1)
     for x, z in UPPER_COLUMNS:
         p -= csk(x, z, UY - PANEL_T, +1, PANEL_CSK)

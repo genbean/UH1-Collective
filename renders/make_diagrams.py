@@ -560,8 +560,8 @@ def toggle_boxes_view(H):
 
     # dropped down their bushings: a quarter inch on the lower panel (GOV, LDG LT), 2 mm on the upper (SL, LDG LT ON),
     # where the Pro Micro stops them (box frame (x, z) of each toggle, from huey_head_r5.py)
-    bodies = [body(-22.81, 43.96, 6.35), body(33.39, 43.96, 6.35), body(-6.51, 88.36, 5.0 + 2.0),
-              body(17.09, 88.36, 5.0 + 2.0)]
+    bodies = [body(-22.81, 43.96, 6.35), body(33.39, 43.96, 6.35), body(-6.51, 86.96, 5.0 + 2.0),
+              body(17.09, 86.96, 5.0 + 2.0)]
     for name, its, sub in (("HueyHeadR5_ToggleBoxes.png", items, "The panels from behind"),
                            ("HueyHeadR5_ToggleBoxes_Switches.png", items + bodies,
                             "With the toggles' bodies dropped in: 1/4 in on the lower panel, 2 mm on the upper")):

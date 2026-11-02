@@ -121,7 +121,7 @@ def lower_panel_new():
     holes = [(x, z, 7.2) for x, z in h.COLUMNS] + [(*h.GOV, h.NUT_RELIEF["toggle"]), (*h.LDG_EXT, h.NUT_RELIEF["toggle"]),
                                                    (*SEARCH, 2 * h.HAT_R + 1.0)]   # STOP REL's nut sits on the plug
     p += prism(h.plug(opening, holes), -0.01, h.PLUG_H)
-    p += h.toggle_box(*h.GOV, h.TOGGLE_WALLS["GOV"], 0.0) + h.toggle_box(*h.LDG_EXT, h.TOGGLE_WALLS["LDG_EXT"], 0.0)
+    p += h.toggle_box(*h.GOV, 0.0, opening, h.COLUMNS) + h.toggle_box(*h.LDG_EXT, 0.0, opening, h.COLUMNS)
     p -= prism(h.toggle_cut(*h.GOV) + h.toggle_cut(*h.LDG_EXT) + h.large_pb_cut(*h.STOP_REL), -h.PANEL_T - 1, h.PLUG_H + 1)
     for x, z in h.COLUMNS:
         p -= h.csk(x, z, -h.PANEL_T, +1, h.PANEL_CSK)

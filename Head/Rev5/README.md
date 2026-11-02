@@ -35,8 +35,8 @@ Positions are from the drawing, measured from each panel's top-left corner (u ac
 | LDG LT FWD / DOWN toggle | 69.6, 22.5 | 70.6, 22.5 | Its mirror image: 14.4 mm in from the right |
 | SEARCH CONT hat | 42.7, 14.2 | 42.5, 22.5 | Centred between the two toggles: midway across, and at their height |
 | STOP REL button (in the ENGINE IDLE ring) | 70.8, 49.9 | 70.8, 49.9 | |
-| SL ON / STOW toggle (upper) | 11.2, 19.1 | 15.7, 19.1 | The LDG LT ON toggle's 15.7 mm from its side, mirrored. Nearer the side, its body hits the corner screws' columns: the bodies are 29.7 mm tall, the box is 36 mm inside, and a column fills each corner |
-| LDG LT ON / OFF toggle (upper) | 39.3, 19.1 | 39.3, 19.1 | |
+| SL ON / STOW toggle (upper) | 11.2, 19.1 | 15.7, 20.5 | The LDG LT ON toggle's 15.7 mm from its side, mirrored. Nearer the side, its body hits the corner screws' columns: the bodies are 29.7 mm tall, the box is 36 mm inside, and a column fills each corner. Centred up and down the 41 mm panel, so the box round it gets 2 mm walls at the top too |
+| LDG LT ON / OFF toggle (upper) | 39.3, 19.1 | 39.3, 20.5 | Centred up and down, as SL |
 
 The labels are laid out as on the real head (the user's photo). Each one belongs to its switch, at a fixed offset from it, so it moves with the switch (`*_LABELS` in `huey_head_r5.py`):
 - **GOV toggle:** GOV stacked, INCR, and RPM stacked, in a row across the top over the switch; DECR under it.
@@ -140,9 +140,7 @@ The pinion (`HueyHeadR5-Pinion.stl`) is the one part that doesn't print as it do
 
 Each toggle sits in a box on its panel's back, 10 mm tall (`TOGGLE_BOX_H`). The box's inside is the 15.0 × 30.4 mm recess the bodies already fit. With a box, you can drop a toggle down its bushing until its front nut is flush with the thread's end, and it can't turn as you tighten the nuts.
 
-- **Wall thickness:** each wall is as thick as the head leaves room for, up to 2 mm, 0.25 mm clear of the box walls, the corner columns, the neck's cuts and the Pro Micro (`TOGGLE_WALLS`).
-  - **Lower toggles (GOV, LDG LT):** 0.55 mm at the outer side and the top.
-  - **Upper toggles (SL, LDG LT ON):** 0.35 mm at the outer side and 0.45 mm at the top, only 0.1 mm clear of the upper box's walls. Those walls are thinner than a 0.4 mm nozzle's line. Check that your slicer keeps them: in Bambu Studio, turn on *Detect thin wall*, or use the Arachne wall generator.
+- **Wall thickness:** 2 mm all round (`TOGGLE_WALL`). The walls stay inside the plug's outline, so they clear the box's walls as the plug does, and they're cut back only where they meet a corner column's 7.2 mm relief. The upper toggles are centred up and down their panel (the drawing had them 1.4 mm high), so their top walls get the full 2 mm too.
 - **How far each toggle drops:**
   - **Lower toggles:** they drop the full 1/4". Bend LDG LT's lugs: straight, they meet the head about 6.5 mm down.
   - **Upper toggles:** they drop 2 mm at most. Any lower and their bodies hit the Pro Micro.
