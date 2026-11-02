@@ -310,22 +310,34 @@ HEX_CLEAR = -0.03                # pinion hex hole over SHAFT_HEX (the shaft's h
                                  # 2026-10-23: the 4.45 shaft is loose in a 4.6 hole and still slightly loose in 4.5
 
 
-PINION_CHAMFER = 2.2             # 45 degrees off the tooth tips at both faces; see pinion()
+PINION_SHOULDER = 0.6            # plain band at the root circle under the teeth, at the bottom face; see pinion()
+PINION_BED_CHAMFER = 0.3         # 45 degrees off the tips at the top face, which prints on the bed (elephant's foot)
 
 
 def pinion():
-    """Teeth the whole way to both faces (no hubs: a hub's step printed badly), with a 45 degree chamfer off the tips at
-    each face. The chamfer is what keeps the pinion clear of the grip's neck: under the grip's gear the neck (r 16.7)
-    reaches inside the pinion's tip circle, and with the grip pushed up to the ceiling (0.5 mm) and the pinion down on its
-    floor (0.2 mm) the neck's shoulder stands 0.2 mm into the pinion's bottom face. A chamfer of 2.0 clears that exactly;
-    2.2 leaves 0.3 mm of margin, and 3.2 of the 5.6 mm of face at the pitch circle. It's the same at both faces, so the
-    pinion goes in either way up, and it prints with no step: a 45 degree chamfer needs no support."""
+    """Full-width teeth over a plain shoulder at the bottom face. What has to clear is the grip's neck: under the grip's
+    gear the neck (r 16.7) reaches inside the pinion's tip circle, and with the grip pushed up to the ceiling (0.5 mm)
+    and the pinion down on its floor (0.2 mm) the neck's shoulder stands 0.2 mm into the pinion's bottom face. So the
+    bottom PINION_SHOULDER is cut down to just under the root circle (r 8.7): 0.4 mm over the neck at worst, and 0.3 mm
+    inside the grip's tips, which run down past it. Nothing reaches the top face (only the web, over it), so the teeth run
+    square to it, 5.0 of the 5.6 mm at every radius (the old 45 degree chamfers at both faces left 3.2 at the pitch circle
+    and 1.2 at the tips). The pinion goes in shoulder down, and prints shoulder up (the STL is turned over for that), so
+    the step is on top and needs no support; the bed face gets a small chamfer for the elephant's foot."""
     z0, z1 = h.PINION_Z
-    g = gear_solid(h.GEAR_M, h.PINION_TEETH, z0, z1, h.PX, h.PY, rot=pinion_phase())
-    ra, c, e = h.GEAR_M * (h.PINION_TEETH + 2) / 2, PINION_CHAMFER, 0.3
-    env = [(0, z0), (ra - c, z0), (ra + e, z0 + c + e), (ra + e, z1 - c - e), (ra - c, z1), (0, z1)]   # (r, z)
+    zs = z0 + PINION_SHOULDER
+    g = gear_solid(h.GEAR_M, h.PINION_TEETH, zs, z1, h.PX, h.PY, rot=pinion_phase())
+    ra, rf, c, e = h.GEAR_M * (h.PINION_TEETH + 2) / 2, h.GEAR_M * (h.PINION_TEETH - 2.5) / 2, PINION_BED_CHAMFER, 0.3
+    env = [(0, zs - 1), (ra + e, zs - 1), (ra + e, z1 - c - e), (ra - c, z1), (0, z1)]   # (r, z)
     g = g.intersect(cq.Workplane("XZ").polyline(env).close().revolve(360, (0, 0, 0), (0, 1, 0)).val().translate(V(h.PX, h.PY, 0)))
+    g = g.fuse(cyl(rf - 0.05, z0, zs + 0.01, h.PX, h.PY))
     return g.cut(hex_prism(h.SHAFT_HEX + HEX_CLEAR, z0 - 1, z1 + 1, h.PX, h.PY)).clean()   # 4.47 hole on the 4.45 hex: a snug push fit
+
+
+def pinion_print():
+    """pinion() turned over about its own middle, shoulder up, for printing."""
+    z0, z1 = h.PINION_Z
+    zm = (z0 + z1) / 2
+    return pinion().rotate(V(h.PX, h.PY, zm), V(h.PX + 1, h.PY, zm), 180)
 
 
 MAGNET_BORE = 4.2                # the magnet is about 4 mm. LOCKED IN: 4.2 fits, printed 2026-10-24 (4.0 printed too small; 4.6 was for a 5 mm magnet)
@@ -365,7 +377,7 @@ if __name__ == "__main__":
     src, out = sys.argv[1:3]
     os.makedirs(os.path.join(out, "ref"), exist_ok=True)
     parts = {"HueyHeadR5-ThrottleGrip": grip(src), "HueyHeadR5-FrictionCollar": to_mesh(friction_collar()),
-             "HueyHeadR5-Pinion": to_mesh(pinion()), "HueyHeadR5-MagnetShaft": to_mesh(magnet_shaft()),
+             "HueyHeadR5-Pinion": to_mesh(pinion_print()), "HueyHeadR5-MagnetShaft": to_mesh(magnet_shaft()),
              "HueyHeadR5-GripBearingCoupons": T(bearing_coupons()), "HueyHeadR5-ORingCoupon": T(oring_coupon())}
     for name, m in parts.items():
         m.export(os.path.join(out, name + ".stl"))
