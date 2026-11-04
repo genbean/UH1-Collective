@@ -147,9 +147,10 @@ PAD_X = (-52.0, -40.0)                           # clear of the hose-clamp groov
 PAD_DY = (13.5, 20.0)                            # |y - SOCK_Y|: clear of the 25.4 mm tube bore
 PAD_Z = -16.0                                    # pad underside at 0 deg = the pillars' top
 # Each pad lands on a pillar of exactly its own footprint (x PAD_X, |y - SOCK_Y| PAD_DY), blended into the tower beside it:
-# knob side, the pillar runs straight on into the friction-knob tower (2 mm away in y); sensor side, its plan view is the
-# hull of the pillar and a pad-wide stretch of the sensor-side pillow block's front face, from its inner corner
-DSTOP_TOWER_Y = (m.BRG_Y0, m.BRG_Y0 + PAD_DY[1] - PAD_DY[0])   # sensor side: where the blend meets the pillow block's front face, as wide as the pad
+# knob side, the pillar runs straight on into the friction-knob tower (2 mm away in y); sensor side, the pillar's footprint
+# is swept back at 45 deg in plan (+x, -y) until it lies inside the sensor-side pillow block, so the blend's two sloping
+# faces are parallel, at the frame's 45 deg like every other gusset
+DSTOP_SWEEP = -m.BLOCK_HW + 1.0 - PAD_X[0]       # sweep length along x and y: the swept pillar ends 1 mm inside the block's front face
 CAP_NUT_Z = -8.3                                 # pillow-block cap screws: the nut's top face (the M4 x 20 ends at -12)
 m.FN_NUT_Z = CAP_NUT_Z                           # the friction knob's M5 nut sits as deep, so its slot's roof is thick (Rev 1: -3.2)
 m.KNOB_BOLT = (25.0, 3.5)                        # ... which takes an M5 x 25 hex bolt (it ended at -7.0 as an M5 x 16): tip at -16
@@ -165,10 +166,10 @@ PED_Y = (-m.BRG_Y0 - 1.0, USTOP_Y[1] + 2.0)      # pedestal: into the sensor-sid
 # corner gusset, hinge lugs to the knob-side pillow block (plan view, 45 deg): stops 6.5 mm short of the desk screw at
 # (PLATE_X1 - 8, PLATE_HW - 8), room for its head
 LUG_GUSSET = 78.8                                # its sloping face is x + y = LUG_GUSSET
-# inside-corner gussets on the knob side (plan view triangles): the knob-side pillow block's inner face (y = BRG_Y0) to the
-# hinge-lug web (+x) and to the friction-knob tower (-x), each from y = CG_Y on the web / tower to CG_X on the block's face.
-# Cut clear of the hub and drum (CG_CLR_R round the pivot) and kept under the shoe (CG_TOP)
-CG_Y, CG_X = 14.0, 26.0
+# inside-corner gussets on the knob side: the knob-side pillow block's inner face (y = BRG_Y0) to the hinge-lug web (+x)
+# and to the friction-knob tower (-x). Mirror images in plan: 45 deg right triangles, CG_LEG along the wall and along the
+# block. Cut clear of the hub and drum (CG_CLR_R round the pivot) and kept under the shoe (CG_TOP)
+CG_LEG = 16.0
 CG_CLR_R = HUB_R + 3.0
 CG_TOP = {1: -14.0, -1: -2.0}                     # +x: level with the lug web; -x: 1 mm under the knob tower's top
 
@@ -285,9 +286,8 @@ def down_stops():
     yi, yo = Y0 + PAD_DY[0], Y0 + PAD_DY[1]                                    # knob side: pad's inner and outer edges
     knob = box(x0, x1, yi, m.SHOE_Y0 + 0.5, Z_PLATE - 0.1, PAD_Z)              # pillar, on into the knob tower
     yi, yo = Y0 - PAD_DY[0], Y0 - PAD_DY[1]                                    # sensor side
-    xt = -m.BLOCK_HW + 1.0                                                     # 1 mm into the pillow block
-    t0, t1 = -DSTOP_TOWER_Y[0], -DSTOP_TOWER_Y[1]
-    sensor = prism([(x0, yi), (x1, yi), (xt, t0), (xt, t1), (-m.BLOCK_HW, t1), (x0, yo)])
+    d = DSTOP_SWEEP                                                            # pillar swept at 45 deg into the pillow block
+    sensor = prism([(x0, yi), (x1, yi), (x1 + d, yi - d), (x1 + d, yo - d), (x0 + d, yo - d), (x0, yo)])
     return [knob, sensor]
 
 
@@ -295,10 +295,11 @@ def corner_gussets():
     """the two inside corners between the knob-side pillow block and the hinge-lug web / friction-knob tower"""
     out = []
     for sx, x_wall in ((1, 40.0), (-1, -36.0)):                                # the lug web's and the knob tower's inner faces
-        pts = [(x_wall + sx * 0.5, CG_Y), (x_wall + sx * 0.5, m.BRG_Y0 + 0.5), (sx * CG_X, m.BRG_Y0 + 0.5)]
+        xw, yb = x_wall + sx * 0.5, m.BRG_Y0 + 0.5                             # 0.5 mm into the wall and the block
+        pts = [(xw, yb - CG_LEG - 0.5), (xw, yb), (xw - sx * (CG_LEG + 0.5), yb)]
         g = (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1).polyline(pts).close()
              .extrude(CG_TOP[sx] - Z_PLATE + 0.1).val())
-        out.append(g.cut(cyl(CG_CLR_R, (0, CG_Y - 1, 0), (0, m.BRG_Y0 + 1, 0))))
+        out.append(g.cut(cyl(CG_CLR_R, (0, m.BRG_Y0 - CG_LEG - 1, 0), (0, m.BRG_Y0 + 1, 0))))
     return out
 
 

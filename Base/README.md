@@ -192,7 +192,7 @@ The lever is two prints, `lever_upper.stl` and `lever_lower.stl`, split at z = 0
 The down-stop is fixed at 0°, with nothing to adjust. Under each of the lever's two pads, either side of the strut, a pillar stands on the plate with exactly the pad's footprint: 12 × 6.5 mm, 13.5 to 20 mm off the strut's centre line. Its flat top is at z = −16 mm, 34 mm up from the plate, where the pad's underside sits with the tube level. Each pillar is blended into the tower beside it, so it prints as one piece with that tower:
 
 - **Knob side:** the friction-knob tower is 2 mm away, so the pillar just carries straight on into it, still 12 mm deep. It stays below the knob's M5 nut slot and clear of the bolt.
-- **Sensor side:** in plan, the pillar tapers back into the front face of the sensor-side pillow block. The blend is as wide as the pad where it meets the block, from the block's inner corner outward, and runs the pillar's full height. It stays below the cap screw's nut slot, so that nut still slides in from the front, and clear of the corner desk screw.
+- **Sensor side:** in plan, the pillar's footprint is swept back at 45° into the sensor-side pillow block, 15.5 mm along x and y, so the blend's two sloping faces are parallel and keep the pad's width. 45° is the angle of every other gusset on the frame. The blend runs the pillar's full height, and its inner face stays 4 mm or more clear of the hub. It stays below the cap screw's nut slot, so that nut still slides in from the front, and clear of the corner desk screw.
 
 The pads are 12 × 6.5 mm; with the chamfers on both, each lands on its pillar over about 52 mm². As the tube lifts they swing up and forward, away from the pillars. Earlier versions of Rev 3 had a post on each side with an M4 × 16 screw, head up, to set the height. (Rev 1 had one post under the socket boss, right where the strut now runs.)
 
@@ -200,7 +200,7 @@ The pads are 12 × 6.5 mm; with the chamfers on both, each lands on its pillar o
 
 ![The frame from above: corner gussets on the knob-side pillow block (left), down-stop pillars (bottom)](renders/rev3_frame_plan.png)
 
-The knob-side pillow block's inner face has two triangular gussets, one into each of the walls that meet it. Toward the back, one runs to the hinge-lug web, as high as the web (z = −14). At the front, one runs to the friction-knob tower, up to 1 mm under the tower's top. In plan each runs from 14 mm off the centre line on the wall to 26 mm off centre on the block's face. Both are cut away in a 33 mm radius round the pivot, so they stay 3 mm clear of the hub and the friction drum and below the shoe.
+The knob-side pillow block's inner face has two triangular gussets, one into each of the walls that meet it. Toward the back, one runs to the hinge-lug web, as high as the web (z = −14). At the front, one runs to the friction-knob tower, up to 1 mm under the tower's top. The two are mirror images: 45° right triangles in plan, with 16 mm legs along the wall and along the block's face. Both are cut away in a 33 mm radius round the pivot, so they stay 3 mm clear of the hub and the friction drum and below the shoe.
 
 ## Hinge-lug gusset
 
