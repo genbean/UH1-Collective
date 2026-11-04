@@ -4,9 +4,10 @@ The collective's pivot base. The lever runs on two 6006-2RS bearings and is prin
 
 A small gas strut, centred under the tube and the hub, holds the lever up. Its lower end is bolted into a gusseted clevis on the base, just ahead of the pivot. Its upper end sits on a collar clamped to the tube. Rev 1 balanced the lever with a ballast bucket and about a kilogram of ballast, and Rev 2 with a clock spring.
 
-Rev 3 also changes four other things from Rev 1:
+Rev 3 also changes five other things from Rev 1:
 - **Tube:** the whole 500 mm carbon tube, uncut (470 mm, plus the 12.7 mm the head's boss takes, plus 17.3 mm down in the socket).
 - **Up-stop:** a boss on the back of the lever lands on a pedestal on the frame at 32°, instead of Rev 1's adjustable quadrant and striker.
+- **Down-stop:** fixed at 0°: the lever's pads land on two solid blocks on the frame, with no screws to set.
 - **Lever:** the hub is 60 mm across all the way.
 - **Pivot height:** 58 mm above the desk, on an 8 mm (5/16 in) base plate.
 
@@ -186,7 +187,14 @@ The lever is two prints, `lever_upper.stl` and `lever_lower.stl`, split at z = 0
 
 ## Down-stop
 
-Two posts stand either side of the strut, 16.75 mm off its centre line. In each post an M4 × 16 countersunk screw stands head up: an M4 nut pressed into a pocket in the post's top takes its thread, and a second nut on top locks the height. The flat top of the head stops one of the lever's pads, so the screws can level the tube at the bottom of travel. (Rev 1 had one post under the socket boss, right where the strut now runs.)
+![The down-stop blocks at 0°, the sensor-side one joined to the pillow block](renders/rev3_downstop.png)
+
+The down-stop is fixed at 0°, with nothing to adjust. Two solid blocks stand on the plate either side of the strut, under the lever's two pads. Their flat tops are at z = −16 mm, 34 mm up from the plate, where the pads' undersides sit with the tube level. Each block is 15.5 mm deep (x = −52 to −36.5) and runs sideways from 13.5 mm off the strut's centre line into the tower beside it, so it is printed as one piece with that tower:
+
+- **Knob side:** the block runs into the friction-knob tower (2 mm overlap). It stays below the knob's M5 nut slot and clear of the bolt.
+- **Sensor side:** the block overlaps the front corner of the sensor-side pillow block by 2.5 mm. It stays below the cap screw's nut slot, so that nut still slides in from the front, and 6.8 mm from the centre of the corner desk screw.
+
+The pads are 12 × 6.5 mm; with the chamfers on both, each lands on its block over about 52 mm². As the tube lifts they swing up and forward, away from the blocks. Earlier versions of Rev 3 had a post on each side with an M4 × 16 screw, head up, to set the height. (Rev 1 had one post under the socket boss, right where the strut now runs.)
 
 ## Hinge-lug gusset
 
@@ -240,7 +248,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 
 ## Printing
 
-- **Frame:** prints plate-down. It carries the gusseted anchor clevis, its walls back to the stop pedestal, the pedestal itself, the two down-stop posts and the hinge-lug gusset, all built straight up from the plate. The clevis screw hole is horizontal.
+- **Frame:** prints plate-down. It carries the gusseted anchor clevis, its walls back to the stop pedestal, the pedestal itself, the two down-stop blocks and the hinge-lug gusset, all built straight up from the plate. The clevis screw hole is horizontal.
 - **Lever halves:** print on their joint faces, with no supports (see [Split lever](#split-lever)).
   - **Lower half:** the stop block and the down-stop pads stand on the bed with the joint face. The block's back face leans about 32° from vertical, within normal overhang limits.
   - **Upper half:** the stop wedge sits on the bed at the back of the hub, with its sloping face leaning in toward the hub.
@@ -251,7 +259,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 
 ## Assembly
 
-1. **Frame:** tap the eight M3 cover holes, in the pillow blocks and the caps, 11 mm deep. Press an M4 nut into the pocket in each down-stop post's top, and slide an M4 nut into each of the four slots in the pillow blocks' front and back faces (the knob-side block's front one opens on the tower gusset's sloping face).
+1. **Frame:** tap the eight M3 cover holes, in the pillow blocks and the caps, 11 mm deep. Slide an M4 nut into each of the four slots in the pillow blocks' front and back faces (the knob-side block's front one opens on the tower gusset's sloping face).
 2. **Lever:** press the four M4 nuts into the lower half's pockets, lay the USB cable and the sensor lead into the lower half, close the upper half and fit the four M4 cap screws (all M4 × 40; see [Split lever](#split-lever)). Press the bearings onto the trunnions.
 3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, press the M5 × 25 hex bolt's head into the knob's hex pocket, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
 4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
@@ -259,8 +267,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
 7. **Strut, collar end:** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
 8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 117 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
-9. **Down-stops:** screw the M4 × 16s, head up, through a lock nut into the nuts in the posts. Set them so the tube is level at the bottom, then lock the nuts.
-10. Balance it as above.
+9. Balance it as above. The down-stop is fixed, so there's nothing to set.
 
 ## Screws
 
@@ -276,7 +283,6 @@ Every screw and nut is from three kits and one pack: the AvrestYPT countersunk k
 | Shoe hinge | M4 × 20 countersunk, head in the sensor-side lug | M4 nut in the knob-side lug's pocket | 1 |
 | Strut eyes | M4 × 16 countersunk, head on the knob side | M4 nut in the far cheek's pocket | 2 |
 | Strut collar clamp | M4 × 12 countersunk, head 2 mm into the sensor-side ear | M4 nut in the other ear's pocket | 2 |
-| Down-stops | M4 × 16 countersunk, head up | M4 nut in the post's top pocket, plus an M4 lock nut | 2 |
 
 Every screw and nut to scale, to sort them before you start (the ruler is 50 mm):
 
@@ -318,4 +324,5 @@ The screw lengths, the felt and the cables are sized from the CAD. The complete 
 - The balance figures come from an estimate of the Huey head (368 g), on the 470 mm tube, with the carbon tube at about 0.12 g per mm. That gives a forward moment of 195 g·m. The figures include the collar and half the strut's weight, about 55 g, which hang on the tube.
 - Gas struts have seal friction, and some are oil-damped. Neither figure is published. Expect a little built-in friction, and some drag if you move the lever fast.
 - Gas strut force changes about 3 % per 10 °C and fades slowly over the years. The collar or a few grams of ballast correct it.
+- The fixed down-stop was checked the same way: the lever and frame don't overlap anywhere from 0° to 32°, and lowered 0.05 mm the pads overlap both blocks, so at 0° they rest on them. Every other render here was drawn with the earlier adjustable down-stop posts and still shows them.
 - The interference check covers the strut, collar, lever, frame and stops at 0°, 8°, 16°, 24°, 31.5° and 32°, with the strut's tabs in both clevises. It also checks the frame against the shoe, felt, caps, covers, bearings and bolts. It's clean. The lever's stop block first touches the pedestal at 32.00°, and the upper half's wedge never reaches the frame. The lever halves have no material inside the tube bore.
