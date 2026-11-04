@@ -208,14 +208,12 @@ def base_items(src):
     t.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, (0, 1, 0)))
     B["tube"] = Item("tube", t.apply_translation((-131.35, -9.0, 0)), src["carbon_tube"][1])
     hw = pieces(src["hardware"][0])
-    cap_s, stop_s, cover_s, other = [], [], [], []
+    cap_s, cover_s = [], []
     for q in hw:
         L = q.extents.max()
         c = q.centroid
         if abs(L - 25.0) < 0.5:
             cover_s.append(screw("M3 x 25", q, RED, "M3x25"))
-        elif abs(L - 16.0) < 0.5:
-            stop_s.append(screw("M4 x 16", q, RED, "M4x16"))
         elif abs(L - 20.0) < 0.5 and q.extents[2] > 19:
             cap_s.append(screw("M4 x 20", q, RED, "M4x20"))
         elif abs(L - 20.0) < 0.5:
@@ -224,7 +222,7 @@ def base_items(src):
             B["knob bolt"] = screw("M5 x 25 hex", q, RED, "M5x25hex")
         else:
             B["plug screw"] = screw("M2 x 12", q, RED, "M2x12")
-    B["cap screws"], B["downstop screws"], B["cover screws"] = cap_s, stop_s, cover_s
+    B["cap screws"], B["cover screws"] = cap_s, cover_s
     B["lever screws"] = [screw("M4 x 40", q, RED, "M4x40shcs") for q in pieces(src["lever_screws"][0])]
     pins = pieces(src["strut_pins"][0])
     B["strut screws"] = [screw("M4 x 16", q, RED, "M4x16") for q in pins if q.extents.max() > 14]
@@ -669,14 +667,13 @@ def base_views(src):
     mv(["knob_spring"], (0, 0, 16))
     pull([B["knob bolt"]], (0, 0, 32), 0)
     pull([B["hinge screw"]], (0, 0, 0), 40)
-    pull(B["downstop screws"], (0, 0, 0), 22)
     for it in B["strut screws"]:                      # the anchor's screw stays with the frame, the eye's with the collar
         if it.head[0] > -60:
             pull([it], (0, 0, 0), 30)
         else:
             pull([it], L + (-90, 0, 0), 30)
 
-    parts = [("Frame", "pillow blocks, knob tower, anchor clevis, stop pedestal, down-stop posts", ["frame"]),
+    parts = [("Frame", "pillow blocks, knob tower, anchor clevis, stop pedestal, down-stop pillars", ["frame"]),
              ("Lever, lower half", "four M4 nuts in its pockets; the cables lie in its channels", ["lever_lower"]),
              ("Lever, upper half", "", ["lever_upper"]),
              ("6006-2RS bearings  (x2)", "pressed onto the trunnions", ["bearing_outer-1", "bearing_outer1"]),
@@ -695,7 +692,7 @@ def base_views(src):
               ("M3 x 25 countersunk  (x8)", "side covers", B["cover screws"]),
               ("M5 x 25 hex bolt (bought)", "knob", [B["knob bolt"]]),
               ("M4 x 20 countersunk", "shoe hinge", [B["hinge screw"]]),
-              ("M4 x 16 countersunk  (x4)", "strut eyes and down-stops", B["strut screws"] + B["downstop screws"]),
+              ("M4 x 16 countersunk  (x2)", "strut eyes", B["strut screws"]),
               ("M4 x 12 countersunk  (x2)", "strut collar clamp", B["collar screws"]),
               ("M2 x 12 countersunk", "cable plug", [B["plug screw"]])]
     groups = [(t, s, [B[k] for k in ks]) for t, s, ks in parts] + screws
@@ -827,15 +824,14 @@ def base_chart(B):
              "The side covers, into M3 threads tapped 11 mm deep in the blocks and caps (NIULUNBAO M3 set)."),
             (screw_tile("csk", 4, 20), "M4 x 20 countersunk", 5,
              "The pillow-block caps (4), into nuts slid into the blocks; the shoe's hinge (1)."),
-            (screw_tile("csk", 4, 16), "M4 x 16 countersunk", 4,
-             "The strut's two eyes (into nuts in the far cheeks) and the two down-stops (head up, with lock nuts)."),
+            (screw_tile("csk", 4, 16), "M4 x 16 countersunk", 2,
+             "The strut's two eyes, into nuts in the far cheeks."),
             (screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the "
              "other ear."),
             (screw_tile("csk", 2, 12), "M2 x 12 countersunk", 1,
              "The cable plug, up from under the cable cover's rim into a thread tapped M2 in the plug."),
-            (nut_tile(7.0, 3.2, 4.0), "M4 nut", 15,
-             "Lever (4), caps (4), shoe hinge (1), strut eyes (2), collar clamp (2), down-stop posts (2); plus 2 M4 "
-             "lock nuts on the down-stops."),
+            (nut_tile(7.0, 3.2, 4.0), "M4 nut", 13,
+             "Lever (4), caps (4), shoe hinge (1), strut eyes (2), collar clamp (2)."),
             (nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the knob tower, slid in from the front.")]
     chart(rows, "MkIII base Rev 3: every screw, to scale",
           "Countersunk screws and nuts: AvrestYPT kit, except where named.",

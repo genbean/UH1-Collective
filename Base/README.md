@@ -38,6 +38,12 @@ python mk3_rev3.py --curve
 That prints the balance table and redraws `renders/strut_balance.png`.
 
 ```bash
+python make_renders_r3.py
+```
+
+That rebuilds `renders/MkIII_Rev3_Assembly.glb` and `../renders/HeliCollective_Assembly.glb` from the STLs, and redraws the base renders here and the collective's pictures in `../renders`. It needs CadQuery too, for the strut at 32°. Run `../renders/make_diagrams.py` after it for the exploded views and screw-size charts.
+
+```bash
 python mk3_pivot.py
 ```
 
@@ -216,6 +222,8 @@ Its sloping face stops 6.5 mm from the centre of the desk screw in that corner, 
 
 ## Friction knob
 
+The knob is 20 mm across, centred at x = −47. (Rev 1's was 28 mm at x = −45.) At 28 mm its rim reached 8 mm off the centre line. From about 8° up, the knob-side down-stop pad and the socket boss swung into it, and it also overlapped the shoe where the shoe curves up over the drum. Now it clears the pad by 1 mm, and it clears the shoe by 1 mm even screwed 1 mm further down. The shoe's tab keeps 1.7 mm of plastic in front of the spring's recess.
+
 An M5 × 25 hex-head bolt (ISO 4017 / DIN 933, 8 mm across flats), its head in a hex pocket moulded into the printed knob (`stl/friction_knob.stl`), runs down through the spring and the shoe's front tab into an M5 nut. The nut slides into a slot in the tower from the front, at the same depth as the pillow-block caps' nuts (its top face 8.3 mm below the pivot axis), so the plastic over it is thick enough to take the spring's load. The bolt's tip ends 3.7 mm past the nut. The spring sits in a 2 mm recess in the shoe's tab, so it is still 6.5 mm long when fitted. Turning the knob screws it down and loads the spring.
 
 Press the bolt's head into the pocket from the top: the hex walls turn it with the knob, so nothing has to be glued, and a spanner or socket still reaches the head through the open top. The spring pushes the knob up against the head. The bolt isn't in the screw kits (they have only countersunk heads): buy an M5 × 25 hex-head bolt, zinc or stainless, from any hardware store.
@@ -332,5 +340,14 @@ The screw lengths, the felt and the cables are sized from the CAD. The complete 
 - The balance figures come from an estimate of the Huey head (368 g), on the 470 mm tube, with the carbon tube at about 0.12 g per mm. That gives a forward moment of 195 g·m. The figures include the collar and half the strut's weight, about 55 g, which hang on the tube.
 - Gas struts have seal friction, and some are oil-damped. Neither figure is published. Expect a little built-in friction, and some drag if you move the lever fast.
 - Gas strut force changes about 3 % per 10 °C and fades slowly over the years. The collar or a few grams of ballast correct it.
-- The fixed down-stop pillars and the corner gussets were checked the same way: the lever and frame don't overlap anywhere from 0° to 32°, the shoe and felt clear the gussets, and lowered 0.05 mm the pads overlap both pillars, so at 0° they rest on them. Every other render here was drawn with the earlier adjustable down-stop posts, before the corner gussets, and still shows them.
-- The interference check covers the strut, collar, lever, frame and stops at 0°, 8°, 16°, 24°, 31.5° and 32°, with the strut's tabs in both clevises. It also checks the frame against the shoe, felt, caps, covers, bearings and bolts. It's clean. The lever's stop block first touches the pedestal at 32.00°, and the upper half's wedge never reaches the frame. The lever halves have no material inside the tube bore.
+- The interference check covers every pair of parts at 0°, 8°, 16°, 24°, 31.5° and 32°: the lever, tube, hose clamp, lever screws, sensor carrier and board turn about the pivot, and the collar, strut and pins are rebuilt at each angle, with the strut's tabs in both clevises. It's clean. The only overlaps are intended:
+  - the bearings' inner races pressed onto the trunnions;
+  - screws in their tapped holes;
+  - the spring's ends in their seats;
+  - the hose clamp in its groove;
+  - the felt on the shoe;
+  - the USB cable under the cable plug, which grips it;
+  - the sensor wires in their channel.
+
+  The bearings' inner races also show a few mm³ against their seals at some angles. That's only the faceted meshes turning against each other.
+- At 0° both down-stop pads rest on their pillars: lowered 0.05 mm, the lever overlaps both. The lever's stop block first touches the pedestal at 32.00°, and the upper half's wedge never reaches the frame. The lever halves have no material inside the tube bore. The lever's stop block first touches the pedestal at 32.00°, and the upper half's wedge never reaches the frame. The lever halves have no material inside the tube bore.

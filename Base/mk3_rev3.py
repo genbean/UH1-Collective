@@ -154,6 +154,12 @@ DSTOP_SWEEP = -m.BLOCK_HW + 1.0 - PAD_X[0]       # sweep length along x and y: t
 CAP_NUT_Z = -8.3                                 # pillow-block cap screws: the nut's top face (the M4 x 20 ends at -12)
 m.FN_NUT_Z = CAP_NUT_Z                           # the friction knob's M5 nut sits as deep, so its slot's roof is thick (Rev 1: -3.2)
 m.KNOB_BOLT = (25.0, 3.5)                        # ... which takes an M5 x 25 hex bolt (it ended at -7.0 as an M5 x 16): tip at -16
+# friction knob (Rev 1: 28 mm across at x = -45). At 28 its rim reached y = 8, so from 8 deg up the knob-side down-stop
+# pad and the socket boss swung into it, and at the back it overlapped the shoe's arc (outer radius 37). At 20 mm and
+# moved 2 mm forward it spans y 12..32, 1 mm clear of the pad (y 11), and x -57..-37, 1 mm clear of the shoe's arc with
+# the knob screwed 1 mm further down. The shoe's spring seat keeps 1.7 mm of tab in front of it
+m.KNOB_D = 20.0
+m.KNOB_X = -47.0
 
 # up-stop: boss on the back of the hub's underside, landing flat on a frame pedestal at STOP_DEG
 STOP_DEG = 32.0
