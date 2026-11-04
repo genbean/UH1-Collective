@@ -219,7 +219,7 @@ def base_items(src):
         elif abs(L - 20.0) < 0.5:
             B["hinge screw"] = screw("M4 x 20", q, RED, "M4x20")
         elif L > 26:
-            B["knob bolt"] = screw("M5 x 25 hex", q, RED, "M5x25hex")
+            B["knob bolt"] = screw("M5 x 30 hex", q, RED, "M5x30hex")
         else:
             B["plug screw"] = screw("M2 x 12", q, RED, "M2x12")
     B["cap screws"], B["cover screws"] = cap_s, cover_s
@@ -681,7 +681,7 @@ def base_views(src):
              ("Sensor cover", "with the magnet", ["cover_sensor"]),
              ("Cable cover + cable plug", "", ["cover_cable"]),
              ("Sensor carrier + AS5600", "plugs into the trunnion's bore", ["sensor_carrier"]),
-             ("Friction knob", "spring under it; the M5 bolt's head in its hex pocket", ["friction_knob"]),
+             ("Friction knob", "the MkII knob, M5 pocket; spring under it, the M5 bolt's head on its floor", ["friction_knob"]),
              ("Shoe + felt", "hinged on the frame's lugs", ["shoe", "felt"]),
              ("Gas strut", "X AUTOHAUX 6 in, 45 N", ["gas_strut"]),
              ("Strut collar", "clamped on the tube", ["strut_collar"]),
@@ -690,7 +690,7 @@ def base_views(src):
     screws = [("M4 x 40 socket head cap  (x4)", "lever halves", B["lever screws"]),
               ("M4 x 20 countersunk  (x4)", "caps", B["cap screws"]),
               ("M3 x 25 countersunk  (x8)", "side covers", B["cover screws"]),
-              ("M5 x 25 hex bolt (bought)", "knob", [B["knob bolt"]]),
+              ("M5 x 30 hex bolt (bought)", "knob", [B["knob bolt"]]),
               ("M4 x 20 countersunk", "shoe hinge", [B["hinge screw"]]),
               ("M4 x 16 countersunk  (x2)", "strut eyes", B["strut screws"]),
               ("M4 x 12 countersunk  (x2)", "strut collar clamp", B["collar screws"]),
@@ -818,7 +818,7 @@ def head_chart(H):
 def base_chart(B):
     rows = [(screw_tile("shcs", 4, 40), "M4 x 40 socket head cap", 4,
              "The lever halves, from the top, into M4 nuts in the lower half (HELIFOUNER M4 x 30-50 kit)."),
-            (screw_tile("hex", 5, 25), "M5 x 25 hex bolt (bought)", 1,
+            (screw_tile("hex", 5, 30), "M5 x 30 hex bolt (bought)", 1,
              "The friction knob: head in the knob's hex pocket, into an M5 nut in the knob tower."),
             (screw_tile("csk", 3, 25), "M3 x 25 countersunk", 8,
              "The side covers, into M3 threads tapped 11 mm deep in the blocks and caps (NIULUNBAO M3 set)."),

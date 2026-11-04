@@ -320,7 +320,7 @@ def screw_views(src):
     labelled(P, [("M4 socket head cap  (x4)", "lever halves, from the top: x 40; M4 nuts in the lower half", lever),
                  ("M4 x 20 countersunk  (x4)", "pillow-block caps, from the top; each into an M4 nut slid into a slot in "
                   "the block's front or back face", caps),
-                 ("M5 x 25 hex bolt (bought)", "friction knob: its head presses into the knob's hex pocket; ends in the "
+                 ("M5 x 30 hex bolt (bought)", "friction knob: its head sits in the knob's hex pocket, on its floor; ends in the "
                   "M5 nut", [knob]),
                  ("M4 nut  (x2)", "strut collar clamp: +y ear", collar_nuts)],
              (-0.5, 0.55, 1.0), "MkIII base Rev 3 screws: from above", "rev3_screws_top.png",

@@ -190,9 +190,10 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
     kit("Cable plug", 1, "M2 x 12 countersunk screw", "Up from under the cable cover's rim, through a clearance hole, into an "
         "M2 thread tapped in the plug (1.6 mm pilot): pulls the plug that closes the cable's slot down onto the cover's "
         "shoulders. Length from the CAD"),
-    any_("Friction knob", 1, "M5 x 25 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
-         "have only countersunk heads): any hardware store. Its head presses into the hex pocket moulded into the printed "
-         "knob (Base/stl/friction_knob.stl), so the knob turns it; it goes through the spring and the shoe into the M5 nut",
+    any_("Friction knob", 1, "M5 x 30 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
+         "have only countersunk heads): any hardware store. Its head sits on the floor of the hex pocket in the printed "
+         "knob (Base/stl/friction_knob.stl, the MkII knob with an M5 pocket), so the knob turns it; it goes through the "
+         "spring and the shoe into the M5 nut",
          "Base/README.md, Friction knob", CHECK),
     kit("Friction knob", 1, "M5 hex nut", "Slid into the knob tower's slot from the front; the friction bolt threads into it"),
     amz("Friction knob", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon", "B09FF6VQ55",
@@ -296,7 +297,8 @@ PRINTED = [
     ("Base", "Base/stl/sensor_carrier.stl", 1, ""),
     ("Base", "Base/stl/shoe.stl", 1, ""),
     ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end"),
-    ("Base", "Base/stl/friction_knob.stl", 1, "Top face down; the M5 x 25 hex bolt's head presses into its hex pocket"),
+    ("Base", "Base/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket. Floor down, pocket open at the top; "
+     "the M5 x 30 hex bolt's head sits on the floor"),
 ]
 DROPPED = [
     ("HeliSR Rev 3.0 bare PCBs (OSH Park, 3 boards, $10.20)", 3, "Bought 2026-10-21. Rev 4.0 replaces the board: it reads "
@@ -316,8 +318,6 @@ DROPPED = [
     ("Fgruh M3 and M4 socket-cap screw kits, M3 x 10 / M4 x 30 / M5 x 40 countersunk packs, M6 x 25 and M6 x 30 bolts, M6 and "
      "M4 nyloc nuts, uxcell M5 x 5 set screws, heat-set inserts and insert tips", 0, "Every screw and nut now comes from the "
      "AvrestYPT and set screw kits (2026-10-23): the CAD was changed to suit them", "User, 2026-10-23"),
-    ("MkII-AdjustKnob.stl (friction knob)", 1, "Took an M6 hex head; the base now prints its own knob for an M5 x 25 hex bolt",
-     "Base/mk3_pivot.py"),
     ("SparkFun Pro Micro 12640 (Digi-Key 1568-12640-ND)", 1, "Replaced by the OSOYOO USB-C Pro Micro from Amazon", FULL),
     ("Sullins PRPC012SAAN-RC male headers (Digi-Key 35-PRPC012SAAN-RC-ND)", 2, "The OSOYOO Pro Micro comes with header pins", FULL),
     ("Assmann AK67421-2 USB A to micro-B cable", 1, "The OSOYOO Pro Micro is USB-C", FULL),
