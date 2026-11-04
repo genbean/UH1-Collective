@@ -97,37 +97,49 @@ Nothing is printed yet. Still to try:
 
 # Rev 3: a separate pod, and a plain hole in the panel
 
-`python hat3_r5.py ../stl` writes the parts; `python hat3_r5.py --check` runs the tilt check.
+`python hat3_r5.py ../stl` writes the panel and the hat's parts, `python hat3_r5.py --check` runs the tilt check, and `python render_hat3.py renders` draws the pictures. `../check_r5.py` now checks the whole head with this panel and the pod.
 
-The lower panel (`HueyHeadR5-LowerPanel3-Black` / `-WhiteText`) no longer has the carrier: just a 21 mm round hole and three 2 mm pins on its back (unevenly spaced, so the pod fits one way only). It prints face down with **no supports**. The hat is a separate pod, glued on over the pins.
+Rev 1 and 2 put the switch carrier in the lower panel, so the panel needed supports there and the faces that set the hat's fit came out rough. In Rev 3 the lower panel (`HueyHeadR5-LowerPanel-Hat3-Black` / `-WhiteText`) has only a 23 mm round hole and three 2 mm pins on its back. The pins are unevenly spaced, so the pod fits one way only. The panel prints face down with **no supports**. The hat is a separate pod, glued on over the pins.
 
-- **No supports for any part.** The pod prints back down, the rocker face down (stem up), the cup flat, and the cap base down.
-- **A straight push moves nothing.** The rocker stands on 8 domed feet on a flat seat in the pod's middle, an octagon 2.2 mm out.
-- **8-way.** A push toward a switch tips the rocker over one edge and clicks that switch. A push toward a diagonal tips it over a diagonal edge and clicks both neighbours. Opposite buttons, or three buttons, can't go in together.
-- **Feel.** An M3 × 20 countersunk screw comes from the pod's back, through the cup and a pen spring, and self-taps into the rocker's stem (2.5 mm hole). The spring pulls the rocker onto its feet: a firm centre, a break, then the click. The buttons bottoming are the stop, and the cap's rim on the panel face is the backstop at 12°.
+![Cut north to south, at rest and pushed north](renders/hat3_section.png)
+
+- **A straight push moves nothing.** A fixed octagonal anvil, 2.6 mm out to its edges, stands in the pod's middle. The rocker's square boss sits on it, so a push on the middle goes straight into the anvil.
+- **8-way.** A push toward a switch tips the rocker over that edge of the anvil, and that switch, 8.5 mm out, clicks. A push toward a diagonal tips it over a diagonal edge, and both neighbours (6.0 mm out along it) click. Opposite buttons can't go in together, and nor can three.
+- **No slop.** The boss is square, in a square bore 0.3 mm bigger all round, so the rocker can't slide or turn and its pushers stay on the buttons.
+- **Feel.** An M3 × 20 countersunk screw comes from behind, through a cup, a pen spring and the anvil, into an M3 nut in the rocker's stem. The spring holds the rocker on the anvil and centres it, and the tact switch gives the click. The pressed buttons bottoming are the stop; the cap's rim on the panel face is the backstop at 13°.
+- **Accurate where it matters.** Every gap that sets the click (anvil, pocket floors, pushers) is a top surface of either the pod or the rocker, and each is a whole number of 0.2 mm layers. The panel doesn't set any of it.
 - **Serviceable.** The rocker goes in and out through the panel's hole from the front.
+
+![Exploded](renders/hat3_exploded.png)
+
+![The pod](renders/hat3_pod.png)
 
 | Part | Print |
 |---|---|
-| `HueyHeadR5-LowerPanel3-Black` / `-WhiteText` | face down, as before; no supports |
-| `HueyHeadR5-Hat3-Pod.stl` | back down, as it comes |
-| `HueyHeadR5-Hat3-Rocker.stl` | face down, stem up |
+| `HueyHeadR5-LowerPanel-Hat3-Black` / `-WhiteText` | face down, as before (Arachne, 0.42 mm first layer); no supports |
+| `HueyHeadR5-Hat3-Pod.stl` | back down, as it comes; no supports |
+| `HueyHeadR5-Hat3-Rocker.stl` | stem down, as it comes: the cone is 45°; no supports |
 | `HueyHeadR5-Hat3-SpringCup.stl` | flat |
 | `HueyHeadR5-Hat3-Cap.stl` | base down |
 
+Print the pod and rocker with 0.2 mm layers (or 0.1 mm): their heights are whole layers.
+
+Hardware: 4 × TE 1825910-6 (the ones you have), an **M3 × 20 countersunk + M3 nut** (kit), and a **pen spring** from the trigger's pack, cut to about 6 coils. It fits 4.2 mm long and closes another 0.6 mm at full tilt, so it must not go solid above 3.5 mm.
+
 Fitting it:
-1. Put the four switches in the pod's pockets, legs out the back, and wire them.
+1. Put the four switches in the pod's pockets from the front, legs out the back, and wire them.
 2. Glue the pod to the panel's back over the pins.
-3. Put the rocker in through the panel's hole, feet back.
-4. From behind, put the M3 × 20 through the cup and a pen spring cut to about 6 mm (it must fit over M3 and in the cup's 4.4 mm seat). Then put it through the pod, and turn it into the stem until the rocker sits firm on its feet with no rattle.
-5. Glue the cap on the stem.
+3. Press the M3 nut into the hex pocket in the rocker's stem. Put the rocker in through the panel's hole, boss first, into the square bore.
+4. From behind: the screw through the spring, then the cup (seat toward the spring), then the pod, into the nut. Hold the stem and turn the screw until the head's top is about 6 mm behind the pod's back. The rocker should sit firm, with no rattle.
+5. With a meter, check that no switch reads closed at rest, that each side clicks only its own switch, and that each diagonal clicks its two.
+6. Glue the cap on the stem.
 
-Checked in CAD (`--check`), with the worst-case switch (0.45 mm to the bottom) and a 0.15 mm gap at rest:
+Checked in CAD (`--check`): nothing overlaps at rest, and the pod, switches and spring stack clear the head's body (`check_r5.py`, all clear). With a 0.2 mm gap at rest:
 
-| Push | Clicks at | Bottoms at | Buttons in |
+| Push | Clicks at (nominal / stiffest switch) | Buttons in | Backstop |
 |---|---|---|---|
-| N, E, S, W | 4.7° | 7.0° | that one |
-| NE, SE, SW, NW | 7.8° | 11.4° | both neighbours |
-| anywhere between | 5.0–6.4° | 7.4–9.4° | one, or the second partly (0.15 mm) |
+| N, E, S, W | 4.3° / 6.2° | that one | 13.0° |
+| NE, SE, SW, NW | 7.2° / 10.2° | both neighbours | 12.9° |
+| anywhere between | 4.6–5.8° / 6.5–8.3° | one, the second partly | 13.1° |
 
-Nothing hits until 12.2°. No third button ever moves. Not printed yet.
+No third button ever moves. Not printed yet. If a switch reads closed at rest, raise `BTN_GAP` by 0.2 and reprint only the rocker. If a diagonal won't click, lower it by 0.2.
