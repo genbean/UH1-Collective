@@ -25,8 +25,8 @@ Lever changes from Rev 1: the hub is the friction drum's 60 mm all the way acros
 now) and no bottom gusset (the strut runs there); two flat down-stop pads on the socket boss; and an up-stop boss on
 the back of the hub's underside. At 32 deg that boss lands flat on a pedestal on the frame between the pillow
 blocks. Rev 1's quadrant, stop block, thumb knob and striker are gone.
-Down-stop: fixed at 0 deg. Two solid blocks either side of the strut, built up from the plate into the towers beside
-them (the friction-knob tower on the knob side, the pillow block on the sensor side), stop the pads on the socket boss.
+Down-stop: fixed at 0 deg. A pillar under each pad on the socket boss, the pad's own size, either side of the strut and
+blended into the tower beside it (the friction-knob tower on the knob side, the pillow block on the sensor side).
 Pivot 58 mm above the desk (Rev 1: 40): the strut's line has to pass about 40 mm below the pivot to clear the hub, and
 the clevis around its eye needs the rest.
 
@@ -142,13 +142,14 @@ COLLAR_BACK = 30.0                               # the collar runs this far past
 COLLAR_BORE = m.TUBE_OD / 2 + 0.15
 CHEEK_T = 5.0                                    # (the tab is thinner now; the cheeks make up the width, so the M4 x 16 still ends at its nut)
 
-# down-stop: pads on the socket boss land on solid blocks either side of the strut, fixed at 0 deg
+# down-stop: pads on the socket boss land on pillars either side of the strut, fixed at 0 deg
 PAD_X = (-52.0, -40.0)                           # clear of the hose-clamp groove (x -54..-63)
 PAD_DY = (13.5, 20.0)                            # |y - SOCK_Y|: clear of the 25.4 mm tube bore
-PAD_Z = -16.0                                    # pad underside at 0 deg = the blocks' top
-DSTOP_X = (PAD_X[0], -m.BLOCK_HW + 1.0)          # the blocks: from the pads' front edge back 1 mm into the pillow blocks' line
-DSTOP_Y = {1: (Y0 + PAD_DY[0], m.SHOE_Y0 + 2.0),           # knob side: from the pad's inner edge 2 mm into the knob tower
-           -1: (-m.BRG_Y0 - 2.5, Y0 - PAD_DY[0])}          # sensor side: from 2.5 mm into the pillow block (6.8 mm clear of the desk screw) to the pad's inner edge
+PAD_Z = -16.0                                    # pad underside at 0 deg = the pillars' top
+# Each pad lands on a pillar of exactly its own footprint (x PAD_X, |y - SOCK_Y| PAD_DY), blended into the tower beside it:
+# knob side, the pillar runs straight on into the friction-knob tower (2 mm away in y); sensor side, its plan view is the
+# hull of the pillar and a pad-wide stretch of the sensor-side pillow block's front face, from its inner corner
+DSTOP_TOWER_Y = (m.BRG_Y0, m.BRG_Y0 + PAD_DY[1] - PAD_DY[0])   # sensor side: where the blend meets the pillow block's front face, as wide as the pad
 CAP_NUT_Z = -8.3                                 # pillow-block cap screws: the nut's top face (the M4 x 20 ends at -12)
 m.FN_NUT_Z = CAP_NUT_Z                           # the friction knob's M5 nut sits as deep, so its slot's roof is thick (Rev 1: -3.2)
 m.KNOB_BOLT = (25.0, 3.5)                        # ... which takes an M5 x 25 hex bolt (it ended at -7.0 as an M5 x 16): tip at -16
@@ -164,6 +165,12 @@ PED_Y = (-m.BRG_Y0 - 1.0, USTOP_Y[1] + 2.0)      # pedestal: into the sensor-sid
 # corner gusset, hinge lugs to the knob-side pillow block (plan view, 45 deg): stops 6.5 mm short of the desk screw at
 # (PLATE_X1 - 8, PLATE_HW - 8), room for its head
 LUG_GUSSET = 78.8                                # its sloping face is x + y = LUG_GUSSET
+# inside-corner gussets on the knob side (plan view triangles): the knob-side pillow block's inner face (y = BRG_Y0) to the
+# hinge-lug web (+x) and to the friction-knob tower (-x), each from y = CG_Y on the web / tower to CG_X on the block's face.
+# Cut clear of the hub and drum (CG_CLR_R round the pivot) and kept under the shoe (CG_TOP)
+CG_Y, CG_X = 14.0, 26.0
+CG_CLR_R = HUB_R + 3.0
+CG_TOP = {1: -14.0, -1: -2.0}                     # +x: level with the lug web; -x: 1 mm under the knob tower's top
 
 
 def collar_pin(theta=0.0, d=COLLAR_D, e=COLLAR_E):
@@ -218,7 +225,7 @@ m.lever = lever_r3                               # Rev 1's lever_halves() and bu
 # ---------------------------------------------------------------- frame: Rev 1's on the taller pivot, new stops and anchor
 def frame_r3():
     """Rev 1's frame_solid() with the pivot 58 mm up, no quadrant or the plate tongue under it, no centre down-stop post, plus the anchor clevis,
-    two fixed down-stop blocks beside the strut and the up-stop pedestal"""
+    two fixed down-stop pillars beside the strut and the up-stop pedestal"""
     plate = (cq.Workplane("XY").box(m.PLATE_X1 - m.PLATE_X0, 2 * m.PLATE_HW, m.PLATE_T, centered=False)
              .translate((m.PLATE_X0, -m.PLATE_HW, -AXIS_H)).edges("|Z").fillet(6).val())
     blocks = [box(-m.BLOCK_HW, m.BLOCK_HW, *sorted((s * m.BRG_Y0, s * m.BLOCK_Y1)), Z_PLATE, 0) for s in (-1, 1)]
@@ -228,12 +235,12 @@ def frame_r3():
     lug_web = box(40, 51, 12, 32, Z_PLATE, -14)
     tower_web = (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1)
                  .polyline([(-54, 30.5), (-34.5, 30.5), (-34.5, 48)]).close().extrude(-2 - Z_PLATE + 0.1).val())
-    stop_blocks = [box(*DSTOP_X, *DSTOP_Y[s], Z_PLATE - 0.1, PAD_Z) for s in (-1, 1)]   # down-stops, into the towers
+    stop_blocks = down_stops()
     lug_gusset = (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1)       # corner gusset: hinge lugs to +y pillow block,
                   .polyline([(m.BLOCK_HW - 0.5, 31.5), (LUG_GUSSET - 31.5, 31.5), (m.BLOCK_HW - 0.5, LUG_GUSSET - m.BLOCK_HW + 0.5)])
                   .close().extrude(-14 - Z_PLATE + 0.1).val())                # level with the lug web, under the hinge pin's end
     pedestal = box(*PED_X, *PED_Y, Z_PLATE - 0.1, USTOP_Z)
-    f = fuse(plate, *blocks, tower, *lugs, *lug_round, lug_web, tower_web, lug_gusset, *stop_blocks, pedestal,
+    f = fuse(plate, *blocks, tower, *lugs, *lug_round, lug_web, tower_web, lug_gusset, *stop_blocks, *corner_gussets(), pedestal,
              anchor_clevis())
 
     cuts = []
@@ -267,6 +274,32 @@ def frame_r3():
     for c in cuts:
         f = f.cut(c)
     return f.clean()
+
+
+def down_stops():
+    """the fixed 0 deg down-stops: a pillar under each pad, its top at the pad's underside, blended into the tower beside it"""
+    def prism(pts):
+        return (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1).polyline(pts).close()
+                .extrude(PAD_Z - Z_PLATE + 0.1).val())
+    x0, x1 = PAD_X
+    yi, yo = Y0 + PAD_DY[0], Y0 + PAD_DY[1]                                    # knob side: pad's inner and outer edges
+    knob = box(x0, x1, yi, m.SHOE_Y0 + 0.5, Z_PLATE - 0.1, PAD_Z)              # pillar, on into the knob tower
+    yi, yo = Y0 - PAD_DY[0], Y0 - PAD_DY[1]                                    # sensor side
+    xt = -m.BLOCK_HW + 1.0                                                     # 1 mm into the pillow block
+    t0, t1 = -DSTOP_TOWER_Y[0], -DSTOP_TOWER_Y[1]
+    sensor = prism([(x0, yi), (x1, yi), (xt, t0), (xt, t1), (-m.BLOCK_HW, t1), (x0, yo)])
+    return [knob, sensor]
+
+
+def corner_gussets():
+    """the two inside corners between the knob-side pillow block and the hinge-lug web / friction-knob tower"""
+    out = []
+    for sx, x_wall in ((1, 40.0), (-1, -36.0)):                                # the lug web's and the knob tower's inner faces
+        pts = [(x_wall + sx * 0.5, CG_Y), (x_wall + sx * 0.5, m.BRG_Y0 + 0.5), (sx * CG_X, m.BRG_Y0 + 0.5)]
+        g = (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1).polyline(pts).close()
+             .extrude(CG_TOP[sx] - Z_PLATE + 0.1).val())
+        out.append(g.cut(cyl(CG_CLR_R, (0, CG_Y - 1, 0), (0, m.BRG_Y0 + 1, 0))))
+    return out
 
 
 def anchor_clevis():
