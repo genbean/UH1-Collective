@@ -94,3 +94,40 @@ Nothing is printed yet. Still to try:
 - whether the M3 screw holds in the key hole;
 - the real switches' button heights, which set the gap (see `BTN_GAP` above);
 - how the feet sit on the covers' metal.
+
+# Rev 3: a separate pod, and a plain hole in the panel
+
+`python hat3_r5.py ../stl` writes the parts; `python hat3_r5.py --check` runs the tilt check.
+
+The lower panel (`HueyHeadR5-LowerPanel3-Black` / `-WhiteText`) no longer has the carrier: just a 21 mm round hole and three 2 mm pins on its back (unevenly spaced, so the pod fits one way only). It prints face down with **no supports**. The hat is a separate pod, glued on over the pins.
+
+- **No supports for any part.** The pod prints back down, the rocker face down (stem up), the cup flat, and the cap base down.
+- **A straight push moves nothing.** The rocker stands on 8 domed feet on a flat seat in the pod's middle, an octagon 2.2 mm out.
+- **8-way.** A push toward a switch tips the rocker over one edge and clicks that switch. A push toward a diagonal tips it over a diagonal edge and clicks both neighbours. Opposite buttons, or three buttons, can't go in together.
+- **Feel.** An M3 × 20 countersunk screw comes from the pod's back, through the cup and a pen spring, and self-taps into the rocker's stem (2.5 mm hole). The spring pulls the rocker onto its feet: a firm centre, a break, then the click. The buttons bottoming are the stop, and the cap's rim on the panel face is the backstop at 12°.
+- **Serviceable.** The rocker goes in and out through the panel's hole from the front.
+
+| Part | Print |
+|---|---|
+| `HueyHeadR5-LowerPanel3-Black` / `-WhiteText` | face down, as before; no supports |
+| `HueyHeadR5-Hat3-Pod.stl` | back down, as it comes |
+| `HueyHeadR5-Hat3-Rocker.stl` | face down, stem up |
+| `HueyHeadR5-Hat3-SpringCup.stl` | flat |
+| `HueyHeadR5-Hat3-Cap.stl` | base down |
+
+Fitting it:
+1. Put the four switches in the pod's pockets, legs out the back, and wire them.
+2. Glue the pod to the panel's back over the pins.
+3. Put the rocker in through the panel's hole, feet back.
+4. From behind, put the M3 × 20 through the cup and a pen spring cut to about 6 mm (it must fit over M3 and in the cup's 4.4 mm seat). Then put it through the pod, and turn it into the stem until the rocker sits firm on its feet with no rattle.
+5. Glue the cap on the stem.
+
+Checked in CAD (`--check`), with the worst-case switch (0.45 mm to the bottom) and a 0.15 mm gap at rest:
+
+| Push | Clicks at | Bottoms at | Buttons in |
+|---|---|---|---|
+| N, E, S, W | 4.7° | 7.0° | that one |
+| NE, SE, SW, NW | 7.8° | 11.4° | both neighbours |
+| anywhere between | 5.0–6.4° | 7.4–9.4° | one, or the second partly (0.15 mm) |
+
+Nothing hits until 12.2°. No third button ever moves. Not printed yet.
