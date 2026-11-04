@@ -341,9 +341,9 @@ DROPPED = [
     ("Ballast bucket, lid, ~0.95 kg ballast, 4 x M4 bucket bolts + inserts, lid M3 screws + inserts", 0,
      "Base Rev 3 balances with the gas strut", BASE),
     ("Quadrant stop block, thumb knob, M5 x 16 stop bolt + nut, M6 striker + insert", 0, "Base Rev 3 has a fixed 32 deg stop", BASE),
-    ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two fixed down-stop blocks beside the strut", "Base/mk3_rev3.py"),
+    ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two fixed down-stop pillars beside the strut", "Base/mk3_rev3.py"),
     ("Base Rev 3 adjustable down-stops: 2 x M4 x 16 countersunk + 4 M4 nuts", 0,
-     "The down-stop is fixed at 0 deg: two solid blocks printed into the frame", "Base/mk3_rev3.py"),
+     "The down-stop is fixed at 0 deg: two pillars printed into the frame", "Base/mk3_rev3.py"),
 ]
 SOURCES = [
     ("HeliSR Rev 4.0 board", "PCB/HeliSR_Rev4.0 (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
