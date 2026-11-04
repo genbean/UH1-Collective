@@ -210,6 +210,8 @@ A corner gusset braces the knob tower to the knob-side pillow block, as in Rev 1
 
 It stands 36 mm off the plate, level with the web between the hinge lugs. That leaves the shoe's hinge pin and its end 8 mm clear above it.
 
+The hinge lugs and the web between them are 14 mm wide (x = 38 to 52; Rev 1: 11 mm, 40 to 51), centred on the hinge screw. That leaves 2.7 mm of wall either side of the M4 countersink and 4.8 mm either side of the clearance hole, so they print solid with the normal wall loops. (Rev 1 left 0.7 mm beside the countersink.)
+
 Its sloping face stops 6.5 mm from the centre of the desk screw in that corner, so the screw's head still fits.
 
 ## Friction knob

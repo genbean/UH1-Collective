@@ -166,6 +166,10 @@ PED_Y = (-m.BRG_Y0 - 1.0, USTOP_Y[1] + 2.0)      # pedestal: into the sensor-sid
 # corner gusset, hinge lugs to the knob-side pillow block (plan view, 45 deg): stops 6.5 mm short of the desk screw at
 # (PLATE_X1 - 8, PLATE_HW - 8), room for its head
 LUG_GUSSET = 78.8                                # its sloping face is x + y = LUG_GUSSET
+# shoe hinge lugs (and the web between them): 14 mm wide, centred on the hinge screw (Rev 1: x 40..51, 0.7 mm of wall
+# beside the M4 countersink). Now 2.7 mm each side of the countersink's 8.6 mm and 4.8 mm each side of the clearance hole,
+# solid perimeters with no extra wall loops
+LUG_X = (m.HINGE_X - 7.0, m.HINGE_X + 7.0)
 # inside-corner gussets on the knob side: the knob-side pillow block's inner face (y = BRG_Y0) to the hinge-lug web (+x)
 # and to the friction-knob tower (-x). Mirror images in plan: 45 deg right triangles, CG_LEG along the wall and along the
 # block. Cut clear of the hub and drum (CG_CLR_R round the pivot) and kept under the shoe (CG_TOP)
@@ -231,9 +235,9 @@ def frame_r3():
              .translate((m.PLATE_X0, -m.PLATE_HW, -AXIS_H)).edges("|Z").fillet(6).val())
     blocks = [box(-m.BLOCK_HW, m.BLOCK_HW, *sorted((s * m.BRG_Y0, s * m.BLOCK_Y1)), Z_PLATE, 0) for s in (-1, 1)]
     tower = box(-54, -36, m.SHOE_Y0, m.SHOE_Y1, Z_PLATE, -1)
-    lugs = [box(40, 51, 12, 16.5, Z_PLATE, 2), box(40, 51, 27.5, 32, Z_PLATE, 2)]
+    lugs = [box(*LUG_X, 12, 16.5, Z_PLATE, 2), box(*LUG_X, 27.5, 32, Z_PLATE, 2)]
     lug_round = [cyl(5.5, (m.HINGE_X, y0, m.HINGE_Z), (m.HINGE_X, y1, m.HINGE_Z)) for y0, y1 in ((12, 16.5), (27.5, 32))]
-    lug_web = box(40, 51, 12, 32, Z_PLATE, -14)
+    lug_web = box(*LUG_X, 12, 32, Z_PLATE, -14)
     tower_web = (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1)
                  .polyline([(-54, 30.5), (-34.5, 30.5), (-34.5, 48)]).close().extrude(-2 - Z_PLATE + 0.1).val())
     stop_blocks = down_stops()
@@ -294,7 +298,7 @@ def down_stops():
 def corner_gussets():
     """the two inside corners between the knob-side pillow block and the hinge-lug web / friction-knob tower"""
     out = []
-    for sx, x_wall in ((1, 40.0), (-1, -36.0)):                                # the lug web's and the knob tower's inner faces
+    for sx, x_wall in ((1, LUG_X[0]), (-1, -36.0)):                                # the lug web's and the knob tower's inner faces
         xw, yb = x_wall + sx * 0.5, m.BRG_Y0 + 0.5                             # 0.5 mm into the wall and the block
         pts = [(xw, yb - CG_LEG - 0.5), (xw, yb), (xw - sx * (CG_LEG + 0.5), yb)]
         g = (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1).polyline(pts).close()
