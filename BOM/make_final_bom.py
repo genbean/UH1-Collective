@@ -146,9 +146,9 @@ SECTIONS.append(("Huey head: hardware", [
     setkit("Trigger pull stop", 1, "M3 x 4 set screw", "Through the trigger's arm (printed M3 thread); its tip bears on the mount. Set it "
            "so the starter switch clicks before the stop"),
     kit("Trigger pull stop seat", 1, "M2 x 8 countersunk screw", "Flush in a countersunk, M2-tapped hole (1.6 mm pilot) in the mount's face under the spring pocket, so the pull stop's tip bears on steel and not on plastic"),
-    kit("Search hat bezel", 4, "M2 x 8 countersunk screw", "Through the hat's bezel into M2 threads tapped in the carrier (1.6 mm pilots)"),
-    setkit("Search hat pivot", 1, "M3 x 4 set screw", "Into the rocker plate's centre (printed M3 thread), from behind; its tip is the pivot and sets the "
-           "preload. Turn it with a 1.5 mm hex key through the carrier floor"),
+    kit("Search hat (Rev 3) spring screw", 1, "M3 x 20 countersunk screw + M3 hex nut", "From behind the pod, through the "
+        "cup, a pen spring cut to 6 coils (one more from the trigger's pack of 10) and the pod's anvil, into the nut in the "
+        "rocker's stem. It holds the rocker on the anvil; it is not a pivot"),
     kit("Panels", 8, "M3 x 16 countersunk screw (DIN 7991)", "4 per panel, into the M3 threads printed 20 mm deep in the "
         "box's corner columns (a kit M3 x 20 fits too)"),
     kit("HeliSR board", 4, "M3 x 12 countersunk screw (DIN 7991) + M3 hex nut", "From outside the rear wall through a "
@@ -212,8 +212,8 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
 SECTIONS.append(("Kits, consumables and tools", [
     ("Hardware", 1, "Screw kit, 1715 pieces: countersunk hex-socket screws M2-M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20, "
      "with hex nuts and washers, hex keys", "AvrestYPT", "", "Amazon", "B0FMD5TMSH", 17.99, "once", ORDERED, 1,
-     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (8), M4 x 12 (3),"
-     " M4 x 16 (2), M4 x 20 (5); nuts M3 (4), M4 (10), M5 (1). Order (link 2026-10-23)",
+     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (9), M4 x 12 (3),"
+     " M4 x 16 (2), M4 x 20 (5); nuts M3 (5), M4 (10), M5 (1). Order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (the order)"),
     ("Hardware", 1, "Set screw kit, 500 pieces, 304 stainless: M3 x 3, 4, 5, 6; M4 x 4, 5, 6; M5 x 5, 8; M6 x 6, 10; "
      "M8 x 8; hex keys", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714", 8.96, "once", ORDERED, 1,

@@ -13,6 +13,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "Hat"))
 import huey_head_r5 as h
 import hat_r5
+import hat3_r5                                      # SEARCH CONT hat Rev 3: its own lower panel and the pod behind it
 from huey_head_r5 import box, ycyl, tilt
 
 TOL = 0.05                                     # mm3: anything smaller is a float graze
@@ -48,7 +49,7 @@ def tm(m):
 
 def main():
     body = h.body_r5()
-    lp, _ = hat_r5.lower_panel_new()
+    lp, _ = hat3_r5.lower_panel()
     up, _ = h.upper_panel()
     parts = {"body": body, "lower_panel": tilt(lp), "upper_panel": tilt(up), "trigger": h.trigger()}
     sw = {"GOV": toggle_body(*h.GOV, 0.0), "LDG_EXT": toggle_body(*h.LDG_EXT, 0.0),
@@ -57,15 +58,15 @@ def main():
           "SL": toggle_body(*h.SL, h.UY), "LDG_ON": toggle_body(*h.LDG_ON, h.UY)}
     parts.update({k: tilt(v) for k, v in sw.items()})
     parts.update({k: tilt(v) for k, v in helisr().items()})
-    for k in range(4):                                           # the hat's tact switches, in their pockets
-        b, bt, lg = hat_r5.tact(k)
-        parts[f"hat_tact{k}"] = tilt((b + bt + lg).translate((h.SEARCH[0], 0, h.SEARCH[1])))
+    asm = hat3_r5.assembly()                                     # the hat: pod, switches, spring stack (rocker and cap
+    for k in ("pod", "cup", "screw", "spring", "tact0", "tact1", "tact2", "tact3"):   # are checked by hat3_r5.py --check)
+        parts[f"hat_{k}"] = tilt(asm[k])
     names = list(parts)
     allowed = {("body", "lower_panel"), ("body", "upper_panel")}   # the panels' plugs sit inside the walls: checked below
     bad = 0
     for i, a in enumerate(names):
         for b in names[i + 1:]:
-            if (a, b) in allowed or a.startswith("hat_tact") and b == "lower_panel" or (a == "lower_panel" and b.startswith("hat_tact")):
+            if (a, b) in allowed or a.startswith("hat_") and b.startswith("hat_"):
                 continue
             if {a, b} <= {"helisr_board", "helisr_spacers", "helisr_parts", "pro_micro", "usb_plug"}:
                 continue
@@ -107,7 +108,7 @@ def labels():
     and the panel's edge by 1 mm."""
     c = h.circle
     low = [c(h.PANEL_CSK[0] + 1.0, x, z) for x, z in h.COLUMNS] + [c(14.0, *h.GOV), c(14.0, *h.LDG_EXT),
-                                                             c(2 * max(hat_r5.BEZ_R, hat_r5.CAP_R) + 1.0, *h.SEARCH), c(h.PB4_BEZEL_D + 1.0, *h.STOP_REL)]
+                                                             c(2 * hat3_r5.v1.CAP_R + 1.0, *h.SEARCH), c(h.PB4_BEZEL_D + 1.0, *h.STOP_REL)]
     up = [c(h.PANEL_CSK[0] + 1.0, x, z) for x, z in h.UPPER_COLUMNS] + [c(14.0, *h.SL), c(14.0, *h.LDG_ON)]
     bad = 0
     for name, lab, holes, outline in (("lower", h.lower_labels(), low, h.LOWER_PANEL), ("upper", h.upper_labels(), up, h.UPPER_PANEL)):
