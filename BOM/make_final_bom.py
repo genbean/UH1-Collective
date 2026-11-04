@@ -181,8 +181,6 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
         "The listing gives the strut's eye holes as 4 mm. Snug, then thread-lock: the eye must still turn"),
     kit("Strut collar", 2, "M4 x 12 countersunk screw + M4 hex nut", "Collar clamp, two 20 mm apart: each head sits 2 mm into the -y ear, "
         "its nut in the +y ear's pocket"),
-    kit("Down-stops", 2, "M4 x 16 countersunk screw + 2 M4 hex nuts", "Head up: its flat top is the stop. One nut pressed "
-        "into the post's top pocket, the second on top of it locks the height that levels the tube"),
     kit("Pillow-block caps", 4, "M4 x 20 countersunk screw + M4 hex nut", "Two per cap, from the top; each nut slides "
         "into a slot in the block's front or back face. Length from the CAD"),
     amz("Side covers", 8, "M3 x 25 countersunk screw (from the M3 x 20-40 set, ASIN B0BYXS4BTF)", "Amazon", "B0BYXS4BTF", 0, "once",
@@ -214,7 +212,7 @@ SECTIONS.append(("Kits, consumables and tools", [
     ("Hardware", 1, "Screw kit, 1715 pieces: countersunk hex-socket screws M2-M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20, "
      "with hex nuts and washers, hex keys", "AvrestYPT", "", "Amazon", "B0FMD5TMSH", 17.99, "once", ORDERED, 1,
      "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (8), M4 x 12 (3),"
-     " M4 x 16 (4), M4 x 20 (5); nuts M3 (4), M4 (14), M5 (1). Your order (link 2026-10-23)",
+     " M4 x 16 (2), M4 x 20 (5); nuts M3 (4), M4 (10), M5 (1). Your order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (your order)"),
     ("Hardware", 1, "Set screw kit, 500 pieces, 304 stainless: M3 x 3, 4, 5, 6; M4 x 4, 5, 6; M5 x 5, 8; M6 x 6, 10; "
      "M8 x 8; hex keys", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714", 8.96, "once", ORDERED, 1,
@@ -343,7 +341,9 @@ DROPPED = [
     ("Ballast bucket, lid, ~0.95 kg ballast, 4 x M4 bucket bolts + inserts, lid M3 screws + inserts", 0,
      "Base Rev 3 balances with the gas strut", BASE),
     ("Quadrant stop block, thumb knob, M5 x 16 stop bolt + nut, M6 striker + insert", 0, "Base Rev 3 has a fixed 32 deg stop", BASE),
-    ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two down-stop posts beside the strut", "Base/mk3_rev3.py"),
+    ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two fixed down-stop blocks beside the strut", "Base/mk3_rev3.py"),
+    ("Base Rev 3 adjustable down-stops: 2 x M4 x 16 countersunk + 4 M4 nuts", 0,
+     "The down-stop is fixed at 0 deg: two solid blocks printed into the frame", "Base/mk3_rev3.py"),
 ]
 SOURCES = [
     ("HeliSR Rev 4.0 board", "PCB/HeliSR_Rev4.0 (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
