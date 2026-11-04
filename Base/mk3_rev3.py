@@ -38,7 +38,7 @@ Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (A
     pillow-block caps 4 x M4 x 20 + 4 M4 nuts, slid in fore and aft from the blocks' front and back faces
     side covers       8 x M3 x 25 (the NIULUNBAO M3 set) from the covers' outer faces, into M3 threads tapped 11 mm deep
                       in the blocks and caps
-    friction knob     1 x M5 x 25 hex-head bolt (bought: the kits have no hex heads), its head in the knob's moulded hex
+    friction knob     1 x M5 x 30 hex-head bolt (bought: the kits have no hex heads), its head in the MkII knob's hex
                       pocket, + 1 M5 nut slid into the knob tower
     cable plug        1 x M2 x 12 up from under the cable cover's rim, into an M2 thread tapped in the plug
     shoe hinge        1 x M4 x 20 + 1 M4 nut in the +y lug's pocket
@@ -153,13 +153,18 @@ PAD_Z = -16.0                                    # pad underside at 0 deg = the 
 DSTOP_SWEEP = -m.BLOCK_HW + 1.0 - PAD_X[0]       # sweep length along x and y: the swept pillar ends 1 mm inside the block's front face
 CAP_NUT_Z = -8.3                                 # pillow-block cap screws: the nut's top face (the M4 x 20 ends at -12)
 m.FN_NUT_Z = CAP_NUT_Z                           # the friction knob's M5 nut sits as deep, so its slot's roof is thick (Rev 1: -3.2)
-m.KNOB_BOLT = (25.0, 3.5)                        # ... which takes an M5 x 25 hex bolt (it ended at -7.0 as an M5 x 16): tip at -16
-# friction knob (Rev 1: 28 mm across at x = -45). At 28 its rim reached y = 8, so from 8 deg up the knob-side down-stop
-# pad and the socket boss swung into it, and at the back it overlapped the shoe's arc (outer radius 37). At 20 mm and
-# moved 2 mm forward it spans y 12..32, 1 mm clear of the pad (y 11), and x -57..-37, 1 mm clear of the shoe's arc with
-# the knob screwed 1 mm further down. The shoe's spring seat keeps 1.7 mm of tab in front of it
-m.KNOB_D = 20.0
+# friction knob: the MkII knob (source/MkII-AdjustKnob.stl), its outside as it is: 18 mm across, 34 mm tall, fluted over
+# its top half. Its inside is changed for the M5 bolt: the MkII's M6 hex pocket (10.2 mm across flats, open at the top) is
+# filled and an M5 one (M5_HEAD_AF) cut in its place, and the 4 mm floor's 6.5 mm hole is cut down to M5 clearance. The
+# bolt's head sits on that floor, so the bolt is an M5 x 30 (head bottom at z = 13.5, tip at -16.5, 4.2 mm past the nut).
+# It stands at x = -47 (Rev 1: 28 mm at -45, which the knob-side down-stop pad and the socket boss hit from 8 deg up and
+# which overlapped the shoe's arc): it spans y 13..31, 2 mm clear of the pad, and x -56..-38, clear of the shoe's arc
+MK2_KNOB = os.path.join(HERE, "source", "MkII-AdjustKnob.stl")
+MK2_KNOB_AT = (-34.09, -10.0, 6.0)               # its axis (x, y) and underside (z) in the STL's own frame
+MK2_KNOB_H, MK2_KNOB_FLOOR = 34.0, 4.0           # height; the hex pocket's floor, from the underside
 m.KNOB_X = -47.0
+m.KNOB_BOLT = (30.0, 3.5)                        # M5 x 30 hex bolt: length under the head, head height
+m.KNOB_HEAD_Z = m.KNOB_Z0 + MK2_KNOB_FLOOR + m.KNOB_BOLT[1]   # the head's top (17.0), its underside on the knob's floor
 
 # up-stop: boss on the back of the hub's underside, landing flat on a frame pedestal at STOP_DEG
 STOP_DEG = 32.0
@@ -299,6 +304,25 @@ def down_stops():
     d = DSTOP_SWEEP                                                            # pillar swept at 45 deg into the pillow block
     sensor = prism([(x0, yi), (x1, yi), (x1 + d, yi - d), (x1 + d, yo - d), (x0 + d, yo - d), (x0, yo)])
     return [knob, sensor]
+
+
+def friction_knob_r3():
+    """the MkII knob, read from its STL and stood on the spring at (KNOB_X, KNOB_Y), with an M5 hex pocket and hole"""
+    from OCP.StlAPI import StlAPI_Reader
+    from OCP.TopoDS import TopoDS_Shape
+    raw = TopoDS_Shape()
+    StlAPI_Reader().Read(raw, MK2_KNOB)
+    k = cq.Solid.makeSolid(cq.Shell.makeShell(cq.Shape.cast(raw).Faces())).fix()
+    x0, y0, z0 = MK2_KNOB_AT
+    k = k.translate(V(m.KNOB_X - x0, m.KNOB_Y - y0, m.KNOB_Z0 - z0))
+    X, Y, zb = m.KNOB_X, m.KNOB_Y, m.KNOB_Z0
+    zt, zf = zb + MK2_KNOB_H, zb + MK2_KNOB_FLOOR
+    k = k.fuse(cyl(6.2, (X, Y, zb + 0.5), (X, Y, zt - 0.3)))                  # fill the M6 pocket and hole (flutes start at r 7.5)
+    k = k.cut(hexprism(m.M5_HEAD_AF, (X, Y, zf), (X, Y, zt + 1)))               # M5 hex pocket, open at the top
+    k = k.cut(cyl(m.M5_CLR_R, (X, Y, zb - 1), (X, Y, zf + 0.1)))               # M5 clearance through the floor
+    k = k.cut(cq.Solid.makeCone(m.M5_HEAD_AF / 2 / math.cos(math.pi / 6) + 0.8, m.M5_HEAD_AF / 2 / math.cos(math.pi / 6) - 0.2,
+                                1.0, V(X, Y, zt - 1.0), V(0, 0, 1)))             # lead-in chamfer at the pocket's mouth
+    return k.clean()
 
 
 def corner_gussets():
@@ -491,7 +515,7 @@ def hardware_r3():
     """the fixed base's kit screws and nuts (reference): friction screw, shoe hinge, side covers and pillow-block caps"""
     hz = m.KNOB_HEAD_Z - m.KNOB_BOLT[1]
     parts = [m.fuse(m.hexprism(m.M5_HEAD_AF - 0.1, (m.KNOB_X, m.KNOB_Y, hz), (m.KNOB_X, m.KNOB_Y, m.KNOB_HEAD_Z)),
-                    m.cyl(2.1, (m.KNOB_X, m.KNOB_Y, hz - m.KNOB_BOLT[0]), (m.KNOB_X, m.KNOB_Y, hz + 0.1))),   # M5 x 25 hex bolt
+                    m.cyl(2.1, (m.KNOB_X, m.KNOB_Y, hz - m.KNOB_BOLT[0]), (m.KNOB_X, m.KNOB_Y, hz + 0.1))),   # M5 x 30 hex bolt
              m.nut(5, (m.KNOB_X, m.KNOB_Y, m.FN_NUT_Z), (0, 0, -1)),
              m.csk_screw(4, (m.HINGE_X, 12, m.HINGE_Z), (0, 1, 0), 20), m.nut(4, (m.HINGE_X, 28.6, m.HINGE_Z), (0, 1, 0))]
     for s in (-1, 1):
@@ -761,7 +785,7 @@ def build():
         # printed
         "frame": frame_r3(),
         "strut_collar": collar(),
-        "friction_knob": m.friction_knob(),
+        "friction_knob": friction_knob_r3(),
         "cover_cable": cover_cable_r3(),
         "cable_plug": cable_plug(),
         # bought / reference
@@ -772,7 +796,7 @@ def build():
         "lever_screws": lever_hardware(),
     })
     for name in PRINTED:
-        if name not in ("cover_cable", "cable_plug", "lever_upper", "lever_lower"):   # those: see their own steps
+        if name not in ("cover_cable", "cable_plug", "lever_upper", "lever_lower", "friction_knob"):   # those: see their own steps; the knob keeps the MkII's edges
             parts[name] = chamfer_edges(parts[name])
     return parts
 
