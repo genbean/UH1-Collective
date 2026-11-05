@@ -102,6 +102,7 @@ def main():
             print(f"OVERLAP {k} (grown 1 mm) with the neck cuts or the AS5600 board {v:.2f} mm3")
     bad += labels()
     bad += leads_hole(body)
+    bad += usb_cable(parts)
     print("all clear" if not bad else f"{bad} problem(s)")
 
 
@@ -158,6 +159,84 @@ def leads_hole(body):
     ok = bool((cav.contains(e) & ~S0.contains(e)).all())
     print(f"{'leads hole comes out in the box':34s} {'OK' if ok else 'NO'}")
     bad += not ok
+    return bad
+
+
+# The carbon tube and the two cables that come up it into the head (Base/README.md, BOM/make_final_bom.py)
+TUBE_OD, TUBE_ID = 25.0, 23.0
+USB_OD = 4.5                     # the Stewart SC-2CAK020M's diameter isn't published; USB 2.0 cables run 3.5-4.5 mm
+AX1_OD = 3.61                    # the base sensor's 4-core lead
+AX1_AT = 7.5                     # it goes through the lip's 20 mm opening this far in front of the centre (panel side)
+USB_MARGIN = 1.0                 # the plug and its cable must clear the body, the tube and the HeliSR's parts by this
+
+
+def head_pt(p):
+    """Box frame -> head frame, for points (tilt() does it for solids)."""
+    c, s = np.cos(np.radians(h.TILT)), np.sin(np.radians(h.TILT))
+    x, y, z = p
+    z -= h.ZB
+    return np.array([x, y * c - z * s, y * s + z * c + h.ZB])
+
+
+def cable(pts, d):
+    """A round cable of diameter d through the points (head frame): hulls of spheres along the path."""
+    s = [mf.Manifold.sphere(d / 2, 20).translate(tuple(map(float, p))) for p in pts]
+    return sum((mf.Manifold.batch_hull([a, b]) for a, b in zip(s, s[1:])), mf.Manifold())
+
+
+def bezier(p0, t0, p1, t1, n=30):
+    k = np.linalg.norm(p1 - p0) / 3
+    u = np.linspace(0, 1, n)[:, None]
+    return (1 - u) ** 3 * p0 + 3 * (1 - u) ** 2 * u * (p0 + t0 * k) + 3 * (1 - u) * u ** 2 * (p1 - t1 * k) + u ** 3 * p1
+
+
+def usb_plug_box(w, t, length, g=0.0):
+    """The USB-C plug's overmold, w x t, hanging length mm from the Pro Micro's end (box frame), grown by g."""
+    xm, yc, z0 = h.HELISR_X0 + h.HELISR_SIZE[1] / 2, h.YB - h.HELISR_STACK + 4.5, h.HELISR_Z0
+    return box(xm - w / 2 - g, yc - t / 2 - g, z0 - length - g, xm + w / 2 + g, yc + t / 2 + g, z0 + 1)
+
+
+def usb_cable(parts):
+    """The USB-C plug's cable and the base sensor's lead, down into the carbon tube. The plug hangs from the Pro Micro
+    through the wire slot and its end goes into the tube's top end, through the lip's 20 mm opening. Its cable bends
+    20 degrees into the tube's axis (the box leans on the tube). The sensor's lead comes up the tube beside it and
+    through the same opening, in front of the plug."""
+    tube = h.zcyl(h.TX, h.TY, TUBE_OD, h.TUBE_END - 120, h.TUBE_END) - h.zcyl(h.TX, h.TY, TUBE_ID, h.TUBE_END - 121, h.TUBE_END + 1)
+    xm, yc, z0 = h.HELISR_X0 + h.HELISR_SIZE[1] / 2, h.YB - h.HELISR_STACK + 4.5, h.HELISR_Z0
+    down = head_pt((0, 0, -1)) - head_pt((0, 0, 0))                 # the plug points straight down the box
+    axis = lambda z: np.array([h.TX, h.TY, z])
+
+    def stub(length, d):
+        p0 = head_pt((xm, yc, z0 - length))
+        return cable(list(bezier(p0, down, axis(h.TUBE_END - 45), np.array([0, 0, -1.0]))) + [axis(h.TUBE_END - 110)], d)
+
+    plug, usb = parts["usb_plug"], stub(25.0, USB_OD)
+    up = head_pt((0, 0, 1)) - head_pt((0, 0, 0))
+    q = lambda z: np.array([h.TX, h.TY - AX1_AT, z])
+    lead = cable([q(h.TUBE_END - 60), q(h.TUBE_TOP + 2), q(h.TUBE_TOP + 2) + 12 * up], AX1_OD)
+    others = {k: m for k, m in parts.items() if k not in ("usb_plug", "pro_micro")}
+    others["tube"] = tube
+    bad = 0
+
+    def line(name, hits):
+        nonlocal bad
+        print(f"{name:34s} {'OK' if not hits else 'HITS ' + ', '.join(hits)}")
+        bad += bool(hits)
+    hit = lambda m, pool: [k for k, o in pool.items() if (m ^ o).volume() > TOL]
+    line("USB plug into the tube", hit(plug, {"tube": tube}))
+    line("USB cable down the tube", hit(usb, others))
+    line("sensor lead beside them", hit(lead, {**others, "usb_plug": plug, "usb_cable": usb}))
+    g = USB_MARGIN                                                    # room round the plug and its cable
+    grown = tilt(usb_plug_box(12.0, 7.0, 25.0, g)) + stub(25.0, USB_OD + 2 * g)
+    line(f"USB plug and cable, {g:.0f} mm clear", hit(grown, {k: others[k] for k in ("body", "tube", "helisr_parts", "helisr_board")}))
+    # how long an overmold still fits (the plug is modelled 25 mm long; measure yours)
+    fits = []
+    for w, t in ((12.0, 7.0), (14.0, 8.0)):
+        n = 25.0
+        while n < 60 and not hit(tilt(usb_plug_box(w, t, n + 1.0)), {"tube": tube, "body": parts["body"]}):
+            n += 1.0
+        fits.append(f"{w:.0f} x {t:.0f} up to {n:.0f} mm")
+    print(f"{'USB-C overmold that fits':34s} {'; '.join(fits)}")
     return bad
 
 
