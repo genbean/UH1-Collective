@@ -119,18 +119,20 @@ Rev 1 and 2 put the switch carrier in the lower panel, so the panel needed suppo
 | `HueyHeadR5-LowerPanel-Hat3-Black` / `-WhiteText` | face down, as before (Arachne, 0.42 mm first layer); no supports |
 | `HueyHeadR5-Hat3-Pod.stl` | back down, as it comes; no supports |
 | `HueyHeadR5-Hat3-Rocker.stl` | stem down, as it comes: the cone is 45°; no supports |
-| `HueyHeadR5-Hat3-SpringCup.stl` | flat |
+| `HueyHeadR5-Hat3-SpringCup.stl` | flat. A 10 mm washer with a shallow seat for the spring. It goes on the pod's back, round the screw hole, seat outward, and isn't glued |
 | `HueyHeadR5-Hat3-Cap.stl` | base down |
 
 Print the pod and rocker with 0.2 mm layers (or 0.1 mm): their heights are whole layers.
 
 Hardware: 4 × TE 1825910-6 (the ones you have), an **M3 × 20 countersunk + M3 nut** (kit), and a **pen spring** from the trigger's pack, cut to about 6 coils. It fits 4.2 mm long and closes another 0.6 mm at full tilt, so it must not go solid above 3.5 mm.
 
+![From behind: the cup, spring and screw in place](renders/hat3_back.png)
+
 Fitting it:
 1. Put the four switches in the pod's pockets from the front, legs out the back, and wire them.
 2. Glue the pod to the panel's back over the pins.
 3. Press the M3 nut into the hex pocket in the rocker's stem. Put the rocker in through the panel's hole, boss first, into the square bore.
-4. From behind: the screw through the spring, then the cup (seat toward the spring), then the pod, into the nut. Hold the stem and turn the screw until the head's top is about 6 mm behind the pod's back. The rocker should sit firm, with no rattle.
+4. From behind: the screw through the spring, then the cup (seat toward the spring), then the pod, into the nut. The cup ends up flat on the middle of the pod's back, with the spring between it and the screw's head. Don't glue it: as the hat tips, the screw swings and drags the cup up to 1.3 mm across the pod's back. Hold the stem and turn the screw until the head's top is about 6 mm behind the pod's back. The rocker should sit firm, with no rattle.
 5. With a meter, check that no switch reads closed at rest, that each side clicks only its own switch, and that each diagonal clicks its two.
 6. Glue the cap on the stem.
 
@@ -142,4 +144,4 @@ Checked in CAD (`--check`): nothing overlaps at rest, and the pod, switches and 
 | NE, SE, SW, NW | 7.2° / 10.2° | both neighbours | 12.9° |
 | anywhere between | 4.6–5.8° / 6.5–8.3° | one, the second partly | 13.1° |
 
-No third button ever moves. Not printed yet. If a switch reads closed at rest, raise `BTN_GAP` by 0.2 and reprint only the rocker. If a diagonal won't click, lower it by 0.2.
+No third button ever moves. Slid to wherever the screw drags it, the cup still covers the pod's screw hole and clears the switch legs. Not printed yet. If a switch reads closed at rest, raise `BTN_GAP` by 0.2 and reprint only the rocker. If a diagonal won't click, lower it by 0.2.
