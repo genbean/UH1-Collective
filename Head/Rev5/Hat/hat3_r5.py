@@ -277,6 +277,17 @@ def modes():
     return out
 
 
+def cup_shift(n, d, theta):
+    """Where the tipped screw's axis crosses the cup's mid-plane, (x, z): the loose cup is dragged there, sliding on
+    the pod's back (its hole is only 0.2 mm bigger than the screw)."""
+    R, t = tip_matrix(n, d, theta)
+    p0, p1 = R @ [0, 0, 0] + t, R @ [0, 1, 0] + t
+    yc = Y_BACK + CUP_T / 2
+    s = (yc - p0[1]) / (p1[1] - p0[1])
+    p = p0 + s * (p1 - p0)
+    return np.array([p[0], p[2]])
+
+
 def vol(m):
     return m.volume() if m.num_vert() else 0.0
 
@@ -313,7 +324,7 @@ def check():
 
     print("\nevery way it can tip, to where it stops (buttons left out: they bottom first, see the angles):")
     print(f"  {'mode':14s} {'stop':>6s}  {'N':>5s} {'E':>5s} {'S':>5s} {'W':>5s}  click nom/max at   stopped by")
-    worst = []
+    worst, cups = [], []
     for label, n, d in modes():
         lo, hi = 0.0, np.radians(30)
         assert not hits(1e-4, n, d), (label, hits(1e-4, n, d))
@@ -333,9 +344,16 @@ def check():
             return float("nan")
         clicks = sum(v >= BTN_GAP + CLICK[2] for v in tr)
         worst.append((label, s[-3] if len(s) > 2 else 0, clicks))
+        sx, sz = cup_shift(n, d, lo)
+        slid = cup().translate((sx, 0, sz))
+        cup_bad = [k for k, m in (("screw", tipped(screw(), n, d, lo)), ("pod", P), ("legs", legs)) if vol(slid ^ m) > 0.002]
+        cups.append((np.hypot(sx, sz), cup_bad))
         print(f"  {label:14s} {np.degrees(lo):5.1f}d  " + " ".join(f"{v:5.2f}" for v in tr) +
               f"  {first(CLICK[1]):4.1f} / {first(CLICK[2]):4.1f}d   " + ", ".join(hits(hi, n, d)))
     print(f"\nmost a third button moves: {max(w[1] for w in worst):.3f} mm (a click needs {BTN_GAP + CLICK[0]:.2f} at the least)")
+    bad = sorted({k for _, b in cups for k in b})
+    print(f"the loose cup slides up to {max(c[0] for c in cups):.2f} mm on the pod's back, following the screw; "
+          f"slid, it hits: {', '.join(bad) or 'nothing'}")
 
 
 def pod_trim(P):
