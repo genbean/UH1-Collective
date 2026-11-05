@@ -72,8 +72,11 @@ HOLE_R = 11.5                          # the panel's hole
 # ---- rocker
 BTN_GAP = 0.2                          # pusher to button at rest (whole layers: see the README)
 PUSH_H, PUSH_R = 0.4, 1.5              # domed pushers, as Rev 2: they meet the button at its centre however it tips
-BOSS = 3.0                             # square boss, 6 x 6, in a 6.6 mm bore
-BOSS_CLR = 0.3
+BORE = 3.3                             # the pod's square bore, 6.6 mm (half-width)
+BOSS = 3.2                             # the rocker's square boss at its back, on the anvil: 6.4 mm, 0.1 inside the bore all
+                                       # round, which is what stops the rocker turning (it was 6.0: too loose in print)
+BOSS_TAPER = 0.2                       # ... and this much narrower at the bore's mouth, so its sides clear the bore's wall
+                                       # as it tips (a straight 6.4 would hit it by 0.06 at 13 degrees)
 POST = 1.1                             # the pod's wall round the bore
 Y_PB = Y_SEAT - (Y_SEAT - (Y_BTN - BTN_GAP)) - PUSH_H   # disc's back: pushers' tips BTN_GAP in front of the buttons  -0.6
 DISC_R = 10.1
@@ -140,8 +143,8 @@ def pod():
     rev = h.cs([(0, 0), (POD_R, 0), (POD_R, FLANGE_T), (BACK_R, FLANGE_T + POD_R - BACK_R), (BACK_R, Y_BACK), (0, Y_BACK)])
     p = mf.Manifold.revolve(rev, 192).rotate((-90, 0, 0))            # profile (r, y) turned round the y axis
     p -= ycyl(0, 0, 2 * FRONT_R, -1, Y_COVER + 0.01)                 # front recess, down to the covers
-    p += prism(square(BOSS + BOSS_CLR + POST), Y_SEAT - BORE_D, Y_COVER + 0.02)   # the post round the bore
-    p -= prism(square(BOSS + BOSS_CLR), Y_SEAT - BORE_D - 1, Y_SEAT + ANVIL_H)    # the bore
+    p += prism(square(BORE + POST), Y_SEAT - BORE_D, Y_COVER + 0.02)              # the post round the bore
+    p -= prism(square(BORE), Y_SEAT - BORE_D - 1, Y_SEAT + ANVIL_H)               # the bore
     p += prism(octagon(R_OCT), Y_SEAT, Y_SEAT + ANVIL_H + 0.01)                   # the anvil
     body = at4(rect(-POCKET / 2, PITCH - POCKET / 2, POCKET / 2, PITCH + POCKET / 2))
     notch = at4(rect(NOTCH[0], PITCH - NOTCH[2] / 2, NOTCH[1], PITCH + NOTCH[2] / 2)
@@ -167,7 +170,9 @@ def rocker():
     y1 = yc + (DISC_R - STEM_R)
     rev = h.cs([(0, Y_STEM), (STEM_R - 0.4, Y_STEM), (STEM_R, Y_STEM + 0.4), (STEM_R, yc), (DISC_R, y1), (DISC_R, Y_PB), (0, Y_PB)])
     r = mf.Manifold.revolve(rev, 192).rotate((-90, 0, 0))
-    r += prism(square(BOSS), Y_PB - 0.01, Y_SEAT)
+    mouth = Y_SEAT - BORE_D
+    r += prism(square(BOSS - BOSS_TAPER), Y_PB - 0.01, mouth)
+    r += (prism(square(BOSS - BOSS_TAPER), mouth - 0.01, mouth) + prism(square(BOSS), Y_SEAT - 0.01, Y_SEAT)).hull()
     for x, z in btn_pts():
         yc_ = Y_PB + PUSH_H - PUSH_R
         r += mf.Manifold.sphere(PUSH_R, 48).translate((x, yc_, z)) - ycyl(x, z, 2 * PUSH_R + 1, yc_ - PUSH_R - 1, Y_PB)
@@ -311,6 +316,9 @@ def check():
         print(f"  {a:7s} x {b:14s} {vol(ma ^ mb):7.3f} mm3")
     pins = sum(vol(ycyl(PIN_R * np.sin(np.radians(a)), PIN_R * np.cos(np.radians(a)), PIN_D + 0.4, 0, 2.0) - P) for a in PIN_ANG)
     print(f"  pin holes {pins:.1f} mm3 open; pins {PIN_D} x {PIN_H} in {PIN_D + 0.4} x 2.0 holes")
+    twist = np.arcsin(BORE / (BOSS * np.sqrt(2))) - np.radians(45)
+    print(f"  boss {2 * BOSS:.1f} in a {2 * BORE:.1f} bore: the rocker can turn {np.degrees(twist):.1f} degrees, moving each "
+          f"pusher {PITCH * twist:.2f} mm across its button ({BTN_R:.2f} mm radius)")
     print(f"  pusher to button {BTN_GAP:.2f}; spring fitted {spring_len():.2f} mm; screw tip {Y_HEAD - SCREW_L:.2f}, nut "
           f"{Y_STEM + NUT_POCKET - NUT_T:.2f} .. {Y_STEM + NUT_POCKET:.2f}, stem front {Y_STEM:.2f}")
 

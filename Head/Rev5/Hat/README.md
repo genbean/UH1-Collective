@@ -105,7 +105,7 @@ Rev 1 and 2 put the switch carrier in the lower panel, so the panel needed suppo
 
 - **A straight push moves nothing.** A fixed octagonal anvil, 2.6 mm out to its edges, stands in the pod's middle. The rocker's square boss sits on it, so a push on the middle goes straight into the anvil.
 - **8-way.** A push toward a switch tips the rocker over that edge of the anvil, and that switch, 8.5 mm out, clicks. A push toward a diagonal tips it over a diagonal edge, and both neighbours (6.0 mm out along it) click. Opposite buttons can't go in together, and nor can three.
-- **No slop.** The boss is square, in a square bore 0.3 mm bigger all round, so the rocker can't slide or turn and its pushers stay on the buttons.
+- **No slop.** The boss is square, in a 6.6 mm square bore, so the rocker can't slide or turn and its pushers stay on the buttons. The boss is 6.4 mm where it sits on the anvil, 0.1 mm inside the bore all round. That lets the rocker turn 1.8°, which moves each pusher 0.27 mm across its 3.5 mm button. It narrows to 6.0 mm at the bore's mouth so its sides still clear the bore's wall at full tilt (by 0.05 mm at the least). The first print had a straight 6.0 mm boss: it could turn 6°, about 0.9 mm at the pushers in CAD, and further in print.
 - **Feel.** An M3 × 20 countersunk screw comes from behind, through a cup, a pen spring and the anvil, into an M3 nut in the rocker's stem. The spring holds the rocker on the anvil and centres it, and the tact switch gives the click. The pressed buttons bottoming are the stop; the cap's rim on the panel face is the backstop at 13°.
 - **Accurate where it matters.** Every gap that sets the click (anvil, pocket floors, pushers) is a top surface of either the pod or the rocker, and each is a whole number of 0.2 mm layers. The panel doesn't set any of it.
 - **Serviceable.** The rocker goes in and out through the panel's hole from the front.
@@ -144,4 +144,6 @@ Checked in CAD (`--check`): nothing overlaps at rest, and the pod, switches and 
 | NE, SE, SW, NW | 7.2° / 10.2° | both neighbours | 12.9° |
 | anywhere between | 4.6–5.8° / 6.5–8.3° | one, the second partly | 13.1° |
 
-No third button ever moves. Slid to wherever the screw drags it, the cup still covers the pod's screw hole and clears the switch legs. Not printed yet. If a switch reads closed at rest, raise `BTN_GAP` by 0.2 and reprint only the rocker. If a diagonal won't click, lower it by 0.2.
+No third button ever moves. Slid to wherever the screw drags it, the cup still covers the pod's screw hole and clears the switch legs. Printed once: the boss turned out loose and is now bigger (see **No slop** above). If a switch reads closed at rest, raise `BTN_GAP` by 0.2 and reprint only the rocker. If a diagonal won't click, lower it by 0.2.
+
+If the rocker still turns too far in the bore, raise `BOSS` (half the boss's width at the anvil, now 3.2) by 0.025 to 0.05 and reprint only the rocker; keep it below 3.25, or the boss's corners rub the bore at full diagonal tilt. If it binds or won't come back to centre, lower it.
