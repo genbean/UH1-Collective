@@ -82,16 +82,20 @@ Every cut keeps at least 1.2 mm of wall to the tube bore, the set screw's hole a
 ## Collision check
 
 `check_r5.py` builds every part in place and tests every pair that shouldn't touch:
-- the body, both panels (with the hat's carrier), the trigger;
+- the body, both panels (the lower one is hat Rev 4's, with its bosses), the trigger;
 - the five toggles' and the STOP REL button's bodies, from their datasheets;
-- the hat's four tact switches;
+- hat Rev 4's board, its switch, J1 with a plug and its wires, and the four M2 screws;
 - the HeliSR board, its spacers, the parts on its face, the Pro Micro and its USB-C plug.
 
-It also checks three more things:
+It also checks these:
 - no cut in the neck block breaks out through a wall (only the bores' open bottom and the AS5600's way in out of the open front leave the solid);
 - the AS5600 module board clears every switch by 1 mm;
-- every label clears the screw heads, the switches' nuts, the hat's bezel and the panel's edge;
-- the starter leads' 4 mm hole is open from the groove to the box, keeps 1.2 mm of wall all round, and comes out in the box's open inside.
+- every label clears the screw heads, the switches' nuts, the hat's cap and the panel's edge;
+- the starter leads' 4 mm hole is open from the groove to the box, keeps 1.2 mm of wall all round, and comes out in the box's open inside;
+- **the cables into the tube.** The USB-C plug (a 12 × 7 × 25 mm overmold) hangs from the Pro Micro through the wire slot, and its end goes 5.4 mm into the carbon tube's top end, through the lip's 20 mm opening.
+  - Its cable (4.5 mm, a guess: Stewart doesn't publish it) bends the 20° into the tube's axis and runs down the 25 × 23 mm tube.
+  - The base sensor's 3.6 mm lead comes up beside it, through the same opening 7.5 mm in front of the centre. Behind the plug works too; right beside its 12 mm sides doesn't.
+  - Nothing touches, and the plug and cable keep 1 mm from the body, the tube and the HeliSR. Measured the same way, a USB-C overmold fits up to 38 mm long at 12 × 7 mm, or 35 mm at 14 × 8; measure yours.
 
 All of it passes:
 
@@ -104,6 +108,11 @@ upper panel labels clear                0.00 mm2 OK
 leads hole open, groove to end     OK
 leads hole 1.2 mm walls            OK
 leads hole comes out in the box    OK
+USB plug into the tube             OK
+USB cable down the tube            OK
+sensor lead beside them            OK
+USB plug and cable, 1 mm clear     OK
+USB-C overmold that fits           12 x 7 up to 38 mm; 14 x 8 up to 35 mm
 all clear
 ```
 

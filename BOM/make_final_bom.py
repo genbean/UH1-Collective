@@ -111,9 +111,10 @@ SECTIONS.append(("Wiring", [
      "380-SC-2CAK020M-ND", 7.33, 1, "", 0, "Cut it about 15 cm from the USB-C plug. Feed the long piece (USB-A end stays "
      "at the PC) through the device: laid in the lever's open channels, up the tube and in through the head. The cable "
      "cover's spout is a plain 7.5 mm bore. Splice the USB-C stub back on inside the head (red, black, green, white) "
-     "and leave the shield wire unconnected. The cut costs about 15 cm of the 2 m: check the run still reaches. The "
-     "head's clearances were checked with a micro-USB plug: check the C plug fits the same way",
-     "Digi-Key cart 2026-10-23; Head/Rev4/README.md; Base/README.md"),
+     "and leave the shield wire unconnected. The cut costs about 15 cm of the 2 m: check the run still reaches. "
+     "Head/Rev5/check_r5.py checks the C plug (a 12 x 7 x 25 mm overmold, its end 5.4 mm into the tube) and its "
+     "cable into the tube: a 12 x 7 overmold up to 38 mm long fits, 14 x 8 up to 35 mm. Measure yours",
+     "Digi-Key cart 2026-10-23; Head/Rev5/README.md (collision check); Base/README.md"),
 ]))
 SECTIONS.append(("Angle sensors", [
     ("AX1, AX4", 2, "AS5600 magnetic encoder module, 23 x 23 mm, with 5 x 2 mm diametric magnet", "WWZMDiB", "", "Amazon",
