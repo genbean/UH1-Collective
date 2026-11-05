@@ -13,7 +13,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "Hat"))
 import huey_head_r5 as h
 import hat_r5
-import hat3_r5                                      # SEARCH CONT hat Rev 3: its own lower panel and the pod behind it
+import hat4_r5                                      # SEARCH CONT hat Rev 4: its own lower panel and the breakout board behind it
 from huey_head_r5 import box, ycyl, tilt
 
 TOL = 0.05                                     # mm3: anything smaller is a float graze
@@ -49,7 +49,7 @@ def tm(m):
 
 def main():
     body = h.body_r5()
-    lp, _ = hat3_r5.lower_panel()
+    lp, _ = hat4_r5.lower_panel()
     up, _ = h.upper_panel()
     parts = {"body": body, "lower_panel": tilt(lp), "upper_panel": tilt(up), "trigger": h.trigger()}
     sw = {"GOV": toggle_body(*h.GOV, 0.0), "LDG_EXT": toggle_body(*h.LDG_EXT, 0.0),
@@ -58,11 +58,13 @@ def main():
           "SL": toggle_body(*h.SL, h.UY), "LDG_ON": toggle_body(*h.LDG_ON, h.UY)}
     parts.update({k: tilt(v) for k, v in sw.items()})
     parts.update({k: tilt(v) for k, v in helisr().items()})
-    asm = hat3_r5.assembly()                                     # the hat: pod, switches, spring stack (rocker and cap
-    for k in ("pod", "cup", "screw", "spring", "tact0", "tact1", "tact2", "tact3"):   # are checked by hat3_r5.py --check)
+    asm = hat4_r5.assembly()                                     # the hat: the board, the switch, J1 and its plug, the
+    for k in ("board", "switch", "j1", "plug", "screws"):        # screws (the stick and cap are checked by hat4_r5.py --check)
         parts[f"hat_{k}"] = tilt(asm[k])
     names = list(parts)
     allowed = {("body", "lower_panel"), ("body", "upper_panel")}   # the panels' plugs sit inside the walls: checked below
+    allowed.add(("lower_panel", "hat_screws"))                  # the M2s cut their thread in the bosses' pilots; hat4_r5.py
+                                                                 # --check tests them against the panel outside the pilots
     bad = 0
     for i, a in enumerate(names):
         for b in names[i + 1:]:
@@ -108,7 +110,7 @@ def labels():
     and the panel's edge by 1 mm."""
     c = h.circle
     low = [c(h.PANEL_CSK[0] + 1.0, x, z) for x, z in h.COLUMNS] + [c(14.0, *h.GOV), c(14.0, *h.LDG_EXT),
-                                                             c(2 * hat3_r5.v1.CAP_R + 1.0, *h.SEARCH), c(h.PB4_BEZEL_D + 1.0, *h.STOP_REL)]
+                                                             c(2 * hat4_r5.v1.CAP_R + 1.0, *h.SEARCH), c(h.PB4_BEZEL_D + 1.0, *h.STOP_REL)]
     up = [c(h.PANEL_CSK[0] + 1.0, x, z) for x, z in h.UPPER_COLUMNS] + [c(14.0, *h.SL), c(14.0, *h.LDG_ON)]
     bad = 0
     for name, lab, holes, outline in (("lower", h.lower_labels(), low, h.LOWER_PANEL), ("upper", h.upper_labels(), up, h.UPPER_PANEL)):
