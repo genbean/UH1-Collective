@@ -127,7 +127,24 @@ SECTIONS.append(("Huey head: switches", [
     dk("637H/2", "IN1, IN2", notes="GOV RPM INCR / DECR. Price: check the cart"),
     dk("636H/2", "IN7", notes="LDG LT ON (one side wired). Price: check the cart"),
     dk("PB4-M-BK-D-67", "IN13", notes="STOP REL"),
-    dk("1825910-6", "IN9-IN12, IN14", notes="SEARCH CONT hat (4, new rocker hat) and starter trigger (1). IN8, IN15, IN16 are spare"),
+    dk("1825910-6", "IN14", 1, notes="Starter trigger. (The SEARCH CONT hat's Rev 1-3 used four more: Rev 4 uses the ALPS "
+       "stick below.) IN8, IN15, IN16 are spare"),
+    ("IN9-IN12 (+ IN15)", 1, "8-direction stick switch with centre push, 11 x 11 mm body, 2.2 mm metal stick, THT",
+     "ALPS Alpine", "RKJXM1015004", "Mouser", "688-RKJXM1015004", None, 1, "", 0, "SEARCH CONT hat Rev 4, on the "
+     "SearchHat breakout board (SW1). Directions A-D to IN9-IN12 (EXT, RETR, L, R); the centre push (CTR) to the spare "
+     "IN15 if you want it. Price: check Mouser", "Head/Rev5/Hat/README.md (Rev 4); PCB/SearchHat_Rev1.0/README.md"),
+]))
+SECTIONS.append(("SearchHat Rev 1.0: the SEARCH CONT hat's breakout board (hat Rev 4)", [
+    ("PCB", 1, "SearchHat Rev 1.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 22 x 29 mm", "OSH Park", "", "OSH Park",
+     "", 4.95, 3, "", 0, "Not ordered yet: upload PCB/SearchHat_Rev1.0/SearchHat_Rev1.0_Gerbers.zip. OSH Park's $5 per "
+     "square inch for three boards (0.99 sq in)", "PCB/SearchHat_Rev1.0/README.md"),
+    ("J1", 1, "JST SH 1.0 mm header, 6 pins, side entry, SMD", "JST", "SM06B-SRSS-TB(LF)(SN)", "Mouser", "", None, 1, "", 0,
+     "On the board's back. Leave it off if you solder the wires to the J2 pads instead. Price: check Mouser (or Digi-Key "
+     "with the switch's order)", "PCB/SearchHat_Rev1.0/README.md"),
+    ("J1 lead", 1, "JST SH jumper, 6 positions, socket to socket, about 150 mm", "JST", "A06SR06SR30K152A", "Mouser", "",
+     None, 1, "", 0, "Cut in half: one end plugs into J1, the other's wires go to the HeliSR's J2 loom (GND, IN9-IN12, and "
+     "IN15 for the centre push). Check pin 1 with a meter. Not needed if you solder to J2. Price: check Mouser",
+     "PCB/SearchHat_Rev1.0/README.md"),
 ]))
 SECTIONS.append(("Huey head: hardware", [
     setkit("Tube boss", 1, "M5 x 8 set screw", "From the boss's front (lower panel off), into its printed M5 thread; the tip "
@@ -146,9 +163,8 @@ SECTIONS.append(("Huey head: hardware", [
     setkit("Trigger pull stop", 1, "M3 x 4 set screw", "Through the trigger's arm (printed M3 thread); its tip bears on the mount. Set it "
            "so the starter switch clicks before the stop"),
     kit("Trigger pull stop seat", 1, "M2 x 8 countersunk screw", "Flush in a countersunk, M2-tapped hole (1.6 mm pilot) in the mount's face under the spring pocket, so the pull stop's tip bears on steel and not on plastic"),
-    kit("Search hat (Rev 3) spring screw", 1, "M3 x 20 countersunk screw + M3 hex nut", "From behind the pod, through the "
-        "cup, a pen spring cut to 6 coils (one more from the trigger's pack of 10) and the pod's anvil, into the nut in the "
-        "rocker's stem. It holds the rocker on the anvil; it is not a pivot"),
+    kit("Search hat (Rev 4) board", 4, "M2 x 8 countersunk screw", "From behind, through the SearchHat board's 2.2 mm "
+        "holes into the 1.6 mm pilots in the lower panel's four bosses; each cuts its own thread"),
     kit("Panels", 8, "M3 x 16 countersunk screw (DIN 7991)", "4 per panel, into the M3 threads printed 20 mm deep in the "
         "box's corner columns (a kit M3 x 20 fits too)"),
     kit("HeliSR board", 4, "M3 x 12 countersunk screw (DIN 7991) + M3 hex nut", "From outside the rear wall through a "
@@ -276,12 +292,12 @@ PRINTED = [
     ("Head", "Head/Rev5/stl/HueyHeadR5-Body.stl", 1, "One piece: box, neck, faux friction knob, boss, sensor pod and "
      "trigger mount. On its rear wall, with tree supports under the neck, knob and tube bore; then ream the bore to a "
      "press fit on the tube"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-LowerPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-LowerPanel-Hat4-Black.stl + -WhiteText.stl", 1, "Front face down, two colours, no "
+     "supports. The SEARCH CONT hat Rev 4's panel: the hat's four bosses grow straight up off its back"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-UpperPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-Trigger.stl", 1, "On either flat side"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-Cap.stl", 1, "Base down. Glue it onto the rocker plate's four legs, last"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-RockerPlate.stl", 1, "Legs down on the bed, boss up; the legs are part of it"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat-Bezel.stl", 1, "Front face down"),
+    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat4-Cap.stl", 1, "Base down, as exported: the stick's socket opens on the bed. "
+     "Push it onto the switch's stick last"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
@@ -301,6 +317,8 @@ PRINTED = [
      "the M5 x 30 hex bolt's head sits on the floor"),
 ]
 DROPPED = [
+    ("TE 1825910-6 tact switches for the SEARCH CONT hat (450-1650-ND)", 4, "Bought in order for the tact-switch "
+     "hats (Rev 1-3); hat Rev 4 uses the ALPS RKJXM1015004 on its own board", "Head/Rev5/Hat/README.md"),
     ("HeliSR Rev 3.0 bare PCBs (OSH Park, 3 boards, $10.20)", 3, "Bought 2026-10-21. Rev 4.0 replaces the board: it reads "
      "the AS5600s over I2C instead of their analog output", "OSH Park order, 2026-10-21"),
     ("YAGEO RC0805FR-071KL 1 kOhm 0805 (311-1.00KCRCT-ND)", 2, "Bought in order for Rev 3.0's PROG buttons (R1, "
@@ -351,6 +369,8 @@ SOURCES = [
     ("HeliSR Rev 3.0 board", "PCB/HeliSR_Rev3.0", "Replaced by Rev 4.0. Bare PCB ordered from OSH Park on 2026-10-21, and "
      "its parts in the Rev 3.0 Digi-Key order; folder frozen and read-only. Its full BOM still supplies the cables and "
      "head switches"),
+    ("SearchHat Rev 1.0 board", "PCB/SearchHat_Rev1.0 (tools/gen_searchhat.py)", "The SEARCH CONT hat Rev 4's breakout: "
+     "designed and checked (DRC clean), not ordered yet"),
     ("Huey head", "Head/Rev5", "Current head design: Rev 5, Rev 4 cut to the real UH-1 panels' dimensions, with printed "
      "threads. Rev 4 (Head/Rev4), the larger one-piece head it came from, is kept as a fallback"),
     ("MkIII base Rev 3", "Base (Base/mk3_rev3.py imports Base/mk3_pivot.py)", "Concept, nothing printed yet: check the orange lines"),
@@ -383,7 +403,7 @@ def section(ws, r, title, ncol):
     ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=ncol)
 def link(cell, supplier, spn):
     url = {"Digi-Key": "https://www.digikey.com/en/products/result?keywords=", "Amazon": "https://www.amazon.com/dp/",
-           "OSH Park": "https://oshpark.com/"}.get(supplier)
+           "OSH Park": "https://oshpark.com/", "Mouser": "https://www.mouser.com/c/?q="}.get(supplier)
     if url and (spn or supplier == "OSH Park"): cell.hyperlink = url + spn; cell.font = F(color="0563C1", underline="single")
 
 wb = Workbook(); wb.calculation = CalcProperties(fullCalcOnLoad=True)
@@ -440,7 +460,7 @@ ws.cell(r, 13, "Unpriced lines").font = F(bold=True)
 ws.cell(r, 14, f'=COUNTIFS(A{HR + 1}:A{last_item},">0",M{HR + 1}:M{last_item},"")').font = F(bold=True)
 r += 1
 ws.cell(r, 1, "Still to buy counts the packs to order; whole build counts every pack needed, bought or not. Both leave "
-        "out the unpriced lines: generic hardware and wire.").font = F(italic=True, color="595959")
+        "out the unpriced lines: generic hardware and wire, and the hat's Mouser parts (price them in the cart).").font = F(italic=True, color="595959")
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=NC)
 ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 

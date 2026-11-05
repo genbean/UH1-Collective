@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "SearchHat")(type "KiCad")(uri "${KIPRJMOD}/SearchHat.pretty")(options "")(descr "SearchHat breakout parts"))
+)

@@ -1,0 +1,15 @@
+(version 1)
+
+# The lower M2 holes' library courtyards (5 mm across) overlap the wire pads' (J2) by about 0.5 mm. An M2
+# countersunk head is 3.8 mm across, and its keepout (4.4 mm) stops every track and the pours; the nearest J2 pad is
+# 0.9 mm outside the head. (severity ignore), not exclusion: kicad-cli 9 still reports rule exclusions as errors.
+(rule "Lower holes and the wire pads: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "(A.Reference == 'H3' && B.Reference == 'J2') || (A.Reference == 'J2' && B.Reference == 'H3') || (A.Reference == 'H4' && B.Reference == 'J2') || (A.Reference == 'J2' && B.Reference == 'H4')"))
+
+# The switch's left PUSH pin (GND) gets one thermal spoke on the back, where R runs past it; a GND track on the back
+# and the front pour join it as well.
+(rule "Switch GND pins: one spoke is enough"
+  (constraint min_resolved_spokes 1)
+  (condition "A.memberOfFootprint('SW1') && A.NetName == 'GND'"))
