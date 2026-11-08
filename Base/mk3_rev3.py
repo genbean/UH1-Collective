@@ -500,6 +500,20 @@ def cover_cable_r3():
     return c.clean()
 
 
+# Retrofit: a cable cover that goes on with the cable already through the lever. The slot underneath is left solid (no
+# plug, no M2 screw); instead a NOTCH_W notch runs in from the face that seats on the block, the full length of the spout
+# and across the ring wall, down to the bore's axis. Offer it up to the block face with the cable's radial run in the
+# notch, push it home, and the cable lies in the bore's far half; the block face closes the notch.
+NOTCH_W = 4.8                                     # the USB cable (4.6, as modelled) + 0.1 each side
+
+
+def cover_cable_notched():
+    c, sy, _ = _cable_cover_solid()
+    y0 = m.BLOCK_Y1
+    c = c.cut(box(0, m.COVER_R + 12, y0 - 1, sy, -NOTCH_W / 2, NOTCH_W / 2))
+    return c.clean()
+
+
 def cable_plug():
     c, sy, _ = _cable_cover_solid()
     x, zh = PLUG_SCREW
@@ -813,6 +827,8 @@ elif __name__ == "__main__":
         sub = os.path.join(HERE, "stl") if name in PRINTED else os.path.join(HERE, "stl", "ref")
         os.makedirs(sub, exist_ok=True)
         cq.exporters.export(cq.Workplane().add(shp), os.path.join(sub, f"{name}.stl"), tolerance=0.04, angularTolerance=0.12)
+    cq.exporters.export(cq.Workplane().add(cover_cable_notched()), os.path.join(HERE, "stl", "cover_cable_notched.stl"),
+                        tolerance=0.04, angularTolerance=0.12)              # retrofit: not in the assembly
     os.makedirs(os.path.join(HERE, "step"), exist_ok=True)
     asm = cq.Assembly(name="MkIII_Rev3")
     for name, shp in parts.items():
