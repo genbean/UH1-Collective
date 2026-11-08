@@ -100,9 +100,18 @@ def glb(P, path):
     print("wrote", os.path.relpath(path, HERE))
 
 
+def frame_top(C):
+    """the frame alone from above, the brake tower at the top of the picture"""
+    P = {"frame": (to_mesh(v.static_parts()["frame"]), C["frame"])}
+    save(title(R.render(P, (-0.3, 0.0, 1.0), up=(1, 0, 0), size=(1100, 1400), zoom=1.0)[0],
+               "Rev 4 frame from above", "The up-stop pad behind the axis, and the 45 deg gussets at each corner of the "
+               "pillow blocks"), "rev4_frame_top.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     C = colours()
+    frame_top(C)
     P0 = scene(0.0, C, tube_to=-200.0)
     P32 = scene(v.STOP_DEG, C, tube_to=-200.0)
     glb(scene(0.0, C), os.path.join(OUT, "MkIII_Rev4_Assembly.glb"))
@@ -116,7 +125,7 @@ def main():
                "Rev 4 from behind", "The brake knob on the back of the tower; the USB cable leaves through the cable "
                "cover's rim"), "rev4_rear.png")
     save(title(R.render(P32, (-0.2, -1.0, 0.25), size=(1600, 1000), focus=((-170, -60, -58), (100, 60, 100)))[0],
-               "Rev 4 at the 32 deg up-stop", "Both up-stop lugs land on the pedestal; the shoe stays on the hub's back"),
+               "Rev 4 at the 32 deg up-stop", "Both up-stop lugs land on the pad behind the axis; the shoe stays on the hub's back"),
          "rev4_32deg.png")
 
     # the brake and the slotted up-stop: frame, caps and covers hidden, from behind and below
@@ -125,7 +134,7 @@ def main():
     for th, P, name, sub in ((0.0, P0, "rev4_brake_lugs.png", "At 0 deg the shoe's lower end sits between the two "
                               "up-stop lugs; the hub between them is a plain cylinder for the felt"),
                              (v.STOP_DEG, P32, "rev4_brake_lugs_32deg.png", "At 32 deg the lugs have swung down, "
-                              "either side of the shoe, onto the pedestal (frame hidden)")):
+                              "either side of the shoe, onto the pad behind the axis (frame hidden)")):
         save(title(R.render(hide(P, *inner), (1.0, -0.55, -0.45), size=(1500, 1050),
                             focus=((-10, -35, -45), (75, 35, 35)), zoom=1.0)[0],
                    f"Brake shoe and up-stop lugs, {th:.0f} deg", sub), name)

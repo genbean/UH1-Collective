@@ -20,7 +20,8 @@ It's a concept: nothing has been printed. Print the [fit-test coupons](#fit-test
 - **Sensor:** the AS5600 board sits inside the sensor trunnion's end, so the side covers are 9.5 mm deep (Rev 3: 15).
 - **USB cable:** it leaves through a notch in the cable cover's rim instead of a spout.
 - **Brake:** a narrow, tall shoe presses on the back of the hub, set by the MkII knob on the back of a tower on the frame.
-- **Up-stop:** the boss under the hub has a slot down the middle. It's now two lugs, one each side of the shoe, both landing on the pedestal.
+- **Up-stop:** two lugs under the back of the hub, one each side of the shoe, land on a pad further back than Rev 3's.
+- **Frame gussets:** 45° gussets at all four corners of both pillow blocks, tying them to the webs behind and the down-stop pillars in front.
 
 The base is longer front to back: the plate is 136 mm long (Rev 3: 116) and the knob stands 35 mm out behind it.
 
@@ -42,10 +43,14 @@ The trunnion and bearing seat are new sizes, so print these before the lever and
 
 | File | What it is | Change |
 |---|---|---|
-| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 40.0 / 40.2 / 40.4 mm | `TRUN_OD += step` |
+| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.9 / 40.1 / 40.3 mm | `TRUN_OD += step` |
 | `stl/coupons/coupon_bearing_seat_6808.stl` | the pillow block's seat and 2 mm lip, 51.9 / 52.1 / 52.3 mm | `BRG_SEAT_D += step` |
 
-`0` is Rev 3's tuned allowance (+0.2 on the race's bore, +0.1 on its outside), carried over. The tube socket is unchanged, so Rev 3's socket fit stands.
+`0` comes from how Rev 3's bearings fitted as built:
+- **Seat:** +0.1 on the race's outside was a perfect fit, so it stays.
+- **Trunnion:** +0.2 on the race's bore pressed on a hair too tight, so Rev 4 uses +0.1 (40.1 mm).
+
+The tube socket is unchanged, so Rev 3's socket fit stands.
 
 ## Across the pivot axis
 
@@ -71,7 +76,7 @@ Each counterbore is 1.25 mm from the hub's end. The bores, the down-stop pads, t
 
 The AS5600 module (WWZMDiB, 23 × 23 mm) sits in a square pocket in the sensor trunnion's end, chip facing out, its front face level with the trunnion's end. There's no carrier.
 
-- **The pocket:** 23.3 mm square and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges, clear of both pad columns.
+- **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, as measured, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges, clear of both pad columns.
 - **Behind the board:** 3.5 mm of space for the wires soldered in from the back and the DIR jumper. It opens into the axial bore, which takes the lead to the tube.
 - **Orientation:** set it in with the pad columns vertical. It fits either way up.
 - **Holding it:** a dot of hot glue in two corners. Nothing else holds it in.
@@ -99,11 +104,27 @@ The shoe is 12 mm wide and 44 mm tall (Rev 3's was 30 wide), with felt on its cu
 
 ![The shoe between the two up-stop lugs, at 0°](renders/rev4_brake_lugs.png)
 
-As in Rev 3, a boss under the back of the hub lands on a pedestal on the frame at 32°. It's 39 mm wide with a 22 mm slot down the middle, so it's two lugs, 8.5 mm wide each.
+Two lugs under the back of the hub land on a pad on the frame at 32°. Each lug is 10 mm wide (|y| 11 to 21), with 22 mm between them for the shoe and the brake tower.
 
-At 0°, the shoe's lower end and the brake tower sit between the lugs. As the lever lifts, they swing down either side of the shoe and land on the pedestal. Inside the slot, the hub is a plain cylinder for the felt to run on.
+**Where the pad is:** further back than Rev 3's pedestal, x = 14 to 29.5, the full width between the pillow blocks. Its back middle (x over 24, |y| under 11) is cut away, clear of the shoe. Its top is at z = −28.5, 2 mm under the hub at its front edge.
 
-![At 32°, the lugs on the pedestal](renders/rev4_brake_lugs_32deg.png)
+**Where the lugs land:** x = 15 to 24.4. They can't land further back: the further back a lug lands, the further back it swings at 0°. These come to x = 35.8 at 0°, 1.2 mm off the webs behind the pillow blocks.
+
+At 0°, the shoe's lower end and the brake tower sit between the lugs. As the lever lifts, the lugs swing down either side of the shoe onto the pad. Between them, the hub is a plain cylinder for the felt to run on.
+
+![At 32°, the lugs on the pad (frame hidden)](renders/rev4_brake_lugs_32deg.png)
+
+The anchor clevis's back wall now runs level, at the cheeks' top, into the pad's front face.
+
+## Frame gussets
+
+![The frame from above: the up-stop pad and the eight corner gussets](renders/rev4_frame_top.png)
+
+Each pillow block has a 45° gusset at each corner, 8 mm along each wall:
+- **Behind, outside:** the block's back face to the outer face of the web running back to the brake tower, up to the web's top. The cap screws' nut slots run out through its sloping face.
+- **Behind, inside:** the block's inner face to the web's front face. Its top is cut back to stay 1.5 mm outside the up-stop lugs' swing.
+- **In front, inside:** the block's inner face to the down-stop pillar's back face, up to the pillar's top, 3 mm clear of the hub.
+- **In front, outside:** the block's front face to the pillar's outer face, up to the pillar's top.
 
 ## Down-stop and strut
 
@@ -167,8 +188,8 @@ Rev 3's shoe hinge screw is gone.
 
 ## Notes
 
-- **The checks:** `python mk3_rev4.py --check` tries every pair of parts at 0°, 8°, 16°, 24°, 31.5° and 32°, and it's clean. The overlaps it allows are the intended ones: screws in their holes, the bearings' inner races on the trunnions, the felt on the shoe, the spring and cap, the strut's tabs in their clevises, and the hose clamp in its groove. Just past each stop, the lever meets the frame where it should: the pads on the pillars below 0°, both lugs on the pedestal above 32°. It also lowers the lever in past the stood-back shoe.
+- **The checks:** `python mk3_rev4.py --check` tries every pair of parts at 0°, 8°, 16°, 24°, 31.5° and 32°, and it's clean. The overlaps it allows are the intended ones: screws in their holes, the bearings' inner races on the trunnions, the felt on the shoe, the spring and cap, the strut's tabs in their clevises, and the hose clamp in its groove. Just past each stop, the lever meets the frame where it should: the pads on the pillars below 0°, both lugs on the up-stop pad above 32°. It also lowers the lever in past the stood-back shoe.
 - **Chamfers:** Rev 3's chamfer step once returned a valid frame with the down-stop pillars missing. Rev 4's version refuses any set of chamfers that takes off more than chamfers could. Rev 3's parts were checked, and none of them lost anything.
 - **Brake feel:** the felt patch is about 11 × 48 mm (Rev 3's drum shoe was wider and shorter). The spring and knob are the same, so the range of drag should be similar, but it's untested.
 - **Balance:** the strut, collar, tube and head are unchanged. The lever is about 68 cm³ lighter, mostly near the pivot, so the balance should be close to Rev 3's. It hasn't been recalculated.
-- **Sensor pocket:** the board's corners clear the pocket by 0.15 mm a side. Measure your module before printing the lever.
+- **Sensor pocket:** sized for the measured board, 0.915 in (23.24 mm), with 0.15 mm a side.

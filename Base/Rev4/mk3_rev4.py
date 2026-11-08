@@ -88,9 +88,10 @@ BRG_IR_SH, BRG_OR_SH = 44.0, 48.3                # inner race's outside, outer r
 BRG_Y0 = HUB_HW + 1.0                            # bearing inner face (22.5)
 BRG_Y1 = BRG_Y0 + BRG_B                          # (29.5)
 BLOCK_Y1 = BRG_Y1 + 2.0                          # pillow block's outer face (31.5): a 2 mm lip holds the outer race
-TRUN_OD = BRG_d + 0.2                            # Rev 3's coupon: +0.2 on the race's bore locks it on
+TRUN_OD = BRG_d + 0.1                            # Rev 3's +0.2 on the race's bore pressed on a hair too tight (as
+                                                 # built, 2026-11-08), so +0.1
 TRUN_OUT = BLOCK_Y1 + 0.5                        # (32)
-BRG_SEAT_D = BRG_D + 0.1                         # Rev 3's coupon: +0.1 on the race's outside
+BRG_SEAT_D = BRG_D + 0.1                         # +0.1 on the race's outside: a perfect fit on Rev 3, as built
 LIP_R = 23.0                                     # clears the inner race (22.0), holds the outer (24.15)
 BLOCK_HW = m.BLOCK_HW                            # 37.5, as Rev 3
 # pillow-block caps: two M3 x 20 countersunk each, from the top, into an M3 nut slid in fore and aft (the 9 mm blocks are
@@ -101,10 +102,11 @@ CAP_NUT_Z = -8.3                                 # the nut's top face, as Rev 3
 COVER_HOLE_R, COVER_R, COVER_IN_R = 30.5, 35.5, 25.0
 COVER_FLOOR, COVER_TAP, COVER_SCREW_L = 2.5, 7.5, 16
 COVER_D = W_HALF - BLOCK_Y1                      # 9.5
-# AS5600 in the sensor trunnion's end: the board (23 x 23 x 1.6) in a square pocket 0.15 mm clear each side, front face level
+# AS5600 in the sensor trunnion's end: the board (0.915 in = 23.24 mm square, measured; 1.6 thick) in a square pocket 0.15 mm
+# clear each side, front face level
 # with the trunnion's end, on two ledges along its top and bottom edges (clear of both pad columns), with 3.5 mm behind it
 # for the wires soldered in from the back and the DIR jumper
-BOARD = m.AS5600_BOARD
+BOARD = 23.24
 BOARD_CLR, BOARD_T, LEDGE, BEHIND = 0.15, 1.6, 1.6, 3.5
 BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and front
 CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top
@@ -123,14 +125,21 @@ LEVER_SCREWS = [(x, y) for x in (-17.0, 10.0) for y in (-16.25, 16.25)]
 GUSSET_T = 8.0
 GUSSET_TOP = [(-48, 16.5), (-4, 33.0), (2, 30.5), (2, 16.5)]  # Rev 1's, its back end cut to x = 2: clear of the shoe at 32 deg
 STOP_DEG = r.STOP_DEG
-USTOP_X, USTOP_Z = (2.0, 18.0), -38.0            # contact face at the stop, world x; pedestal top
-USTOP_HW, USTOP_SLOT = 19.5, 11.0                # boss half width; slot half width (the tower's 10 + 1)
+# up-stop: two lugs under the back of the hub land on a pad behind the axis at STOP_DEG. The further back they land,
+# the further back they swing at 0 deg, toward the webs behind the pillow blocks (x = 37): with the pad at z = -28.5 and
+# the contact face ending at x = 24.4, their back corners come to x = 35.8 at 0 deg, 1.2 mm off the webs. The pad's top
+# is 2 mm under the hub at its front edge.
+USTOP_X, USTOP_Z = (15.0, 24.4), -28.5           # contact face at the stop, world x; the pad's top
+USTOP_HW, USTOP_SLOT = 21.0, 11.0                # lugs from |y| 11 to 21: either side of the shoe and the brake tower (+-10)
+LUG_R = math.hypot(USTOP_X[1], USTOP_Z)          # the lugs' furthest point from the axis (37.5)
 PAD_X, PAD_DY, PAD_Z = r.PAD_X, r.PAD_DY, r.PAD_Z
 
 # ---------------------------------------------------------------- frame
 PLATE_X = (-62.0, 74.0)
 Z_PLATE, AXIS_H = r.Z_PLATE, r.AXIS_H
-PED_X = (USTOP_X[0] - 2.0, USTOP_X[1] + 2.0)
+PED_X = (14.0, 29.5)                             # the up-stop pad, full width between the pillow blocks
+PED_NOTCH = (24.0, USTOP_SLOT)                   # ... with its back middle cut away (x > 24, |y| < 11), clear of the shoe
+CG_LEG = 8.0                                     # corner gussets at each end of each pillow block, 45 deg in plan
 DESK = [(x, y) for x in (PLATE_X[0] + 8, PLATE_X[1] - 8) for y in (-W_HALF + 8, W_HALF - 8)]
 
 # ---------------------------------------------------------------- brake (all on y = 0, z = 0 unless noted)
@@ -161,16 +170,11 @@ def moved(shape):
 
 
 # ================================================================ lever
-def up_stop_boss():
-    """a block under the back of the hub, drawn as it sits at the stop (its face on the pedestal, its top inside the hub)
-    and turned back to 0 deg; at 0 deg it is all below the split, in the lower half"""
-    return rot_y(box(*USTOP_X, -USTOP_HW, USTOP_HW, USTOP_Z, -20.0), -STOP_DEG)
-
-
-def brake_track():
-    """the slot down the up-stop boss: everything outside the hub's cylinder, behind and below the axis, within
-    USTOP_SLOT of the middle"""
-    return box(0, 80, -USTOP_SLOT, USTOP_SLOT, -80, 0).cut(cyl(HUB_R, (0, -40, 0), (0, 40, 0)))
+def up_stop_lugs():
+    """two blocks under the back of the hub, drawn as they sit at the stop (their faces on the pad, their tops inside the
+    hub) and turned back to 0 deg. At 0 deg the part outside the hub is all below the split, in the lower half, and the
+    hub between them is a plain cylinder for the felt"""
+    return [rot_y(box(*USTOP_X, *sorted((s * USTOP_SLOT, s * USTOP_HW)), USTOP_Z, -5.0), -STOP_DEG) for s in (-1, 1)]
 
 
 def sensor_pocket():
@@ -188,12 +192,12 @@ def lever():
     trunnions = [cyl(TRUN_OD / 2, (0, s * BRG_Y0, 0), (0, s * TRUN_OUT, 0)) for s in (-1, 1)]
     gusset = gusset_xz(GUSSET_TOP, -GUSSET_T / 2, GUSSET_T / 2)
     pads = [box(*PAD_X, *sorted((s * PAD_DY[0], s * PAD_DY[1])), PAD_Z, 0) for s in (-1, 1)]
-    h = fuse(core, boss, gusset, *shoulders, *trunnions, *pads, up_stop_boss())
+    h = fuse(core, boss, gusset, *shoulders, *trunnions, *pads, *up_stop_lugs())
     cuts = [cyl(m.SOCK_BORE_R, (-m.SOCK_BOTTOM, 0, 0), (-m.SOCK_MOUTH - 1, 0, 0)),               # tube socket
             tube(m.SOCK_BOSS_R + 1, m.SOCK_BOSS_R - 1.2, (-54, 0, 0), (-63, 0, 0)),               # hose-clamp groove
             cyl(m.CABLE_R, (0, -POCKET_FLOOR - 0.5, 0), (0, TRUN_OUT + 1, 0)),                   # axial 1/2" bore
             cyl(m.CABLE_R, (-m.SOCK_BOTTOM - 1, 0, 0), (3, 0, 0)),                               # radial 1/2" bore
-            sensor_pocket(), brake_track()]
+            sensor_pocket()]
     for c in cuts:
         h = h.cut(c)
     return h.clean()
@@ -255,7 +259,7 @@ def block_cuts(s):
 
 
 def anchor_clevis():
-    """Rev 3's anchor_clevis() on the middle, its aft wall running into this pedestal"""
+    """Rev 3's anchor_clevis() on the middle, its aft wall running level, at the cheeks' top, into the up-stop pad"""
     g = r.ROD_TAB_T + 0.6
     zt, zb = r.ANCH_Z + r.CLEVIS_R, Z_PLATE - 0.1
     ax = r.ANCH_X
@@ -265,10 +269,33 @@ def anchor_clevis():
         f0, f1 = sorted((s * (r.STRUT_ROD_D / 2 + r.ROD_CLEAR), s * (g / 2 + r.CLEVIS_T)))
         parts += [cyl(r.CLEVIS_R, (ax, y0, r.ANCH_Z), (ax, y1, r.ANCH_Z)),
                   box(ax - r.CLEVIS_R, ax + r.CLEVIS_R, y0, y1, zb, r.ANCH_Z),
-                  gusset_xz([(ax, zt), (PED_X[0], USTOP_Z), (PED_X[0] + 1, USTOP_Z - 0.5), (PED_X[0] + 1, zb),
-                             (ax, zb)], y0, y1),
+                  gusset_xz([(ax, zt), (PED_X[0] + 1, zt), (PED_X[0] + 1, zb), (ax, zb)], y0, y1),
                   gusset_xz([(ax, zt), (ax - r.CLEVIS_RUN, zb), (ax, zb)], f0, f1)]
     return fuse(*parts)
+
+
+def corner_gussets():
+    """45 deg corner gussets (in plan) at both ends of each pillow block, CG_LEG along each wall:
+    behind, outside   the block's back face to the outer face of the web behind it, up to the web's top
+    behind, inside    the block's inner face to the web's front face, kept 1.5 mm outside the up-stop lugs' swing
+    in front, inside  the block's inner face to the down-stop pillar's back face, up to the pillar's top and 3 mm clear of
+                      the hub
+    in front, outside the block's front face to the pillar's outer face, up to the pillar's top"""
+    def prism(pts, top):
+        return (cq.Workplane("XY").workplane(offset=Z_PLATE - 0.1).polyline(pts).close()
+                .extrude(top - Z_PLATE + 0.1).val())
+    L, bx, yo, yi = CG_LEG, BLOCK_HW, BLOCK_Y1 - 0.5, BRG_Y0       # yo: 0.5 inside the block's outer face
+    yw = BRG_Y0 + 0.5                                               # the web's and the pillar's outer faces (23)
+    out = []
+    for s in (-1, 1):
+        q = lambda pts: [(x, s * y) for x, y in pts]
+        out += [prism(q([(bx - 0.5, yw - 0.5), (bx - 0.5, yo), (bx + L, yw - 0.5)]), 0.0),                 # behind, outside
+                prism(q([(bx, yi + 0.5), (bx - 0.5 - L, yi + 0.5), (bx, yi - L)]), 0.0)
+                .cut(cyl(LUG_R + 1.5, (0, s * (yi - L - 1), 0), (0, s * (yi + 1), 0))),                   # behind, inside
+                prism(q([(-bx, yi + 0.5), (-bx + 0.5 + L, yi + 0.5), (-bx, yi - L)]), PAD_Z)
+                .cut(cyl(HUB_R + 3.0, (0, s * (yi - L - 1), 0), (0, s * (yi + 1), 0))),                   # in front, inside
+                prism(q([(-bx + 0.5, yw - 0.5), (-bx + 0.5, yo), (-bx - L, yw - 0.5)]), PAD_Z)]           # in front, outside
+    return out
 
 
 def frame():
@@ -287,9 +314,10 @@ def frame():
                   box(PAD_X[0], -BLOCK_HW + 0.5, *sorted((s * PAD_DY[0], yi + s * 0.5)), Z_PLATE - 0.1, PAD_Z),
                   # web from the brake tower to the pillow block, behind the up-stop lugs
                   box(BLOCK_HW - 0.5, 56.0, *sorted((s * (TOWER_HW - 0.5), yi + s * 0.5)), Z_PLATE - 0.1, 0.0)]
-    parts += [box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z),                    # up-stop pedestal
-              box(*TOWER_X, -TOWER_HW, TOWER_HW, Z_PLATE - 0.1, TOWER_TOP),                            # brake tower
-              anchor_clevis()]
+    pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z).cut(
+        box(PED_NOTCH[0], PED_X[1] + 1, -PED_NOTCH[1], PED_NOTCH[1], Z_PLATE, USTOP_Z + 1))
+    parts += [pad, box(*TOWER_X, -TOWER_HW, TOWER_HW, Z_PLATE - 0.1, TOWER_TOP),                       # up-stop pad, brake tower
+              anchor_clevis(), *corner_gussets()]
     f = fuse(*parts)
 
     a3, t3, a4, t4 = m.NUT_AF[3], m.NUT_T[3], m.NUT_AF[4], m.NUT_T[4]
