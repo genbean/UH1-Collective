@@ -1,5 +1,7 @@
 # MkIII base, Rev 3: gas strut balance
 
+> **Rev 4** ([`Rev4/`](Rev4/README.md)) is the next revision: this base cut down to 82 mm (3.25 in) wide, with the lever symmetrical about the tube, thin-section bearings and the brake behind the hub. It hasn't been printed yet.
+
 The collective's pivot base. The lever runs on two 6006-2RS bearings and is printed as two halves, and an adjustable friction knob sets the drag. An AS5600 magnetic sensor reads the lever angle, and the USB cable leaves on the knob side.
 
 A small gas strut, centred under the tube and the hub, holds the lever up. Its lower end is bolted into a gusseted clevis on the base, just ahead of the pivot. Its upper end sits on a collar clamped to the tube. Rev 1 balanced the lever with a ballast bucket and about a kilogram of ballast, and Rev 2 with a clock spring.
