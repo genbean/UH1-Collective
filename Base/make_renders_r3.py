@@ -4,12 +4,12 @@ MkIII base Rev 3: the assembly GLBs and the renders, from the STLs that mk3_rev3
     python mk3_rev3.py           (first: stl/, stl/ref/, step/)
     python make_renders_r3.py    (needs cadquery for the strut at 32 deg, numpy, trimesh, manifold3d, pyvista, pillow)
 
-1. Rebuilds renders/MkIII_Rev3_Assembly.glb and ../renders/HeliCollective_Assembly.glb: every base part's mesh is
-   replaced by its STL (the parts keep their GLB colours; the head's "H:" parts are left as they are).
+1. Rebuilds renders/MkIII_Rev3_Assembly.glb: every base part's mesh is replaced by its STL (the parts keep their GLB
+   colours).
 2. Draws renders/rev3_*.png (all but rev3_lever_lower, rev3_lever_socket and rev3_screws_levernuts, which show only
-   the lever, and rev3_exploded / rev3_screw_sizes, which ../renders/make_diagrams.py draws from the collective GLB)
-   and ../renders/HeliCollective_0deg.png, _32deg.png and _side.png.
+   the lever, and rev3_exploded / rev3_screw_sizes, which ../renders/make_diagrams.py draws from this GLB).
 Run ../renders/make_diagrams.py after it for the exploded views and screw charts.
+The collective's GLB and pictures in ../renders show base Rev 4 now: Rev4/make_renders_r4.py draws them.
 
 At an angle the lever, tube, hose clamp, lever screws, sensor carrier and board, the head and the cable inside the lever
 turn about the pivot (y axis); the collar, strut and pins are rebuilt by mk3_rev3 at that angle. Sections are cut as
@@ -350,23 +350,12 @@ def screw_views(src):
              "rev3_screws_strut.png", focus=((-60, 12, -58), (30, 12, -5)), zoom=0.8)
 
 
-def collective_views(src):
-    for th, name, view, size in ((0.0, "HeliCollective_0deg.png", (-0.35, -1.0, 0.45), (1800, 1100)),
-                                 (r.STOP_DEG, "HeliCollective_32deg.png", (-0.35, -1.0, 0.45), (1800, 1100)),
-                                 (0.0, "HeliCollective_side.png", (0, -1.0, 0.12), (1800, 900))):
-        P = pose(src, th, tube_to=FULL)
-        save(render(P, view, size=size, zoom=1.05)[0], name, TOP_OUT)
-
-
 if __name__ == "__main__":
     pv.OFF_SCREEN = True
     rebuild_glb(BASE_GLB)
-    rebuild_glb(ALL_GLB)
-    src_all = load_glb(ALL_GLB)
-    which = set(sys.argv[1:]) or {"base", "screws", "collective"}
+    src_all = load_glb(BASE_GLB)
+    which = set(sys.argv[1:]) or {"base", "screws"}
     if "base" in which:
         base_views(src_all)
     if "screws" in which:
         screw_views(src_all)
-    if "collective" in which:
-        collective_views(src_all)

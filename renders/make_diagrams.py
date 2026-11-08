@@ -1,8 +1,9 @@
 """
-Exploded views, screw maps and screw-size charts for the MkIII base Rev 3 and the Huey head Rev 5, drawn from
-HeliCollective_Assembly.glb in this folder (the complete collective at 0 deg: the base in its own frame, the head's
-parts named "H:..."). Every screw group in the GLB is split into its screws, and each screw is pulled out along its own
-axis, toward its head, in the exploded views.
+Exploded views, screw maps and screw-size charts for the Huey head Rev 5, drawn from HeliCollective_Assembly.glb in this
+folder (the complete collective at 0 deg: base Rev 4 in its own frame, the head's parts named "H:..."), and for the MkIII
+base Rev 3, from ../Base/renders/MkIII_Rev3_Assembly.glb. Every screw group in a GLB is split into its screws, and each
+screw is pulled out along its own axis, toward its head, in the exploded views. (Base Rev 4's exploded view and screw
+chart come from ../Base/Rev4/make_renders_r4.py, with these helpers.)
 
     python make_diagrams.py            (needs numpy, trimesh, manifold3d, pyvista and pillow)
 
@@ -26,6 +27,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GLB = os.path.join(HERE, "HeliCollective_Assembly.glb")
+BASE3_GLB = os.path.join(HERE, "..", "Base", "renders", "MkIII_Rev3_Assembly.glb")
 BASE_OUT = os.path.join(HERE, "..", "Base", "renders")
 HEAD_OUT = os.path.join(HERE, "..", "Head", "Rev5", "renders")
 
@@ -37,8 +39,10 @@ FONT_B = "C:/Windows/Fonts/segoeuib.ttf"
 
 # Head Rev 5's frame from the collective's (the base's: pivot at the origin, Y the pivot axis, Z up, the tube along -X):
 # the head's x across its face is the base's Y, its y (into the head) is -Z, its z (up the tube) is -X. The tube's axis
-# is at the head's (TX, TY) = (5.29, 18.52) and the base's (Y, Z) = (-9, 0); its top end is at head z 55.9.
-TO_HEAD = np.array([[0, 1, 0, 5.29 + 9.0], [0, 0, -1, 18.52], [-1, 0, 0, -446.8], [0, 0, 0, 1.0]])
+# is at the head's (TX, TY) = (5.29, 18.52) and the base's (Y, Z) = (0, 0) (base Rev 4 centres the tube; Rev 3 had it at
+# y = -9, and the GLB's head moved with it); its top end is at head z 55.9.
+TUBE_Y = 0.0
+TO_HEAD = np.array([[0, 1, 0, 5.29 - TUBE_Y], [0, 0, -1, 18.52], [-1, 0, 0, -446.8], [0, 0, 0, 1.0]])
 TILT = np.radians(20.0)                 # huey_head_r5.TILT, about x through (y = 0, z = ZB)
 ZB = -2.55
 
@@ -55,8 +59,8 @@ def tilt_dir(v):
 
 
 # ---------------------------------------------------------------------------------------------------- loading
-def load():
-    scene = trimesh.load(GLB)
+def load(path=GLB):
+    scene = trimesh.load(path)
     out = {}
     for node in scene.graph.nodes_geometry:
         T, g = scene.graph[node]
@@ -840,5 +844,5 @@ if __name__ == "__main__":
     toggle_boxes_view(head_items(src))
     head_scenes(head_items(src))
     head_chart(H)
-    B = base_views(src)
+    B = base_views(load(BASE3_GLB))
     base_chart(B)

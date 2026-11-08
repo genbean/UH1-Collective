@@ -1,6 +1,6 @@
 # MkIII base, Rev 3: gas strut balance
 
-> **Rev 4** ([`Rev4/`](Rev4/README.md)) is the next revision: this base cut down to 82 mm (3.25 in) wide, with the lever symmetrical about the tube, thin-section bearings and the brake behind the hub. It hasn't been printed yet.
+> **This is Rev 3, the first base built.** The current base is **Rev 4** ([`Rev4/`](Rev4/README.md)): this one cut down to 82 mm (3.25 in) wide, with the lever symmetrical about the tube, thin-section bearings, a shell over the lever and the brake behind the hub. Rev 3's files stay here, and Rev 4's scripts build on them.
 
 The collective's pivot base. The lever runs on two 6006-2RS bearings and is printed as two halves, and an adjustable friction knob sets the drag. An AS5600 magnetic sensor reads the lever angle, and the USB cable leaves on the knob side.
 
@@ -23,7 +23,7 @@ Rev 3 also changes five other things from Rev 1:
 
 ![Exploded: the lever lifted out of the frame, the caps, bearings and covers off, every screw pulled out along its axis](renders/rev3_exploded.png)
 
-`renders/MkIII_Rev3_Assembly.glb` is the whole base in 3D at the down-stop: every printed part in its colour, plus the bearings, strut, tube, clamp, hardware and sensor stand-ins. It opens in Windows 3D Viewer or any glTF viewer. The complete collective, base and head Rev 5 together, is in [`../renders`](../renders): `HeliCollective_Assembly.glb`, and pictures at 0° and at the 32° stop.
+`renders/MkIII_Rev3_Assembly.glb` is the whole base in 3D at the down-stop: every printed part in its colour, plus the bearings, strut, tube, clamp, hardware and sensor stand-ins. It opens in Windows 3D Viewer or any glTF viewer. The complete collective in [`../renders`](../renders) shows the current base, Rev 4, with head Rev 5.
 
 `mk3_rev3.py` builds the base. It imports Rev 1's model, `mk3_pivot.py`, for every part the two share, and for the fit parameters you tune with the coupons below.
 
@@ -43,7 +43,7 @@ That prints the balance table and redraws `renders/strut_balance.png`.
 python make_renders_r3.py
 ```
 
-That rebuilds `renders/MkIII_Rev3_Assembly.glb` and `../renders/HeliCollective_Assembly.glb` from the STLs, and redraws the base renders here and the collective's pictures in `../renders`. It needs CadQuery too, for the strut at 32°. Run `../renders/make_diagrams.py` after it for the exploded views and screw-size charts.
+That rebuilds `renders/MkIII_Rev3_Assembly.glb` from the STLs and redraws the base renders here. It needs CadQuery too, for the strut at 32°. Run `../renders/make_diagrams.py` after it for the exploded view and screw-size chart. (The collective's model and pictures in `../renders` now come from `Rev4/make_renders_r4.py`.)
 
 ```bash
 python mk3_pivot.py
@@ -345,7 +345,7 @@ The screw lengths, the felt and the cables are sized from the CAD. The complete 
 
 ## Notes
 
-- This is a concept and nothing has been printed. Print the fit-test coupons first, with the carbon tube.
+- **Built (2026-11):** the bearing seats (+0.1 on the race's outside) fitted perfectly. The races pressed onto the trunnions (+0.2 on their bore) a hair too tight. The 45 N strut lifted the lever: the anchor has since moved, so reprint the frame. Rev 4 takes these on.
 - The balance figures come from an estimate of the Huey head (368 g), on the 470 mm tube, with the carbon tube at about 0.12 g per mm. That gives a forward moment of 195 g·m. The figures include the collar and half the strut's weight, about 55 g, which hang on the tube.
 - Gas struts have seal friction, and some are oil-damped. Neither figure is published. Expect a little built-in friction, and some drag if you move the lever fast.
 - Gas strut force changes about 3 % per 10 °C and fades slowly over the years. The collar or a few grams of ballast correct it.

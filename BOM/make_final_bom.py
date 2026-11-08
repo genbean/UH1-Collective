@@ -1,6 +1,6 @@
 # Build Heli_Collective_Final_BOM.xlsx and Heli_Collective_DigiKey.csv: one BOM for the whole collective as it is
 # built now: the HeliSR Rev 4.0 board (AS5600s over I2C; not ordered yet), the Huey head Rev 5 (Head/Rev5/) and
-# the MkIII base Rev 3 (Base/, a concept, not yet printed).
+# the MkIII base Rev 4 (Base/Rev4/, not yet printed; Rev 3, in Base/, is the one built first).
 # The board's parts are read from Rev 4.0's board BOM script and checked against its board file; the cables and the
 # head switches from the frozen Rev 3.0 full BOM script (single source of truth). The Digi-Key order placed for
 # Rev 3.0 (DK_ORDER) counts as bought: the parts Rev 4.0 shares with it are not ordered again, and the ones it
@@ -45,13 +45,13 @@ BRD = "PCB/HeliSR_Rev4.0 board BOM (checked against the board file)"
 NEW = "Digi-Key listing 2026-10-27"
 FULL = "PCB/HeliSR_Rev3.0/HeliSR_Rev3.0_BOM.xlsx (Digi-Key cart)"
 HEAD = "Head/Rev5/README.md and Head/Rev4/README.md, Bought"
-BASE = "Base/README.md, Bought parts"
-BASE1 = "Base/mk3_pivot.py (the Rev 1 parts Rev 3 keeps)"
-CAD = "Base/mk3_pivot.py geometry (no size in any list)"
+BASE = "Base/Rev4/README.md, Bought parts"
+BASE1 = "Base/mk3_pivot.py and Base/mk3_rev3.py (the parts Rev 4 keeps)"
+CAD = "Base/Rev4/mk3_rev4.py geometry (no size in any list)"
 AMZ = "Amazon listing on 2026-10-22 (listing)"
 KIT = "AvrestYPT screw kit (Amazon B0FMD5TMSH)"
 SETKIT = "HIQTRADEBYJJ set screw kit (Amazon B0DG33R714)"
-SCREWS = "Head/Rev5 and Base/mk3_rev3.py screw lists; renders/*Screws*.png"
+SCREWS = "Head/Rev5 and Base/Rev4/mk3_rev4.py screw lists; Head/Rev5/renders and Base/Rev4/renders screw maps"
 CHECK, INKIT, ORDERED = "check", "kit", "ordered"
 FILL = {CHECK: "FCE4D6", INKIT: "E2EFDA", ORDERED: "DDEBF7"}
 
@@ -174,12 +174,14 @@ SECTIONS.append(("Huey head: hardware", [
     amz("Trigger", 1, "Pen spring, 4 mm OD x 50 mm, 0.4 mm wire, pack of 10", "uxcell", "B0GCZGNBYH", 6.99, 10,
         "Trigger return: cut to about 13 mm", HEAD),
     amz("Head box", 1, "Ballast: lead split shot fishing weights, assorted, 120 pcs", "SANWEAL", "B0H6J3X6GL", 5.99, 1,
-        "Only if the gas strut lifts too much: about 48 g for a 45 N strut. Close to the middle of the box. Weigh out what you "
-        "need", BASE),
+        "Only if the gas strut lifts too much: the base balances a 45 N strut; a 50 N one needs about 42 g, the top of "
+        "the range (53 N) about 68 g. Close to the middle of the box. Weigh out what you need", BASE),
 ]))
-SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
-    ("Pivot", 2, "Deep-groove ball bearing 6006-2RS, 30 x 55 x 13 mm", "BlueStars", "6006-2RS", "Amazon", "B09XTV8XYK",
-     8.99, 2, "", 0, "Sold in pairs", AMZ + "; " + BASE1),
+SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
+    ("Pivot", 2, "Thin-section ball bearing 6808-2RS, 40 x 52 x 7 mm, double sealed", "", "6808-2RS", "Amazon",
+     "B012BIHBTQ", None, 2, CHECK, 0, "2-pack listing found 2026-11-08: price not checked, and any 6808-2RS fits (SKF "
+     "61808-2RS1, VXB, WJB and others sell it). Pressed onto the 40.1 mm trunnions, seated in the frame and the shell. "
+     "Print the 6808 coupons first", "Amazon search 2026-11-08; " + BASE),
     ("Tube", 1, "Carbon fibre tube, 25 mm OD x 23 mm ID, 500 mm, 3K plain weave, wrapped", "MECCANIXITY", "", "Amazon",
      "B0CFFT1B31", 27.49, 2, "", 0, "Sold in pairs. Wrapped, as the base needs (not pultruded). Used whole, 500 mm, uncut (470 + the head's extra 12.7 mm of bore + 17.3 mm down in the base's socket). Drill the "
      "head's 5.2 mm cross hole 10 mm below the top end and file a 13 mm wide notch, 4+ mm deep, in each side of the bottom end for the cables. Check "
@@ -188,46 +190,62 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
     amz("Lever halves", 4, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
         "flat and lock washers and a hex key (200 pieces)", "HELIFOUNER", "B0CDSKK7V1", 9.99, "once",
-        "Uses 4 x M4 x 40, with 4 of its M4 nuts. "
-        "The heads sit flush in 8 mm counterbores at the top and the nuts in hex pockets open to the underside, as far apart "
+        "Uses 2 x M4 x 40 (the front pair) and 2 x M4 x 50 (the back pair), with 4 of its M4 nuts. "
+        "The heads sit in counterbores at the top and the nuts in hex pockets open to the underside, as far apart "
         "as the lever allows; no tip protrudes. The nuts go into the lower half's pockets first", BASE,
         ORDERED),
     ("Strut", 1, "Gas strut, 6 in (152.4 mm eye to eye), 45 N (sold as 9-12 lb), flat eyelet tabs", "X AUTOHAUX", "",
-     "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half", BASE),
+     "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half. The anchor is placed so the "
+     "45 N strut as bought balances the lever", BASE),
     kit("Strut eyes", 2, "M4 x 16 countersunk screw + M4 hex nut", "One per eye: head on +y, nut in the -y cheek's pocket. "
         "The listing gives the strut's eye holes as 4 mm. Snug, then thread-lock: the eye must still turn"),
     kit("Strut collar", 2, "M4 x 12 countersunk screw + M4 hex nut", "Collar clamp, two 20 mm apart: each head sits 2 mm into the -y ear, "
         "its nut in the +y ear's pocket"),
-    kit("Pillow-block caps", 4, "M4 x 20 countersunk screw + M4 hex nut", "Two per cap, from the top; each nut slides "
-        "into a slot in the block's front or back face. Length from the CAD"),
-    amz("Side covers", 8, "M3 x 25 countersunk screw (from the M3 x 20-40 set, ASIN B0BYXS4BTF)", "Amazon", "B0BYXS4BTF", 0, "once",
-        "From the same 100-piece set as the trigger pivot (20 of each length). Four per cover, from its outer face into M3 "
-        "threads tapped 11 mm deep in the block and cap: 10 mm of thread, three times the 20 mm screw's. The kit's M3 x 20 "
-        "would only reach 5", BASE + "; user's M3 set 2026-10-24", ORDERED),
-    any_("Friction knob", 1, "M5 x 30 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
-         "have only countersunk heads): any hardware store. Its head sits on the floor of the hex pocket in the printed "
-         "knob (Base/stl/friction_knob.stl, the MkII knob with an M5 pocket), so the knob turns it; it goes through the "
-         "spring and the shoe into the M5 nut",
-         "Base/README.md, Friction knob", CHECK),
-    kit("Friction knob", 1, "M5 hex nut", "Slid into the knob tower's slot from the front; the friction bolt threads into it"),
-    amz("Friction knob", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon", "B09FF6VQ55",
-        11.10, 10, "Over the M5 screw, in a 2 mm recess in the shoe; 6.5 mm long when fitted in the CAD. The CAD asked for 1.1 "
-        "mm wire and 10-12 mm free length; this is the nearest stock size, so trim a coil if it is too long", CAD, CHECK),
-    amz("Friction shoe", 1, "Self-adhesive felt tape, 1.5 mm thick, 3/4 in x 50 ft, black", "FindTape", "B077TCDNYT", 24.98, 1,
-        "Lines the shoe against the drum: cut a 95 mm length (19 mm wide, the CAD wants 17 mm). It is the only 1.5 mm felt found "
+    kit("Shell", 4, "M3 x 20 countersunk screw + M3 hex nut", "Two each side, from the top down counterbores in the "
+        "shell's side walls (its bearing caps); each nut slides into a slot in the pillow block's front or back face"),
+    kit("Side covers", 8, "M3 x 16 countersunk screw", "Four per cover, from its outer face into M3 threads tapped right "
+        "through the pillow block and the shell's 9 mm side wall"),
+    kit("Back plate", 6, "M3 x 16 countersunk screw", "From its back face into M3 threads tapped 7.5 mm deep: four in "
+        "the frame, two in the shell"),
+    any_("Brake", 1, "M5 x 30 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
+         "have only countersunk heads): Rev 3's, or any hardware store. Its head sits on the floor of the hex pocket in "
+         "the printed knob (Base/Rev4/stl/friction_knob.stl: the MkII knob, its floor raised to 18 mm), so the knob turns "
+         "it; it goes through the M5 nut in the back plate and pushes the spring cap",
+         "Base/Rev4/README.md, Brake", CHECK),
+    kit("Brake", 1, "M5 hex nut", "Pressed into the pocket in the back plate's front face; the brake bolt threads into it"),
+    amz("Brake", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon", "B09FF6VQ55",
+        11.10, 10, "In the shoe's bore, under the printed spring cap; 6.5 mm long when fitted in the CAD. The CAD asked "
+        "for 1.1 mm wire and 10-12 mm free length; this is the nearest stock size, so trim a coil if it is too long",
+        CAD, CHECK),
+    amz("Brake shoe", 1, "Self-adhesive felt tape, 1.5 mm thick, 3/4 in x 50 ft, black", "FindTape", "B077TCDNYT", 24.98, 1,
+        "Lines the shoe's curved face: cut a 48 mm length and trim it to 11 mm wide. It is the only 1.5 mm felt found "
         "in a usable width, and you need a few cm of the 50 ft", CAD, CHECK),
-    kit("Shoe hinge", 1, "M4 x 20 countersunk screw + M4 hex nut", "Hinge pin through both frame lugs and the shoe's eye: "
-        "head in the -y lug, nut in the +y lug's pocket (the lugs are 20 mm apart outside). Snug, then thread-lock: the shoe "
-        "must still swing"),
     amz("Desk mounting", 4, "Screw, #10 x 1-1/2 in pan head, 304 stainless, pack of 50", "Amazon", "B0F43RY9S6", 8.29, 50,
-        "Through the 5.5 mm holes in the frame plate's corners (6 mm plate). Not in the kits: they go into the desk. 1-1/2 in "
-        "suits a typical desktop: check yours", CAD, CHECK),
+        "Through the 5.5 mm holes in the frame plate's corners (8 mm plate). Not in the kits: they go into the desk. "
+        "1-1/2 in suits a typical desktop: check yours", CAD, CHECK),
 ]))
+def _kit_used():
+    """what the kit lines above take out of the screw kit, by size"""
+    import collections
+    scr, nuts = collections.Counter(), collections.Counter()
+    for _, lines in SECTIONS:
+        for l in lines:
+            if l[6] != "B0FMD5TMSH" or l[9] != INKIT:
+                continue
+            m_ = re.match(r"(M\d) x (\d+) countersunk", l[2])
+            if m_:
+                scr[(m_.group(1), int(m_.group(2)))] += l[1]
+            n_ = re.search(r"(M\d) hex nut", l[2])
+            if n_:
+                nuts[n_.group(1)] += l[1]
+    return ", ".join(f"{d} x {L} ({q})" for (d, L), q in sorted(scr.items())) + "; nuts " + ", ".join(
+        f"{d} ({q})" for d, q in sorted(nuts.items()))
+KIT_USED = _kit_used()
 SECTIONS.append(("Kits, consumables and tools", [
     ("Hardware", 1, "Screw kit, 1715 pieces: countersunk hex-socket screws M2-M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20, "
      "with hex nuts and washers, hex keys", "AvrestYPT", "", "Amazon", "B0FMD5TMSH", 17.99, "once", ORDERED, 1,
-     "Every countersunk screw and nut in the head and base (the green lines). Used: M3 x 12 (4), M3 x 16 (8), M3 x 20 (9), M4 x 12 (3),"
-     " M4 x 16 (2), M4 x 20 (5); nuts M3 (5), M4 (10), M5 (1). Order (link 2026-10-23)",
+     "Every countersunk screw and nut in the head and base (the green lines). Used: " + KIT_USED + ". Order "
+     "(link 2026-10-23)",
      "Amazon listing 2026-10-23 (the order)"),
     ("Hardware", 1, "Set screw kit, 500 pieces, 304 stainless: M3 x 3, 4, 5, 6; M4 x 4, 5, 6; M5 x 5, 8; M6 x 6, 10; "
      "M8 x 8; hex keys", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714", 8.96, "once", ORDERED, 1,
@@ -251,7 +269,8 @@ SECTIONS.append(("Kits, consumables and tools", [
     ("Assembly", 1, "Tweezers, 1 mm tip (Olimex CHN-TWZ1MM), for placing the SMD parts", "Olimex", "CHN-TWZ1MM", "Digi-Key",
      "1188-CHN-TWZ1MM-ND", 0.82, "once", "", 0, "Description from Olimex's sibling CHN-TWZ2MM listing: check the tip", "the Rev 3.0 Digi-Key order"),
     amz("Assembly", 1, "Taps, M3 / M4 / M5 / M6 / M8, 5-piece set", "Amazon", "B0FN49CGJG", 6.49, "once",
-        "M3: base side covers. M4: tube lock. The head's threads (M3 and up) are printed",
+        "M3: the base's side-cover holes (8, through the walls) and back-plate holes (6). The head's threads (M3 and "
+        "up) are printed",
         "Head/Rev5/README.md; Base/README.md"),
     amz("Assembly", 1, "Drill bit, 5.2 mm HSS, 2 pcs", "Amazon", "B0FN3WV6DW", 6.99, "once",
         "The tube's cross hole is 5.2 mm", "Head/Rev4/README.md"),
@@ -300,18 +319,20 @@ PRINTED = [
     ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
-    ("Base", "Base/stl/coupons/coupon_trunnion.stl, coupon_bearing_seat.stl, coupon_tube_socket.stl", 1,
-     "Fit-test coupons: print first and tune mk3_pivot.py (the socket with the carbon tube)"),
-    ("Base", "Base/stl/frame.stl", 1, "Plate down"),
-    ("Base", "Base/stl/lever_lower.stl", 1, "On its joint face"),
-    ("Base", "Base/stl/lever_upper.stl", 1, "On its joint face"),
-    ("Base", "Base/stl/cap_left.stl, cap_right.stl", 1, "One each"),
-    ("Base", "Base/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
-    ("Base", "Base/stl/sensor_carrier.stl", 1, ""),
-    ("Base", "Base/stl/shoe.stl", 1, ""),
-    ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end"),
-    ("Base", "Base/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket. Floor down, pocket open at the top; "
-     "the M5 x 30 hex bolt's head sits on the floor"),
+    ("Base", "Base/Rev4/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_shoe_pocket.stl", 1,
+     "Fit-test coupons: print first and tune mk3_rev4.py (TRUN_OD, BRG_SEAT_D, SHOE_CLR). The tube socket is Rev 3's: "
+     "Base/stl/coupons/coupon_tube_socket.stl, with the carbon tube"),
+    ("Base", "Base/Rev4/stl/frame.stl", 1, "Plate down"),
+    ("Base", "Base/Rev4/stl/shell.stl", 1, "Top down: the bearing half-seats, the slot and the shoe's half-pocket open upward"),
+    ("Base", "Base/Rev4/stl/lever_lower.stl", 1, "On its joint face"),
+    ("Base", "Base/Rev4/stl/lever_upper.stl", 1, "On its joint face"),
+    ("Base", "Base/Rev4/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
+    ("Base", "Base/Rev4/stl/shoe.stl", 1, "On its back face: the spring's bore on the bed, the curved face on top"),
+    ("Base", "Base/Rev4/stl/spring_cap.stl", 1, "On its flat front face, dimple up"),
+    ("Base", "Base/Rev4/stl/back_plate.stl", 1, "On its front face, the nut pocket on the bed"),
+    ("Base", "Base/Rev4/stl/strut_collar.stl", 1, "Standing on one end. The same part as Rev 3's"),
+    ("Base", "Base/Rev4/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket, its floor raised to 18 mm for "
+     "the M5 x 30. Floor down, pocket open at the top"),
 ]
 DROPPED = [
     ("TE 1825910-6 tact switches for the SEARCH CONT hat (450-1650-ND)", 4, "Bought in order for the tact-switch "
@@ -359,6 +380,12 @@ DROPPED = [
     ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two fixed down-stop pillars beside the strut", "Base/mk3_rev3.py"),
     ("Base Rev 3 adjustable down-stops: 2 x M4 x 16 countersunk + 4 M4 nuts", 0,
      "The down-stop is fixed at 0 deg: two pillars printed into the frame", "Base/mk3_rev3.py"),
+    ("6006-2RS ball bearings, 30 x 55 x 13 (BlueStars, Amazon B09XTV8XYK)", 2, "Bought for base Rev 3. Base Rev 4 runs "
+     "on 6808-2RS thin-section bearings", "Base/README.md (Rev 3)"),
+    ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 16: the "
+     "set is still used for the head's trigger pivot", "Base/README.md (Rev 3)"),
+    ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M3 "
+     "x 20 + M3 nuts), and its brake has no hinge", "Base/README.md (Rev 3)"),
 ]
 SOURCES = [
     ("HeliSR Rev 4.0 board", "PCB/HeliSR_Rev4.0 (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
@@ -370,7 +397,9 @@ SOURCES = [
      "designed and checked (DRC clean), not ordered yet"),
     ("Huey head", "Head/Rev5", "Current head design: Rev 5, Rev 4 cut to the real UH-1 panels' dimensions, with printed "
      "threads. Rev 4 (Head/Rev4), the larger one-piece head it came from, is kept as a fallback"),
-    ("MkIII base Rev 3", "Base (Base/mk3_rev3.py imports Base/mk3_pivot.py)", "Concept, nothing printed yet: check the orange lines"),
+    ("MkIII base Rev 4", "Base/Rev4 (mk3_rev4.py imports Base/mk3_rev3.py and Base/mk3_pivot.py)",
+     "Current base, 82 mm wide, not yet printed: check the orange lines"),
+    ("MkIII base Rev 3", "Base (mk3_rev3.py)", "The base built first (2026-11). Rev 4 replaces it"),
     ("Prices", "Digi-Key cart 2026-10-19 (JST headers 2026-10-22; Rev 4.0's new parts and cables 2026-10-27); Amazon "
      "listings 2026-10-22; OSH Park order 2026-10-21",
      "Pack prices, before shipping and tariff"),
@@ -410,7 +439,7 @@ COLS = ["#", "Where", "Qty per collective", "Pack", "Packs needed", "Packs bough
 NC = len(COLS)
 setup(ws, "Heli Collective - final BOM",
       "Everything bought for one collective: the HeliSR Rev 4.0 board (the bare PCB from OSH Park, every part on it from "
-      "Digi-Key), the Huey head and the MkIII base Rev 3 (a concept, not yet printed). Packs bought counts what's already "
+      "Digi-Key), the Huey head Rev 5 and the MkIII base Rev 4 (not yet printed). Packs bought counts what's already "
       "ordered, including the Digi-Key order placed for Rev 3.0: Rev 4.0 shares most of its parts. Blue line: "
       "already ordered. Green: covered by a kit or pack priced on another line. Orange: size taken from the base's CAD, not from a parts list, so check "
       "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Amazon listings "
@@ -492,7 +521,7 @@ wd.merge_cells(start_row=d + 1, start_column=1, end_row=d + 1, end_column=len(DC
 wd.freeze_panes = "A5"
 
 ws2 = wb.create_sheet("Printed parts")
-setup(ws2, "Heli Collective - printed parts", "The print set for the Huey head and the MkIII base Rev 3, with the "
+setup(ws2, "Heli Collective - printed parts", "The print set for the Huey head Rev 5 and the MkIII base Rev 4, with the "
       "orientation each README gives. Print the coupons first. Paths are from the repository root.", 5)
 header(ws2, ["#", "Assembly", "File", "Qty", "Print"], [4, 10, 70, 6, 70], 4)
 for i, (asm, f, q, note) in enumerate(PRINTED, 1):

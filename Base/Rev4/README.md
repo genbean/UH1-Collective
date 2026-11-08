@@ -2,7 +2,9 @@
 
 Rev 4 is Rev 3 cut down to **82 mm (3.25 in)** wide along the pivot axis, against Rev 3's 130 mm, with the lever symmetrical about the tube. One shell over the top encloses the lever, in place of Rev 3's two bearing caps. The strut, collar, tube, socket, down-stops and fits are Rev 3's. What changes is everything along the pivot axis, the enclosure, and the brake, which moves behind the hub.
 
-It's a concept: nothing has been printed. Print the [fit-test coupons](#fit-test-coupons) first.
+This is the current base. It hasn't been printed yet: print the [fit-test coupons](#fit-test-coupons) first.
+
+![Rev 4, exploded](renders/rev4_exploded.png)
 
 ![Rev 4 from the front](renders/rev4_hero.png)
 
@@ -36,7 +38,7 @@ The knob stands 31 mm out behind the plate.
 | | |
 |---|---|
 | `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference and assembly checks; `--coupons` writes `stl/coupons/` |
-| `make_renders_r4.py` | the renders and `renders/MkIII_Rev4_Assembly.glb` |
+| `make_renders_r4.py` | the renders, screw maps, exploded view and screw chart, `renders/MkIII_Rev4_Assembly.glb`, and the complete collective with head Rev 5 in [`../../renders`](../../renders) |
 | `stl/` | the printed parts |
 | `stl/ref/` | bought parts and hardware, for reference |
 | `step/MkIII_Rev4_assembly.step` | the whole base |
@@ -235,11 +237,29 @@ All from the same kits as Rev 3: the AvrestYPT countersunk kit (M3 and M4 × 8, 
 
 Rev 3's shoe hinge screw is gone.
 
-![Screws from above and behind](renders/rev4_screws_top.png)
+Every screw and nut, to scale:
 
-![Screws on the sensor side](renders/rev4_screws_sensorside.png)
+![Every screw and nut, to scale](renders/rev4_screw_sizes.png)
 
-![Screws on the USB side](renders/rev4_screws_usbside.png)
+Between them, these label every screw and nut in the base:
+
+![The shell's screws, from above](renders/rev4_screws_top.png)
+
+![The lever's screws, with the shell off](renders/rev4_screws_lever.png)
+
+![The lever's nuts, from below](renders/rev4_screws_levernuts.png)
+
+![From the front: the shell's front nuts](renders/rev4_screws_front.png)
+
+![From behind: the back plate, the brake bolt, the shell's back nuts](renders/rev4_screws_back.png)
+
+![The brake in section: the bolt, its nut in the back plate, the spring cap, the spring and the shoe](renders/rev4_screws_brake.png)
+
+![The sensor side: the cover, the collar clamp, the strut's body-end nut, the desk screws](renders/rev4_screws_sensorside.png)
+
+![The USB side: the cover, the strut's body-end screw, the collar clamp's nuts](renders/rev4_screws_usbside.png)
+
+![The strut's anchor](renders/rev4_screws_strut.png)
 
 ## Bought parts
 
