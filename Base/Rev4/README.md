@@ -27,7 +27,7 @@ It's a concept: nothing has been printed. Print the [fit-test coupons](#fit-test
 - **Brake:** a narrow, tall shoe presses on the back of the hub. Its pocket is split between the frame and the shell, and holds it with no slop.
 - **Up-stop:** two lugs under the back of the hub, one each side of the shoe, land on a pad further back than Rev 3's.
 - **Frame gussets:** 45° gussets at all four corners of both pillow blocks.
-- **Strut anchor:** moved up and back, so the 45 N strut as bought balances the lever. Rev 3's anchor balances a 40 N strut, so the 45 N strut pushes the lever up.
+- **Strut anchor:** moved up and back, so the 45 N strut as bought balances the lever. Rev 3's first anchor was sized for a 40 N strut, so the 45 N strut pushed the lever up. Rev 3 now has the same anchor.
 
 The knob stands 31 mm out behind the plate.
 
@@ -174,9 +174,9 @@ The columns are 8.8 mm either side of the middle. The shoe's pocket runs out thr
 
 ![Out of balance at the grip, against lever angle](renders/strut_balance_r4.png)
 
-Rev 3's anchor, at x = −12, z = −40.5, balances a 40 N strut: the bottom of the range the 45 N strut is sold as. The 45 N strut as bought lifts the lever, by about 50 to 70 g at the grip.
+Rev 3 was first built with the anchor at x = −12, z = −40.5, sized for a 40 N strut: the bottom of the range the 45 N strut is sold as. The 45 N strut as bought lifted the lever, by about 50 to 70 g at the grip.
 
-Rev 4's anchor is at x = −9.5, z = −36.5: 4 mm up and 2.5 mm back. The strut's line passes closer to the pivot, so it has less leverage. It now balances 45 N to within 3 g at the grip over the whole travel. The strut is 119 mm long at 0° and 140 mm at 32°, inside its 102–152 mm stroke.
+The anchor is now at x = −9.5, z = −36.5, in Rev 4 and in Rev 3's updated frame: 4 mm up and 2.5 mm back. The strut's line passes closer to the pivot, so it has less leverage. It now balances 45 N to within 3 g at the grip over the whole travel. The strut is 119 mm long at 0° and 140 mm at 32°, inside its 102–152 mm stroke.
 
 | Strut force | Out of balance at the grip | Fix |
 |---|---|---|
@@ -189,7 +189,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 **The clevis:**
 - **Cheeks:** they're 6.5 mm round the eye (Rev 3: 8), so they stay 1.5 mm under the hub.
-- **Back wall:** it runs 2 mm under the hub into the up-stop pad.
+- **Back walls:** they run 2 mm under the hub into the up-stop pad. Behind the tab, from 1 mm past its round end, the gap between them is filled, so they print as one solid block with proper infill.
 - **Screw:** the strut's M4 × 16 still fits.
 
 `python mk3_rev4.py --balance` prints the table and redraws the plot. It uses Rev 3's model: Rev 4's lever halves and Rev 3's estimate of the head (368 g). If your head is lighter than that, the strut will still lift a little. Slide the collar away from the pivot, or add ballast.

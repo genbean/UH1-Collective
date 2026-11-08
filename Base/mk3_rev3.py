@@ -13,13 +13,14 @@ Tube: 25 x 23 mm carbon fibre, used whole, 500 mm, uncut: 470 + the head boss's 
 
 Strut: X AUTOHAUX 6" 10 lb / 45 N gas spring (Amazon B0CY267GFY, 2 for $13.69), 152.4 mm eye to eye extended,
 101.6 mm compressed, sold as 40-53 N, with flat eyelet tabs on both ends (4 mm holes, per the listing). The steel
-rod-end tab sits in a fixed clevis printed into the frame, 12 mm ahead of and 40.5 mm below the pivot, gusseted fore
+rod-end tab sits in a fixed clevis printed into the frame, 9.5 mm ahead of and 36.5 mm below the pivot, gusseted fore
 and aft, on an M4 x 16 countersunk screw.
 The plastic body-end tab sits in a clevis on a collar clamped to the tube 130 mm out, 32 mm below the tube axis. At the
 down-stop the strut lies almost flat under the socket boss. As the tube lifts, its line swings up toward the pivot, so
-the leverage falls the way the head's weight does. Sized so a 40 N strut (the bottom of the range) balances within a
-few grams at the grip; a stronger one lifts a little too much and you add ballast to the head (about 50 g for 45 N).
-Sliding the collar trims +/-20 g.
+the leverage falls the way the head's weight does. Sized so the 45 N strut as bought balances within a few grams at the
+grip; a stronger one lifts a little too much and you add ballast to the head, a weaker one sags. Sliding the collar
+trims +/-20 g. (First built with the anchor at 12 mm ahead and 40.5 below, sized for 40 N: the 45 N strut as bought
+lifted the lever, so the anchor moved up and back on 2026-11-08.)
 
 Lever changes from Rev 1: the hub is the friction drum's 60 mm all the way across; no bucket pad (nothing bolts there
 now) and no bottom gusset (the strut runs there); two flat down-stop pads on the socket boss; and an up-stop boss on
@@ -109,7 +110,8 @@ FWD_GM = forward_gm()
 STRUT_EXT, STRUT_COMP = 152.4, 101.6             # eye to eye, extended / compressed
 STRUT_F = 45.0                                   # N, nominal
 STRUT_F_RANGE = (40.0, 53.0)                     # as sold ("9-12 lb")
-STRUT_F_DESIGN = 40.0                            # the geometry balances this; a stronger strut gets head ballast
+STRUT_F_DESIGN = 45.0                            # the geometry balances this, the strut as bought (first 40, the bottom
+                                                 # of the range: the 45 N strut as bought lifted the lever)
 STRUT_PROG = 1.3                                 # force rise from extended to compressed (assumed; not in the listing)
 STRUT_BODY_D, STRUT_ROD_D, STRUT_BODY_L = 12.1, 4.0, 70.0   # diameters from the listing
 TAB_L = 12.0                                     # eye centre to where the tab meets the rod or body
@@ -124,13 +126,15 @@ PIN_R = 2.2                                      # M4 screws through both eyes (
 STRUT_G = 65.0                                   # strut mass, g (estimate)
 
 # where the strut's eyes sit (lever frame for the collar: d along the tube, e below its axis)
-ANCH_X, ANCH_Z = -12.0, -40.5                    # fixed anchor eye
+ANCH_X, ANCH_Z = -9.5, -36.5                     # fixed anchor eye (first -12, -40.5, for a 40 N strut): the strut's
+                                                 # line passes closer to the pivot, so it has less leverage
 COLLAR_D, COLLAR_E = 128.0, 26.0                 # collar eye, as set for a 40 N strut (E: close under the tube, to spare the plastic a long lever)
 COLLAR_RANGE = (-8.0, 8.0)                       # collar slide inside the strut's stroke
 Y0 = m.SOCK_Y                                    # the strut's plane = the tube's
 
 # fixed clevis at the anchor, printed into the frame
-CLEVIS_T, CLEVIS_R = 6.0, 8.0                    # cheek thickness, radius round the eye
+CLEVIS_T, CLEVIS_R = 6.0, 6.5                    # cheek thickness, radius round the eye (8 with the first anchor; 6.5
+                                                 # keeps the cheeks 1.5 mm under the hub)
 CLEVIS_RUN = 20.0                                # front gussets reach this far forward of the eye, down to the plate
 ROD_CLEAR = 1.0                                  # front gussets stop this far short of the strut's rod (both sides)
 
@@ -340,18 +344,21 @@ def anchor_clevis():
     """two cheeks round the strut's steel rod-end tab, printed into the plate. Each cheek is a round boss over the eye on a
     block down to the plate, with a gusset running 20 mm forward down to the plate and a wall running straight back into
     the stop pedestal, its top from the boss's top to the pedestal's front edge. The front gussets stop 1 mm short of
-    the strut's rod, so it swings up between them; a web ties the cheeks together behind the tab."""
+    the strut's rod, so it swings up between them. Behind the tab (1 mm past its round end) the gap between the cheeks
+    is filled, so the two back walls are one solid block to the pedestal (it prints with proper infill, not two thin
+    walls)."""
     g = ROD_TAB_T + 0.6
     zt = ANCH_Z + CLEVIS_R
     zb = Z_PLATE - 0.1
-    parts = [box(ANCH_X + ROD_TAB_W / 2 + 1.0, ANCH_X + CLEVIS_R, Y0 - g / 2 - 0.1, Y0 + g / 2 + 0.1, zb, ANCH_Z)]
+    aft = [(ANCH_X, zt), (PED_X[0], USTOP_Z), (PED_X[0] + 1, USTOP_Z - 0.5), (PED_X[0] + 1, zb), (ANCH_X, zb)]
+    parts = [gusset_xz(aft, Y0 - g / 2 - 0.1, Y0 + g / 2 + 0.1).intersect(
+        box(ANCH_X + ROD_TAB_W / 2 + 1.0, PED_X[0] + 2, Y0 - g, Y0 + g, zb - 1, 0))]                    # between the walls
     for s in (-1, 1):
         y0, y1 = sorted((Y0 + s * g / 2, Y0 + s * (g / 2 + CLEVIS_T)))
         f0, f1 = sorted((Y0 + s * (STRUT_ROD_D / 2 + ROD_CLEAR), Y0 + s * (g / 2 + CLEVIS_T)))
         parts += [cyl(CLEVIS_R, (ANCH_X, y0, ANCH_Z), (ANCH_X, y1, ANCH_Z)),
                   box(ANCH_X - CLEVIS_R, ANCH_X + CLEVIS_R, y0, y1, zb, ANCH_Z),
-                  gusset_xz([(ANCH_X, zt), (PED_X[0], USTOP_Z), (PED_X[0] + 1, USTOP_Z - 0.5), (PED_X[0] + 1, zb),
-                             (ANCH_X, zb)], y0, y1),                                                         # aft, into the pedestal
+                  gusset_xz(aft, y0, y1),                                                                      # aft, into the pedestal
                   gusset_xz([(ANCH_X, zt), (ANCH_X - CLEVIS_RUN, zb), (ANCH_X, zb)], f0, f1)]                # fore
     return fuse(*parts)
 
@@ -542,7 +549,7 @@ def balance(plot=None):
           f"{load(STOP_DEG) / 1000:.3f} at {STOP_DEG:.0f}")
     L0, L1 = (math.hypot(collar_pin(t)[0] - ANCH_X, collar_pin(t)[1] - ANCH_Z) for t in (0, STOP_DEG))
     print(f"strut {L0:.0f} mm at 0 deg -> {L1:.0f} mm at {STOP_DEG:.0f} deg (stroke window {STRUT_COMP:.0f}..{STRUT_EXT:.0f})")
-    for F in (STRUT_F_DESIGN, STRUT_F, STRUT_F_RANGE[1]):
+    for F in (STRUT_F_RANGE[0], STRUT_F_DESIGN, STRUT_F_RANGE[1]):
         err = [strut_torque(t, F) - load(t) for t in th]
         ballast = sum(err) / len(err) / 9.80665e-3 / BOX_R
         print(f"  {F:.0f} N: {grip(min(err)):+.0f} .. {grip(max(err)):+.0f} g at the grip (+ = rises)"
@@ -570,17 +577,17 @@ def plot_balance(path, load, grip):
         for sd in ("top", "right"):
             a.spines[sd].set_visible(False)
     a1.plot(th, [load(t) / 1000 for t in th], color=ink2, lw=2, label="gravity, nose down (head, grip, tube, lever)")
-    a1.plot(th, [strut_torque(t, STRUT_F_DESIGN) / 1000 for t in th], color=blue, lw=2,
-            label=f"strut at {STRUT_F_DESIGN:.0f} N (the geometry's design point)")
-    a1.plot(th, [strut_torque(t, STRUT_F) / 1000 for t in th], color=orange, lw=2, label=f"strut at {STRUT_F:.0f} N (nominal)")
+    a1.plot(th, [strut_torque(t, STRUT_F_DESIGN) / 1000 for t in th], color=orange, lw=2,
+            label=f"strut at {STRUT_F_DESIGN:.0f} N, as bought (the geometry's design point)")
     a1.set_ylabel("torque about the pivot, N·m")
     a1.legend(loc="lower left", frameon=False, fontsize=9)
     a1.set_title(f"MkIII Rev 3: gas strut, 470 mm carbon tube, {STOP_DEG:.0f}° stop", loc="left", color=ink, fontsize=12, pad=10)
     a2.axhline(0, color=ink2, lw=1)
-    for F, col, ls in ((STRUT_F_DESIGN, blue, "-"), (STRUT_F, orange, "-"), (STRUT_F_RANGE[1], aqua, (0, (5, 3)))):
+    for F, col, ls in ((STRUT_F_RANGE[0], blue, (0, (5, 3))), (STRUT_F_DESIGN, orange, "-"), (STRUT_F_RANGE[1], aqua, (0, (5, 3)))):
         err = [strut_torque(t, F) - load(t) for t in th]
         ballast = sum(err) / len(err) / 9.80665e-3 / BOX_R
-        lab = f"{F:.0f} N" + ("" if abs(ballast) < 10 else f": add about {ballast:.0f} g to the head")
+        lab = f"{F:.0f} N" + (" (as bought)" if F == STRUT_F_DESIGN else "") + (
+            f": add about {ballast:.0f} g to the head" if ballast >= 10 else ": too weak, it drops" if ballast <= -10 else "")
         a2.plot(th, [grip(x) for x in err], color=col, lw=2, ls=ls, label=lab)
     a2.set_ylabel(f"out of balance at the grip ({GRIP_R:.0f} mm), g\n+ = rises, − = drops")
     a2.set_xlabel("lever angle, deg (0 = down-stop)")

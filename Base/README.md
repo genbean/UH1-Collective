@@ -111,19 +111,24 @@ The real collective starts about 30° above level and swings about 30–40°. Ou
 
 ![The same at the 32° stop](renders/rev3_section32.png)
 
-At the down-stop the strut lies almost flat under the socket boss, and its line passes about 40 mm below the pivot. As the tube lifts, the collar rises and the strut swings up toward the pivot. Its leverage shrinks in step with the head's weight, which also gets easier to hold as the tube rises. The strut also loses a little force as it extends, from 117 mm at the bottom to 140 mm at 32°, out of its 102–152 mm stroke.
+At the down-stop the strut lies almost flat under the socket boss, and its line passes about 37 mm below the pivot. As the tube lifts, the collar rises and the strut swings up toward the pivot. Its leverage shrinks in step with the head's weight, which also gets easier to hold as the tube rises. The strut also loses a little force as it extends, from 119 mm at the bottom to 140 mm at 32°, out of its 102–152 mm stroke.
 
 ![Torque and out-of-balance against lever angle](renders/strut_balance.png)
 
-The geometry is set so a **40 N strut balances to within 5 g at the grip**. That's the bottom of the range the 45 N strut is sold as. A stronger strut lifts a little too much, nearly the same amount at every angle, so a fixed weight in the head cancels it:
+The geometry is set so **the 45 N strut, as bought, balances to within 2 g at the grip**. A stronger strut lifts a little too much, nearly the same amount at every angle, so a fixed weight in the head cancels it. A weaker one sags:
 
-| Strut force | Out of balance at the grip | Ballast in the head to even it out |
+| Strut force | Out of balance at the grip | Fix |
 |---|---|---|
-| 40 N | −4 to +5 g | none |
-| 45 N (nominal) | +53 to +72 g (rises) | about **48 g** |
-| 53 N (top of the range) | +141 to +178 g | about 125 g |
+| 40 N | −58 to −50 g (drops) | — |
+| **45 N (as bought)** | **−2 to +2 g** | none |
+| 50 N | +50 to +61 g (rises) | about 42 g of ballast in the head |
+| 53 N (top of the range) | +80 to +96 g | about 68 g of ballast |
 
-The collar does the fine tuning. Sliding it 8 mm toward the pivot adds about 24 g of lift at the grip, and 8 mm away takes 24 g off. For comparison, Rev 1's bucket was out by ±130 g at the ends of its travel.
+The collar does the fine tuning. Sliding it 8 mm toward the pivot adds about 21 g of lift at the grip, and 8 mm away takes 21 g off. For comparison, Rev 1's bucket was out by ±130 g at the ends of its travel.
+
+**The anchor moved on 2026-11-08.** Rev 3 was first built with the anchor 12 mm ahead of and 40.5 mm below the pivot, sized for a 40 N strut, the bottom of the 45 N strut's range. The 45 N strut as bought lifted the lever, by about 50 to 70 g at the grip. The anchor is now 9.5 mm ahead and 36.5 mm below, so the strut's line passes closer to the pivot and has less leverage.
+
+To update a base built before then, reprint the frame. Nothing else changes: the strut, collar, screws and lever are the same, and the strut's lower M4 × 16 goes back in as before.
 
 The figures assume the strut gains 30 % in force from fully extended to fully compressed. The listing doesn't give this, so the real curve may differ by a few grams. Ballast and the collar take up any offset.
 
@@ -147,7 +152,7 @@ A 40 N cabinet strut ([QLXHBOT](https://www.amazon.com/dp/B0C8DJ8W9H)) was consi
 
 Two 6 mm cheeks rise from the plate either side of the strut's steel tab, printed into the frame. An M4 × 16 countersunk screw goes through both cheeks and the tab into an M4 nut in a pocket in the far cheek, so the joint holds whether the strut pushes or pulls.
 
-Each cheek is a round boss over the eye, standing on a block down to the plate. A triangular gusset runs 20 mm forward, from the top of the boss down to the plate. Behind the eye, each cheek carries on as a wall straight back into the stop pedestal, 22 mm away. The wall's top runs from the top of the boss to the pedestal's front edge, 4 mm under the hub, so the clevis and the pedestal brace each other. A web between the cheeks, behind the tab, ties them together.
+Each cheek is a round boss over the eye, 6.5 mm in radius (8 with the first anchor), standing on a block down to the plate. A triangular gusset runs 20 mm forward, from the top of the boss down to the plate. Behind the eye, each cheek carries on as a wall straight back into the stop pedestal, 19.5 mm away. The wall's top runs from the top of the boss, 1.5 mm under the hub, down to the pedestal's front edge, so the clevis and the pedestal brace each other. Behind the tab, from 1 mm past its round end, the gap between the cheeks is filled back to the pedestal. The two walls print as one solid block, with proper infill.
 
 The front gussets are 3.8 mm thick, so they stop 1 mm short of the strut's rod on each side and the rod swings up between them. Their outer faces are flush with the cheeks, so the screw's head and the nut seat flat. The screw goes in from the knob side, which has about 35 mm of room. Nothing at the anchor adjusts.
 
@@ -289,7 +294,7 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
 6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
 7. **Strut, collar end:** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
-8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 117 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
+8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 119 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
 9. Balance it as above. The down-stop is fixed, so there's nothing to set.
 
 ## Screws

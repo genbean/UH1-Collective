@@ -130,9 +130,9 @@ LEVER_SCREWS = [(x, y) for x in (-17.0, 10.0) for y in (-16.25, 16.25)]
 GUSSET_T = 8.0
 GUSSET_TOP = [(-48, 16.5), (-4, 33.0), (2, 30.5), (2, 16.5)]  # Rev 1's, its back end cut to x = 2: clear of the shoe at 32 deg
 STOP_DEG = r.STOP_DEG
-# The gas strut's anchor. Rev 3's, at x -12, z -40.5, balances a 40 N strut, the bottom of the range the 45 N strut is sold
-# as; the 45 N strut as bought lifts the lever (about +50..+70 g at the grip). Moved up and back to x -9.5, z -36.5 it
-# balances 45 N to within 3 g at the grip over the whole travel (the strut 119 mm long at 0 deg, 140 at 32, in its
+# The gas strut's anchor. Rev 3's first, at x -12, z -40.5, balanced a 40 N strut, the bottom of the range the 45 N strut
+# is sold as; the 45 N strut as bought lifted the lever (about +50..+70 g at the grip). Moved up and back to x -9.5,
+# z -36.5 (Rev 3's frame has it too now) it balances 45 N to within 3 g at the grip over the whole travel (the strut 119 mm long at 0 deg, 140 at 32, in its
 # 102..152 mm stroke): the strut's line passes closer to the pivot, so it has less leverage. The clevis's cheeks shrink
 # to 6.5 mm round the eye (Rev 3: 8), 1.5 mm under the hub, and its back wall runs 2 mm under the hub to the pad.
 # Rev 3's strut, collar pin, pins and clevis code read these from Rev 3's module, so they're set there too (this
@@ -299,18 +299,21 @@ def block_cuts(s):
 
 
 def anchor_clevis():
-    """Rev 3's anchor_clevis() on the middle, at ANCH_X, ANCH_Z, its aft wall running level, 2 mm under the hub, into the
-    up-stop pad"""
+    """Rev 3's anchor_clevis() on the middle, at ANCH_X, ANCH_Z, its back walls running level, 2 mm under the hub, into
+    the up-stop pad, and the gap between them filled from 1 mm behind the tab's round end: one solid block, for proper
+    infill"""
     g = r.ROD_TAB_T + 0.6
     zt, zb = r.ANCH_Z + r.CLEVIS_R, Z_PLATE - 0.1
     ax = r.ANCH_X
-    parts = [box(ax + r.ROD_TAB_W / 2 + 1.0, ax + r.CLEVIS_R, -g / 2 - 0.1, g / 2 + 0.1, zb, r.ANCH_Z)]
+    aft = [(ax, ANCH_WALL_Z), (PED_X[0] + 1, ANCH_WALL_Z), (PED_X[0] + 1, zb), (ax, zb)]
+    parts = [gusset_xz(aft, -g / 2 - 0.1, g / 2 + 0.1).intersect(
+        box(ax + r.ROD_TAB_W / 2 + 1.0, PED_X[0] + 2, -g, g, zb - 1, 0))]          # the gap between the walls, behind the tab
     for s in (-1, 1):
         y0, y1 = sorted((s * g / 2, s * (g / 2 + r.CLEVIS_T)))
         f0, f1 = sorted((s * (r.STRUT_ROD_D / 2 + r.ROD_CLEAR), s * (g / 2 + r.CLEVIS_T)))
         parts += [cyl(r.CLEVIS_R, (ax, y0, r.ANCH_Z), (ax, y1, r.ANCH_Z)),
                   box(ax - r.CLEVIS_R, ax + r.CLEVIS_R, y0, y1, zb, r.ANCH_Z),
-                  gusset_xz([(ax, ANCH_WALL_Z), (PED_X[0] + 1, ANCH_WALL_Z), (PED_X[0] + 1, zb), (ax, zb)], y0, y1),
+                  gusset_xz(aft, y0, y1),
                   gusset_xz([(ax, zt), (ax - r.CLEVIS_RUN, zb), (ax, zb)], f0, f1)]
     return fuse(*parts)
 
