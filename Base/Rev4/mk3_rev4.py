@@ -170,9 +170,18 @@ HUB_CLR = 0.8
 TOWER_X0, TOWER_X1 = 24.0, 47.5
 TOWER_HW = 10.0
 SHOE_IN = 10.5
-BACK_T, BACK_Z = 8.5, -30.0                      # back plate: x TOWER_X1 .. +8.5, z -30 up to the shell's top
-BACK_SCREWS = [(y, z) for y in (-6.0, 6.0) for z in (-26.0, 26.0)]   # M3 x 16 countersunk from its back face, into M3
-                                                 # threads tapped 7.5 mm deep in the tower, above and below the tunnel
+# The back: one 45 deg chamfer plane each side, |y| + x = REAR_C, from the pillow blocks' outer back corners through the
+# frame, the shell and the back plate, so the three read as one block from behind.
+REAR_C = BLOCK_HW + BLOCK_Y1                     # 69
+# back plate: x TOWER_X1 .. +8.5, from just over the base plate up to the shell's top, the full width of the back face
+# (|y| 21.5) tapering along the chamfer to 13 at its back face
+BACK_T, BACK_Z = 8.5, Z_PLATE + 0.2
+# its screws: M3 x 16 countersunk from its back face, into M3 threads tapped 7.5 mm deep. The back face is 13 either side,
+# so they're at y = +-7 (the heads 2.5 mm in from its edges), which puts all six in solid housing above or below the
+# shoe's pocket, none in its 3.9 mm side walls. A pair each side of the bolt's push, just clear of the pocket (z = +-26:
+# two into the shell, two into the frame) takes the push with the least bending; a pair near the foot (z = -41, into
+# the frame) keeps the plate's bottom tight to the frame.
+BACK_SCREWS = [(y, z) for y in (-7.0, 7.0) for z in (26.0, -26.0, -41.0)]
 NUT5_X = TOWER_X1                                # the M5 nut, in a pocket in the back plate's front face
 KNOB_X0 = TOWER_X1 + BACK_T + 3.0                # the knob's underside: 3 mm off the back plate, room to screw in
 BOLT_L = 30.0                                    # Rev 3's M5 x 30 hex bolt, its head on the knob's floor
@@ -294,7 +303,6 @@ def anchor_clevis():
 
 def corner_gussets():
     """45 deg corner gussets (in plan) at both ends of each pillow block, CG_LEG along each wall:
-    behind, outside   the block's back face to the outer face of the web behind it, up to the web's top
     behind, inside    the block's inner face to the web's front face, kept 1.5 mm outside the up-stop lugs' swing
     in front, inside  the block's inner face to the down-stop pillar's back face, up to the pillar's top and 3 mm clear of
                       the hub
@@ -307,8 +315,7 @@ def corner_gussets():
     out = []
     for s in (-1, 1):
         q = lambda pts: [(x, s * y) for x, y in pts]
-        out += [prism(q([(bx - 0.5, yw - 0.5), (bx - 0.5, yo), (bx + L, yw - 0.5)]), 0.0),                 # behind, outside
-                prism(q([(bx, yi + 0.5), (bx - 0.5 - L, yi + 0.5), (bx, yi - L)]), 0.0)
+        out += [prism(q([(bx, yi + 0.5), (bx - 0.5 - L, yi + 0.5), (bx, yi - L)]), 0.0)
                 .cut(cyl(LUG_R + 1.5, (0, s * (yi - L - 1), 0), (0, s * (yi + 1), 0))),                   # behind, inside
                 prism(q([(-bx, yi + 0.5), (-bx + 0.5 + L, yi + 0.5), (-bx, yi - L)]), PAD_Z)
                 .cut(cyl(HUB_R + 3.0, (0, s * (yi - L - 1), 0), (0, s * (yi + 1), 0))),                   # in front, inside
@@ -326,8 +333,8 @@ def frame():
         parts += [box(-BLOCK_HW, BLOCK_HW, y0, y1, Z_PLATE, 0),                                       # pillow block
                   # down-stop pillar under the pad, run on into the pillow block
                   box(PAD_X[0], -BLOCK_HW + 0.5, *sorted((s * PAD_DY[0], yi + s * 0.5)), Z_PLATE - 0.1, PAD_Z),
-                  # web from the brake tower to the pillow block, behind the up-stop lugs
-                  box(BLOCK_HW - 0.5, TOWER_X1, *sorted((s * (TOWER_HW - 0.5), yi + s * 0.5)), Z_PLATE - 0.1, 0.0)]
+                  # behind the pillow block: the web to the brake housing and the corner, out to the back chamfer
+                  rear_fill(s, Z_PLATE - 0.1, 0.0)]
     pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z)                            # up-stop pad
     parts += [pad, brake_housing(Z_PLATE - 0.1, 0.0), anchor_clevis(), *corner_gussets()]
     f = fuse(*parts)
@@ -369,17 +376,20 @@ def lever_sweep():
     return fuse(*[rot_y(env, a) for a in range(-1, int(STOP_DEG) + 3, 2)])
 
 
-def shell_rear_corners():
-    """behind the shell's back wall, either side of the brake housing, the same outline as the frame's below them, up to
-    the shell's top: the web out to the housing's back face (|y| 9.5..23) and the 45 deg gusset beyond it (out to the
-    pillow blocks' outer face)"""
-    bx, yw, yo, L = BLOCK_HW, BRG_Y0 + 0.5, BLOCK_Y1 - 0.5, CG_LEG
-    out = []
-    for s in (-1, 1):
-        out.append(box(bx - 0.5, TOWER_X1, *sorted((s * (TOWER_HW - 0.5), s * yw)), 0, SHELL_TOP))
-        pts = [(bx - 0.5, s * (yw - 0.5)), (bx - 0.5, s * yo), (bx + L, s * (yw - 0.5))]
-        out.append(cq.Workplane("XY").polyline(pts).close().extrude(SHELL_TOP).val())
-    return out
+def rear_fill(s, z0, z1):
+    """behind a pillow block (side s), between z0 and z1: solid from the brake housing's side (|y| 9.5) out to the
+    block's outer face and back to the housing's back face, its outer back corner cut off by the back chamfer"""
+    bx, yo, yh = BLOCK_HW, BLOCK_Y1, TOWER_HW - 0.5
+    pts = [(bx - 0.5, yh), (bx - 0.5, yo), (bx, yo), (TOWER_X1, REAR_C - TOWER_X1), (TOWER_X1, yh)]
+    return (cq.Workplane("XY").workplane(offset=z0).polyline([(x, s * y) for x, y in pts]).close()
+            .extrude(z1 - z0).val())
+
+
+def joint_edge(e):
+    """edges in the faces where the frame, shell and back plate meet: no chamfer there, so no groove shows at the seams
+    (and none runs along the inside of the shoe's pocket)"""
+    b = e.BoundingBox()
+    return (abs(b.zmin) < 1e-4 and abs(b.zmax) < 1e-4) or (abs(b.xmin - TOWER_X1) < 1e-4 and abs(b.xmax - TOWER_X1) < 1e-4)
 
 
 def shell():
@@ -396,12 +406,12 @@ def shell():
         yb = side * (BRG_Y0 + BLOCK_Y1) / 2
         for x in (-CAP_BOLT_X, CAP_BOLT_X):
             s = s.cut(m.csk_hole(3, (x, yb, CAP_HEAD_Z), (0, 0, -1), 10, out=SHELL_TOP))
-    s = s.fuse(brake_housing(0.0, SHELL_TOP), *shell_rear_corners())            # the brake housing's upper half
+    s = s.fuse(brake_housing(0.0, SHELL_TOP), *[rear_fill(side, 0.0, SHELL_TOP) for side in (-1, 1)])   # brake housing
     s = s.cut(shoe_tunnel())
     for y, z in BACK_SCREWS:
         s = s.cut(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
     s = s.cut(lever_sweep())
-    return chamfer_edges(s.clean())
+    return chamfer_edges(s.clean(), exclude=joint_edge)
 
 
 # ================================================================ side covers
@@ -446,12 +456,13 @@ def back_plate():
     """closes the pocket's back, screwed across the frame's and the shell's halves of the housing; the M5 nut sits in
     a pocket in its front face, and the bolt's push goes into it. Prints on its front face"""
     x0, x1 = TOWER_X1, TOWER_X1 + BACK_T
-    p = box(x0, x1, -TOWER_HW, TOWER_HW, BACK_Z, SHELL_TOP)
+    pts = [(x0, -(REAR_C - x0)), (x1, -(REAR_C - x1)), (x1, REAR_C - x1), (x0, REAR_C - x0)]
+    p = cq.Workplane("XY").workplane(offset=BACK_Z).polyline(pts).close().extrude(SHELL_TOP - BACK_Z).val()
     p = p.cut(hexprism(m.NUT_AF[5], (x0 - 0.1, 0, 0), (x0 + m.NUT_T[5] + 0.2, 0, 0)))
     p = p.cut(cyl(m.CSK[5][1] / 2, (x0 - 1, 0, 0), (x1 + 1, 0, 0)))
     for y, z in BACK_SCREWS:
         p = p.cut(m.csk_hole(3, (x1, y, z), (-1, 0, 0), BACK_T + 1))
-    return chamfer_edges(p.clean())
+    return chamfer_edges(p.clean(), exclude=joint_edge)
 
 
 def shoe():
@@ -589,7 +600,7 @@ def strut_collar(theta=0.0):
 def static_parts():
     """the parts that don't move, built once (chamfered, as Rev 3's)"""
     if not _STATIC:
-        _STATIC.update({"frame": chamfer_edges(frame()), "shell": shell(), "shoe": shoe(), "spring_cap": spring_cap(),
+        _STATIC.update({"frame": chamfer_edges(frame(), exclude=joint_edge), "shell": shell(), "shoe": shoe(), "spring_cap": spring_cap(),
                         "back_plate": back_plate(),
                         "cover_sensor": cover_sensor(), "cover_cable": cover_cable(), "friction_knob": friction_knob(),
                         "felt": felt(), "knob_spring": knob_spring(), "hardware": hardware(), "magnet": magnet(),

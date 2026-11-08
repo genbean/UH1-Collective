@@ -118,9 +118,19 @@ def assembly_top(C, P0=None):
     save(title(img, "Rev 4 from above", "Straight down, to scale, at 0 deg"), "rev4_top.png")
 
 
+def back_view(C, P0=None):
+    """from behind and a little above: the back chamfer through the frame, shell and back plate, and the plate's screws"""
+    P0 = P0 or scene(0.0, C, tube_to=-200.0)
+    save(title(R.render(hide(P0, "carbon_tube", "strut_collar", "gas_strut", "strut_pins", "hose_clamp"), (1.0, 0.35, 0.45),
+                        size=(1400, 1100), focus=((-40, -45, -58), (110, 45, 40)), zoom=1.0)[0],
+               "Rev 4 from behind", "One 45 deg chamfer each side through the frame, the shell and the back plate; the "
+               "plate's six M3 screws"), "rev4_back.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     C = colours()
+    back_view(C)
     frame_top(C)
     assembly_top(C)
     P0 = scene(0.0, C, tube_to=-200.0)
@@ -197,7 +207,7 @@ def main():
     nut5 = np.array([v.TOWER_X1 + v.BACK_T, 0, 0])
     labelled(P0, [("M3 x 20 countersunk  (x4)", "the shell, from the top, down counterbores into M3 nuts slid into the "
                    "pillow blocks from the front and back", caps),
-                  ("M3 x 16 countersunk  (x4)", "the back plate: two into the frame, two into the shell, tapped M3 "
+                  ("M3 x 16 countersunk  (x6)", "the back plate: four into the frame, two into the shell, tapped M3 "
                    "7.5 mm deep", back),
                   ("M5 x 30 hex bolt (Rev 3's)", "brake: its head on the floor of the knob's hex pocket", [knob]),
                   ("M5 nut", "brake: in a pocket in the back plate's front face", [nut5])],
