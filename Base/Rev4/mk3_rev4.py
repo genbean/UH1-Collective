@@ -13,23 +13,27 @@ and hose clamp are moved +9 in y.)
 Across the pivot axis, from the middle out (each side):
     hub                 |y| 0-21.5     60 mm across (Rev 3: 64 mm long, now 43), 3.5 mm past the socket boss
     bearing             |y| 22.5-29.5  6808-2RS thin-section, 40 x 52 x 7 (Rev 3: 6006-2RS, 30 x 55 x 13)
-    retaining lip       |y| 29.5-31.5  the pillow blocks and caps are 9 mm wide (Rev 3: 17)
-    trunnion end        |y| 32.0       40.2 mm across: the 6808's bore, +0.2 as Rev 3's coupon fit
+    retaining lip       |y| 29.5-31.5  the pillow blocks are 9 mm wide (Rev 3: 17); the base plate stops at their
+                                       outer faces, 63 mm across
+    trunnion end        |y| 32.0       40.1 mm across: the 6808's bore + 0.1
     side covers         |y| 31.5-41.0  9.5 mm deep (Rev 3: 15)
+One shell over the top takes the place of Rev 3's two bearing caps: a box over the lever whose side walls are the caps,
+with a slot in its front and top for the socket boss, tube and top gusset to swing through, and a notch in its back
+wall round the brake tower. It drops straight down over the lever and bolts on with the four cap screws.
 The AS5600 board sits INSIDE the sensor trunnion, in a square pocket in its end, chip facing out and level with the
 trunnion's end; the magnet is on a post from the sensor cover, 1 mm off the chip. The USB cable turns out of the
 axis inside the cable cover and leaves through a notch in its rim, toward the back; the notch lets the cover go on
 over a cable that's already fitted, like Rev 3's.
 
 Brake: Rev 3's drum, shoe and knob tower sat beside the hub, and there's no room for them now. The brake is behind
-the hub instead. A narrow, tall shoe (12 mm wide, 44 mm tall, felt on its face) rides in a pocket in a tower on the
-frame's back edge and presses on the hub's own cylinder over +-44 deg either side of the axis. The MkII knob, on the
-back of the tower, turns Rev 3's M5 x 30 hex bolt through a captive nut; the bolt's tip pushes a printed spring cap,
-and the spring (Rev 3's, 10 mm OD, still 6.5 mm long when fitted) pushes the shoe. The shoe wraps the hub above its
-widest point, so it has to stand back while the lever goes in: the pocket leaves it 10.5 mm to slide back.
-Up-stop: a boss under the back of the hub lands on a pedestal at 32 deg, as in Rev 3. At 0 deg it sits where the
-shoe's lower end is, so it has a slot down the middle: two lugs, one each side of the shoe and the brake tower, both
-landing on the pedestal. Inside the slot the hub is a plain cylinder, so the felt runs on it.
+the hub instead. A narrow, tall shoe (12 mm wide, 44 mm tall, felt on its face) presses on the hub's own cylinder over
++-44 deg either side of the axis. It slides in a pocket 0.1 mm clear all round, so the friction's pull (up or down, as
+the lever moves) can't shift it. The pocket is split at the axis like a bearing seat: its lower half is in a tower on
+the frame, its upper half in the shell, and both come right up to the hub (0.8 mm off it), wrapping the shoe from its
+front corners back. The shoe goes in once the lever is in, before the shell; a back plate screwed across both halves'
+back faces carries the M5 nut. The MkII knob turns Rev 3's M5 x 30 hex bolt through that nut; the bolt's tip pushes
+a printed spring cap, and the spring (Rev 3's, 10 mm OD, 6.5 mm long when fitted) pushes the shoe.
+Up-stop: two lugs under the back of the hub, either side of the shoe, land on a pad behind the axis at 32 deg.
 
 Run with a Python that has cadquery:
     python mk3_rev4.py            -> stl/ (printed), stl/ref/ (bought, reference), step/MkIII_Rev4_assembly.step
@@ -98,7 +102,8 @@ BLOCK_HW = m.BLOCK_HW                            # 37.5, as Rev 3
 # too narrow for Rev 3's M4 heads)
 CAP_BOLT_X, CAP_HEAD_Z, CAP_SCREW_L = 30.5, 8.0, 20
 CAP_NUT_Z = -8.3                                 # the nut's top face, as Rev 3
-# side covers: four M3 x 16 countersunk each, into M3 threads tapped 7.5 mm deep in the block and cap
+# side covers: four M3 x 16 countersunk each, into M3 threads tapped in the block and shell; the pilot holes go right
+# through their 9 mm walls (COVER_TAP is the back plate's screws' tapped depth)
 COVER_HOLE_R, COVER_R, COVER_IN_R = 30.5, 35.5, 25.0
 COVER_FLOOR, COVER_TAP, COVER_SCREW_L = 2.5, 7.5, 16
 COVER_D = W_HALF - BLOCK_Y1                      # 9.5
@@ -135,30 +140,43 @@ LUG_R = math.hypot(USTOP_X[1], USTOP_Z)          # the lugs' furthest point from
 PAD_X, PAD_DY, PAD_Z = r.PAD_X, r.PAD_DY, r.PAD_Z
 
 # ---------------------------------------------------------------- frame
-PLATE_X = (-62.0, 74.0)
+PLATE_X = (-65.0, 62.0)                          # the plate is BLOCK_Y1 either side: no wings
 Z_PLATE, AXIS_H = r.Z_PLATE, r.AXIS_H
-PED_X = (14.0, 29.5)                             # the up-stop pad, full width between the pillow blocks
-PED_NOTCH = (24.0, USTOP_SLOT)                   # ... with its back middle cut away (x > 24, |y| < 11), clear of the shoe
+PED_X = (14.0, 29.5)                             # the up-stop pad, full width between the pillow blocks; the brake
+                                                 # tower runs on from its back middle
 CG_LEG = 8.0                                     # corner gussets at each end of each pillow block, 45 deg in plan
-DESK = [(x, y) for x in (PLATE_X[0] + 8, PLATE_X[1] - 8) for y in (-W_HALF + 8, W_HALF - 8)]
+DESK = [(x, y) for x in (-57.0, 54.0) for y in (-24.0, 24.0)]   # past the pillow blocks' ends and the down-stop
+                                                 # pillars, the screws' heads clear of every wall
+# the shell over the top: a box on the pillow blocks, x +-BLOCK_HW, |y| <= BLOCK_Y1, z 0..SHELL_TOP, 3 mm walls; its side
+# walls (|y| 22.5..31.5) are solid, the bearing caps; the brake housing's upper half runs on out of its back wall
+SHELL_TOP, SHELL_T = 38.0, 3.0
+SWEEP_CLR = 1.0                                  # the slot in its front and top: this far round the lever's sweep
 
 # ---------------------------------------------------------------- brake (all on y = 0, z = 0 unless noted)
 FELT_T = 1.5
 SHOE_HW, SHOE_HZ = 6.0, 22.0                     # 12 wide, 44 tall
-SHOE_X1 = 47.0                                   # its back face
+SHOE_CLR = 0.1                                   # per side, all round the shoe in its tunnel: no slop (tune it with the
+                                                 # shoe-pocket coupon)
+SHOE_X1 = 45.0                                   # its back face
 SPRING_BORE = (35.0, SHOE_X1)                    # the spring's bore in the shoe's back, 10.6 across (Rev 3's seat)
 SPRING_FIT = m.SPRING_FIT                        # 6.5 fitted, as Rev 3
-CAP_X = (SPRING_BORE[0] + SPRING_FIT, 48.5)      # printed spring cap, 5.5 mm of it in the shoe's bore: the bolt's tip
+CAP_X = (SPRING_BORE[0] + SPRING_FIT, 47.0)      # printed spring cap, 3.5 mm of it in the shoe's bore: the bolt's tip
                                                  # pushes its back face
-# The shoe wraps the hub above its widest point, so while the lever is lowered into the frame the shoe has to stand
-# back: its top corners are 9.5 mm inside the hub's outline. The pocket runs RETRACT behind the shoe for that, and
-# backing the knob out ~11 mm lets the shoe, spring and cap slide back together.
-RETRACT = 10.5
-TOWER_X, TOWER_HW, TOWER_TOP = (32.0, 71.5), 10.0, 25.0
-POCKET_X1 = SHOE_X1 + RETRACT                    # (57.5)
-NUT5_X = 63.0                                    # captive M5 nut, slid in from the top
-KNOB_X0 = TOWER_X[1] + 3.0                       # the knob's underside: 3 mm off the tower, room to screw in
+# The brake housing, split at z = 0 like a bearing seat: the lower half on the frame, the upper half on the shell. It
+# runs from TOWER_X0 (just behind the shoe's front corners at x = 22.5) to TOWER_X1, its front following the hub HUB_CLR
+# off, and the pocket runs out through its back face. The shoe goes in with the shell off, standing back SHOE_IN while
+# it's set down past the hub, then slid forward.
+HUB_CLR = 0.8
+TOWER_X0, TOWER_X1 = 24.0, 47.5
+TOWER_HW = 10.0
+SHOE_IN = 10.5
+BACK_T, BACK_Z = 8.5, -30.0                      # back plate: x TOWER_X1 .. +8.5, z -30 up to the shell's top
+BACK_SCREWS = [(y, z) for y in (-6.0, 6.0) for z in (-26.0, 26.0)]   # M3 x 16 countersunk from its back face, into M3
+                                                 # threads tapped 7.5 mm deep in the tower, above and below the tunnel
+NUT5_X = TOWER_X1                                # the M5 nut, in a pocket in the back plate's front face
+KNOB_X0 = TOWER_X1 + BACK_T + 3.0                # the knob's underside: 3 mm off the back plate, room to screw in
 BOLT_L = 30.0                                    # Rev 3's M5 x 30 hex bolt, its head on the knob's floor
+KNOB_FLOOR = CAP_X[1] + BOLT_L - KNOB_X0         # the knob's floor, raised to 18 mm (Rev 3's: 4) for the M5 x 30
 
 
 def collar_pin(theta=0.0):
@@ -254,7 +272,7 @@ def block_cuts(s):
             cyl(LIP_R, (0, s * (BRG_Y1 - 1), 0), (0, s * (BLOCK_Y1 + 1), 0))]           # retaining lip's bore
     for a in (45, 135, 225, 315):
         px, pz = m.on_circle(COVER_HOLE_R, a)
-        cuts.append(cyl(m.TAP[3] / 2, (px, s * (BLOCK_Y1 - COVER_TAP), pz), (px, s * (BLOCK_Y1 + 1), pz)))   # covers' M3
+        cuts.append(cyl(m.TAP[3] / 2, (px, s * (BRG_Y0 - 1), pz), (px, s * (BLOCK_Y1 + 1), pz)))   # covers' M3: tap drill, right through the wall
     return cuts
 
 
@@ -299,25 +317,19 @@ def corner_gussets():
 
 
 def frame():
-    plate = (cq.Workplane("XY").box(PLATE_X[1] - PLATE_X[0], 2 * W_HALF, m.PLATE_T, centered=False)
-             .translate((PLATE_X[0], -W_HALF, -AXIS_H)).edges("|Z").fillet(6).val())
+    plate = (cq.Workplane("XY").box(PLATE_X[1] - PLATE_X[0], 2 * BLOCK_Y1, m.PLATE_T, centered=False)
+             .translate((PLATE_X[0], -BLOCK_Y1, -AXIS_H)).edges("|Z").fillet(6).val())
     parts = [plate]
     for s in (-1, 1):
         y0, y1 = sorted((s * BRG_Y0, s * BLOCK_Y1))
         yi, yo = s * BRG_Y0, s * BLOCK_Y1
         parts += [box(-BLOCK_HW, BLOCK_HW, y0, y1, Z_PLATE, 0),                                       # pillow block
-                  # under the cover, a gusset from the block's outer face down to the plate's edge
-                  (cq.Workplane("YZ").polyline([(yo - s * 0.5, Z_PLATE - 0.1), (yo - s * 0.5, -COVER_R - 1.0),
-                                                (s * W_HALF, Z_PLATE - 0.1)]).close()
-                   .extrude(2 * BLOCK_HW).translate((-BLOCK_HW, 0, 0)).val()),
                   # down-stop pillar under the pad, run on into the pillow block
                   box(PAD_X[0], -BLOCK_HW + 0.5, *sorted((s * PAD_DY[0], yi + s * 0.5)), Z_PLATE - 0.1, PAD_Z),
                   # web from the brake tower to the pillow block, behind the up-stop lugs
-                  box(BLOCK_HW - 0.5, 56.0, *sorted((s * (TOWER_HW - 0.5), yi + s * 0.5)), Z_PLATE - 0.1, 0.0)]
-    pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z).cut(
-        box(PED_NOTCH[0], PED_X[1] + 1, -PED_NOTCH[1], PED_NOTCH[1], Z_PLATE, USTOP_Z + 1))
-    parts += [pad, box(*TOWER_X, -TOWER_HW, TOWER_HW, Z_PLATE - 0.1, TOWER_TOP),                       # up-stop pad, brake tower
-              anchor_clevis(), *corner_gussets()]
+                  box(BLOCK_HW - 0.5, TOWER_X1, *sorted((s * (TOWER_HW - 0.5), yi + s * 0.5)), Z_PLATE - 0.1, 0.0)]
+    pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z)                            # up-stop pad
+    parts += [pad, brake_housing(Z_PLATE - 0.1, 0.0), anchor_clevis(), *corner_gussets()]
     f = fuse(*parts)
 
     a3, t3, a4, t4 = m.NUT_AF[3], m.NUT_T[3], m.NUT_AF[4], m.NUT_T[4]
@@ -334,13 +346,10 @@ def frame():
     cuts += [cyl(r.PIN_R, (r.ANCH_X, -12, r.ANCH_Z), (r.ANCH_X, 12, r.ANCH_Z)),                      # anchor: M4 x 16,
              m.csk_hole(4, (r.ANCH_X, aw, r.ANCH_Z), (0, -1, 0), 1),                                   # head on +y,
              hexprism(a4, (r.ANCH_X, -aw + t4 + 0.2, r.ANCH_Z), (r.ANCH_X, -aw - 1, r.ANCH_Z))]         # nut on -y
-    # brake: the shoe's pocket (open to the hub), the spring cap's bore, the bolt, and the M5 nut slid in from the top
-    nut_r = m.NUT_AF[5] / 2 / math.cos(math.radians(30))
-    cuts += [box(TOWER_X[0] - 1, POCKET_X1, -SHOE_HW - 0.3, SHOE_HW + 0.3, -SHOE_HZ - 0.3, SHOE_HZ + 0.3),
-             cyl(5.4, (POCKET_X1 - 0.1, 0, 0), (POCKET_X1 + 2.5, 0, 0)),
-             cyl(m.CSK[5][1] / 2, (POCKET_X1, 0, 0), (TOWER_X[1] + 1, 0, 0)),
-             hexprism(m.NUT_AF[5], (NUT5_X, 0, 0), (NUT5_X + m.NUT_T[5] + 0.2, 0, 0)).rotate(V(0, 0, 0), V(1, 0, 0), 30),
-             box(NUT5_X, NUT5_X + m.NUT_T[5] + 0.2, -m.NUT_AF[5] / 2, m.NUT_AF[5] / 2, 0, TOWER_TOP + 1)]
+    # brake: the shoe's pocket (lower half), and the back plate's lower screws
+    cuts.append(shoe_tunnel())
+    for y, z in BACK_SCREWS:
+        cuts.append(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
     for x, y in DESK:
         cuts.append(cyl(2.75, (x, y, -AXIS_H - 1), (x, y, 0)))                                         # desk mounting
     for c in cuts:
@@ -348,15 +357,38 @@ def frame():
     return f.clean()
 
 
-def cap(s):
-    y0, y1 = sorted((s * BRG_Y0, s * BLOCK_Y1))
-    yb = (y0 + y1) / 2
-    c = cyl(BLOCK_HW, (0, y0, 0), (0, y1, 0)).intersect(box(-60, 60, y0 - 1, y1 + 1, 0, 60))
-    for k in block_cuts(s):
-        c = c.cut(k)
-    for x in (-CAP_BOLT_X, CAP_BOLT_X):
-        c = c.cut(m.csk_hole(3, (x, yb, CAP_HEAD_Z), (0, 0, -1), 10, out=40))
-    return c.clean()
+def lever_sweep():
+    """what the shell has to let through: the socket boss and the top gusset, SWEEP_CLR bigger all round, at every
+    angle from 1 deg below the down-stop to 1 deg past the up-stop (2 deg apart: 0.02 mm between them at the shell)"""
+    c = SWEEP_CLR
+    boss = cyl(m.SOCK_BOSS_R + c, (-8.0, 0, 0), (-90.0, 0, 0))
+    g = [(-48 - c, 16.5), (-4, 33.0 + c * 1.2), (2 + c, 30.5 + c * 0.7), (2 + c, 16.5)]
+    pads = [box(PAD_X[0] - c, PAD_X[1] + c, *sorted((s * (PAD_DY[0] - c), s * (PAD_DY[1] + c))), PAD_Z - c, 0)
+            for s in (-1, 1)]                                                  # the down-stop pads, 20 out from the tube
+    env = fuse(boss, gusset_xz(g, -GUSSET_T / 2 - c, GUSSET_T / 2 + c), *pads)
+    return fuse(*[rot_y(env, a) for a in range(-1, int(STOP_DEG) + 3, 2)])
+
+
+def shell():
+    """the box over the lever, in place of Rev 3's two caps: its side walls are the caps (the bearing's upper half-seat
+    and lip, the cover screws' upper threads, the cap screws counterbored from the top), joined by 3 mm front, back and
+    top walls. The front and top are slotted for the lever's sweep; the upper half of the brake housing runs on out of
+    the back wall. Prints top down"""
+    h = BLOCK_HW
+    s = box(-h, h, -BLOCK_Y1, BLOCK_Y1, 0, SHELL_TOP).cut(
+        box(-h + SHELL_T, h - SHELL_T, -BRG_Y0, BRG_Y0, -1, SHELL_TOP - SHELL_T))
+    for side in (-1, 1):
+        for k in block_cuts(side):
+            s = s.cut(k)
+        yb = side * (BRG_Y0 + BLOCK_Y1) / 2
+        for x in (-CAP_BOLT_X, CAP_BOLT_X):
+            s = s.cut(m.csk_hole(3, (x, yb, CAP_HEAD_Z), (0, 0, -1), 10, out=SHELL_TOP))
+    s = s.fuse(brake_housing(0.0, SHELL_TOP))                                   # the brake housing's upper half
+    s = s.cut(shoe_tunnel())
+    for y, z in BACK_SCREWS:
+        s = s.cut(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
+    s = s.cut(lever_sweep())
+    return chamfer_edges(s.clean())
 
 
 # ================================================================ side covers
@@ -388,6 +420,27 @@ def cover_cable():
 
 
 # ================================================================ brake
+def brake_housing(z0, z1):
+    """the block round the shoe's pocket between heights z0 and z1, its front HUB_CLR off the hub"""
+    return box(TOWER_X0, TOWER_X1, -TOWER_HW, TOWER_HW, z0, z1).cut(cyl(HUB_R + HUB_CLR, (0, -20, 0), (0, 20, 0)))
+
+
+def shoe_tunnel(clr=SHOE_CLR):
+    return box(TOWER_X0 - 4, TOWER_X1 + 1, -SHOE_HW - clr, SHOE_HW + clr, -SHOE_HZ - clr, SHOE_HZ + clr)
+
+
+def back_plate():
+    """closes the pocket's back, screwed across the frame's and the shell's halves of the housing; the M5 nut sits in
+    a pocket in its front face, and the bolt's push goes into it. Prints on its front face"""
+    x0, x1 = TOWER_X1, TOWER_X1 + BACK_T
+    p = box(x0, x1, -TOWER_HW, TOWER_HW, BACK_Z, SHELL_TOP)
+    p = p.cut(hexprism(m.NUT_AF[5], (x0 - 0.1, 0, 0), (x0 + m.NUT_T[5] + 0.2, 0, 0)))
+    p = p.cut(cyl(m.CSK[5][1] / 2, (x0 - 1, 0, 0), (x1 + 1, 0, 0)))
+    for y, z in BACK_SCREWS:
+        p = p.cut(m.csk_hole(3, (x1, y, z), (-1, 0, 0), BACK_T + 1))
+    return chamfer_edges(p.clean())
+
+
 def shoe():
     s = box(HUB_R - 9.0, SHOE_X1, -SHOE_HW, SHOE_HW, -SHOE_HZ, SHOE_HZ)
     s = s.cut(cyl(HUB_R + FELT_T, (0, -20, 0), (0, 20, 0)))                                    # its face, under the felt
@@ -416,18 +469,29 @@ def knob_spring():
 
 
 def friction_knob():
-    """Rev 3's knob (the MkII knob with an M5 hex pocket), lying on its side on the back of the tower"""
-    sx, sy, sz = m.KNOB_X, m.KNOB_Y, m.KNOB_Z0
-    k = r.friction_knob_r3().translate(V(-sx, -sy, -sz))                   # underside centre to the origin, axis +z
-    return rot_y(k, 90).translate(V(KNOB_X0, 0, 0))                        # axis +x
+    """Rev 3's knob (the MkII knob with an M5 hex pocket) with its floor raised to KNOB_FLOOR, so Rev 3's M5 x 30 reaches
+    the spring cap from it; lying on its side behind the back plate"""
+    from OCP.StlAPI import StlAPI_Reader
+    from OCP.TopoDS import TopoDS_Shape
+    raw = TopoDS_Shape()
+    StlAPI_Reader().Read(raw, r.MK2_KNOB)
+    k = cq.Solid.makeSolid(cq.Shell.makeShell(cq.Shape.cast(raw).Faces())).fix()
+    x0, y0, z0 = r.MK2_KNOB_AT
+    k = k.translate(V(-x0, -y0, -z0))                                      # underside centre to the origin, axis +z
+    zt, zf, hr = r.MK2_KNOB_H, KNOB_FLOOR, m.M5_HEAD_AF / 2 / math.cos(math.pi / 6)
+    k = k.fuse(cyl(6.2, (0, 0, 0.5), (0, 0, zt - 0.3)))                     # fill the MkII's M6 pocket and hole
+    k = k.cut(hexprism(m.M5_HEAD_AF, (0, 0, zf), (0, 0, zt + 1)))           # M5 hex pocket, open at the top
+    k = k.cut(cyl(m.M5_CLR_R, (0, 0, -1), (0, 0, zf + 0.1)))                # M5 clearance up to the floor
+    k = k.cut(cq.Solid.makeCone(hr + 0.8, hr - 0.2, 1.0, V(0, 0, zt - 1.0), V(0, 0, 1)))   # lead-in at the mouth
+    return rot_y(k.clean(), 90).translate(V(KNOB_X0, 0, 0))                # axis +x
 
 
 def brake_hardware():
     """M5 x 30 hex bolt (head on the knob's floor) and its nut"""
-    hb = KNOB_X0 + r.MK2_KNOB_FLOOR
+    hb = KNOB_X0 + KNOB_FLOOR
     bolt = fuse(hexprism(m.M5_HEAD_AF - 0.1, (hb, 0, 0), (hb + m.KNOB_BOLT[1], 0, 0)),
                 cyl(2.4, (hb - BOLT_L, 0, 0), (hb + 0.1, 0, 0)))
-    return fuse(bolt, m.nut(5, (NUT5_X + 0.1, 0, 0), (1, 0, 0), turn=30))
+    return fuse(bolt, m.nut(5, (NUT5_X + 0.1, 0, 0), (1, 0, 0)))
 
 
 # ================================================================ bought parts and wiring
@@ -476,8 +540,10 @@ def carbon_tube(length=160.0):
 
 
 def hardware():
-    """the fixed base's screws and nuts (reference): caps, covers, the brake bolt and nut"""
+    """the fixed base's screws and nuts (reference): the shell's, the covers', the back plate's, the brake bolt and nut"""
     parts = [brake_hardware()]
+    for y, z in BACK_SCREWS:
+        parts.append(m.csk_screw(3, (TOWER_X1 + BACK_T, y, z), (-1, 0, 0), 16))
     for s in (-1, 1):
         yb = s * (BRG_Y0 + BLOCK_Y1) / 2
         for x in (-CAP_BOLT_X, CAP_BOLT_X):
@@ -492,7 +558,7 @@ def hardware():
 # ================================================================ build + export
 TURNS = ("lever_upper", "lever_lower", "lever_screws", "carbon_tube", "hose_clamp", "sensor_pcb", "sensor_chip",
          "bearing_inner", "sensor_wires")
-PRINTED = ["frame", "cap_left", "cap_right", "lever_upper", "lever_lower", "shoe", "spring_cap", "cover_sensor",
+PRINTED = ["frame", "shell", "lever_upper", "lever_lower", "shoe", "spring_cap", "back_plate", "cover_sensor",
            "cover_cable", "strut_collar", "friction_knob"]
 
 
@@ -508,10 +574,10 @@ def strut_collar(theta=0.0):
 
 
 def static_parts():
-    """the parts that don't move, built once (the frame and caps chamfered, as Rev 3's)"""
+    """the parts that don't move, built once (chamfered, as Rev 3's)"""
     if not _STATIC:
-        _STATIC.update({"frame": chamfer_edges(frame()), "cap_left": chamfer_edges(cap(-1)),
-                        "cap_right": chamfer_edges(cap(1)), "shoe": shoe(), "spring_cap": spring_cap(),
+        _STATIC.update({"frame": chamfer_edges(frame()), "shell": shell(), "shoe": shoe(), "spring_cap": spring_cap(),
+                        "back_plate": back_plate(),
                         "cover_sensor": cover_sensor(), "cover_cable": cover_cable(), "friction_knob": friction_knob(),
                         "felt": felt(), "knob_spring": knob_spring(), "hardware": hardware(), "magnet": magnet(),
                         "bearing_outer": fuse(*[bearing(s)[0] for s in (-1, 1)]),
@@ -538,7 +604,7 @@ def build(theta=0.0):
 # Overlaps that are meant to be there: presses and fits, screws in their holes (modelled at their thread's outside
 # diameter, so they overlap a tapped pilot), parts that rest on each other, and the cables in their channels.
 ALLOWED = {("bearing_inner", "lever_upper"), ("bearing_inner", "lever_lower"), ("felt", "shoe"),
-           ("frame", "hardware"), ("cap_left", "hardware"), ("cap_right", "hardware"), ("cover_sensor", "hardware"),
+           ("frame", "hardware"), ("hardware", "shell"), ("back_plate", "hardware"), ("cover_sensor", "hardware"),
            ("cover_cable", "hardware"), ("friction_knob", "hardware"), ("hardware", "knob_spring"),
            ("hardware", "spring_cap"), ("knob_spring", "shoe"), ("knob_spring", "spring_cap"),
            ("frame", "strut_pins"), ("gas_strut", "strut_pins"), ("strut_collar", "strut_pins"),
@@ -568,24 +634,37 @@ def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
 
 
 def check_assembly(step=2.0):
-    """the lever (bearings on) lowered straight down into the frame, from 80 mm up, with the shoe, spring and cap
-    slid RETRACT back"""
+    """the order it goes together in: the lever (bearings on) lowered straight down into the bare frame from 80 mm up;
+    the shoe (felt, spring and cap in it) set down into the frame's half of its pocket standing SHOE_IN back, from
+    60 mm up, then slid forward onto the hub; then the shell lowered straight down over both from 80 mm up"""
     S = static_parts()
-    back = V(RETRACT, 0, 0)
-    fixed = {"frame": S["frame"], "shoe": S["shoe"].translate(back), "felt": S["felt"].translate(back),
-             "spring_cap": S["spring_cap"].translate(back)}
     lever_b = fuse(*lever_halves(0.0), *[bearing(s)[k] for s in (-1, 1) for k in range(3)])
+    shoe_b = fuse(S["shoe"], S["felt"], S["spring_cap"])
     worst = {}
-    z = 80.0
-    while z >= -0.01:
-        mv = lever_b.translate(V(0, 0, z))
-        for k, f in fixed.items():
-            vol = mv.intersect(f).Volume()
-            if vol > 0.01:
-                worst[k] = max(worst.get(k, (0, 0)), (vol, z))
-        z -= step
-    print("lowering the lever in: " + ("clear" if not worst else
-                                         "; ".join(f"{k} {v:.2f} mm3 at z {zz:.0f}" for k, (v, zz) in worst.items())))
+
+    def hit(key, a_, b_, at):
+        vol = a_.intersect(b_).Volume()
+        if vol > 0.01:
+            worst[key] = max(worst.get(key, (0, 0)), (vol, at))
+
+    for i in range(int(80 / step) + 1):
+        z = 80.0 - i * step
+        hit("lever / frame", lever_b.translate(V(0, 0, z)), S["frame"], z)
+    for i in range(int(60 / step) + 1):
+        z = 60.0 - i * step
+        for k, f in (("frame", S["frame"]), ("lever", lever_b)):
+            hit(f"shoe down / {k}", shoe_b.translate(V(SHOE_IN, 0, z)), f, z)
+    for i in range(int(SHOE_IN / 0.5) + 1):
+        d = SHOE_IN - i * 0.5
+        for k, f in (("frame", S["frame"]), ("lever", lever_b)):
+            hit(f"shoe forward / {k}", shoe_b.translate(V(d, 0, 0)), f, d)
+    for i in range(int(80 / step) + 1):
+        z = 80.0 - i * step
+        sh = S["shell"].translate(V(0, 0, z))
+        for k, f in (("lever", lever_b), ("frame", S["frame"]), ("shoe", shoe_b)):
+            hit(f"shell / {k}", sh, f, z)
+    print("lever in, shoe in, shell on: " + ("clear" if not worst else
+          "; ".join(f"{k} {v:.2f} mm3 at {zz:.1f}" for k, (v, zz) in worst.items())))
 
 
 def export():
@@ -620,10 +699,20 @@ def coupon_seat(d, depth=BRG_B, lip=BLOCK_Y1 - BRG_Y1, wall=4.0):
     return c.cut(cyl(LIP_R, (0, 0, -1), (0, 0, lip + 1)))
 
 
+def coupon_shoe_pocket(d, length=10.0, wall=4.0):
+    """10 mm of the brake shoe's tunnel, printed as the frame prints it (its axis level, its roof a bridge). The step
+    changes the clearance across it, on its width and height alike: -0.2 / 0 / +0.2 = 0 / 0.1 / 0.2 mm a side. Slide
+    the printed shoe through each: no rattle, no rocking, and still sliding under a finger"""
+    w, h = 2 * (SHOE_HW + SHOE_CLR) + d, 2 * (SHOE_HZ + SHOE_CLR) + d
+    c = box(-w / 2 - wall, w / 2 + wall, 0, length, 0, h + 2 * wall)
+    return c.cut(box(-w / 2, w / 2, -1, length + 1, wall, wall + h)).clean()
+
+
 def export_coupons():
     out = os.path.join(HERE, "stl", "coupons")
     os.makedirs(out, exist_ok=True)
-    for name, f in (("coupon_trunnion_6808", coupon_trunnion), ("coupon_bearing_seat_6808", coupon_seat)):
+    for name, f in (("coupon_trunnion_6808", coupon_trunnion), ("coupon_bearing_seat_6808", coupon_seat),
+                    ("coupon_shoe_pocket", coupon_shoe_pocket)):
         shp = m.coupon_plate(f)
         bb = shp.BoundingBox()
         print(f"{name:26s} valid={shp.isValid()} size={bb.xlen:.0f} x {bb.ylen:.0f} x {bb.zlen:.0f}")

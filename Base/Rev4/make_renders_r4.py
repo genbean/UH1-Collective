@@ -31,7 +31,8 @@ def to_mesh(shape):
 
 def colours():
     c = {k: col for k, (_, col) in R.load_glb(R.BASE_GLB).items()}
-    c.update({"spring_cap": c["shoe"], "sensor_wires": (200, 60, 160)})
+    c.update({"spring_cap": c["shoe"], "sensor_wires": (200, 60, 160), "shell": c["cap_left"],
+              "back_plate": c["cap_left"]})
     return c
 
 
@@ -119,17 +120,20 @@ def main():
 
     save(title(R.render(P0, (-0.45, -0.85, 0.38), size=(1600, 1050), focus=focus, zoom=1.05)[0],
                "MkIII base Rev 4: 82 mm (3.25 in) wide",
-               "Symmetrical lever on 6808-2RS thin bearings, the AS5600 inside the trunnion, the brake behind the hub"),
+               "One shell over the lever in place of the caps, 6808-2RS thin bearings, the brake behind the hub"),
          "rev4_hero.png")
+    save(title(R.render(hide(P0, "shell", "back_plate"), (-0.45, -0.85, 0.38), size=(1600, 1050), focus=focus,
+                        zoom=1.05)[0], "Rev 4 with the shell off",
+               "The lever on its bearings, the shoe in the frame's half of its pocket"), "rev4_open.png")
     save(title(R.render(P0, (0.75, 0.6, 0.5), size=(1600, 1050), focus=focus, zoom=1.05)[0],
-               "Rev 4 from behind", "The brake knob on the back of the tower; the USB cable leaves through the cable "
-               "cover's rim"), "rev4_rear.png")
+               "Rev 4 from behind", "The brake knob on the back plate, across both halves of the brake housing; the "
+               "USB cable leaves through the cable cover's rim"), "rev4_rear.png")
     save(title(R.render(P32, (-0.2, -1.0, 0.25), size=(1600, 1000), focus=((-170, -60, -58), (100, 60, 100)))[0],
                "Rev 4 at the 32 deg up-stop", "Both up-stop lugs land on the pad behind the axis; the shoe stays on the hub's back"),
          "rev4_32deg.png")
 
     # the brake and the slotted up-stop: frame, caps and covers hidden, from behind and below
-    inner = ("frame", "cap_left", "cap_right", "cover_sensor", "cover_cable", "hardware", "bearing_outer",
+    inner = ("frame", "shell", "back_plate", "cover_sensor", "cover_cable", "hardware", "bearing_outer",
              "bearing_seal", "usb_cable", "gas_strut", "strut_pins", "strut_collar", "carbon_tube", "hose_clamp")
     for th, P, name, sub in ((0.0, P0, "rev4_brake_lugs.png", "At 0 deg the shoe's lower end sits between the two "
                               "up-stop lugs; the hub between them is a plain cylinder for the felt"),
@@ -169,31 +173,37 @@ def main():
                        (P32, "rev4_section_brake_32deg.png", "Section on the tube's plane, at the 32 deg stop")):
         Pc = R.cut(P, 1, -0.01, keep="above")
         save(title(R.render(Pc, (0, -1, 0), size=(1700, 1000), focus=((-140, 0, -58), (100, 0, 40)), parallel=True)[0],
-                   t, "The knob turns an M5 bolt through a captive nut; its tip pushes the spring cap, the spring pushes "
-                   "the felt-faced shoe onto the hub"), name)
+                   t, "The shoe's pocket, split between the frame and the shell; the knob's M5 bolt pushes the spring "
+                   "cap, the spring pushes the shoe onto the hub"), name)
 
     # screws
-    caps = [np.array([x, s * (v.BRG_Y0 + v.BLOCK_Y1) / 2, v.CAP_HEAD_Z]) for s in (-1, 1) for x in (-v.CAP_BOLT_X, v.CAP_BOLT_X)]
+    caps = [np.array([x, s * (v.BRG_Y0 + v.BLOCK_Y1) / 2, v.SHELL_TOP]) for s in (-1, 1)
+            for x in (-v.CAP_BOLT_X, v.CAP_BOLT_X)]
+    back = [np.array([v.TOWER_X1 + v.BACK_T, y, z]) for y, z in v.BACK_SCREWS]
     lev = [np.array([x, y, zh + 4]) for x, y, zh, *_ in v.lever_screw_seats()]
     covers = lambda s: [np.array([px, s * v.W_HALF, pz]) for px, pz in
                         (m.on_circle(v.COVER_HOLE_R, a) for a in (45, 135, 225, 315))]
     knob = np.array([v.KNOB_X0 + 34, 0, 0])
-    nut5 = np.array([v.NUT5_X + 2, 0, v.TOWER_TOP])
-    labelled(P0, [("M4 socket head cap  (x4)", "lever halves, from the top: front pair x 40, back pair x 50; M4 nuts "
-                   "in the lower half", lev),
-                  ("M3 x 20 countersunk  (x4)", "pillow-block caps, from the top, into M3 nuts slid into the blocks "
-                   "from the front and back", caps),
+    nut5 = np.array([v.TOWER_X1 + v.BACK_T, 0, 0])
+    labelled(P0, [("M3 x 20 countersunk  (x4)", "the shell, from the top, down counterbores into M3 nuts slid into the "
+                   "pillow blocks from the front and back", caps),
+                  ("M3 x 16 countersunk  (x4)", "the back plate: two into the frame, two into the shell, tapped M3 "
+                   "7.5 mm deep", back),
                   ("M5 x 30 hex bolt (Rev 3's)", "brake: its head on the floor of the knob's hex pocket", [knob]),
-                  ("M5 nut", "brake: slides into the tower's slot from the top", [nut5])],
-             (0.55, 0.35, 1.0), "MkIII base Rev 4 screws: from above and behind", "rev4_screws_top.png",
+                  ("M5 nut", "brake: in a pocket in the back plate's front face", [nut5])],
+             (0.6, 0.35, 0.8), "MkIII base Rev 4 screws: from above and behind", "rev4_screws_top.png",
              focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
-    labelled(P0, [("M3 x 16 countersunk  (x4)", "sensor cover: tap the block and cap M3, 7.5 mm deep", covers(-1)),
+    labelled(hide(P0, "shell", "back_plate"), [("M4 socket head cap  (x4)", "lever halves, from the top: front pair "
+                                                "x 40, back pair x 50; M4 nuts in the lower half", lev)],
+             (0.55, 0.35, 1.0), "MkIII base Rev 4 screws: the lever (shell off)", "rev4_screws_lever.png",
+             focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
+    labelled(P0, [("M3 x 16 countersunk  (x4)", "sensor cover: tap the block and shell M3, 7.5 mm deep", covers(-1)),
                   ("M4 nut  (x2)", "the strut's eyes: M4 x 16 countersunk from the +y side, nuts in the -y cheeks",
                    [np.array([-v.r.COLLAR_D, -7.3, -v.r.COLLAR_E]),
                     np.array([v.r.ANCH_X, -((v.r.ROD_TAB_T + 0.6) / 2 + v.r.CLEVIS_T), v.r.ANCH_Z])])],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
-    labelled(P0, [("M3 x 16 countersunk  (x4)", "cable cover: tap the block and cap M3, 7.5 mm deep", covers(1))],
+    labelled(P0, [("M3 x 16 countersunk  (x4)", "cable cover: tap the block and shell M3, 7.5 mm deep", covers(1))],
              (0.5, 1.0, 0.4), "MkIII base Rev 4 screws: USB (+y) side", "rev4_screws_usbside.png",
              focus=((-60, -50, -58), (100, 50, 40)), zoom=1.05)
 
