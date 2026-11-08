@@ -176,12 +176,14 @@ REAR_C = BLOCK_HW + BLOCK_Y1                     # 69
 # back plate: x TOWER_X1 .. +8.5, from just over the base plate up to the shell's top, the full width of the back face
 # (|y| 21.5) tapering along the chamfer to 13 at its back face
 BACK_T, BACK_Z = 8.5, Z_PLATE + 0.2
-# its screws: M3 x 16 countersunk from its back face, into M3 threads tapped 7.5 mm deep. The back face is 13 either side,
-# so they're at y = +-7 (the heads 2.5 mm in from its edges), which puts all six in solid housing above or below the
-# shoe's pocket, none in its 3.9 mm side walls. A pair each side of the bolt's push, just clear of the pocket (z = +-26:
-# two into the shell, two into the frame) takes the push with the least bending; a pair near the foot (z = -41, into
-# the frame) keeps the plate's bottom tight to the frame.
-BACK_SCREWS = [(y, z) for y in (-7.0, 7.0) for z in (26.0, -26.0, -41.0)]
+# its screws: M3 x 16 countersunk from its back face, into M3 threads tapped 7.5 mm deep. Three pairs, evenly spaced
+# down the plate: one at its middle (z = -5.9, into the frame) and one BACK_PITCH above (into the shell) and below (into
+# the frame). Two columns at y = +-8.8: the shoe's pocket runs out through the back face 6.1 either side of the middle,
+# so the middle pair's pilots need to be this far out to keep 1.45 mm of wall off it (at +-7 they'd break into it), and
+# the heads are still 0.75 mm inside the plate's 13 mm back face.
+BACK_ZC = (BACK_Z + SHELL_TOP) / 2               # the plate's middle (-5.9)
+BACK_PITCH = 32.9
+BACK_SCREWS = [(y, BACK_ZC + k * BACK_PITCH) for y in (-8.8, 8.8) for k in (1, 0, -1)]
 NUT5_X = TOWER_X1                                # the M5 nut, in a pocket in the back plate's front face
 KNOB_X0 = TOWER_X1 + BACK_T + 3.0                # the knob's underside: 3 mm off the back plate, room to screw in
 BOLT_L = 30.0                                    # Rev 3's M5 x 30 hex bolt, its head on the knob's floor

@@ -160,10 +160,14 @@ The down-stop and strut are unchanged from Rev 3: pads on the socket boss land o
 
 The frame, the shell and the back plate share one 45° chamfer plane each side. It runs from the pillow blocks' outer back corners to the back plate's back face (|y| + x = 69 mm), so from behind the three read as one block. The edges where they meet aren't chamfered, so no groove shows at the seams, and none runs along the inside of the shoe's pocket at the split.
 
-**The back plate's screws:** six M3 × 16 countersunk, from its back face into M3 threads tapped 7.5 mm deep.
-- **Across:** the back face is 13 mm either side, so the screws are at y = ±7, with their heads 2.5 mm in from its edges. That puts every one in solid housing above or below the shoe's pocket, none in the pocket's 3.9 mm side walls.
-- **Round the bolt:** a pair just above the pocket (z = +26, into the shell) and a pair just below it (z = −26, into the frame). The pocket keeps them that far apart, and that close to the bolt's push the plate bends least.
-- **Near the foot:** a pair at z = −41, into the frame, keeps the plate's bottom tight to the frame.
+**The back plate's screws:** six M3 × 16 countersunk, from its back face into M3 threads tapped 7.5 mm deep. They're in three evenly spaced pairs down the plate:
+- **Middle pair:** at the plate's centre height (z = −5.9), into the frame.
+- **Top pair:** 32.9 mm above that (z = +27), into the shell.
+- **Bottom pair:** 32.9 mm below that (z = −38.8), into the frame.
+
+The columns are 8.8 mm either side of the middle. The shoe's pocket runs out through the back face 6.1 mm either side of the middle. At 7 mm the middle pair's pilot holes would break into it, and at 8.8 they keep 1.45 mm of wall. The heads are still 0.75 mm inside the plate's 13 mm back face. Take the knob off to reach the middle pair: it's in front of them.
+
+![The back plate from behind: three evenly spaced pairs of screws](renders/rev4_back_plate.png)
 
 ## Printing
 
