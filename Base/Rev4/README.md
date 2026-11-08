@@ -8,6 +8,8 @@ It's a concept: nothing has been printed. Print the [fit-test coupons](#fit-test
 
 ![Rev 4 with the shell off](renders/rev4_open.png)
 
+![Rev 4 straight down from above, to scale](renders/rev4_top.png)
+
 ![Rev 3 and Rev 4 from above, to the same scale](renders/rev4_vs_rev3_top.png)
 
 ![From behind: the brake knob, and the USB cable leaving the cable cover](renders/rev4_rear.png)
@@ -77,7 +79,7 @@ The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from t
 - **Side walls:** solid, 9 mm thick. These are the caps. Each holds the bearing's upper half-seat and lip, and two of the cover's screw holes. Two M3 × 20 countersunk screws per side go down counterbores into M3 nuts in the pillow blocks, as the caps' did.
 - **Front, back and top walls:** 3 mm thick.
 - **Tube slot:** the front and top are slotted just wide enough for the socket boss, the tube, the top gusset and the down-stop pads to swing from 0° to 32°, with 1 mm all round. The slot is cut from the lever's actual sweep, 2° at a time.
-- **Brake housing:** its upper half runs on out of the back wall (see [Brake](#brake)).
+- **Brake housing:** its upper half runs on out of the back wall (see [Brake](#brake)). Either side of it, the shell has the same outline as the frame below, up to its top: the webs out to the housing's back face, and the 45° corner gussets beyond them. From behind, the shell and frame read as one block.
 - **Assembly:** it drops straight down over the lever, the slot and the shoe's pocket both open at the bottom.
 
 ## Lever

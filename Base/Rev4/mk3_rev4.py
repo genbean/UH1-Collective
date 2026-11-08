@@ -369,6 +369,19 @@ def lever_sweep():
     return fuse(*[rot_y(env, a) for a in range(-1, int(STOP_DEG) + 3, 2)])
 
 
+def shell_rear_corners():
+    """behind the shell's back wall, either side of the brake housing, the same outline as the frame's below them, up to
+    the shell's top: the web out to the housing's back face (|y| 9.5..23) and the 45 deg gusset beyond it (out to the
+    pillow blocks' outer face)"""
+    bx, yw, yo, L = BLOCK_HW, BRG_Y0 + 0.5, BLOCK_Y1 - 0.5, CG_LEG
+    out = []
+    for s in (-1, 1):
+        out.append(box(bx - 0.5, TOWER_X1, *sorted((s * (TOWER_HW - 0.5), s * yw)), 0, SHELL_TOP))
+        pts = [(bx - 0.5, s * (yw - 0.5)), (bx - 0.5, s * yo), (bx + L, s * (yw - 0.5))]
+        out.append(cq.Workplane("XY").polyline(pts).close().extrude(SHELL_TOP).val())
+    return out
+
+
 def shell():
     """the box over the lever, in place of Rev 3's two caps: its side walls are the caps (the bearing's upper half-seat
     and lip, the cover screws' upper threads, the cap screws counterbored from the top), joined by 3 mm front, back and
@@ -383,7 +396,7 @@ def shell():
         yb = side * (BRG_Y0 + BLOCK_Y1) / 2
         for x in (-CAP_BOLT_X, CAP_BOLT_X):
             s = s.cut(m.csk_hole(3, (x, yb, CAP_HEAD_Z), (0, 0, -1), 10, out=SHELL_TOP))
-    s = s.fuse(brake_housing(0.0, SHELL_TOP))                                   # the brake housing's upper half
+    s = s.fuse(brake_housing(0.0, SHELL_TOP), *shell_rear_corners())            # the brake housing's upper half
     s = s.cut(shoe_tunnel())
     for y, z in BACK_SCREWS:
         s = s.cut(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))

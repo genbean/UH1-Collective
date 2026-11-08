@@ -109,10 +109,20 @@ def frame_top(C):
                "pillow blocks"), "rev4_frame_top.png")
 
 
+def assembly_top(C, P0=None):
+    """the whole base straight down from above, tube up the page, to scale"""
+    P0 = P0 or scene(0.0, C, tube_to=-200.0)
+    img, px = R.render(P0, (0, 0, 1), up=(-1, 0, 0), size=(1100, 1500), focus=((-200, -45, -60), (100, 45, 45)),
+                       parallel=True, anchors=[(97, -v.W_HALF, 45), (97, v.W_HALF, 45)])
+    width_bar(img, px[0][0], px[1][0], int(px[0][1]) + 40, "82 mm (3.25 in)")
+    save(title(img, "Rev 4 from above", "Straight down, to scale, at 0 deg"), "rev4_top.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     C = colours()
     frame_top(C)
+    assembly_top(C)
     P0 = scene(0.0, C, tube_to=-200.0)
     P32 = scene(v.STOP_DEG, C, tube_to=-200.0)
     glb(scene(0.0, C), os.path.join(OUT, "MkIII_Rev4_Assembly.glb"))
