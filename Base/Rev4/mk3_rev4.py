@@ -130,6 +130,17 @@ LEVER_SCREWS = [(x, y) for x in (-17.0, 10.0) for y in (-16.25, 16.25)]
 GUSSET_T = 8.0
 GUSSET_TOP = [(-48, 16.5), (-4, 33.0), (2, 30.5), (2, 16.5)]  # Rev 1's, its back end cut to x = 2: clear of the shoe at 32 deg
 STOP_DEG = r.STOP_DEG
+# The gas strut's anchor. Rev 3's, at x -12, z -40.5, balances a 40 N strut, the bottom of the range the 45 N strut is sold
+# as; the 45 N strut as bought lifts the lever (about +50..+70 g at the grip). Moved up and back to x -9.5, z -36.5 it
+# balances 45 N to within 3 g at the grip over the whole travel (the strut 119 mm long at 0 deg, 140 at 32, in its
+# 102..152 mm stroke): the strut's line passes closer to the pivot, so it has less leverage. The clevis's cheeks shrink
+# to 6.5 mm round the eye (Rev 3: 8), 1.5 mm under the hub, and its back wall runs 2 mm under the hub to the pad.
+# Rev 3's strut, collar pin, pins and clevis code read these from Rev 3's module, so they're set there too (this
+# process only; Rev 3's own files don't change).
+STRUT_F_DESIGN = 45.0
+ANCH_X, ANCH_Z, CLEVIS_R = -9.5, -36.5, 6.5
+r.ANCH_X, r.ANCH_Z, r.CLEVIS_R, r.STRUT_F_DESIGN = ANCH_X, ANCH_Z, CLEVIS_R, STRUT_F_DESIGN
+ANCH_WALL_Z = -(HUB_R + 2.0)                     # the clevis's back wall's top, 2 mm under the hub
 # up-stop: two lugs under the back of the hub land on a pad behind the axis at STOP_DEG. The further back they land,
 # the further back they swing at 0 deg, toward the webs behind the pillow blocks (x = 37): with the pad at z = -28.5 and
 # the contact face ending at x = 24.4, their back corners come to x = 35.8 at 0 deg, 1.2 mm off the webs. The pad's top
@@ -288,7 +299,8 @@ def block_cuts(s):
 
 
 def anchor_clevis():
-    """Rev 3's anchor_clevis() on the middle, its aft wall running level, at the cheeks' top, into the up-stop pad"""
+    """Rev 3's anchor_clevis() on the middle, at ANCH_X, ANCH_Z, its aft wall running level, 2 mm under the hub, into the
+    up-stop pad"""
     g = r.ROD_TAB_T + 0.6
     zt, zb = r.ANCH_Z + r.CLEVIS_R, Z_PLATE - 0.1
     ax = r.ANCH_X
@@ -298,7 +310,7 @@ def anchor_clevis():
         f0, f1 = sorted((s * (r.STRUT_ROD_D / 2 + r.ROD_CLEAR), s * (g / 2 + r.CLEVIS_T)))
         parts += [cyl(r.CLEVIS_R, (ax, y0, r.ANCH_Z), (ax, y1, r.ANCH_Z)),
                   box(ax - r.CLEVIS_R, ax + r.CLEVIS_R, y0, y1, zb, r.ANCH_Z),
-                  gusset_xz([(ax, zt), (PED_X[0] + 1, zt), (PED_X[0] + 1, zb), (ax, zb)], y0, y1),
+                  gusset_xz([(ax, ANCH_WALL_Z), (PED_X[0] + 1, ANCH_WALL_Z), (PED_X[0] + 1, zb), (ax, zb)], y0, y1),
                   gusset_xz([(ax, zt), (ax - r.CLEVIS_RUN, zb), (ax, zb)], f0, f1)]
     return fuse(*parts)
 
@@ -709,6 +721,50 @@ def export():
     print("done")
 
 
+# ================================================================ balance
+def balance(plot=None):
+    """the strut's lift against the head's weight, at the grip, with Rev 4's lever and anchor (Rev 3's model: the head,
+    tube and cables forward of the pivot, the lever halves, screws, collar and half the strut behind it)"""
+    lu, ll = lever_halves(0.0)
+    items = r.rear_items({"lever_upper": lu, "lever_lower": ll, "strut_collar": strut_collar(0.0)})
+    load = lambda t: r.gravity(t, items) * 9.80665                                         # N*mm, nose down
+    grip = lambda nmm: nmm / 9.80665e-3 / r.GRIP_R                                          # N*mm -> g at the grip
+    th = r.frange(STOP_DEG, 0.5)
+    L0, L1 = (math.hypot(r.collar_pin(t)[0] - ANCH_X, r.collar_pin(t)[1] - ANCH_Z) for t in (0, STOP_DEG))
+    print(f"anchor x {ANCH_X}, z {ANCH_Z}: strut {L0:.0f} mm at 0 deg -> {L1:.0f} at {STOP_DEG:.0f} "
+          f"(stroke {r.STRUT_COMP:.0f}..{r.STRUT_EXT:.0f}); load {load(0) / 1000:.3f} N*m at 0 deg")
+    rows = []
+    for F in (40.0, STRUT_F_DESIGN, 50.0, r.STRUT_F_RANGE[1]):
+        err = [grip(r.strut_torque(t, F) - load(t)) for t in th]
+        rows.append((F, err))
+        print(f"  {F:.0f} N: {min(err):+.0f} .. {max(err):+.0f} g at the grip (+ = rises)")
+    for k in r.COLLAR_RANGE:
+        print(f"  collar {k:+.0f} mm: {grip(r.strut_torque(0, STRUT_F_DESIGN, k) - r.strut_torque(0, STRUT_F_DESIGN)):+.0f} g at 0 deg")
+    if plot:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        ink, ink2, grid, surf = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
+        cols = {40.0: "#2a78d6", STRUT_F_DESIGN: "#eb6834", 50.0: "#1baf7a", r.STRUT_F_RANGE[1]: "#8a5cc7"}
+        fig, ax = plt.subplots(figsize=(8.4, 4.6))
+        fig.patch.set_facecolor(surf)
+        ax.set_facecolor(surf)
+        ax.grid(True, color=grid, lw=0.8)
+        for sd in ("top", "right"):
+            ax.spines[sd].set_visible(False)
+        ax.axhline(0, color=ink2, lw=1)
+        for F, err in rows:
+            ax.plot(th, err, color=cols[F], lw=2.4 if F == STRUT_F_DESIGN else 1.6,
+                    label=f"{F:.0f} N" + ("  (as bought: the design point)" if F == STRUT_F_DESIGN else ""))
+        ax.set_xlim(0, STOP_DEG)
+        ax.set_xlabel("lever angle, deg (0 = down-stop)", color=ink2)
+        ax.set_ylabel(f"out of balance at the grip ({r.GRIP_R:.0f} mm), g\n+ = rises, - = drops", color=ink2)
+        ax.set_title(f"MkIII Rev 4: the strut's anchor at x {ANCH_X}, z {ANCH_Z}", loc="left", color=ink, fontsize=12)
+        ax.legend(loc="center right", frameon=False, fontsize=9, bbox_to_anchor=(1.0, 0.52))
+        fig.savefig(plot, dpi=150, bbox_inches="tight", facecolor=surf)
+        print("wrote", plot)
+
+
 # ================================================================ fit-test coupons for the 6808
 # Rev 3's coupon plates (Rev 1's coupon_plate: steps -0.2, 0, +0.2 on the diameter, engraved), sized for the 6808-2RS.
 # The tube socket is Rev 3's, so its coupon (and TRUN/seat steps found on the 6006) carry over only as a starting point.
@@ -749,6 +805,8 @@ if __name__ == "__main__":
     if "--check" in sys.argv[1:]:
         check()
         check_assembly()
+    elif "--balance" in sys.argv[1:]:
+        balance(plot=os.path.join(HERE, "renders", "strut_balance_r4.png"))
     elif "--coupons" in sys.argv[1:]:
         export_coupons()
     else:

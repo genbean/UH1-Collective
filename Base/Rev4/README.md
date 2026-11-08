@@ -27,6 +27,7 @@ It's a concept: nothing has been printed. Print the [fit-test coupons](#fit-test
 - **Brake:** a narrow, tall shoe presses on the back of the hub. Its pocket is split between the frame and the shell, and holds it with no slop.
 - **Up-stop:** two lugs under the back of the hub, one each side of the shoe, land on a pad further back than Rev 3's.
 - **Frame gussets:** 45° gussets at all four corners of both pillow blocks.
+- **Strut anchor:** moved up and back, so the 45 N strut as bought balances the lever. Rev 3's anchor balances a 40 N strut, so the 45 N strut pushes the lever up.
 
 The knob stands 31 mm out behind the plate.
 
@@ -169,6 +170,30 @@ The columns are 8.8 mm either side of the middle. The shoe's pocket runs out thr
 
 ![The back plate from behind: three evenly spaced pairs of screws](renders/rev4_back_plate.png)
 
+## Balance
+
+![Out of balance at the grip, against lever angle](renders/strut_balance_r4.png)
+
+Rev 3's anchor, at x = −12, z = −40.5, balances a 40 N strut: the bottom of the range the 45 N strut is sold as. The 45 N strut as bought lifts the lever, by about 50 to 70 g at the grip.
+
+Rev 4's anchor is at x = −9.5, z = −36.5: 4 mm up and 2.5 mm back. The strut's line passes closer to the pivot, so it has less leverage. It now balances 45 N to within 3 g at the grip over the whole travel. The strut is 119 mm long at 0° and 140 mm at 32°, inside its 102–152 mm stroke.
+
+| Strut force | Out of balance at the grip | Fix |
+|---|---|---|
+| 40 N | −58 to −50 g (drops) | — |
+| **45 N (as bought)** | **−3 to +2 g** | none |
+| 50 N | +49 to +60 g (rises) | about 42 g of ballast in the head |
+| 53 N (top of the range) | +79 to +95 g | about 68 g of ballast |
+
+The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at the grip, and 8 mm away takes 21 g off.
+
+**The clevis:**
+- **Cheeks:** they're 6.5 mm round the eye (Rev 3: 8), so they stay 1.5 mm under the hub.
+- **Back wall:** it runs 2 mm under the hub into the up-stop pad.
+- **Screw:** the strut's M4 × 16 still fits.
+
+`python mk3_rev4.py --balance` prints the table and redraws the plot. It uses Rev 3's model: Rev 4's lever halves and Rev 3's estimate of the head (368 g). If your head is lighter than that, the strut will still lift a little. Slide the collar away from the pivot, or add ballast.
+
 ## Printing
 
 - **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel.
@@ -237,4 +262,4 @@ Rev 3's shoe hinge screw is gone.
   - **The assembly order:** the lever lowered into the frame; the shoe set down standing back and slid onto the hub; the shell lowered over both.
 - **Chamfers:** Rev 3's chamfer step once returned a valid frame with the down-stop pillars missing. Rev 4's version refuses any set of chamfers that takes off more than chamfers could. Rev 3's parts were checked, and none of them lost anything.
 - **Brake feel:** the felt patch is about 11 × 48 mm (Rev 3's drum shoe was wider and shorter). The spring is the same, so the range of drag should be similar, but it's untested.
-- **Balance:** the strut, collar, tube and head are unchanged. The lever is about 68 cm³ lighter, mostly near the pivot, so the balance should be close to Rev 3's. It hasn't been recalculated.
+- **Balance:** see [Balance](#balance). The lever is about 68 cm³ lighter than Rev 3's, mostly near the pivot, and that makes almost no difference: its load at 0° is 1.998 N·m against Rev 3's 1.996.
