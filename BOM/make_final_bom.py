@@ -204,9 +204,6 @@ SECTIONS.append(("MkIII base Rev 3 (concept, not yet printed)", [
         "From the same 100-piece set as the trigger pivot (20 of each length). Four per cover, from its outer face into M3 "
         "threads tapped 11 mm deep in the block and cap: 10 mm of thread, three times the 20 mm screw's. The kit's M3 x 20 "
         "would only reach 5", BASE + "; user's M3 set 2026-10-24", ORDERED),
-    kit("Cable plug", 1, "M2 x 12 countersunk screw", "Up from under the cable cover's rim, through a clearance hole, into an "
-        "M2 thread tapped in the plug (1.6 mm pilot): pulls the plug that closes the cable's slot down onto the cover's "
-        "shoulders. Length from the CAD"),
     any_("Friction knob", 1, "M5 x 30 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
          "have only countersunk heads): any hardware store. Its head sits on the floor of the hex pocket in the printed "
          "knob (Base/stl/friction_knob.stl, the MkII knob with an M5 pocket), so the knob turns it; it goes through the "
@@ -309,8 +306,7 @@ PRINTED = [
     ("Base", "Base/stl/lever_lower.stl", 1, "On its joint face"),
     ("Base", "Base/stl/lever_upper.stl", 1, "On its joint face"),
     ("Base", "Base/stl/cap_left.stl, cap_right.stl", 1, "One each"),
-    ("Base", "Base/stl/cover_cable.stl, cover_sensor.stl", 1, "One each"),
-    ("Base", "Base/stl/cable_plug.stl", 1, "On a long flat face. Fills the cable cover's slot once the USB cable is in"),
+    ("Base", "Base/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
     ("Base", "Base/stl/sensor_carrier.stl", 1, ""),
     ("Base", "Base/stl/shoe.stl", 1, ""),
     ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end"),

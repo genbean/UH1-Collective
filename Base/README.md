@@ -275,15 +275,14 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
   - **Upper half:** the stop wedge sits on the bed at the back of the hub, with its sloping face leaning in toward the hub.
 - **Strut collar** (`strut_collar.stl`): 40 mm long, with a web tapering from the ring down to the strut's eye, solid behind the eye where the strut pushes and split into two cheeks round the tab. Stand it on the end away from the strut (the end without the boss notch), so the bore builds straight up, the web's slope is under 30° and the notch opens at the top.
 - **Friction knob** (`friction_knob.stl`): floor down, as the MkII knob printed, with the pocket open at the top.
-- **Cable plug** (`cable_plug.stl`): on one of its long flat faces.
-- **Notched cable cover** (`cover_cable_notched.stl`, retrofit only): use it if the base is already assembled with the USB cable through the lever but not through the cable cover. Its slot underneath is filled in, so it needs no cable plug and no M2 screw. Instead, a 4.8 mm notch runs from the bore to the face that seats on the block. Lay the cable's radial run in the notch, push the cover onto the block, and screw it down. The block face closes the notch. Its cable boss is round and as wide as the cover is deep (15 mm), flush with both faces. Print it on its outer face (the face with the countersinks), the boss just touching the bed: the notch opens upward.
-- **Caps, shoe, covers and sensor carrier:** no special notes.
+- **Cable cover** (`cover_cable.stl`): on its outer face (the face with the countersinks), the round spout just touching the bed. The spout is 15 mm across, the cover's full depth, so it is flush with both faces and needs no supports; the bore's lower half prints as an open channel and the notch opens upward.
+- **Caps, shoe, sensor cover and sensor carrier:** no special notes.
 
 ## Assembly
 
 1. **Frame:** tap the eight M3 cover holes, in the pillow blocks and the caps, 11 mm deep. Slide an M4 nut into each of the four slots in the pillow blocks' front and back faces (the knob-side block's front one opens on the tower gusset's sloping face).
 2. **Lever:** press the four M4 nuts into the lower half's pockets, lay the USB cable and the sensor lead into the lower half, close the upper half and fit the four M4 cap screws (all M4 × 40; see [Split lever](#split-lever)). Press the bearings onto the trunnions.
-3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, drop the M5 × 30 hex bolt into the knob's hex pocket, head down on its floor, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the USB cable drops into the cable cover's spout through the slot underneath. Then slide the cable plug in from the spout's outer end, under the cable, until its hole lines up with the one coming up through the underside of the cover's rim. The slot is T-shaped, 5 mm at the mouth and 6.8 mm under the cable, so the plug's head rests on the cover either side of the mouth: pressing on the cable loads the cover. The plug's top is flat (it prints better than a curve), level with where the bore meets the slot's sides, 1.58 mm under the bore's axis. Tap the plug's 1.6 mm hole M2 through the cover's hole from below, and fit the M2 × 12 countersunk up from under the rim: tightening it pulls the plug's head down onto those shoulders. The head sits in a counterbore, flush with the rim's curve; there's 40 mm under it to the desk, so use a short hex key.
+3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, drop the M5 × 30 hex bolt into the knob's hex pocket, head down on its floor, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the cable cover goes on over the USB cable, which is already through the lever with its plug out past the cover. A 4.8 mm notch runs the length of the spout, from its bore to the face that seats on the block. Lay the cable's run out of the trunnion into the notch, push the cover onto the block and screw it down: the cable lies in the bore and the block face closes the notch. There's no plug or extra screw.
 4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
 5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
 6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
@@ -300,7 +299,6 @@ Every screw and nut is from three kits and one pack: the AvrestYPT countersunk k
 | Lever halves | M4 × 40 socket head cap, from the top | M4 nut in a pocket in the lower half | 4 |
 | Pillow-block caps | M4 × 20 countersunk, from the top | M4 nut slid into a slot in the block's front or back face | 4 |
 | Side covers | M3 × 25 countersunk (the NIULUNBAO M3 set), from the cover's outer face | M3 thread tapped 11 mm deep in the block or cap | 8 |
-| Cable plug | M2 × 12 countersunk, up from under the cable cover's rim | M2 thread tapped in the plug | 1 |
 | Friction knob | **M5 × 30 hex-head bolt (bought; not in the kits)**, head on the floor of the knob's hex pocket | M5 nut slid into the knob tower from the front | 1 |
 | Shoe hinge | M4 × 20 countersunk, head in the sensor-side lug | M4 nut in the knob-side lug's pocket | 1 |
 | Strut eyes | M4 × 16 countersunk, head on the knob side | M4 nut in the far cheek's pocket | 2 |
@@ -315,8 +313,6 @@ Every screw and nut to scale, to sort them before you start (the ruler is 50 mm)
 ![Screws from the front, under the socket](renders/rev3_screws_front.png)
 
 ![Screws on the knob side, from behind](renders/rev3_screws_knobside.png)
-
-![The cable plug's screw, from under the cable cover](renders/rev3_screws_plug.png)
 
 ![Screws on the sensor side](renders/rev3_screws_sensorside.png)
 
@@ -352,7 +348,6 @@ The screw lengths, the felt and the cables are sized from the CAD. The complete 
   - the spring's ends in their seats;
   - the hose clamp in its groove;
   - the felt on the shoe;
-  - the USB cable under the cable plug, which grips it;
   - the sensor wires in their channel.
 
   The bearings' inner races also show a few mm³ against their seals at some angles. That's only the faceted meshes turning against each other.

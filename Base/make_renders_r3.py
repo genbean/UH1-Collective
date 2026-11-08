@@ -56,6 +56,9 @@ def rebuild_glb(path):
     for name, g in list(sc.geometry.items()):
         if name.startswith("H:"):
             continue
+        if not os.path.exists(stl_path(name)):                # a part since dropped from the base (Rev 3's cable plug)
+            sc.delete_geometry(name)
+            continue
         t = trimesh.load(stl_path(name), force="mesh")
         t.visual = trimesh.visual.TextureVisuals(material=g.visual.material)
         sc.geometry[name] = t
@@ -281,13 +284,13 @@ def base_views(src):
                 focus=((-45, cheek, -58), (25, cheek, -10)), zoom=0.65)[0], "rev3_anchor.png")
 
     # the hinge lugs and their gussets, from behind
-    save(render(no_cover_screws(hide(P0, "cover_cable", "cable_plug", "usb_cable")), (0.9, 0.5, 0.8), size=(1400, 1000),
+    save(render(no_cover_screws(hide(P0, "cover_cable", "usb_cable")), (0.9, 0.5, 0.8), size=(1400, 1000),
                 focus=((15, 0, -58), (60, 52, 10)), zoom=1.0)[0], "rev3_lug_gusset.png")
 
     # the up-stop at 32 deg: cut through the stop boss, and from behind
     save(render(cut(hide(P32, "usb_cable", "sensor_wires"), 1, -5.0), (0, -1, 0), size=(1400, 950), parallel=True,
                 focus=((-25, -5, -58), (62, -5, 40)), zoom=0.9)[0], "rev3_upstop.png")
-    save(render(hide(P32, "cover_sensor", "cover_cable", "cable_plug", "magnet", "usb_cable", "hardware"), (1, 0.0, 0.3),
+    save(render(hide(P32, "cover_sensor", "cover_cable", "magnet", "usb_cable", "hardware"), (1, 0.0, 0.3),
                 size=(1400, 950), focus=((0, -52, -58), (40, 52, 40)), zoom=0.95)[0], "rev3_upstop_rear.png")
 
     # the down-stops and the frame from above
@@ -314,8 +317,6 @@ def screw_views(src):
     nut5 = np.array([-54.0, m.KNOB_Y, m.FN_NUT_Z - m.NUT_T[5] / 2])
     cap_nuts = [np.array([-m.BLOCK_HW, s * (m.BRG_Y0 + m.BLOCK_Y1) / 2, r.CAP_NUT_Z - 1.7]) for s in (-1, 1)]
     desk = [np.array([x, y, r.Z_PLATE]) for x in (m.PLATE_X0 + 8, m.PLATE_X1 - 8) for y in (-m.PLATE_HW + 8, m.PLATE_HW - 8)]
-    x, zh = r.PLUG_SCREW
-    plug = np.array([x, m.BLOCK_Y1 + 7, zh])
 
     labelled(P, [("M4 socket head cap  (x4)", "lever halves, from the top: x 40; M4 nuts in the lower half", lever),
                  ("M4 x 20 countersunk  (x4)", "pillow-block caps, from the top; each into an M4 nut slid into a slot in "
@@ -343,10 +344,6 @@ def screw_views(src):
               ("M4 nut  (x2)", "front pillow-block caps: slide into the slots in the blocks' front faces", cap_nuts)],
              (-1.0, -0.1, 0.18), "MkIII base Rev 3 screws: from the front, under the socket (tube and collar hidden)",
              "rev3_screws_front.png", focus=((-62, -55, -58), (10, 55, 40)), zoom=1.0)
-    labelled(P, [("M2 x 12 countersunk", "cable plug: up from under the cover's rim; tap the plug M2 (1.6 mm pilot)",
-                  [plug])],
-             (0.3, 1.0, -0.45), "MkIII base Rev 3 screws: the cable plug's screw, under the cable cover's spout",
-             "rev3_screws_plug.png", focus=((0, 40, -45), (60, 70, 15)), zoom=0.9)
     cutP = cut(P, 1, 12.0, keep="below")
     labelled(cutP, [("M4 x 16 countersunk + M4 nut", "strut, rod end: head on +y, nut in the -y cheek's pocket", [anch])],
              (0.15, 1.0, 0.35), "MkIII base Rev 3 screws: the strut's anchor (cut away at y = +12)",

@@ -192,7 +192,7 @@ def flat(H, keys=None):
 # ---------------------------------------------------------------------------------------------------- the base
 def base_items(src):
     B = {}
-    for n in ("frame", "lever_lower", "lever_upper", "cap_left", "cap_right", "cover_sensor", "cover_cable", "cable_plug",
+    for n in ("frame", "lever_lower", "lever_upper", "cap_left", "cap_right", "cover_sensor", "cover_cable",
               "shoe", "felt", "friction_knob", "knob_spring", "sensor_carrier", "sensor_pcb", "sensor_chip", "magnet",
               "gas_strut", "strut_collar", "hose_clamp", "bearing_inner", "bearing_outer", "bearing_seal"):
         m, col = src[n]
@@ -220,8 +220,6 @@ def base_items(src):
             B["hinge screw"] = screw("M4 x 20", q, RED, "M4x20")
         elif L > 26:
             B["knob bolt"] = screw("M5 x 30 hex", q, RED, "M5x30hex")
-        else:
-            B["plug screw"] = screw("M2 x 12", q, RED, "M2x12")
     B["cap screws"], B["cover screws"] = cap_s, cover_s
     B["lever screws"] = [screw("M4 x 40", q, RED, "M4x40shcs") for q in pieces(src["lever_screws"][0])]
     pins = pieces(src["strut_pins"][0])
@@ -658,8 +656,7 @@ def base_views(src):
     for it in B["cap screws"]:
         it.move = np.array([0, 40 * np.sign(it.head[1]), 165]) + it.out * 40
     mv(["cover_sensor", "magnet"], (0, -150, 40))
-    mv(["cover_cable", "cable_plug"], (0, 150, 40))
-    pull([B["plug screw"]], (0, 150, 40), 25)
+    mv(["cover_cable"], (0, 150, 40))
     for it in B["cover screws"]:
         it.move = np.array([0, 150 * np.sign(it.head[1]), 40]) + it.out * 35
     mv(["felt"], (0, 0, 22))
@@ -679,7 +676,7 @@ def base_views(src):
              ("6006-2RS bearings  (x2)", "pressed onto the trunnions", ["bearing_outer-1", "bearing_outer1"]),
              ("Pillow-block caps  (x2)", "", ["cap_left", "cap_right"]),
              ("Sensor cover", "with the magnet", ["cover_sensor"]),
-             ("Cable cover + cable plug", "", ["cover_cable"]),
+             ("Cable cover", "goes on over the USB cable", ["cover_cable"]),
              ("Sensor carrier + AS5600", "plugs into the trunnion's bore", ["sensor_carrier"]),
              ("Friction knob", "the MkII knob, M5 pocket; spring under it, the M5 bolt's head on its floor", ["friction_knob"]),
              ("Shoe + felt", "hinged on the frame's lugs", ["shoe", "felt"]),
@@ -693,8 +690,7 @@ def base_views(src):
               ("M5 x 30 hex bolt (bought)", "knob", [B["knob bolt"]]),
               ("M4 x 20 countersunk", "shoe hinge", [B["hinge screw"]]),
               ("M4 x 16 countersunk  (x2)", "strut eyes", B["strut screws"]),
-              ("M4 x 12 countersunk  (x2)", "strut collar clamp", B["collar screws"]),
-              ("M2 x 12 countersunk", "cable plug", [B["plug screw"]])]
+              ("M4 x 12 countersunk  (x2)", "strut collar clamp", B["collar screws"])]
     groups = [(t, s, [B[k] for k in ks]) for t, s, ks in parts] + screws
     labelled(everything, groups, (-0.55, -1.0, 0.75), (0, 0, 1), "MkIII base Rev 3, exploded",
              "Printed parts in their colours, screws in red with their nuts on them. The tube is cut short.",
@@ -828,8 +824,6 @@ def base_chart(B):
              "The strut's two eyes, into nuts in the far cheeks."),
             (screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the "
              "other ear."),
-            (screw_tile("csk", 2, 12), "M2 x 12 countersunk", 1,
-             "The cable plug, up from under the cable cover's rim into a thread tapped M2 in the plug."),
             (nut_tile(7.0, 3.2, 4.0), "M4 nut", 13,
              "Lever (4), caps (4), shoe hinge (1), strut eyes (2), collar clamp (2)."),
             (nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the knob tower, slid in from the front.")]

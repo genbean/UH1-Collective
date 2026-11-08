@@ -40,7 +40,6 @@ Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (A
                       in the blocks and caps
     friction knob     1 x M5 x 30 hex-head bolt (bought: the kits have no hex heads), its head in the MkII knob's hex
                       pocket, + 1 M5 nut slid into the knob tower
-    cable plug        1 x M2 x 12 up from under the cable cover's rim, into an M2 thread tapped in the plug
     shoe hinge        1 x M4 x 20 + 1 M4 nut in the +y lug's pocket
     strut eyes        2 x M4 x 16 + 2 M4 nuts in pockets
     strut collar      2 x M4 x 12 + 2 M4 nuts (clamp)
@@ -445,90 +444,26 @@ def pins(theta=0.0):
     return fuse(anchor, rot_y(col, theta))
 
 
-# ---------------------------------------------------------------- cable cover and its plug
-# The cable cover's slot (Rev 1's cover_cable()) lets the USB cable drop into its bore sideways, so the plug never has to
-# pass through it. The plug is the piece that slot cut away, 0.1 mm smaller each side: with the cable in, it slides in
-# from the spout's outer end, under the cable, and fills the slot again. An M2 x 12 countersunk comes up from under the
-# cover's rim, through a clearance hole, and threads into the plug: tightening it pulls the plug's head down onto the
-# cover's shoulders, the way the cable pushes it, and pins it in place.
-m.CSK[2], m.TAP[2] = (4.0, 2.4), 1.6               # M2 countersunk head and clearance; pilot to tap
-PLUG_CLR = 0.1
-PLUG_SCREW = (29.0, -14.0)                        # (x, z of the head's top): up through the rim's underside, its head
-                                                  # in a counterbore 3.7 mm up from the curved surface; its tip ends at
-                                                  # z -2, 0.4 mm under the plug's top and 5.9 mm into the plug
-# The slot is a T (seen along the spout): 5 mm wide at the mouth, where the cable drops in, and SLOT_HEAD wide from the
-# bore down to SLOT_HEAD_Z. The plug's head bears on the cover's shoulders either side of the mouth all along the slot,
-# so pushing the cable down loads the cover.
-SLOT_MOUTH, SLOT_HEAD, SLOT_HEAD_Z = 5.0, 6.8, -4.6
-SPOUT_R = 6.9                                     # Rev 1: 6.5. Room round the T's head; it just clears the block's face
-# The plug's top, under the cable, is flat (it prints better than the bore's curve), level with where the bore meets the
-# slot's side walls in the cover, so it lines up with the cover's edges and stays out of the bore's sides
-PLUG_TOP = -math.sqrt(3.75 ** 2 - (SLOT_HEAD / 2) ** 2)    # -1.58: 1.58 mm under the bore's axis
-
-
-_CABLE_COVER = []
-
-
-def _cable_cover_solid():
-    """Rev 1's cable cover before its slot is cut, its outside edges already chamfered, and the slot (USB side: no
-    mirroring). Cover and plug are both cut from it, so the plug carries the cover's own chamfers and the slot's edges
-    stay sharp: the plug fills it with only a hairline round it"""
-    sy = m.BLOCK_Y1 + 7
-    if not _CABLE_COVER:
-        c = m._cover_base().fuse(cyl(SPOUT_R, (20, sy, 0), (m.COVER_R + 10, sy, 0)))
-        c = m._cover_finish(c, m.BLOCK_Y1 + 9.5)
-        c = c.cut(cyl(3.75, (0, sy, 0), (m.COVER_R + 12, sy, 0)))
-        _CABLE_COVER.append(chamfer_edges(c))
-    return _CABLE_COVER[0], sy, _slot(sy)
-
-
-def _slot(sy, k=0.0):
-    """the T-slot, shrunk by k all round (k = PLUG_CLR gives the plug's outline)"""
-    x0, x1 = 20, m.COVER_R + 12
-    mouth = box(x0, x1, sy - SLOT_MOUTH / 2 + k, sy + SLOT_MOUTH / 2 - k, -8 + k, 0)
-    head = box(x0, x1, sy - SLOT_HEAD / 2 + k, sy + SLOT_HEAD / 2 - k, SLOT_HEAD_Z + k, 0)
-    return mouth.fuse(head)
-
-
-def cover_cable_r3():
-    c, sy, slot = _cable_cover_solid()
-    x, zh = PLUG_SCREW
-    c = c.cut(slot)
-    rim = math.sqrt(m.COVER_R ** 2 - x ** 2)                                  # the rim's surface under the screw, below the axis
-    c = c.cut(m.csk_hole(2, (x, sy, zh), (0, 0, 1), -8.0 + 0.5 - zh, out=rim + zh + 2.0))   # up through the rim into the slot;
-                                                                                # the counterbore runs out through the rim's surface
-    return c.clean()
-
-
-# Retrofit: a cable cover that goes on with the cable already through the lever. The slot underneath is left solid (no
-# plug, no M2 screw); instead a NOTCH_W notch runs in from the face that seats on the block, the full length of the spout
-# and across the ring wall, down to the bore's axis. Offer it up to the block face with the cable's radial run in the
-# notch, push it home, and the cable lies in the bore's far half; the block face closes the notch.
-# Its boss is round and the full cover depth across (block face to outer face; the bore stays 0.5 mm off its axis, where
-# the cable runs), so it prints on its outer face, the boss just touching the bed. Printed that way the bore's lower half
-# is an open channel and the notch opens upward.
+# ---------------------------------------------------------------- cable cover
+# The cable cover goes on with the USB cable already through the lever and its plug end out past the cover. A NOTCH_W
+# notch runs in from the face that seats on the block, the full length of the spout and across the ring wall, down to the
+# bore's axis. Offer it up to the block face with the cable's radial run in the notch, push it home, and the cable lies
+# in the bore's far half; the block face closes the notch. (Rev 3 first had Rev 1's slot under the spout, filled by a
+# separate plug on an M2 screw; the notch needs neither.)
+# The spout is round and the full cover depth across (block face to outer face; the bore stays 0.5 mm off its axis,
+# where the cable runs), so it prints on its outer face, the spout just touching the bed. Printed that way the bore's
+# lower half is an open channel and the notch opens upward.
 NOTCH_W = 4.8                                     # the USB cable (4.6, as modelled) + 0.1 each side
 
 
-def cover_cable_notched():
+def cover_cable_r3():
     y0, y1, sy = m.BLOCK_Y1, m.BLOCK_Y1 + m.COVER_D, m.BLOCK_Y1 + 7
     c = m._cover_base().fuse(cyl(m.COVER_D / 2, (20, (y0 + y1) / 2, 0), (m.COVER_R + 10, (y0 + y1) / 2, 0)))
     c = m._cover_finish(c, m.BLOCK_Y1 + 9.5)
     c = c.cut(cyl(3.75, (0, sy, 0), (m.COVER_R + 12, sy, 0)))
     c = chamfer_edges(c.clean())
-    c = c.cut(box(0, m.COVER_R + 12, y0 - 1, sy, -NOTCH_W / 2, NOTCH_W / 2))
+    c = c.cut(box(0, m.COVER_R + 12, y0 - 1, sy, -NOTCH_W / 2, NOTCH_W / 2))     # the notch's edges stay sharp
     return c.clean()
-
-
-def cable_plug():
-    c, sy, _ = _cable_cover_solid()
-    x, zh = PLUG_SCREW
-    k = PLUG_CLR
-    bore = cyl(3.75, (0, sy, 0), (m.COVER_R + 12, sy, 0))
-    p = c.fuse(bore).intersect(_slot(sy, k))
-    p = p.intersect(box(0, m.COVER_R + 10, sy - 10, sy + 10, -20, PLUG_TOP))           # flat top; ends at the spout's end
-    p = p.cut(cyl(m.COVER_IN_R, (0, m.BLOCK_Y1 - 1, 0), (0, sy + SLOT_HEAD / 2 + 1, 0)))   # starts at the hollow's wall
-    return p.cut(cyl(m.TAP[2] / 2, (x, sy, -9.0), (x, sy, 1.0))).clean()               # tap M2, from below
 
 
 def hardware_r3():
@@ -545,8 +480,6 @@ def hardware_r3():
         for a in (45, 135, 225, 315):
             px, pz = m.on_circle(m.COVER_HOLE_R, a)
             parts.append(m.csk_screw(3, (px, s * (m.BLOCK_Y1 + m.COVER_D), pz), (0, -s, 0), COVER_SCREW_L))
-    x, zh = PLUG_SCREW
-    parts.append(m.csk_screw(2, (x, m.BLOCK_Y1 + 7, zh), (0, 0, 1), 12))              # the cable plug's screw, from below
     return fuse(*parts)
 
 
@@ -807,7 +740,6 @@ def build():
         "strut_collar": collar(),
         "friction_knob": friction_knob_r3(),
         "cover_cable": cover_cable_r3(),
-        "cable_plug": cable_plug(),
         # bought / reference
         "carbon_tube": carbon_tube(160.0),
         "gas_strut": strut(),
@@ -816,13 +748,13 @@ def build():
         "lever_screws": lever_hardware(),
     })
     for name in PRINTED:
-        if name not in ("cover_cable", "cable_plug", "lever_upper", "lever_lower", "friction_knob"):   # those: see their own steps; the knob keeps the MkII's edges
+        if name not in ("cover_cable", "lever_upper", "lever_lower", "friction_knob"):   # those: see their own steps; the knob keeps the MkII's edges
             parts[name] = chamfer_edges(parts[name])
     return parts
 
 
 PRINTED = ["frame", "cap_left", "cap_right", "lever_upper", "lever_lower", "shoe", "sensor_carrier", "cover_sensor",
-           "cover_cable", "cable_plug", "strut_collar", "friction_knob"]
+           "cover_cable", "strut_collar", "friction_knob"]
 
 if __name__ == "__main__" and "--curve" in sys.argv[1:]:
     balance(plot=os.path.join(HERE, "renders", "strut_balance.png"))
@@ -833,8 +765,6 @@ elif __name__ == "__main__":
         sub = os.path.join(HERE, "stl") if name in PRINTED else os.path.join(HERE, "stl", "ref")
         os.makedirs(sub, exist_ok=True)
         cq.exporters.export(cq.Workplane().add(shp), os.path.join(sub, f"{name}.stl"), tolerance=0.04, angularTolerance=0.12)
-    cq.exporters.export(cq.Workplane().add(cover_cable_notched()), os.path.join(HERE, "stl", "cover_cable_notched.stl"),
-                        tolerance=0.04, angularTolerance=0.12)              # retrofit: not in the assembly
     os.makedirs(os.path.join(HERE, "step"), exist_ok=True)
     asm = cq.Assembly(name="MkIII_Rev3")
     for name, shp in parts.items():
