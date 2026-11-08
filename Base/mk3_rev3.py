@@ -504,12 +504,17 @@ def cover_cable_r3():
 # plug, no M2 screw); instead a NOTCH_W notch runs in from the face that seats on the block, the full length of the spout
 # and across the ring wall, down to the bore's axis. Offer it up to the block face with the cable's radial run in the
 # notch, push it home, and the cable lies in the bore's far half; the block face closes the notch.
+# Its boss is square, not round: the full cover depth (block face to outer face) and 2 x SPOUT_R tall, so it prints on
+# its outer face with no supports. Printed that way the bore's lower half is an open channel and the notch opens upward.
 NOTCH_W = 4.8                                     # the USB cable (4.6, as modelled) + 0.1 each side
 
 
 def cover_cable_notched():
-    c, sy, _ = _cable_cover_solid()
-    y0 = m.BLOCK_Y1
+    y0, y1, sy = m.BLOCK_Y1, m.BLOCK_Y1 + m.COVER_D, m.BLOCK_Y1 + 7
+    c = m._cover_base().fuse(box(20, m.COVER_R + 10, y0, y1, -SPOUT_R, SPOUT_R))
+    c = m._cover_finish(c, m.BLOCK_Y1 + 9.5)
+    c = c.cut(cyl(3.75, (0, sy, 0), (m.COVER_R + 12, sy, 0)))
+    c = chamfer_edges(c.clean())
     c = c.cut(box(0, m.COVER_R + 12, y0 - 1, sy, -NOTCH_W / 2, NOTCH_W / 2))
     return c.clean()
 
