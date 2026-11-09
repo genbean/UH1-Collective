@@ -3,12 +3,16 @@ MkIII collective base - Rev 4: narrow, 73 mm (2.87 in) wide
 
 Rev 3 (../mk3_rev3.py) with the base cut down from 130 mm to 73 mm along the pivot axis, and the lever symmetrical about
 the tube. Everything Rev 4 doesn't change comes from Rev 3: the gas strut, its collar and anchor, the socket for the
-uncut 500 mm carbon tube, the down-stop pads and pillars, the lever's cap-screw joint, the MkII friction knob, the
-chamfers and the fits.
+uncut 500 mm carbon tube, the down-stop pads and pillars, the MkII friction knob, the chamfers and the fits.
 
 Same frame as Rev 3, except that the tube's plane is now the middle: origin = pivot centre, Y = pivot axis, Z = up,
 tube along -X at 0 deg, +Y = USB side, -Y = sensor side. (Rev 3's tube is at y = -9, so Rev 3's collar, strut, pins
 and hose clamp are moved +9 in y.)
+
+The lever is split on the tube's plane (y = 0), not at the pivot axis as Rev 3, so each half prints on its joint face
+with its trunnion up and each trunnion is one round piece: lever_sensor (-y) and lever_cable (+y). Four M4 x 35 socket
+head cap screws run along the pivot axis through the hub, behind the bearings, with printed hollow dowels round them at
+the joint to locate the halves.
 
 Across the pivot axis, from the middle out (each side):
     hub                 |y| 0-21.5     60 mm across (Rev 3: 64 mm long, now 43), 3.5 mm past the socket boss
@@ -56,7 +60,7 @@ import mk3_rev3 as r                                                            
 from mk3_pivot import V, cyl, tube, box, fuse, hexprism, rot_y                           # noqa: E402
 
 m = r.m
-gusset_xz, hex_y = r.gusset_xz, r.hex_y
+gusset_xz = r.gusset_xz
 
 
 def chamfer_edges(shape, sizes=r.CHAMFERS, chunk=8, exclude=None):
@@ -147,17 +151,45 @@ USB_BEND_R, USB_Y = 4.0, BLOCK_Y1 + 1.3          # (32.8)
 USB_R, USB_TUNNEL_R = 2.3, 2.5
 
 # ---------------------------------------------------------------- lever
-# four M4 x 40 socket head cap screws, where Rev 3 has them: x = +-17, symmetrical fore and aft, 16.25 mm either side of
-# the tube: 1.25 mm from the counterbore to the hub's end and 1.35 mm from the clearance hole to the socket at the front
-# pair.
-LEVER_SCREWS = [(x, y) for x in (-17.0, 17.0) for y in (-16.25, 16.25)]
-# The fairing over the socket boss, on the upper half and mirrored underneath on the lower (in place of Rev 3's 8 mm top
-# gusset): FAIR_HW either side of the tube, from the hose-clamp groove's back edge back to the hub. Its top is one
-# straight line from the boss's top at the groove to the hub's circle and tangent to it, so it runs into the hub without
-# a corner; its long top edges are rounded FAIR_R. 10.5 keeps it 1.75 mm clear of the front lever screws' counterbores
-# on top and 1.6 mm of their nut pockets underneath.
+# Split on the tube's plane (y = 0), not at the pivot axis as Rev 3: two halves, lever_sensor (-y) and lever_cable (+y),
+# each printed on its joint face with its trunnion up, so each trunnion is one round piece, printed the way the trunnion
+# coupon was. Four M4 x 35 socket head cap screws (HELIFOUNER kit) run along the pivot axis through the hub, on a JS_R
+# circle at +-JS_DEG from fore-aft, behind the bearings: heads in counterbores and nuts in hex pockets in the hub's end
+# faces, diagonally, so each half has two heads and two nuts. A head seats JS_CB_D under the end face; the screw's tip
+# stands 1 mm past its nut, 3 mm inside the far end face. Between the shoulder (r 20.9) and the hub's surface (r 30):
+# the counterbores leave 1.55 mm of hub over them, the nut pockets (a flat toward the axis) 1.6, the dowel holes 1.5;
+# the front pair's dowel holes are 2.4 mm off the socket's bore (at 45 deg they'd be 1.2). The bearings cover the
+# pockets, so the screws go in before the bearings go on.
+JS_R, JS_DEG = 24.7, 50.0
+JS_SCREW_L = 35
+JS_CB_R, JS_CB_D = 3.75, 5.0                     # 7.5 mm counterbore: the 7 mm head 0.25 clear; its top 1 mm under the face
+JS_SEAT = HUB_HW - JS_CB_D                       # |y| 16.5: the head's seat
+JS_TIP = JS_SCREW_L - JS_SEAT                    # |y| 18.5 on the far side
+JS_NUT = (JS_TIP - r.LS_TIP_PAST_NUT - r.LS_NUT_T, JS_TIP - r.LS_TIP_PAST_NUT)   # |y| 14.3..17.5: the nut, pulled up
+# (x, z, the side its head is on): front-top and back-bottom heads in lever_sensor, the other two in lever_cable
+JOINT_SCREWS = [(sx * JS_R * math.cos(math.radians(JS_DEG)), sz * JS_R * math.sin(math.radians(JS_DEG)),
+                 -1 if sx * sz < 0 else 1) for sx in (-1, 1) for sz in (1, -1)]
+# Locating them: a printed hollow dowel round each screw at the joint, half in each half, like an engine's dowels to its
+# gearbox (lever_dowel, x4, printed standing). Its holes are DOWEL_CLR clear a side (tune with the dowel-hole coupon),
+# 0.2 deeper than the dowel's half so the faces close, with a 45 deg lead-in at the mouth that takes the first layer's
+# squish. The steel screw inside carries the shear across the dowel's layers.
+DOWEL_OD, DOWEL_ID, DOWEL_L = 7.5, 4.5, 8.0
+DOWEL_CLR = 0.05                                 # 7.6 mm holes
+DOWEL_DEPTH = DOWEL_L / 2 + 0.2                  # 4.2 each side
+DOWEL_LEAD = 0.4
+JOINT_CH = 0.3                                   # on the joint face's outer edges, against elephant's foot at the seam;
+                                                 # none on the bores
+# The fairing over the socket boss, on top and mirrored underneath (in place of Rev 3's 8 mm top gusset): FAIR_HW either
+# side of the tube, from the hose-clamp groove's back edge back to the hub. Its top is one straight line from the boss's
+# top at the groove to the hub's circle and tangent to it, so it runs into the hub without a corner; its long top edges
+# are rounded FAIR_R.
 GROOVE_X = -54.0                                 # the hose-clamp groove's back edge
 FAIR_HW, FAIR_R = 10.5, 3.0
+# The down-stop pads run inward into the lower fairing: filled from the pad's inner face (|y| 13.5) to the fairing's side
+# (10.5; the fill starts inside it, past its rounded edge), over the pad's length, from the pad's bottom up into the
+# boss. The pad's inner face would print as a flat overhang once the lever's split on y = 0; this way pad and fairing
+# are one piece, with nothing hanging
+PAD_FILL_Y = FAIR_HW - FAIR_R
 STOP_DEG = r.STOP_DEG
 # The gas strut's anchor. Rev 3's first, at x -12, z -40.5, balanced a 40 N strut, the bottom of the range the 45 N strut
 # is sold as; the 45 N strut as bought lifted the lever (about +50..+70 g at the grip). Moved up and back to x -9.5,
@@ -285,67 +317,100 @@ def sensor_pocket():
     return seat.fuse(behind)
 
 
-def lever():
+def lever(pocket=True):
+    """the whole lever, unsplit; pocket=False leaves out the sensor's pocket (the rest is symmetrical about y = 0)"""
     core = rot_y(cyl(HUB_R, (0, -HUB_HW, 0), (0, HUB_HW, 0)), 135)      # seam away from the split, the stop and the track
     boss = cyl(m.SOCK_BOSS_R, (-10, 0, 0), (-m.SOCK_MOUTH, 0, 0))
     shoulders = [cyl(BRG_IR_SH / 2 - 1.1, (0, s * HUB_HW, 0), (0, s * BRG_Y0, 0)) for s in (-1, 1)]
     trunnions = [cyl(TRUN_OD / 2, (0, s * BRG_Y0, 0), (0, s * TRUN_OUT, 0)) for s in (-1, 1)]
     gusset = fuse(fairing(1), fairing(-1))
-    pads = [box(*PAD_X, *sorted((s * PAD_DY[0], s * PAD_DY[1])), PAD_Z, 0) for s in (-1, 1)]
+    pads = [box(*PAD_X, *sorted((s * PAD_FILL_Y, s * PAD_DY[1])), PAD_Z, 0) for s in (-1, 1)]   # filled in to the fairing
     h = fuse(core, boss, gusset, *shoulders, *trunnions, *pads, *up_stop_lugs())
     cuts = [cyl(m.SOCK_BORE_R, (-m.SOCK_BOTTOM, 0, 0), (-m.SOCK_MOUTH - 1, 0, 0)),               # tube socket
             tube(m.SOCK_BOSS_R + 1, m.SOCK_BOSS_R - 1.2, (-54, 0, 0), (-63, 0, 0)),               # hose-clamp groove
             cyl(m.CABLE_R, (0, -POCKET_FLOOR - 0.5, 0), (0, TRUN_OUT + 1, 0)),                   # axial 1/2" bore
             cyl(m.CABLE_R, (-m.SOCK_BOTTOM - 1, 0, 0), (3, 0, 0)),                               # radial 1/2" bore
-            sensor_pocket(),
-            strut_relief()]                                                                       # the strut's cylinder
+            strut_relief()] + ([sensor_pocket()] if pocket else [])                               # the strut's cylinder
     for c in cuts:
         h = h.cut(c)
     return h.clean()
 
 
-def lever_screw_seats():
-    """Rev 3's rule: per screw (x, y, head seat z, kit length, tip z, nut pocket ceiling z)"""
-    out = []
-    for x, y in LEVER_SCREWS:
-        z_head = math.sqrt(HUB_R ** 2 - (abs(x) + r.CAP_CB_R) ** 2) - r.CAP_K
-        z_nut_open = -math.sqrt(HUB_R ** 2 - (abs(x) + m.LS_NUT_AF / 2) ** 2) + r.NUT_WALL
-        length = max(k for k in r.KIT_LENGTHS if k <= z_head - (z_nut_open - r.LS_TIP_PAST_NUT))
-        z_tip = z_head - length
-        out.append((x, y, z_head, length, z_tip, z_tip + r.LS_TIP_PAST_NUT + r.LS_NUT_T))
-    return out
+def hex_xz(cx, cz, af, y0, y1):
+    """a hexagonal prism along y from y0 to y1, centred on (cx, cz), one flat facing the pivot axis"""
+    phi = math.degrees(math.atan2(cz, cx))
+    rc = af / 2 / math.cos(math.radians(30))
+    pts = [V(cx + rc * math.cos(math.radians(phi + 30 + 60 * k)), y0, cz + rc * math.sin(math.radians(phi + 30 + 60 * k)))
+           for k in range(6)]
+    return cq.Solid.extrudeLinear(cq.Wire.makePolygon(pts + [pts[0]]), [], V(0, y1 - y0, 0))
 
 
-def lever_screw_cuts():
-    cuts = []
-    for x, y, zh, _, _, zn in lever_screw_seats():
-        cuts += [cyl(r.CAP_CB_R, (x, y, zh), (x, y, 60)),
-                 cyl(m.LS_CLR_R, (x, y, zn - 0.5), (x, y, zh + 0.01)),
-                 hex_y(m.LS_NUT_AF, (x, y, -60), (x, y, zn))]
+def lever_joint_cuts():
+    """per joint screw: its counterbore and clearance hole on the head's side, its nut's pocket on the other, and the
+    dowel's hole either side of the joint with its lead-in"""
+    cuts, out = [], HUB_HW + 1.5
+    rd = DOWEL_OD / 2 + DOWEL_CLR
+    for x, z, sh in JOINT_SCREWS:
+        cuts += [cyl(JS_CB_R, (x, sh * JS_SEAT, z), (x, sh * out, z)),                                 # counterbore
+                 cyl(m.LS_CLR_R, (x, sh * (JS_SEAT + 0.01), z), (x, -sh * (JS_NUT[0] + 0.01), z)),       # clearance
+                 hex_xz(x, z, m.NUT_AF[4], -sh * JS_NUT[0], -sh * out),                                  # nut pocket
+                 cyl(rd, (x, -DOWEL_DEPTH, z), (x, DOWEL_DEPTH, z))]                                     # dowel holes
+        cuts += [cq.Solid.makeCone(rd + DOWEL_LEAD, rd, DOWEL_LEAD, V(x, 0, z), V(0, sy, 0)) for sy in (-1, 1)]
     return cuts
 
 
 def lever_screws(theta=0.0):
+    """the four M4 x 35s (reference), heads on their seats, and their nuts pulled up against the pockets' floors"""
     parts = []
-    for x, y, zh, length, zt, zn in lever_screw_seats():
-        parts += [cyl(r.CAP_D / 2, (x, y, zh), (x, y, zh + r.CAP_K)), cyl(2.0, (x, y, zt), (x, y, zh)),
-                  hex_y(7.0, (x, y, zn - r.LS_NUT_T), (x, y, zn))]
+    for x, z, sh in JOINT_SCREWS:
+        parts += [cyl(r.CAP_D / 2, (x, sh * JS_SEAT, z), (x, sh * (JS_SEAT + r.CAP_K), z)),
+                  cyl(2.0, (x, sh * JS_SEAT, z), (x, -sh * JS_TIP, z)),
+                  hex_xz(x, z, 7.0, -sh * JS_NUT[0], -sh * JS_NUT[1]).cut(
+                      cyl(2.0, (x, -sh * (JS_NUT[0] - 1), z), (x, -sh * (JS_NUT[1] + 1), z)))]
     return rot_y(fuse(*parts), theta)
+
+
+def lever_dowel():
+    """one hollow dowel, standing on its end as it prints"""
+    d = tube(DOWEL_OD / 2, DOWEL_ID / 2, (0, 0, 0), (0, 0, DOWEL_L))
+    return d.chamfer(0.4, None, [e for e in d.Edges() if e.geomType() == "CIRCLE" and e.radius() > DOWEL_OD / 2 - 0.01])
+
+
+def lever_dowels(theta=0.0):
+    """the four dowels in their holes, centred on the joint"""
+    d0 = lever_dowel().rotate((0, 0, 0), (1, 0, 0), -90).translate(V(0, -DOWEL_L / 2, 0))   # along y
+    return rot_y(fuse(*[d0.translate(V(x, 0, z)) for x, z, _ in JOINT_SCREWS]), theta)
+
+
+def _channel(p):
+    """on the socket, the radial bore or the axial bore, where the joint face meets them (no chamfer there)"""
+    return -m.SOCK_MOUTH - 1 <= p.x <= m.CABLE_R + 0.1 and abs(p.z) <= m.SOCK_BORE_R + 0.05
 
 
 _HALVES = []
 
 
 def lever_halves(theta=0.0):
-    """split at z = 0, chamfered everywhere but the joint plane (Rev 3)"""
+    """[lever_sensor (-y), lever_cable (+y)]. The cable half is split off the lever (without the sensor's pocket, so
+    symmetrical about y = 0), chamfered as Rev 3 everywhere but its joint face, and JOINT_CH round the joint face's
+    outside edge, not on the bores. The sensor half is its mirror image, so their outsides match exactly, with the
+    sensor's pocket cut and chamfered. Then the joint's screw and dowel holes go into both, their mouths left sharp (the
+    counterbores come within 0.05 mm of the bearing's shoulder)"""
     if not _HALVES:
-        h = lever()
-        for c in lever_screw_cuts():
-            h = h.cut(c)
-        h = h.clean()
-        on_joint = lambda e: abs(e.BoundingBox().zmin) < 1e-4 and abs(e.BoundingBox().zmax) < 1e-4
-        _HALVES.append(chamfer_edges(h.intersect(box(-200, 200, -100, 100, 0, 200)).clean(), exclude=on_joint))
-        _HALVES.append(chamfer_edges(h.intersect(box(-200, 200, -100, 100, -200, 0)).clean(), exclude=on_joint))
+        on_joint = lambda e: abs(e.BoundingBox().ymin) < 1e-4 and abs(e.BoundingBox().ymax) < 1e-4
+        cable = chamfer_edges(lever(pocket=False).intersect(box(-200, 200, 0, 100, -100, 100)).clean(), exclude=on_joint)
+        face = max((f for f in cable.Faces() if f.geomType() == "PLANE" and abs(f.Center().y) < 1e-4),
+                   key=lambda f: f.Area())
+        cable = cable.chamfer(JOINT_CH, None, [e for e in face.outerWire().Edges() if not _channel(e.positionAt(0.5))])
+        sensor = cable.mirror("XZ").cut(sensor_pocket()).clean()
+        k = BOARD / 2 + BOARD_CLR + 0.1
+        in_pocket = lambda e: (lambda b: b.ymax < -POCKET_FLOOR + 0.1 and max(abs(b.xmin), abs(b.xmax), abs(b.zmin),
+                                                                             abs(b.zmax)) < k)(e.BoundingBox())
+        sensor = chamfer_edges(sensor, exclude=lambda e: not in_pocket(e))
+        for half in (sensor, cable):
+            for c in lever_joint_cuts():
+                half = half.cut(c)
+            _HALVES.append(half.clean())
     return [rot_y(s, theta) for s in _HALVES]
 
 
@@ -882,10 +947,10 @@ def hardware():
 
 
 # ================================================================ build + export
-TURNS = ("lever_upper", "lever_lower", "lever_screws", "carbon_tube", "hose_clamp", "sensor_pcb", "sensor_chip",
-         "bearing_inner", "sensor_wires")
-PRINTED = ["frame", "shell", "lever_upper", "lever_lower", "shoe", "spring_cap", "back_plate", "cover_sensor",
-           "cover_cable", "strut_collar", "friction_knob"]
+TURNS = ("lever_sensor", "lever_cable", "lever_screws", "lever_dowel", "carbon_tube", "hose_clamp", "sensor_pcb",
+         "sensor_chip", "bearing_inner", "sensor_wires")
+PRINTED = ["frame", "shell", "lever_sensor", "lever_cable", "lever_dowel", "shoe", "spring_cap", "back_plate",
+           "cover_sensor", "cover_cable", "strut_collar", "friction_knob"]
 
 
 _STATIC = {}
@@ -914,10 +979,10 @@ def static_parts():
 
 def build(theta=0.0):
     """every part at lever angle theta (the strut, collar and pins rebuilt for it)"""
-    lu, ll = lever_halves(theta)
+    ls, lc = lever_halves(theta)
     pcb, chip = sensor_board()
     P = static_parts()
-    P.update({"lever_upper": lu, "lever_lower": ll, "strut_collar": strut_collar(theta),
+    P.update({"lever_sensor": ls, "lever_cable": lc, "lever_dowel": lever_dowels(theta), "strut_collar": strut_collar(theta),
               "bearing_inner": rot_y(fuse(*[bearing(s)[1] for s in (-1, 1)]), theta),
               "carbon_tube": rot_y(carbon_tube(), theta), "hose_clamp": rot_y(moved(m.hose_clamp()), theta),
               "gas_strut": moved(r.strut(theta)), "strut_pins": moved(r.pins(theta)),
@@ -930,13 +995,13 @@ def build(theta=0.0):
 # ================================================================ interference check
 # Overlaps that are meant to be there: presses and fits, screws in their holes (modelled at their thread's outside
 # diameter, so they overlap a tapped pilot), parts that rest on each other, and the cables in their channels.
-ALLOWED = {("bearing_inner", "lever_upper"), ("bearing_inner", "lever_lower"), ("felt", "shoe"),
+ALLOWED = {("bearing_inner", "lever_cable"), ("bearing_inner", "lever_sensor"), ("felt", "shoe"),
            ("frame", "hardware"), ("hardware", "shell"), ("back_plate", "hardware"), ("cover_sensor", "hardware"),
            ("cover_cable", "hardware"), ("friction_knob", "hardware"), ("hardware", "knob_spring"),
            ("hardware", "spring_cap"), ("knob_spring", "shoe"), ("knob_spring", "spring_cap"),
            ("frame", "strut_pins"), ("gas_strut", "strut_pins"), ("strut_collar", "strut_pins"),
-           ("lever_lower", "lever_screws"), ("lever_screws", "lever_upper"), ("carbon_tube", "hose_clamp"),
-           ("hose_clamp", "lever_lower"), ("hose_clamp", "lever_upper"), ("carbon_tube", "strut_collar"),
+           ("lever_cable", "lever_screws"), ("lever_screws", "lever_sensor"), ("carbon_tube", "hose_clamp"),
+           ("hose_clamp", "lever_cable"), ("hose_clamp", "lever_sensor"), ("carbon_tube", "strut_collar"),
            ("cover_sensor", "magnet"), ("sensor_pcb", "sensor_wires"), ("frame", "gas_strut")}
 # Parts that share a curved face (the races in their seats, the seal between them): the mesh boolean finds a sliver
 # where the two faces' facets don't line up (2.3 mm3 for an outer race in its seat, up to 2.7 for an inner race against
@@ -1006,12 +1071,16 @@ def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
 
 
 def check_assembly(step=2.0):
-    """the order it goes together in: the lever (bearings on) lowered straight down into the bare frame from 80 mm up;
-    the shoe (felt, spring and cap in it) set down into the frame's half of its pocket standing SHOE_IN back, from
-    60 mm up, then slid forward onto the hub; then the shell lowered straight down over both from 80 mm up"""
+    """the order it goes together in: the lever (halves screwed up on their dowels, bearings on) lowered straight down
+    into the bare frame from 80 mm up; the shoe (felt, spring and cap in it) set down into the frame's half of its pocket
+    standing SHOE_IN back, from 60 mm up, then slid forward onto the hub; then the shell lowered straight down over all
+    of it from 80 mm up. Part by part, so a race landing in its seat is held to SHARED's sliver like check()"""
     S = static_parts()
-    lever_b = cq.Compound.makeCompound([*lever_halves(0.0), *[bearing(s)[k] for s in (-1, 1) for k in range(3)]])
-    shoe_b = cq.Compound.makeCompound([S["shoe"], S["felt"], S["spring_cap"]])
+    ls, lc = lever_halves(0.0)
+    lever_b = {"lever_sensor": ls, "lever_cable": lc, "lever_screws": lever_screws(0.0), "lever_dowel": lever_dowels(0.0),
+               "bearing_outer": S["bearing_outer"], "bearing_seal": S["bearing_seal"],
+               "bearing_inner": fuse(*[bearing(s)[1] for s in (-1, 1)])}
+    shoe_b = {"shoe": S["shoe"], "felt": S["felt"], "spring_cap": S["spring_cap"]}
     worst = {}
 
     def meet(p, q):
@@ -1019,38 +1088,43 @@ def check_assembly(step=2.0):
         return (a.xmax >= b.xmin and b.xmax >= a.xmin and a.ymax >= b.ymin and b.ymax >= a.ymin and
                 a.zmax >= b.zmin and b.zmax >= a.zmin)
 
-    def hit(key, a_, b_, at):
-        vol = sum(overlap(sa, sb) for sa in a_.Solids() for sb in b_.Solids() if meet(sa, sb))
-        if vol != vol:
-            worst[key + " NOT CHECKED"] = (0.0, at)
-        elif vol > 0.01:
-            worst[key] = max(worst.get(key, (0, 0)), (vol, at))
+    def hit(group, d, fixed, at):
+        """each part of the moving group, moved by d, against each fixed part"""
+        for a, pa in group.items():
+            pa = pa.translate(d)
+            for b, pb in fixed.items():
+                vol = sum(overlap(sa, sb) for sa in pa.Solids() for sb in pb.Solids() if meet(sa, sb))
+                key = f"{a} / {b}"
+                if vol != vol:
+                    worst[key + " NOT CHECKED"] = (0.0, at)
+                elif vol > SHARED.get(tuple(sorted((a, b))), 0.01):
+                    worst[key] = max(worst.get(key, (0, 0)), (vol, at))
 
+    frame_ = {"frame": S["frame"]}
     for i in range(int(80 / step) + 1):
         z = 80.0 - i * step
-        hit("lever / frame", lever_b.translate(V(0, 0, z)), S["frame"], z)
+        hit(lever_b, V(0, 0, z), frame_, z)
     for i in range(int(60 / step) + 1):
         z = 60.0 - i * step
-        for k, f in (("frame", S["frame"]), ("lever", lever_b)):
-            hit(f"shoe down / {k}", shoe_b.translate(V(SHOE_IN, 0, z)), f, z)
+        hit(shoe_b, V(SHOE_IN, 0, z), {**frame_, **lever_b}, z)
     for i in range(int(SHOE_IN / 0.5) + 1):
         d = SHOE_IN - i * 0.5
-        for k, f in (("frame", S["frame"]), ("lever", lever_b)):
-            hit(f"shoe forward / {k}", shoe_b.translate(V(d, 0, 0)), f, d)
+        hit(shoe_b, V(d, 0, 0), {**frame_, **lever_b}, d)
     for i in range(int(80 / step) + 1):
         z = 80.0 - i * step
-        sh = S["shell"].translate(V(0, 0, z))
-        for k, f in (("lever", lever_b), ("frame", S["frame"]), ("shoe", shoe_b)):
-            hit(f"shell / {k}", sh, f, z)
+        hit({"shell": S["shell"]}, V(0, 0, z), {**frame_, **lever_b, **shoe_b}, z)
     print("lever in, shoe in, shell on: " + ("clear" if not worst else
           "; ".join(f"{k} {v:.2f} mm3 at {zz:.1f}" for k, (v, zz) in worst.items())))
 
 
 def export():
     P = build(0.0)
+    one = {"lever_dowel": lever_dowel()}                       # one, standing as it prints: print four
     for name in PRINTED:
-        print(f"{name:16s} valid={P[name].isValid()} vol={P[name].Volume():9.1f}")
+        shp = one.get(name, P[name])
+        print(f"{name:16s} valid={shp.isValid()} vol={shp.Volume():9.1f}" + ("  (print 4)" if name in one else ""))
     for name, shp in P.items():
+        shp = one.get(name, shp)
         sub = os.path.join(HERE, "stl") if name in PRINTED else os.path.join(HERE, "stl", "ref")
         os.makedirs(sub, exist_ok=True)
         cq.exporters.export(cq.Workplane().add(shp), os.path.join(sub, f"{name}.stl"), tolerance=0.04, angularTolerance=0.12)
@@ -1066,8 +1140,10 @@ def export():
 def balance(plot=None):
     """the strut's lift against the head's weight, at the grip, with Rev 4's lever and anchor (Rev 3's model: the head,
     tube and cables forward of the pivot, the lever halves, screws, collar and half the strut behind it)"""
-    lu, ll = lever_halves(0.0)
-    items = r.rear_items({"lever_upper": lu, "lever_lower": ll, "strut_collar": strut_collar(0.0)})
+    ls, lc = lever_halves(0.0)
+    items = r.rear_items({"lever_upper": ls, "lever_lower": lc, "strut_collar": strut_collar(0.0)})
+    items[2] = (4 * 3.6 + r.printed_mass(lever_dowels(0.0), infill=1.0), V(0, 0, 0))   # the joint's screws, nuts and
+                                                                                        # dowels: centred on the pivot
     load = lambda t: r.gravity(t, items) * 9.80665                                         # N*mm, nose down
     grip = lambda nmm: nmm / 9.80665e-3 / r.GRIP_R                                          # N*mm -> g at the grip
     th = r.frange(STOP_DEG, 0.5)
@@ -1132,11 +1208,21 @@ def coupon_shoe_pocket(d, length=10.0, wall=4.0):
     return c.cut(box(-w / 2, w / 2, -1, length + 1, wall, wall + h)).clean()
 
 
+def coupon_dowel_hole(d, w=14.0, h=8.0):
+    """one of the lever's dowel holes as the halves print it: opening on the bed with its lead-in, the screw's clearance
+    hole on through, so its ceiling bridges the same ring. The step is on the hole's diameter: 7.4 / 7.6 / 7.8. A printed
+    dowel should push in by hand with no play"""
+    rd = DOWEL_OD / 2 + DOWEL_CLR + d / 2
+    c = box(-w / 2, w / 2, -w / 2, w / 2, 0, h)
+    c = c.cut(cyl(rd, (0, 0, -1), (0, 0, DOWEL_DEPTH))).cut(cyl(m.LS_CLR_R, (0, 0, -1), (0, 0, h + 1)))
+    return c.cut(cq.Solid.makeCone(rd + DOWEL_LEAD, rd, DOWEL_LEAD, V(0, 0, 0), V(0, 0, 1))).clean()
+
+
 def export_coupons():
     out = os.path.join(HERE, "stl", "coupons")
     os.makedirs(out, exist_ok=True)
     for name, f in (("coupon_trunnion_6808", coupon_trunnion), ("coupon_bearing_seat_6808", coupon_seat),
-                    ("coupon_shoe_pocket", coupon_shoe_pocket)):
+                    ("coupon_shoe_pocket", coupon_shoe_pocket), ("coupon_dowel_hole", coupon_dowel_hole)):
         shp = m.coupon_plate(f)
         bb = shp.BoundingBox()
         print(f"{name:26s} valid={shp.isValid()} size={bb.xlen:.0f} x {bb.ylen:.0f} x {bb.zlen:.0f}")

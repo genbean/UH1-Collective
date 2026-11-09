@@ -20,7 +20,7 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 
 ## What changes from Rev 3
 
-- **Lever:** the hub is 43 mm long (Rev 3: 64), centred on the tube. The tube's plane moves from 9 mm off-centre to the middle. Rev 3's friction drum is gone.
+- **Lever:** the hub is 43 mm long (Rev 3: 64), centred on the tube. The tube's plane moves from 9 mm off-centre to the middle. Rev 3's friction drum is gone. The halves split on the tube's plane instead of at the pivot axis, so each trunnion prints round, in one piece.
 - **Bearings:** 6808-2RS thin-section bearings, 40 × 52 × 7 mm, in place of the 6006-2RS (30 × 55 × 13). The trunnions grow to 40 mm across to suit.
 - **Frame:** 9 mm pillow blocks (Rev 3: 17). The base plate stops at their outer faces, so it's 63 × 127 mm (Rev 3: 100 × 116), with no wings or gussets out beside it. A front wall under the shell's carries its cut for the lever on down, so the two read as one piece.
 - **Shell:** one box over the lever, in place of the two caps, slotted for the tube. Four M4 × 50 socket head screws hold it to the pillow blocks, and a diamond grid in the joint locates it.
@@ -47,13 +47,14 @@ Both scripts import Rev 3's (`../mk3_rev3.py`, `../make_renders_r3.py`) and need
 
 ## Fit-test coupons
 
-The trunnion, bearing seat and shoe pocket are new, so print these before the big parts. They're made and read like [Rev 3's coupons](../README.md#fit-test-coupons-print-these-before-the-big-parts).
+The trunnion, bearing seat, shoe pocket and the lever's dowel holes are new, so print these before the big parts. They're made and read like [Rev 3's coupons](../README.md#fit-test-coupons-print-these-before-the-big-parts).
 
 | File | What it is | Good fit | Change |
 |---|---|---|---|
 | `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.9 / 40.1 / 40.3 mm | the race presses on firmly, no wobble | `TRUN_OD += step` |
 | `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.8 / 52.0 / 52.2 mm | the race goes in with thumb pressure | `BRG_SEAT_D += step` |
 | `stl/coupons/coupon_shoe_pocket.stl` | 10 mm of the shoe's pocket, 0 / 0.1 / 0.2 mm clear a side, printed as the frame prints it | the printed shoe slides through under a finger, with no rattle and no rocking | `SHOE_CLR += step / 2` |
+| `stl/coupons/coupon_dowel_hole.stl` | one of the lever's dowel holes, 7.4 / 7.6 / 7.8 mm, 4.2 mm deep, opening on the bed with its lead-in, as the halves print it | a printed dowel (`lever_dowel.stl`) pushes in by hand, with no play | `DOWEL_CLR += step / 2` |
 
 The bearing coupons' `0` comes from how the bearings fitted as built:
 - **Seat:** +0.1 on the race's outside was a perfect fit in Rev 3's one-piece blocks. In Rev 4's seat, split between the frame and the shell, it left the bearing a little play, so the seat is now 52.0 mm, the race's own size. The seat coupon is one piece, so it can't show the split: check the play in the frame and shell themselves.
@@ -114,21 +115,36 @@ The frame and the shell meet on one flat plane through the pivot axis, which als
 
 ## Lever
 
-Two halves split at the pivot axis, as Rev 3, joined by four M4 × 40 socket head cap screws from the top into nuts in the lower half. They're where Rev 3 has them: x = ±17, symmetrical fore and aft, 16.25 mm either side of the tube. The front pair's holes are 1.35 mm from the socket.
+Two halves, split on the tube's plane (y = 0) rather than at the pivot axis as Rev 3: `lever_sensor` (−y) and `lever_cable` (+y). Each prints on its joint face with its trunnion up, so each trunnion is one round piece, printed the same way as the trunnion coupon that fitted the 6808.
 
-Each counterbore is 1.25 mm from the hub's end. The bores, the down-stop pads, the hose-clamp groove and the socket for the uncut 500 mm tube are all Rev 3's.
+- **Screws:** four M4 × 35 socket head cap screws run along the pivot axis through the hub, behind the bearings, on a 24.7 mm circle at ±50° from fore and aft. Each half has two heads and two nuts, diagonally opposite: the sensor half has the front-top and back-bottom heads, the cable half the other two. The heads sit in 7.5 mm counterbores 5 mm deep in the hub's end face, and the nuts in hex pockets in the other half's end face, a flat toward the axis. Each tip stands 1 mm past its nut, 3 mm inside the far end face.
+- **Walls:** the counterbores leave 1.55 mm of hub over them and the nut pockets 1.6 mm. The counterbores come within 0.05 mm of the bearing's shoulder without breaking into it.
+- **Behind the bearings:** the 6808s cover the heads and nuts. Screw the halves up before pressing the bearings on. To split the lever again, pull a bearing first.
+- **Dowels:** a printed hollow dowel sits round each screw at the joint, half in each half, like the dowels between an engine and its gearbox. Each is 7.5 mm across with a 4.5 mm bore, and 8 mm long (`lever_dowel.stl`, print four).
+  - **Holes:** 7.6 mm across and 4.2 mm deep each side, so the joint faces close on each other, with a 0.4 mm 45° lead-in at the mouth that takes the first layer's squish.
+  - **Shear:** the steel screw inside each dowel carries the load across the dowel's layers.
+  - **Fit:** tune it with the dowel-hole coupon.
+  - **Walls:** the front pair's holes are 2.4 mm from the socket, and the back pair's 1.5 mm under the hub's surface.
+- **Seam:** a 0.3 mm chamfer runs round the joint face's outside edge, against elephant's foot at the seam. The bores have none.
+- **Down-stop pads:** each runs in to the lower fairing. It's filled from the pad's inner face to the fairing's side over its whole length, and from its bottom up into the boss, so pad and fairing are one piece. With the lever split on the tube's plane, the pad's inner face would otherwise print as a flat overhang.
+- **Strength:** up and down at the grip, the main load, the two halves sit side by side, each carrying its share, and nothing crosses the joint. With Rev 3's split at the axis, each half alone had only about a fifth of the section's stiffness, and the joint had to carry the shear between them, about 3 N/mm at 100 N on the grip. A side load crosses the joint now instead: 20 N at the grip puts about 0.7 N/mm across it, which the dowels and the screws' clamp carry easily.
+- **Unchanged:** the outside, the bores, the fairings, the strut relief, the hose-clamp groove, the trunnions and the socket for the uncut 500 mm tube.
 
-**Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss on the upper half, and the same one mirrored under it on the lower half. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm. It stays 1.75 mm clear of the front screws' counterbores on top and 1.6 mm clear of their nut pockets underneath.
+![The lever exploded: the halves, dowels, screws and nuts](renders/rev4_lever_exploded.png)
 
-**Strut relief:** the strut's cylinder sits on the base end, and from 28° up its end comes in under the front of the hub. A shallow relief in the lower half's underside lets it by, 1.5 mm clear all the way to the stop: 2.65 mm deep at most, 11.6 mm wide, centred on the tube's plane. It's cut by the cylinder swung about the collar's pin as the lever sees it, so it's smooth, with no facets. It's under the lever, away from the brake's felt.
+**Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss, and the same one mirrored runs under it. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm.
+
+**Strut relief:** the strut's cylinder sits on the base end, and from 28° up its end comes in under the front of the hub. A shallow relief in the hub's underside lets it by, 1.5 mm clear all the way to the stop: 2.65 mm deep at most, 11.6 mm wide, centred on the tube's plane. It's cut by the cylinder swung about the collar's pin as the lever sees it, so it's smooth, with no facets. It's under the lever, away from the brake's felt.
 
 ![The lever from below at the 32° stop: the relief for the strut's cylinder](renders/rev4_strut_relief.png)
 
 ![The lever from the side: the fairings top and bottom, tangent to the hub](renders/rev4_lever_side.png)
 
-![The lever from the front and above: the upper fairing between the front screws](renders/rev4_lever_top.png)
+![The lever from the front and above: the upper fairing; the halves meet on the tube's plane](renders/rev4_lever_top.png)
 
-![The lever's screws, with the shell off](renders/rev4_screws_lever.png)
+![The lever from the front and below: the down-stop pads run in to the lower fairing](renders/rev4_lever_under.png)
+
+![The lever's sensor end, bearing off: two heads and two nuts](renders/rev4_screws_lever_sensor.png)
 
 ## Sensor
 
@@ -237,7 +253,12 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 - **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel, the grid's pyramids point up, and the front wall builds straight up.
 - **Shell:** top down. The bearing half-seats, the slot, the shoe's half-pocket and the grid's sockets all open upward.
-- **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half.
+- **Lever halves:** each on its joint face, trunnion up, so the trunnion prints round, axis up, like its coupon.
+  - **Opening upward:** the sensor's pocket, the counterbores and the nut pockets.
+  - **Arches:** the socket and the radial cable bore print as arches in the joint face, as in Rev 3. The dowel holes' roofs bridge 1.6 mm.
+  - **Supports:** the up-stop lugs' inner faces need a small support each. Each is a flat overhang about 40 mm² across, 11 mm above the bed, and the brake runs between the lugs, so they can't be filled. Nothing else needs support: the down-stop pads run in to the fairing.
+  - **Seam:** turn on the slicer's elephant's-foot compensation. The seam's 0.3 mm chamfer takes the rest.
+- **Lever dowels:** four, standing on end.
 - **Shoe:** stand it on its back face. The spring's bore opens on the bed, and the curved face is on top.
 - **Spring cap:** on its flat front face, dimple up.
 - **Back plate:** on its front face, the nut pocket on the bed.
@@ -248,7 +269,11 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 ## Assembly
 
 1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Tap the six back-plate holes, four in the frame and two in the shell, 7.5 mm deep. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
-2. **Lever:** press the four M4 nuts into the lower half's pockets. Lay the USB cable and the sensor lead into its channels, close the upper half, and fit the four M4 × 40 cap screws. Press the bearings onto the trunnions.
+2. **Lever:**
+   - **Dowels:** push the four dowels into one half's holes.
+   - **Cables:** poke the USB cable through the cable half's axial bore from its joint face, and the sensor lead through the sensor half's. Lay both along the radial channel.
+   - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
+   - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
 3. **Sensor:** solder the module to the lead, as in Rev 3, and set it in the trunnion's pocket, chip out, with a dot of hot glue.
 4. **Lever in:** lower the lever's bearings straight down into the frame's seats.
 5. **Shoe in:** glue the felt onto the shoe's face. Drop the spring into the shoe's bore, then the spring cap. Set the shoe down into the frame's half of its pocket about 10 mm back from the hub, hanging out of the open back, and slide it forward onto the hub. The shoe can't go straight down into place, because its face wraps round the hub.
@@ -263,7 +288,7 @@ All from the same kits as Rev 3: the AvrestYPT countersunk kit (M3 and M4 × 8, 
 
 | Where | Screw | Into | Qty |
 |---|---|---|---|
-| Lever halves | M4 × 40 socket head cap, from the top, two in front and two behind | M4 nut in a pocket in the lower half | 4 |
+| Lever halves | M4 × 35 socket head cap, along the pivot axis through the hub, two from each end, heads in 7.5 mm counterbores | M4 nut in a hex pocket in the other half's end face | 4 |
 | Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, under the side cover | 4 |
 | Side covers | M3 × 12 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
 | Back plate | M3 × 16 countersunk, from its back face | M3 thread tapped 7.5 mm deep in the frame (4) and the shell (2) | 6 |
@@ -281,9 +306,9 @@ Between them, these label every screw and nut in the base:
 
 ![The shell's screws, from above](renders/rev4_screws_top.png)
 
-![The lever's screws, with the shell off](renders/rev4_screws_lever.png)
+![The lever's sensor end, bearing off: two heads and two nuts](renders/rev4_screws_lever_sensor.png)
 
-![The lever's nuts, from below](renders/rev4_screws_levernuts.png)
+![The lever's cable end, bearing off: the other two heads and nuts](renders/rev4_screws_lever_cable.png)
 
 ![The shell's nuts, in the pillow blocks' outer faces (sensor cover off)](renders/rev4_screws_shellnuts.png)
 

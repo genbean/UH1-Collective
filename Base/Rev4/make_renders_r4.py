@@ -41,6 +41,7 @@ from mk3_pivot import cyl, fuse, hexprism              # noqa: E402
 d, m = R.d, R.m
 OUT = os.path.join(HERE, "renders")
 RED = (214, 48, 39)
+DOWEL = (236, 190, 62)
 HW = ("hardware", "lever_screws", "strut_pins")
 SUB = ("Screws in red. Countersunk screws and nuts: AvrestYPT kit (the lever halves and the shell: HELIFOUNER M4 x 30-50 socket head "
        "cap kit and its nuts). Brake bolt: M5 x 30 hex head (Rev 3's).")
@@ -54,7 +55,8 @@ def to_mesh(shape):
 def colours():
     c = {k: col for k, (_, col) in R.load_glb(R.BASE_GLB).items()}
     c.update({"spring_cap": c["shoe"], "sensor_wires": (200, 60, 160), "shell": c["cap_left"],
-              "back_plate": c["cap_left"]})
+              "back_plate": c["cap_left"], "lever_sensor": c["lever_upper"], "lever_cable": c["lever_lower"],
+              "lever_dowel": DOWEL})
     return c
 
 
@@ -152,16 +154,21 @@ def back_view(C, P0=None):
 def lever_views(C):
     """the lever alone: from the side, the fairings over and under the socket boss running into the hub; and from the
     front and above"""
-    lu, ll = v.lever_halves(0.0)
-    P = {"lever_upper": (to_mesh(lu), C["lever_upper"]), "lever_lower": (to_mesh(ll), C["lever_lower"])}
+    ls, lc = v.lever_halves(0.0)
+    P = {"lever_sensor": (to_mesh(ls), C["lever_sensor"]), "lever_cable": (to_mesh(lc), C["lever_cable"])}
     save(title(R.render(P, (0.0, -1.0, 0.05), size=(1500, 950), zoom=1.0)[0], "Rev 4 lever from the side",
                "The fairings over and under the socket boss: from the hose-clamp groove, tangent to the hub"),
          "rev4_lever_side.png")
     save(title(R.render(P, (-0.55, -0.2, 1.0), size=(1300, 1100), zoom=1.0)[0], "Rev 4 lever from the front and above",
-               "The upper fairing, 21 mm wide, between the front screws' counterbores"), "rev4_lever_top.png")
+               "The upper fairing, 21 mm wide; the halves meet on the tube's plane"), "rev4_lever_top.png")
+    save(title(R.render(P, (-0.6, -0.55, -0.6), size=(1300, 1000), focus=((-66, -25, -32), (5, 25, 5)), zoom=1.0)[0],
+               "Rev 4 lever from the front and below",
+               "The down-stop pads run in to the lower fairing, so each half prints with nothing hanging under them"),
+         "rev4_lever_under.png")
+    lever_exploded(C)
     P32 = scene(v.STOP_DEG, C, tube_to=-120.0)
-    keep = ("lever_upper", "lever_lower", "lever_screws", "gas_strut", "strut_pins", "carbon_tube", "bearing_outer",
-            "bearing_inner", "bearing_seal")
+    keep = ("lever_sensor", "lever_cable", "lever_screws", "lever_dowel", "gas_strut", "strut_pins", "carbon_tube",
+            "bearing_outer", "bearing_inner", "bearing_seal")
     save(title(R.render({k: x for k, x in P32.items() if k in keep}, (-0.25, -0.75, -0.6), size=(1300, 1050),
                         focus=((-45, -25, -50), (15, 25, 5)), zoom=1.0)[0],
                "Rev 4 lever from below, at the 32° stop",
@@ -178,7 +185,7 @@ def joint_views(C, P0=None):
                "Rev 4 frame: its half of the joint",
                f"A diamond knurl, {n} pyramids 2.4 mm across and 0.7 mm tall, on every land either side of the bearings; the shell has a socket over each"),
          "rev4_joint_grid.png")
-    keep = ("frame", "shell", "cover_sensor", "cover_cable", "lever_upper", "lever_lower", "lever_screws", "gas_strut",
+    keep = ("frame", "shell", "cover_sensor", "cover_cable", "lever_sensor", "lever_cable", "lever_screws", "gas_strut",
             "bearing_outer", "bearing_inner", "bearing_seal", "hardware")
     save(title(R.render({k: x for k, x in P0.items() if k in keep}, (-1.0, -0.35, 0.3), size=(1300, 1100),
                         focus=((-50, -45, -58), (40, 45, 40)), zoom=1.0)[0],
@@ -283,10 +290,11 @@ def screws_and_nuts():
     H += [("brake bolt", fuse(hexprism(m.M5_HEAD_AF - 0.1, (hb, 0, 0), (hb + m.KNOB_BOLT[1], 0, 0)),
                               cyl(2.4, (hb - v.BOLT_L, 0, 0), (hb + 0.1, 0, 0))), (1, 0, 0)),
           ("brake nut", m.nut(5, (v.NUT5_X + 0.1, 0, 0), (1, 0, 0)), (-1, 0, 0))]
-    for x, y, zh, L, zt, zn in v.lever_screw_seats():
-        H += [(f"lever screw {L}", fuse(cyl(r.CAP_D / 2, (x, y, zh), (x, y, zh + r.CAP_K)),
-                                        cyl(2.0, (x, y, zt), (x, y, zh))), (0, 0, 1)),
-              ("lever nut", r.hex_y(7.0, (x, y, zn - r.LS_NUT_T), (x, y, zn)), (0, 0, -1))]
+    for x, z, sh in v.JOINT_SCREWS:                                               # the lever's, along the pivot axis
+        H += [(f"lever screw {v.JS_SCREW_L}", fuse(cyl(r.CAP_D / 2, (x, sh * v.JS_SEAT, z),
+                                                       (x, sh * (v.JS_SEAT + r.CAP_K), z)),
+                                                   cyl(2.0, (x, -sh * v.JS_TIP, z), (x, sh * v.JS_SEAT, z))), (0, sh, 0)),
+              ("lever nut", v.hex_xz(x, z, 7.0, -sh * v.JS_NUT[0], -sh * v.JS_NUT[1]), (0, -sh, 0))]
     aw = (r.ROD_TAB_T + 0.6) / 2 + r.CLEVIS_T                                     # Rev 3's pins(), on the middle
     cw = (r.BODY_TAB_T + 0.6) / 2 + r.CHEEK_T
     dd, ro = r.COLLAR_D, r.COLLAR_BORE + r.COLLAR_WALL
@@ -326,17 +334,23 @@ def screw_views(P0):
                    heads_of("shell screw"))],
              (0.45, 0.3, 1.0), "MkIII base Rev 4 screws: the shell, from above", "rev4_screws_top.png",
              focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
-    labelled(hide(P0, "shell", "back_plate"),
-             [("M4 x 40 socket head cap  (x4)", "lever halves, two in front and two behind, as Rev 3: from the top "
-               "into M4 nuts in the lower half (HELIFOUNER kit)", heads_of("lever screw 40"))],
-             (0.55, 0.35, 1.0), "MkIII base Rev 4 screws: the lever (shell off)", "rev4_screws_lever.png",
-             focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
-    keep = ("lever_upper", "lever_lower", "lever_screws", "bearing_inner", "bearing_outer", "bearing_seal")
-    labelled({k: x for k, x in P0.items() if k in keep},
-             [("M4 nut  (x4)", "the lever's: press them into the lower half's pockets, open to its underside, before "
-               "closing the halves", heads_of("lever nut"))],
-             (0.35, -0.45, -1.0), "MkIII base Rev 4 screws: the lever's nuts, from below (lever only)",
-             "rev4_screws_levernuts.png", focus=((-45, -35, -35), (35, 35, 35)), zoom=1.0)
+    lever_only = {k: x for k, x in P0.items() if k in ("lever_sensor", "lever_cable", "lever_screws", "lever_dowel")}
+    other = {-1: "cable", 1: "sensor"}
+    where = lambda x, z: ("front" if x < 0 else "back") + (", top" if z > 0 else ", bottom")
+    for s, side, name in ((-1, "sensor (-y)", "rev4_screws_lever_sensor.png"),
+                          (1, "cable (+y)", "rev4_screws_lever_cable.png")):
+        groups = []
+        for x, z, sh in v.JOINT_SCREWS:                             # one label each: no leaders crossing the hub
+            if sh == s:
+                groups.append((f"M4 x {v.JS_SCREW_L} socket head cap", f"{where(x, z)}: head in a 7.5 mm counterbore "
+                               f"5 mm deep, along the pivot axis into a nut in the {other[s]} half (HELIFOUNER kit)",
+                               [np.array([x, s * (v.JS_SEAT + v.r.CAP_K), z])]))
+            else:
+                groups.append(("M4 nut", f"{where(x, z)}: in a hex pocket, a flat toward the axis, for the "
+                               f"{other[s]} half's screw. The bearing covers it", [np.array([x, s * v.JS_NUT[1], z])]))
+        labelled(lever_only, groups, (-0.06, 1.0 * s, 0.1),
+                 f"MkIII base Rev 4 screws: the lever's {side} end, bearing off (screw the halves up before pressing "
+                 "the bearings on)", name, focus=((-36, 0, -36), (36, 0, 36)), zoom=1.0, parallel=True)
     labelled(hide(P0, "cover_sensor", "magnet", "carbon_tube", "strut_collar", "hose_clamp", "usb_cable",
                   "sensor_wires", "gas_strut", "strut_pins"),
              [("M4 nut  (x4)", "the shell's: two each side, slid into the slots in the pillow blocks' outer faces "
@@ -389,11 +403,56 @@ def screw_views(P0):
              "rev4_screws_strut.png", focus=((-60, 12, -58), (30, 12, -5)), zoom=0.8)
 
 
-# ---------------------------------------------------------------------------------------------------- exploded view
+# ---------------------------------------------------------------------------------------------------- exploded views
+def dowels():
+    """the four dowels where they sit, centred on the joint, one shape each"""
+    dw = v.lever_dowel().rotate((0, 0, 0), (1, 0, 0), -90).translate(v.V(0, -v.DOWEL_L / 2, 0))
+    return [dw.translate(v.V(x, 0, z)) for x, z, _ in v.JOINT_SCREWS]
+
+
+def lever_exploded(C):
+    """the lever's halves parted along the pivot axis: the dowels in the cable half's joint face, the screws out past
+    their heads' half and the nuts out past theirs"""
+    ls, lc = v.lever_halves(0.0)
+    G = 26.0
+    I = {"lever_sensor": d.Item("lever_sensor", to_mesh(ls), C["lever_sensor"]),
+         "lever_cable": d.Item("lever_cable", to_mesh(lc), C["lever_cable"])}
+    I["lever_sensor"].move = np.array([0, -G, 0])
+    I["lever_cable"].move = np.array([0, G, 0])
+    I["lever_sensor"].head = np.array([-12.0, -15.0, 27.4])             # on the hub's top
+    I["lever_cable"].head = np.array([-30.0, 0.0, 21.0])                # on its joint face
+    for k, dw in enumerate(dowels()):
+        I[f"dowel{k}"] = d.Item("lever_dowel", to_mesh(dw), C["lever_dowel"])
+        I[f"dowel{k}"].move = np.array([0, G - v.DOWEL_L / 2 + 0.2, 0])   # pushed into the cable half's holes
+    S = []
+    for g, shp, o in screws_and_nuts():
+        if g.startswith("lever"):
+            it = d.screw(g, to_mesh(shp), d.RED, g, out=o)
+            s = 1 if it.out[1] > 0 else -1
+            it.move = np.array([0, s * G, 0]) + it.out * (26 if g.startswith("lever screw") else 14)
+            S.append(it)
+    pick = lambda g, s: [it for it in S if it.name.startswith(g) and it.out[1] * s > 0]
+    groups = [("Lever, sensor half (-y)", "prints on its joint face, its trunnion up: one round piece; the AS5600's "
+               "pocket in its end", [I["lever_sensor"]]),
+              ("Lever, cable half (+y)", "the same, mirrored", [I["lever_cable"]]),
+              ("Hollow dowels  (x4, printed)", f"{v.DOWEL_OD} x {v.DOWEL_ID} x {v.DOWEL_L:.0f} mm, standing up. Push them "
+               "into one half's holes, round the screws, then close the other half on them",
+               [I["dowel0"], I["dowel2"]]),
+              (f"M4 x {v.JS_SCREW_L} socket head cap  (x2)", "from the sensor half's end, front-top and back-bottom, "
+               "into nuts in the cable half (HELIFOUNER kit)", pick("lever screw", -1)),
+              (f"M4 x {v.JS_SCREW_L} socket head cap  (x2)", "from the cable half's end, front-bottom and back-top, "
+               "into nuts in the sensor half", pick("lever screw", 1)),
+              ("M4 nut  (x2)", "in hex pockets in the sensor half's end face", pick("lever nut", -1)),
+              ("M4 nut  (x2)", "in hex pockets in the cable half's end face", pick("lever nut", 1))]
+    d.labelled(list(I.values()) + S, groups, (-0.65, -0.75, 0.55), (0, 0, 1), "MkIII base Rev 4 lever, exploded",
+               "Split on the tube's plane. Close the halves on the dowels, fit the screws, then press the bearings on",
+               os.path.join(OUT, "rev4_lever_exploded.png"), size=(1700, 1300), crop=True)
+
+
 def exploded(C):
     P = v.build(0.0)
     I = {}
-    for n in ("frame", "shell", "lever_upper", "lever_lower", "back_plate", "shoe", "felt", "spring_cap", "knob_spring",
+    for n in ("frame", "shell", "lever_sensor", "lever_cable", "back_plate", "shoe", "felt", "spring_cap", "knob_spring",
               "friction_knob", "cover_sensor", "cover_cable", "magnet", "sensor_pcb", "sensor_chip", "gas_strut",
               "strut_collar", "hose_clamp"):
         I[n] = d.Item(n, to_mesh(P[n]), C[n])
@@ -402,6 +461,8 @@ def exploded(C):
             I[f"{n}{s}"] = d.Item(n, to_mesh(v.bearing(s)[k]), C[n])
         I[f"bearing_outer{s}"].head = np.array([-17.0, s * (v.BRG_Y0 + v.BRG_Y1) / 2, -17.0])  # on the ring's front
     I["tube"] = d.Item("tube", to_mesh(v.carbon_tube(130.0)), C["carbon_tube"])
+    for k, dw in enumerate(dowels()):
+        I[f"dowel{k}"] = d.Item("lever_dowel", to_mesh(dw), C["lever_dowel"])
     S = {}
     for g, shp, o in screws_and_nuts():
         S.setdefault(g, []).append(d.screw(g, to_mesh(shp), d.RED, g, out=o))
@@ -416,13 +477,15 @@ def exploded(C):
                 it.move = np.asarray(at, float) + it.out * dist
 
     L = np.array([0, 0, 115.0])                                        # the lever, lifted out of the frame
-    mv(["lever_lower"], L)
-    mv(["lever_upper"], L + (0, 0, 45))
-    pull("lever screw 40", L + (0, 0, 45), 55)
-    pull("lever nut", L, 22)
-    for s in (-1, 1):
-        mv([f"bearing_outer{s}", f"bearing_inner{s}", f"bearing_seal{s}"], L + (0, 32 * s, 0))
-    mv(["sensor_pcb", "sensor_chip"], L + (0, -58, 0))
+    G = 38.0                                                           # its halves, parted along the pivot axis
+    mv(["lever_sensor"], L + (0, -G, 0))
+    mv(["lever_cable"], L + (0, G, 0))
+    mv([f"dowel{k}" for k in range(4)], L)
+    for s in (-1, 1):                                                  # screws out past their heads' half, nuts past theirs
+        pull(f"lever screw {v.JS_SCREW_L}", L + (0, s * G, 0), 30, lambda it, s=s: it.out[1] * s > 0)
+        pull("lever nut", L + (0, s * G, 0), 16, lambda it, s=s: it.out[1] * s > 0)
+        mv([f"bearing_outer{s}", f"bearing_inner{s}", f"bearing_seal{s}"], L + (0, 85 * s, 0))
+    mv(["sensor_pcb", "sensor_chip"], L + (0, -125, 0))
     mv(["tube"], L + (-95, 0, 0))
     mv(["hose_clamp"], L + (-30, 0, 0))
     mv(["strut_collar"], L + (-95, 0, 0))
@@ -451,8 +514,11 @@ def exploded(C):
     parts = [("Frame", "pillow blocks, the brake housing's lower half, anchor clevis, up-stop pad, down-stop pillars",
               ["frame"]),
              ("Shell", "the bearing caps and the brake housing's upper half in one", ["shell"]),
-             ("Lever, lower half", "the cables lie in its channels", ["lever_lower"]),
-             ("Lever, upper half", "", ["lever_upper"]),
+             ("Lever, sensor half", "split on the tube's plane; each half prints on its joint face, trunnion up",
+              ["lever_sensor"]),
+             ("Lever, cable half", "the cables lie in the halves' channels", ["lever_cable"]),
+             ("Hollow dowels  (x4, printed)", "round the lever's screws, half in each half: they locate the halves",
+              ["dowel0", "dowel2"]),
              ("6808-2RS bearings  (x2)", "pressed onto the trunnions", ["bearing_outer-1", "bearing_outer1"]),
              ("AS5600 board", "in the sensor trunnion's end, chip out", ["sensor_pcb"]),
              ("Sensor cover", "with the magnet on its post", ["cover_sensor"]),
@@ -464,8 +530,8 @@ def exploded(C):
              ("Strut collar", "clamped on the tube", ["strut_collar"]),
              ("Hose clamp", "on the socket's mouth", ["hose_clamp"]),
              ("Carbon tube", "25 x 23 mm, 500 mm (shortened here)", ["tube"])]
-    screws = [("M4 x 40 + M4 nut  (x4)", "lever halves: socket head, from the top, the nuts in the lower half",
-               S["lever screw 40"] + S["lever nut"]),
+    screws = [(f"M4 x {v.JS_SCREW_L} + M4 nut  (x4)", "lever halves: socket head, along the pivot axis behind the "
+               "bearings; two heads and two nuts in each half", S[f"lever screw {v.JS_SCREW_L}"] + S["lever nut"]),
               ("M4 x 50 + M4 nut  (x4)", "the shell: socket head, into nuts slid into the pillow blocks' sides",
                S["shell screw"] + S["shell nut"]),
               ("M3 x 16  (x8)", "side covers, countersunk", S["cover screw"]),
@@ -483,9 +549,9 @@ def exploded(C):
 
 
 def screw_chart():
-    rows = [(d.screw_tile("shcs", 4, 40), "M4 x 40 socket head cap", 4,
-             "The lever halves, two in front and two behind, as Rev 3: from the top into M4 nuts in the lower half "
-             "(HELIFOUNER M4 x 30-50 kit)."),
+    rows = [(d.screw_tile("shcs", 4, v.JS_SCREW_L), f"M4 x {v.JS_SCREW_L} socket head cap", 4,
+             "The lever halves: along the pivot axis through the hub, behind the bearings, into M4 nuts in the other "
+             "half; two heads and two nuts in each half (HELIFOUNER M4 x 30-50 kit)."),
             (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 4,
              "The shell, from the top, each centred on the joint, into M4 nuts slid into the pillow blocks from the "
              "sides."),
