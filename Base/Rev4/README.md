@@ -37,7 +37,7 @@ The knob stands 31 mm out behind the plate.
 
 | | |
 |---|---|
-| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference and assembly checks; `--coupons` writes `stl/coupons/` |
+| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference, assembly and opening-clearance checks; `--coupons` writes `stl/coupons/` |
 | `make_renders_r4.py` | the renders, screw maps, exploded view and screw chart, `renders/MkIII_Rev4_Assembly.glb`, and the complete collective with head Rev 5 in [`../../renders`](../../renders) |
 | `stl/` | the printed parts |
 | `stl/ref/` | bought parts and hardware, for reference |
@@ -82,7 +82,7 @@ The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from t
 
 - **Side walls:** solid, 9 mm thick. These are the caps. Each holds the bearing's upper half-seat and lip, and two of the cover's screw holes. Two M4 × 50 socket head screws per side go down through them from the top, each centred on the joint, heads down 13 mm counterbores, into M4 nuts in the pillow blocks (see [The joint](#the-joint)).
 - **Front, back and top walls:** 3 mm thick.
-- **Tube slot:** one clean opening in the front and top, the same outline as the frame's front wall below it (see [The joint](#the-joint)). It holds the socket boss, the tube, the lever's fairings and the down-stop pads through their whole swing, 0° to 32°, with at least 1 mm all round.
+- **Tube slot:** one clean opening in the front and top, the same outline as the frame's front wall below it (see [The joint](#the-joint)). It fits the lever closely: 2 mm clear of the socket boss, the lever's fairings, the down-stop pads and the hose clamp, measured in 3D, through their whole swing, 0° to 32°.
 - **Brake housing:** its upper half runs on out of the back wall (see [Brake](#brake)). Either side of it, the shell is solid back to the housing's back face, with the same outline as the frame below, up to its top.
 - **Assembly:** it drops straight down over the lever, the slot and the shoe's pocket both open at the bottom.
 
@@ -108,7 +108,13 @@ The frame and the shell meet on one flat plane through the pivot axis, which als
   - **Shape:** square pyramids 2.4 mm across their corners and 0.7 mm tall with flat tops, on a diamond grid with 0.6 mm flat lanes. They stand on the frame's half and fit into sockets in the shell's half, 0.1 mm clear on their 45° flanks and 0.2 mm deeper than the pyramids. The flat faces still close on each other, so the bearing seats close, and the knurl stops the shell sliding fore and aft or sideways as the screws pull it down.
   - **Coverage:** it runs over every land, in front of the bearings and behind them, and on across the solid frame behind the pillow blocks. It stops 0.5 mm short of every edge and hole: pyramids at its edge are cut off square, and any piece smaller than a third of a pyramid is left out. The grid is the same mirror image either side of the tube, and fore and aft on the pillow blocks.
   - **Printing:** neither half needs supports: the pyramids point up on the frame, and the sockets open upward on the shell, which prints top down.
-- **Front opening:** the frame has a 3 mm front wall between the pillow blocks, under the shell's, and one clean opening runs through both. It has straight sides 21 mm either side of the tube (the down-stop pads, 1 mm clear) from the top down to 7 mm under the pivot axis, and a round bottom of the same radius below that: the lever's lower fairing swings down to 24.5 mm under the axis in the walls' plane. On top it carries on as one slot, as wide at the front, narrowing at 45° to 12.5 mm either side of the tube for the upper fairing, and ending round just behind the hub's top. Both contain the lever's whole sweep, 1 mm clear or more. Below the opening, a smooth round-ended slot lets the strut's cylinder through, 1.5 mm clear over the whole travel. It's cut by the cylinder swung about its anchor pin, so it has no facets.
+- **Front opening:** the frame has a 3 mm front wall between the pillow blocks, under the shell's, and one clean opening runs through both. It follows the lever 2 mm clear (2.0 to 2.4 mm wherever the lever passes close), measured in 3D from the down-stop to the up-stop: `python mk3_rev4.py --openings` measures it. It's drawn in lines, arcs and ellipse arcs, with no facets. From the bottom up:
+  - **Lower fairing:** a tab 12.55 mm either side of the tube, its bottom 24.7 mm under the axis, its corners rounded to follow the fairing's 3 mm rounds.
+  - **Socket boss:** a circle 20.05 mm about the axis up to the joint, then straight sides. Where the tab meets it, the corners are rounded 3 mm.
+  - **Pads' reliefs:** from about 20° on, the down-stop pads' back corners swing up through the shell's wall. Each side bows out on one long arc to 22.05 mm and runs straight up to the pads' tops at the stop, then turns back in.
+  - **Boss at the stop:** an ellipse, the boss's own section in the front face at 32°, narrows up to the top. It meets the top slot's sides through the top wall's 3 mm.
+  
+  On top it carries on as one slot. At the front it follows the boss's footprint as it crosses the wall at the stop, an ellipse, and is rounded into straight sides 12.55 mm either side of the tube over the upper fairing. It ends square 3.15 mm in front of the axis, where the fairing's top passes under the wall at the stop, with corners that follow the fairing's rounds. Below the opening, a smooth round-ended slot lets the strut's cylinder through, 1.5 mm clear over the whole travel. It's cut by the cylinder swung about its anchor pin, so it has no facets.
 - **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis, 2 mm below the side cover's bottom edge. A 2.5 mm hex key goes straight in to the M4 × 16's head.
 
 ![The front: the frame's wall carries on the shell's cut for the lever](renders/rev4_front.png)
@@ -346,9 +352,10 @@ Between them, these label every screw and nut in the base:
 
 ## Notes
 
-- **The checks:** `python mk3_rev4.py --check` runs two checks, and both are clean.
+- **The checks:** `python mk3_rev4.py --check` runs three checks, and all are clean.
   - **Every pair of parts** at 0°, 8°, 16°, 24°, 31.5° and 32°. The overlaps it allows are the intended ones: screws in their holes, the bearings' inner races on the trunnions, the felt on the shoe, the spring and cap, the strut's tabs in their clevises, and the hose clamp in its groove. Just past each stop, the lever meets the frame where it should: the pads on the pillars below 0°, both lugs on the up-stop pad above 32°.
   - **The assembly order:** the lever lowered into the frame; the shoe set down standing back and slid onto the hub; the shell lowered over both.
+  - **The openings' clearance:** the true 3D distance from the frame's front wall and the shell's front and top walls to the lever's halves, the hose clamp and the tube, every 0.25° from 0° to 32°, then every 0.02° round each wall's closest passes. None is under 2 mm. `--openings` runs this one alone.
 - **Chamfers:** Rev 3's chamfer step once returned a valid frame with the down-stop pillars missing. Rev 4's version refuses any set of chamfers that takes off more than chamfers could. Rev 3's parts were checked, and none of them lost anything.
 - **Brake feel:** the felt patch is about 11 × 48 mm (Rev 3's drum shoe was wider and shorter). The spring is the same, so the range of drag should be similar, but it's untested.
 - **Balance:** see [Balance](#balance). The lever is about 68 cm³ lighter than Rev 3's, mostly near the pivot, and that makes almost no difference: its load at 0° is 1.998 N·m against Rev 3's 1.996.
