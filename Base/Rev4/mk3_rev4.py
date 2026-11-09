@@ -34,7 +34,8 @@ through the cover's front bevel; the cover goes on over a cable that's already f
 their front and back ends bevelled 45 deg in line with the frame's corner chamfers.
 
 Brake: a strap behind the hub. A rigid printed strap, 18 mm wide and 8 mm deep, lined with 1.5 mm felt, wraps the
-hub's back between the up-stop lugs, from 40 deg below the axis to 24 above. Its bottom end is a knuckle on an M4 x 50
+hub's back between the up-stop lugs, from 54 deg below the axis to 42 above (the felt from 52 to 40), down into the
+up-stop pad's slot and up under its head. Its bottom end is a knuckle on an M4 x 50
 pin through the up-stop pad, just behind the strut's clevis, in a slot 0.5 mm clear either side that keeps it 1.5 mm or
 more off the lugs; gussets run from the knuckle into the band, and from the band's top up into a solid head carrying
 an M5 nut. The knob sits in a seat sunk into the shell's top, and its M5 x 35 bolt leans forward 30 deg from vertical,
@@ -294,8 +295,11 @@ SLOT_HW = STRAP_HW + 0.5                         # the knuckle's slot through th
                                                  # can't shift more than 0.5 toward a lug
 BAY_HW = USTOP_SLOT                              # 11: the strap's bay behind the pad, in the frame and the shell
 STRAP_R0, STRAP_T = HUB_R + FELT_T, 8.0          # its face (31.5, on the felt) and the band's depth
-STRAP_PHI = (-40.0, 24.0)                        # the band; the arm on its bottom end, the head on its top end
-FELT_PHI = (-38.0, 22.0)                         # the felt, 2 deg in from each end
+STRAP_PHI = (-54.0, 42.0)                        # the band; the arm on its bottom end, the head on its top end. At the
+                                                 # bottom it runs down into the up-stop pad's slot, into the knuckle; at
+                                                 # the top, under the head, its end is cut off level with the head's face
+FELT_PHI = (-52.0, 40.0)                         # the felt, 2 deg in from each end
+HEAD_FROM = 12.0                                 # the head's gusset takes the band from here up
 FELT_HW = STRAP_HW - 1.0                         # 16 wide, clear of the strap's chamfers
 HINGE_X, HINGE_Z, KNUCKLE_R = 24.0, -38.0, 6.2   # the hinge: 4 mm of strap round its pin; the knuckle 2.8 mm behind
                                                  # the strut clevis's back walls
@@ -317,9 +321,11 @@ BOLT_L = 35.0                                    # M5 x 35 hex bolt
 # REST_DEG onto the back wall of its bay, which is far enough for the lever's hub to drop past it. In the shell the back
 # of its bay is a ramp RAMP_CLR behind the head, parallel to the bolt: lowering the shell, the ramp meets the leaning
 # head in the last few mm and swings it forward onto the hub, so the nut ends up on the bolt's axis for the knob.
-REST_DEG = 4.0
+REST_DEG = 8.0                                   # the dropping hub clears the felt's top end (40 deg up) by 1.0 mm
 RAMP_CLR = 1.0
-BACK_X, BACK_WALL = 52.5, 3.0                    # the frame's and shell's back face, and their wall behind the shell's bay
+BACK_X, BACK_WALL = 56.5, 3.0                    # the frame's and shell's back face, and their wall behind the shell's
+                                                 # bay: 1 mm behind the head leaning back REST_DEG, so the shell's ramp
+                                                 # can catch it
 BAY_Z0 = HINGE_Z - KNUCKLE_R - 1.5               # the floor of the slot and the frame's bay
 T_CEIL = -SEAT_FLOOR                             # along the bolt from the seat (+ toward the knob): the bay's ceiling,
 T_HEAD = T_CEIL - HEAD_GAP                       # the head's face,
@@ -990,14 +996,14 @@ def hex_on(af, p0, p1, corner):
 
 def strap_outline():
     """the strap in the XZ plane, as three outlines that overlap: the band on the hub; the head, the hull of the nut's
-    block and the band's top 12 deg, one solid gusset from the band's front and back out to where the bolt pulls; and
+    block and the band from HEAD_FROM up, one solid gusset from the band's front and back out to where the bolt pulls; and
     the arm, the hull of the knuckle and the band's bottom 12 deg, a gusset from the band down to the hinge. The chords
     inside the band's face come off with the face's cylinder (strap())"""
     r0, r1 = STRAP_R0, STRAP_R0 + STRAP_T
     p0, p1 = STRAP_PHI
     band = _arc(r0, p0, p1, 60) + _arc(r1, p1, p0, 60)
     blk = [(q.x, q.z) for q in (on_bolt(t, s) for t in (T_HEAD, T_FAR) for s in (-HEAD_HW, HEAD_HW))]
-    head = r._hull(blk + _arc(r0, p1 - 12.0, p1) + _arc(r1, p1 - 12.0, p1))
+    head = r._hull(blk + _arc(r0, HEAD_FROM, p1) + _arc(r1, HEAD_FROM, p1))
     knuckle = [(HINGE_X + KNUCKLE_R * math.cos(math.radians(a)), HINGE_Z + KNUCKLE_R * math.sin(math.radians(a)))
                for a in range(0, 360, 3)]
     arm = r._hull(knuckle + _arc(r0, p0, p0 + 12.0) + _arc(r1, p0, p0 + 12.0))
@@ -1047,6 +1053,9 @@ def strap():
     s = s.cut(cyl(HINGE_HOLE_R, (HINGE_X, -20, HINGE_Z), (HINGE_X, 20, HINGE_Z)))             # the hinge pin
     s = s.cut(nut_slot())                                                                    # the M5 nut
     s = s.cut(cyl(2.8, on_bolt(-40.0).toTuple(), on_bolt(T_HEAD + 1.0).toTuple()))          # the bolt, right through
+    top = [(q.x, q.z) for q in (on_bolt(T_HEAD, -80), on_bolt(T_HEAD + 80, -80), on_bolt(T_HEAD + 80, 80),
+                                on_bolt(T_HEAD, 80))]
+    s = s.cut(gusset_xz(top, -20, 20))                         # the band's top end, level with the head's face
     s = chamfer_edges(s.clean())
     return s.cut(cq.Solid.makeCone(4.5, 2.8, 1.7, on_bolt(T_HEAD + 0.01), -u)).clean()   # lead-in for the bolt's tip
 

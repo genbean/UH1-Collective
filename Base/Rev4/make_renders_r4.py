@@ -278,10 +278,39 @@ def main():
                    t, "The brake strap, hinged in the up-stop pad; the knob's M5 bolt leans 30 deg forward and draws its "
                    "head up and forward, swinging the felt onto the hub"), name)
 
+    brake_lever_in(C)
     screw_views(P0)
     exploded(C)
     screw_chart()
     collective(C)
+
+
+def brake_lever_in(C, lift=12.0):
+    """the lever going in: the brake strap leans back on its own onto its bay's back wall, and the hub drops past its
+    felt. In section on the tube's plane, the lever lift mm short of its seats; the shell, knob and tube not on yet"""
+    up = v.V(0, 0, lift)
+    moving = set(v.TURNS) | {"bearing_outer", "bearing_seal"}
+    later = ("shell", "friction_knob", "hardware", "cover_sensor", "cover_cable", "magnet", "usb_cable", "gas_strut",
+             "strut_pins", "strut_collar", "carbon_tube")
+    P = {}
+    for name, shp in v.build(0.0).items():
+        if name in later:
+            continue
+        if name in ("strap", "felt"):
+            shp = v.strap_at(shp, v.REST_DEG)
+        elif name in moving:
+            shp = shp.translate(up)
+        P[name] = (to_mesh(shp), RED if name in HW else C[name])
+    for g, shp, _ in v.brake_screws():
+        if g == "brake nut":
+            P[g] = (to_mesh(v.strap_at(shp, v.REST_DEG)), RED)
+        elif g.startswith("hinge"):
+            P[g] = (to_mesh(shp), RED)
+    Pc = R.cut(P, 1, -0.01, keep="above")
+    save(title(R.render(Pc, (0, -1, 0), size=(1500, 1150), focus=((-40, 0, -58), (65, 0, 50)), parallel=True)[0],
+               f"The lever going in, {lift:.0f} mm above its seats (section on the tube's plane)",
+               f"The brake strap leans back {v.REST_DEG:.0f} deg on its own, onto its bay's back wall, and the hub drops "
+               "past its felt"), "rev4_brake_lever_in.png")
 
 
 # ---------------------------------------------------------------------------------------------------- the hardware

@@ -223,7 +223,7 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
         "and the brake goes from free to firm within about a turn. Any spring up to 10 mm OD (over the 5 mm bolt), "
         "0.8-1.0 mm wire, 10-15 mm free length, fits", CAD, CHECK),
     amz("Brake strap", 1, "Self-adhesive felt tape, 1.5 mm thick, 3/4 in x 50 ft, black", "FindTape", "B077TCDNYT", 24.98, 1,
-        "Lines the brake strap's curved face: cut a 33 mm length and trim it to 16 mm wide. It is the only 1.5 mm felt "
+        "Lines the brake strap's curved face: cut a 51 mm length and trim it to 16 mm wide. It is the only 1.5 mm felt "
         "found in a usable width, and you need a few cm of the 50 ft", CAD, CHECK),
     amz("Desk mounting", 4, "Screw, #10 x 1-1/2 in pan head, 304 stainless, pack of 50", "Amazon", "B0F43RY9S6", 8.29, 50,
         "Through the 5.5 mm holes in the frame plate's corners (8 mm plate). Not in the kits: they go into the desk. "
