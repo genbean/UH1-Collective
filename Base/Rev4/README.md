@@ -2,7 +2,7 @@
 
 Rev 4 is Rev 3 cut down to **73 mm (2.87 in)** wide along the pivot axis, against Rev 3's 130 mm, with the lever symmetrical about the tube. One shell over the top encloses the lever, in place of Rev 3's two bearing caps. The strut, collar, tube, socket, down-stops and fits are Rev 3's. What changes is everything along the pivot axis, the enclosure, and the brake, which moves behind the hub.
 
-This is the current base. It hasn't been printed yet: print the [fit-test coupons](#fit-test-coupons) first.
+This is the current base. Its first frame, shell and lever were printed and assembled on 2026-11-08, and the bearing coupons fitted. Since then the lever is split on the tube's plane, the brake is a hinged strap, the side covers are 5 mm square plates, the USB cable leaves toward the front, and the lever's opening is 2 mm clear. So reprint every printed part except the strut collar, and print the dowel-hole [coupon](#fit-test-coupons) before the lever.
 
 ![Rev 4, exploded](renders/rev4_exploded.png)
 
@@ -14,7 +14,7 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 
 ![Rev 3 and Rev 4 from above, to the same scale](renders/rev4_vs_rev3_top.png)
 
-![From behind: the brake knob in the shell's top, and the USB cable leaving the cable cover](renders/rev4_rear.png)
+![From behind: the brake knob in the shell's top; the USB cable leaves the cable cover toward the front](renders/rev4_rear.png)
 
 ![At the 32° up-stop](renders/rev4_32deg.png)
 

@@ -228,8 +228,8 @@ def main():
                         focus=focus, zoom=1.05)[0], "Rev 4 with the shell off",
                "The lever on its bearings, the brake strap behind the hub"), "rev4_open.png")
     save(title(R.render(P0, (0.75, 0.6, 0.5), size=(1600, 1050), focus=focus, zoom=1.05)[0],
-               "Rev 4 from behind", "The brake knob in its seat in the shell's top; the USB cable leaves through the "
-               "cable cover's rim"), "rev4_rear.png")
+               "Rev 4 from behind", "The brake knob in its seat in the shell's top; the USB cable leaves the cable cover "
+               "toward the front"), "rev4_rear.png")
     save(title(R.render(P32, (-0.2, -1.0, 0.25), size=(1600, 1000), focus=((-170, -60, -58), (100, 60, 100)))[0],
                "Rev 4 at the 32 deg up-stop", "Both up-stop lugs land on the pad behind the axis; the strap stays on the hub's back"),
          "rev4_32deg.png")
