@@ -1,6 +1,6 @@
 # MkIII base, Rev 4: narrow
 
-Rev 4 is Rev 3 cut down to **82 mm (3.25 in)** wide along the pivot axis, against Rev 3's 130 mm, with the lever symmetrical about the tube. One shell over the top encloses the lever, in place of Rev 3's two bearing caps. The strut, collar, tube, socket, down-stops and fits are Rev 3's. What changes is everything along the pivot axis, the enclosure, and the brake, which moves behind the hub.
+Rev 4 is Rev 3 cut down to **73 mm (2.87 in)** wide along the pivot axis, against Rev 3's 130 mm, with the lever symmetrical about the tube. One shell over the top encloses the lever, in place of Rev 3's two bearing caps. The strut, collar, tube, socket, down-stops and fits are Rev 3's. What changes is everything along the pivot axis, the enclosure, and the brake, which moves behind the hub.
 
 This is the current base. It hasn't been printed yet: print the [fit-test coupons](#fit-test-coupons) first.
 
@@ -24,8 +24,8 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 - **Bearings:** 6808-2RS thin-section bearings, 40 × 52 × 7 mm, in place of the 6006-2RS (30 × 55 × 13). The trunnions grow to 40 mm across to suit.
 - **Frame:** 9 mm pillow blocks (Rev 3: 17). The base plate stops at their outer faces, so it's 63 × 127 mm (Rev 3: 100 × 116), with no wings or gussets out beside it. A front wall under the shell's carries its cut for the lever on down, so the two read as one piece.
 - **Shell:** one box over the lever, in place of the two caps, slotted for the tube. Four M4 × 50 socket head screws hold it to the pillow blocks, and a diamond grid in the joint locates it.
-- **Sensor:** the AS5600 board sits inside the sensor trunnion's end, so the side covers are 9.5 mm deep (Rev 3: 15).
-- **USB cable:** it leaves through a notch in the cable cover's rim instead of a spout.
+- **Sensor:** the AS5600 board sits inside the sensor trunnion's end, flush with the bearing, so the side covers are 5 mm plates (Rev 3's are 15 mm deep).
+- **USB cable:** it turns out of the axis inside the bearing's retaining lip and runs back in a tunnel under the cable cover, instead of Rev 3's spout.
 - **Brake:** a narrow, tall shoe presses on the back of the hub. Its pocket is split between the frame and the shell, and holds it with no slop.
 - **Up-stop:** two lugs under the back of the hub, one each side of the shoe, land on a pad further back than Rev 3's.
 - **Frame gussets:** 45° gussets at all four corners of both pillow blocks.
@@ -70,8 +70,8 @@ From the middle out, each side:
 | Hub | 0 – 21.5 | 60 mm across; 3.5 mm past the socket boss |
 | Bearing | 22.5 – 29.5 | 6808-2RS |
 | Retaining lip | 29.5 – 31.5 | the pillow blocks' and the shell's outer faces, and the plate's edge, are at 31.5 |
-| Trunnion end | 32.0 | 40.1 mm across |
-| Side cover | 31.5 – 41.0 | 2.5 mm floor; it overhangs the plate |
+| Trunnion end | 29.5 | 40.1 mm across, flush with the bearing's outer face |
+| Side cover | 31.5 – 36.5 | a 5 mm plate; it overhangs the base plate by 5 mm |
 
 ## Shell
 
@@ -85,19 +85,30 @@ The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from t
 - **Brake housing:** its upper half runs on out of the back wall (see [Brake](#brake)). Either side of it, the shell is solid back to the housing's back face, with the same outline as the frame below, up to its top.
 - **Assembly:** it drops straight down over the lever, the slot and the shoe's pocket both open at the bottom.
 
+## Side covers
+
+![The USB side: the square cover over the bearing and the shell screws' nut slots](renders/rev4_hero.png)
+
+Square plates, 5 mm thick, on the pillow blocks' and the shell's side faces: 65.5 mm tall, centred on the pivot axis, over the bearing and the shell screws' nut slots. Their ends are bevelled 45°, the back one on the plane of the frame's and shell's [back chamfer](#the-back) and the front one on the plane of the 0.8 mm chamfer on the pillow blocks' front corners, so both run on flush. Each is held by four M3 × 12 countersunk screws, where the round covers had them, into M3 threads tapped right through the block's and the shell's 9 mm walls. The strut's hex-key hole is 2 mm below the USB-side cover's bottom edge.
+
+- **Sensor cover:** the magnet sits in a pocket in its inside face (see [Sensor](#sensor)).
+- **Cable cover:** half of the USB cable's tunnel is a channel in its inside face (see [USB cable](#usb-cable)).
+
+The edges against the block and shell aren't chamfered, so no groove shows at the seams.
+
 ## The joint
 
 ![The frame's half of the joint: the knurl on every land, both sides of the bearings](renders/rev4_joint_grid.png)
 
 The frame and the shell meet on one flat plane through the pivot axis, which also splits the bearing seats.
 
-- **Screws:** four M4 × 50 socket head cap screws from the lever's HELIFOUNER kit, two per side, 30.5 mm either side of the axis, down the middle of the shell's 9 mm side walls (y = ±27). Each is centred on the joint: its head seats 25 mm above it, at the floor of a 13 mm counterbore, and its tip is 25 mm below. Each goes into an M4 nut slid into a slot in the pillow block's outer face, about 21–24 mm under the joint. The slots open just below the side covers' rim. The nut sits flats-in: its inner flat stops it turning when you tighten the screw. The counterbore leaves 0.9 mm of shell either side, and the nut's slot leaves 0.9 mm of block to its inside face.
+- **Screws:** four M4 × 50 socket head cap screws from the lever's HELIFOUNER kit, two per side, 30.5 mm either side of the axis, down the middle of the shell's 9 mm side walls (y = ±27). Each is centred on the joint: its head seats 25 mm above it, at the floor of a 13 mm counterbore, and its tip is 25 mm below. Each goes into an M4 nut slid into a slot in the pillow block's outer face, about 21–24 mm under the joint. The slots open on the blocks' outer faces, under the side covers. The nut sits flats-in: its inner flat stops it turning when you tighten the screw. The counterbore leaves 0.9 mm of shell either side, and the nut's slot leaves 0.9 mm of block to its inside face.
 - **Diamond knurl:** the whole face the frame and the shell share is knurled.
   - **Shape:** square pyramids 2.4 mm across their corners and 0.7 mm tall with flat tops, on a diamond grid with 0.6 mm flat lanes. They stand on the frame's half and fit into sockets in the shell's half, 0.1 mm clear on their 45° flanks and 0.2 mm deeper than the pyramids. The flat faces still close on each other, so the bearing seats close, and the knurl stops the shell sliding fore and aft or sideways as the screws pull it down.
   - **Coverage:** it runs over every land, in front of the bearings and behind them, and on across the solid frame behind the pillow blocks. It stops 0.5 mm short of every edge and hole: pyramids at its edge are cut off square, and any piece smaller than a third of a pyramid is left out. The grid is the same mirror image either side of the tube, and fore and aft on the pillow blocks.
   - **Printing:** neither half needs supports: the pyramids point up on the frame, and the sockets open upward on the shell, which prints top down.
 - **Front opening:** the frame has a 3 mm front wall between the pillow blocks, under the shell's, and one clean opening runs through both. It has straight sides 21 mm either side of the tube (the down-stop pads, 1 mm clear) from the top down to 7 mm under the pivot axis, and a round bottom of the same radius below that: the lever's lower fairing swings down to 24.5 mm under the axis in the walls' plane. On top it carries on as one slot, as wide at the front, narrowing at 45° to 12.5 mm either side of the tube for the upper fairing, and ending round just behind the hub's top. Both contain the lever's whole sweep, 1 mm clear or more. Below the opening, a smooth round-ended slot lets the strut's cylinder through, 1.5 mm clear over the whole travel. It's cut by the cylinder swung about its anchor pin, so it has no facets.
-- **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis, just below the side cover's rim. A 2.5 mm hex key goes straight in to the M4 × 16's head.
+- **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis, 2 mm below the side cover's bottom edge. A 2.5 mm hex key goes straight in to the M4 × 16's head.
 
 ![The front: the frame's wall carries on the shell's cut for the lever](renders/rev4_front.png)
 
@@ -109,6 +120,10 @@ Each counterbore is 1.25 mm from the hub's end. The bores, the down-stop pads, t
 
 **Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss on the upper half, and the same one mirrored under it on the lower half. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm. It stays 1.75 mm clear of the front screws' counterbores on top and 1.6 mm clear of their nut pockets underneath.
 
+**Strut relief:** the strut's cylinder sits on the base end, and from 28° up its end comes in under the front of the hub. A shallow relief in the lower half's underside lets it by, 1.5 mm clear all the way to the stop: 2.65 mm deep at most, 11.6 mm wide, centred on the tube's plane. It's cut by the cylinder swung about the collar's pin as the lever sees it, so it's smooth, with no facets. It's under the lever, away from the brake's felt.
+
+![The lever from below at the 32° stop: the relief for the strut's cylinder](renders/rev4_strut_relief.png)
+
 ![The lever from the side: the fairings top and bottom, tangent to the hub](renders/rev4_lever_side.png)
 
 ![The lever from the front and above: the upper fairing between the front screws](renders/rev4_lever_top.png)
@@ -117,18 +132,18 @@ Each counterbore is 1.25 mm from the hub's end. The bores, the down-stop pads, t
 
 ## Sensor
 
-The AS5600 module (WWZMDiB) sits in a square pocket in the sensor trunnion's end, chip facing out, its front face level with the trunnion's end. There's no carrier.
+The AS5600 module (WWZMDiB) sits in a square pocket in the sensor trunnion's end, chip facing out, its front face level with the trunnion's end, which is flush with the bearing's outer face. There's no carrier.
 
 - **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, as measured, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges, clear of both pad columns.
 - **Behind the board:** 3.5 mm of space for the wires soldered in from the back and the DIR jumper. It opens into the axial bore, which takes the lead to the tube.
 - **Orientation:** set it in with the pad columns vertical. It fits either way up.
 - **Holding it:** a dot of hot glue in two corners. Nothing else holds it in.
 
-The magnet (4 × 2 mm, in Rev 3's 4.2 mm pocket) is on a post from the sensor cover's floor, 1.0 mm off the chip, as in Rev 3. The wiring and the module's changes (R1 off, DIR to VCC, R4 off for I²C) are exactly as in [Rev 3](../README.md#sensor).
+The chip stands inside the bearing's retaining lip. The magnet (4 × 2 mm, in Rev 3's 4.2 mm pocket) sits in a pocket in the sensor cover's inside face, its face 0.5 mm below the cover's and 1.0 mm off the chip, as in Rev 3. The wiring and the module's changes (R1 off, DIR to VCC, R4 off for I²C) are exactly as in [Rev 3](../README.md#sensor).
 
 ## USB cable
 
-The cable comes out of the trunnion on the axis and turns toward the back inside the cable cover, on a 4 mm radius (Rev 3: 6). It leaves through a hole in the cover's rim. A 4.8 mm notch runs from that hole to the face that seats on the block, so the cover goes on over a cable that's already through the lever, as Rev 3's does.
+The cable comes out of the trunnion on the axis and turns toward the back on a 4 mm radius (Rev 3: 6), inside the bearing's retaining lip. It runs straight back in a round tunnel 5 mm across, 1.3 mm out from the pillow block's face: half of it is a groove in the block's and the shell's outer faces, half a channel in the cable cover. It leaves through the cover's back bevel. Lay the cable in the groove and the cover goes on over it, so it can go on over a cable that's already through the lever, as Rev 3's does. The groove leaves 1.1 mm of block to the nearest shell screw's hole, and the cover 1.2 mm over the channel. The trunnions end flush with the bearings so the cable can turn inside the lip: that's what lets the covers be 5 mm.
 
 ## Brake
 
@@ -226,7 +241,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 - **Shoe:** stand it on its back face. The spring's bore opens on the bed, and the curved face is on top.
 - **Spring cap:** on its flat front face, dimple up.
 - **Back plate:** on its front face, the nut pocket on the bed.
-- **Side covers:** outer face down. The magnet's post and pocket, and the cable cover's notch, open upward.
+- **Side covers:** outer face down. The magnet's pocket and the cable's channel open upward, and the 45° ends lean out at 45°, so no supports.
 - **Knob:** as Rev 3's, floor down. Reprint it: its floor is higher.
 - **Strut collar:** Rev 3's, unchanged. Reuse it.
 
@@ -239,7 +254,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 5. **Shoe in:** glue the felt onto the shoe's face. Drop the spring into the shoe's bore, then the spring cap. Set the shoe down into the frame's half of its pocket about 10 mm back from the hub, hanging out of the open back, and slide it forward onto the hub. The shoe can't go straight down into place, because its face wraps round the hub.
 6. **Shell on:** lower it straight down over the lever and the shoe, so the grid's pyramids drop into their sockets. Fit its four M4 × 50 socket head screws into the nuts and tighten them evenly.
 7. **Back plate:** press the M5 nut into its pocket and screw the plate on (six M3 × 16). Drop the M5 × 30 bolt into the knob's hex pocket, head down, and screw it in through the nut until it meets the spring cap, then set the drag.
-8. **Covers:** fit the sensor cover, with the magnet in its post. Lay the USB cable into the cable cover's notch, push the cover onto the block and shell, and screw both down (M3 × 16).
+8. **Covers:** glue the magnet into the sensor cover's pocket, pushed to the bottom. Lay the USB cable into its groove in the USB-side pillow block and shell, push the cable cover on over it, and screw both covers down (M3 × 12).
 9. **Strut and tube:** as Rev 3.
 
 ## Screws
@@ -249,8 +264,8 @@ All from the same kits as Rev 3: the AvrestYPT countersunk kit (M3 and M4 × 8, 
 | Where | Screw | Into | Qty |
 |---|---|---|---|
 | Lever halves | M4 × 40 socket head cap, from the top, two in front and two behind | M4 nut in a pocket in the lower half | 4 |
-| Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, just below the side cover's rim | 4 |
-| Side covers | M3 × 16 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
+| Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, under the side cover | 4 |
+| Side covers | M3 × 12 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
 | Back plate | M3 × 16 countersunk, from its back face | M3 thread tapped 7.5 mm deep in the frame (4) and the shell (2) | 6 |
 | Brake | **M5 × 30 hex-head bolt (Rev 3's)**, head on the floor of the knob's hex pocket | M5 nut in the back plate's pocket | 1 |
 | Strut eyes | M4 × 16 countersunk, head on the +y side | M4 nut in the far cheek's pocket | 2 |

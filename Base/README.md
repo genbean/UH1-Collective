@@ -1,6 +1,6 @@
 # MkIII base, Rev 3: gas strut balance
 
-> **This is Rev 3, the first base built.** The current base is **Rev 4** ([`Rev4/`](Rev4/README.md)): this one cut down to 82 mm (3.25 in) wide, with the lever symmetrical about the tube, thin-section bearings, a shell over the lever and the brake behind the hub. Rev 3's files stay here, and Rev 4's scripts build on them.
+> **This is Rev 3, the first base built.** The current base is **Rev 4** ([`Rev4/`](Rev4/README.md)): this one cut down to 73 mm (2.87 in) wide, with the lever symmetrical about the tube, thin-section bearings, a shell over the lever and the brake behind the hub. Rev 3's files stay here, and Rev 4's scripts build on them.
 
 The collective's pivot base. The lever runs on two 6006-2RS bearings and is printed as two halves, and an adjustable friction knob sets the drag. An AS5600 magnetic sensor reads the lever angle, and the USB cable leaves on the knob side.
 

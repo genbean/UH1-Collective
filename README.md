@@ -19,7 +19,7 @@ Each folder has its own README with the details: how it works, printing, the par
 
 | Folder | What's in it |
 |---|---|
-| [`Base/Rev4/`](Base/Rev4/README.md) | **MkIII base, Rev 4: the current base.** 82 mm (3.25 in) wide, the lever centred on the tube: the pivot on thin-section bearings, the split lever, a shell that encloses it, the gas strut, the brake behind the hub, the stops and the collective's AS5600. Ready-to-print STLs, fit-test coupons, a STEP assembly, renders with every screw labelled, and the scripts that make them. |
+| [`Base/Rev4/`](Base/Rev4/README.md) | **MkIII base, Rev 4: the current base.** 73 mm (2.87 in) wide, the lever centred on the tube: the pivot on thin-section bearings, the split lever, a shell that encloses it, the gas strut, the brake behind the hub, the stops and the collective's AS5600. Ready-to-print STLs, fit-test coupons, a STEP assembly, renders with every screw labelled, and the scripts that make them. |
 | [`Base/`](Base/README.md) | MkIII base Rev 3: the first base built, 130 mm wide. Its parts and scripts stay here, and Rev 4's build on them. |
 | [`Head/Rev5/`](Head/Rev5/README.md) | **Huey head, Rev 5: the current head.** The switch box in one print, cut to the real UH-1 panels' dimensions, with the throttle grip and its gears, the throttle's AS5600, the starter trigger and the search light hat, and a collision check (`check_r5.py`). STLs and scripts. The BOM lists it. |
 | [`Head/Rev4/`](Head/Rev4/README.md) | Head Rev 4: the same head in a larger box (107 × 75 mm lower panel), kept as a fallback in case everything doesn't fit in Rev 5. Rev 5's README refers to it for assembly. |
