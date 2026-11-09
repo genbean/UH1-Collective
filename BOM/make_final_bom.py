@@ -190,9 +190,10 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
     amz("Lever halves and shell", 8, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
         "flat and lock washers and a hex key (200 pieces)", "HELIFOUNER", "B0CDSKK7V1", 9.99, "once",
-        "Uses 4 x M4 x 40 and 4 x M4 x 50, with 8 of its M4 nuts. Lever halves: four M4 x 40, two in front and "
-        "two behind, as Rev 3, heads in counterbores at the top, nuts in hex pockets open to the underside (they go "
-        "into the lower half first); no tip protrudes. Shell: four M4 x 50, two each side, from the top down 13 mm "
+        "Uses 4 x M4 x 35 and 4 x M4 x 50, with 8 of its M4 nuts. Lever halves (split on the tube's plane): four "
+        "M4 x 35 along the pivot axis through the hub, behind the bearings, two from each end, heads in 7.5 mm "
+        "counterbores, nuts in hex pockets in the other half's end face; printed hollow dowels round them locate the "
+        "halves. Screw the halves up before pressing the bearings on. Shell: four M4 x 50, two each side, from the top down 13 mm "
         "counterbores in its side walls, each centred on the joint, into nuts slid into the pillow blocks from "
         "their outer faces; the slots open just below the side covers' rim", BASE, ORDERED),
     ("Strut", 1, "Gas strut, 6 in (152.4 mm eye to eye), 45 N (sold as 9-12 lb), flat eyelet tabs", "X AUTOHAUX", "",
@@ -319,13 +320,17 @@ PRINTED = [
     ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
-    ("Base", "Base/Rev4/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_shoe_pocket.stl", 1,
-     "Fit-test coupons: print first and tune mk3_rev4.py (TRUN_OD, BRG_SEAT_D, SHOE_CLR). The tube socket is Rev 3's: "
+    ("Base", "Base/Rev4/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_shoe_pocket.stl, "
+     "coupon_dowel_hole.stl", 1,
+     "Fit-test coupons: print first and tune mk3_rev4.py (TRUN_OD, BRG_SEAT_D, SHOE_CLR, DOWEL_CLR). The tube socket is Rev 3's: "
      "Base/stl/coupons/coupon_tube_socket.stl, with the carbon tube"),
     ("Base", "Base/Rev4/stl/frame.stl", 1, "Plate down"),
     ("Base", "Base/Rev4/stl/shell.stl", 1, "Top down: the bearing half-seats, the slot and the shoe's half-pocket open upward"),
-    ("Base", "Base/Rev4/stl/lever_lower.stl", 1, "On its joint face"),
-    ("Base", "Base/Rev4/stl/lever_upper.stl", 1, "On its joint face"),
+    ("Base", "Base/Rev4/stl/lever_sensor.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
+     "inner face"),
+    ("Base", "Base/Rev4/stl/lever_cable.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
+     "inner face"),
+    ("Base", "Base/Rev4/stl/lever_dowel.stl", 4, "Standing on end"),
     ("Base", "Base/Rev4/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
     ("Base", "Base/Rev4/stl/shoe.stl", 1, "On its back face: the spring's bore on the bed, the curved face on top"),
     ("Base", "Base/Rev4/stl/spring_cap.stl", 1, "On its flat front face, dimple up"),
