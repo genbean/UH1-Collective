@@ -37,7 +37,7 @@ The knob stands 31 mm out behind the plate.
 
 | | |
 |---|---|
-| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference and assembly checks; `--coupons` writes `stl/coupons/`; `--trunnion` draws the trunnion's profile |
+| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference and assembly checks; `--coupons` writes `stl/coupons/` |
 | `make_renders_r4.py` | the renders, screw maps, exploded view and screw chart, `renders/MkIII_Rev4_Assembly.glb`, and the complete collective with head Rev 5 in [`../../renders`](../../renders) |
 | `stl/` | the printed parts |
 | `stl/ref/` | bought parts and hardware, for reference |
@@ -51,27 +51,13 @@ The trunnion, bearing seat and shoe pocket are new, so print these before the bi
 
 | File | What it is | Good fit | Change |
 |---|---|---|---|
-| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.98 / 40.18 / 40.38 mm across the axes (0.25 less across the diagonals), each split in two halves that print on their joint faces like the lever's | glue each pair face to face, then measure it as below: the race presses on firmly by hand, no wobble | `TRUN_FIT += step`; `TRUN_DIAG` if it isn't round |
+| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.9 / 40.1 / 40.3 mm | the race presses on firmly, no wobble | `TRUN_OD += step` |
 | `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.9 / 52.1 / 52.3 mm | the race goes in with thumb pressure | `BRG_SEAT_D += step` |
 | `stl/coupons/coupon_shoe_pocket.stl` | 10 mm of the shoe's pocket, 0 / 0.1 / 0.2 mm clear a side, printed as the frame prints it | the printed shoe slides through under a finger, with no rattle and no rocking | `SHOE_CLR += step / 2` |
 
-The bearing coupons' `0` comes from how the bearings fitted as built:
+The bearing coupons' `0` comes from how Rev 3's bearings fitted as built:
 - **Seat:** +0.1 on the race's outside was a perfect fit, so it stays.
-- **Trunnion:** +0.2 on the race's bore pressed on a hair too tight on Rev 3. Rev 4's first lever, at +0.1 (40.1 mm), was too tight as well, and measuring it showed why (below).
-
-**The trunnions print square-ish.** The lever's halves print on their joint faces, so each half-trunnion is an arch of stacked layers. Measured with the two halves together, Rev 4's first print was:
-
-| Across | Measured | |
-|---|---|---|
-| the joint, and square to it (the axes) | 1.575 in (40.0 mm) | 0.003 in under the bearing's bore |
-| the bearing's bore | 1.578 in (40.08 mm) | the size to print to |
-| the 45° diagonals | 1.585 in (40.26 mm) | 0.007 in over the bore: the layers' stair-steps stick out on the sloped flanks |
-
-So the trunnion's profile isn't round any more. The script works it out from those readings (`TRUN_PRINTED`, `BORE_MEASURED`), to print on the bore every way (`TRUN_FIT` = 0): 40.18 mm (1.5817 in) across the axes, and `TRUN_DIAG` = 0.25 mm less across the diagonals, 39.92 mm (1.5717 in), easing in and out between them (r = R − 0.127 sin² 2θ). With the first lever's printing error, that comes out 1.578 in every way. For a press fit rather than line to line, raise `TRUN_FIT`. Check a new print, or the coupon, with a calliper across both axes and both diagonals: if they still differ, change `TRUN_DIAG` by the difference.
-
-![The trunnion's profile: the first print as measured, the profile drawn now, and what it should print](renders/rev4_trunnion_profile.png)
-
-`python mk3_rev4.py --trunnion` redraws this from the readings at the top of the script's trunnion section.
+- **Trunnion:** +0.2 on the race's bore pressed on a hair too tight, so Rev 4 uses +0.1 (40.1 mm).
 
 The tube socket is unchanged, so Rev 3's socket fit stands.
 
@@ -84,7 +70,7 @@ From the middle out, each side:
 | Hub | 0 – 21.5 | 60 mm across; 3.5 mm past the socket boss |
 | Bearing | 22.5 – 29.5 | 6808-2RS |
 | Retaining lip | 29.5 – 31.5 | the pillow blocks' and the shell's outer faces, and the plate's edge, are at 31.5 |
-| Trunnion end | 32.0 | 40.18 mm across the axes, 39.92 across the diagonals (it prints round, 1.578 in) |
+| Trunnion end | 32.0 | 40.1 mm across |
 | Side cover | 31.5 – 41.0 | 2.5 mm floor; it overhangs the plate |
 
 ## Shell
@@ -214,7 +200,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 - **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel.
 - **Shell:** top down. The bearing half-seats, the slot and the shoe's half-pocket all open upward.
-- **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half. The trunnions' profile allows for how the arches print at the layer height you use: check them across the diagonals (Fit-test coupons, above).
+- **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half.
 - **Shoe:** stand it on its back face. The spring's bore opens on the bed, and the curved face is on top.
 - **Spring cap:** on its flat front face, dimple up.
 - **Back plate:** on its front face, the nut pocket on the bed.
