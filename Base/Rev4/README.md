@@ -14,7 +14,7 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 
 ![Rev 3 and Rev 4 from above, to the same scale](renders/rev4_vs_rev3_top.png)
 
-![From behind: the brake knob, and the USB cable leaving the cable cover](renders/rev4_rear.png)
+![From behind: the brake knob in the shell's top, and the USB cable leaving the cable cover](renders/rev4_rear.png)
 
 ![At the 32° up-stop](renders/rev4_32deg.png)
 
@@ -26,12 +26,12 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 - **Shell:** one box over the lever, in place of the two caps, slotted for the tube. Four M4 × 50 socket head screws hold it to the pillow blocks, and a diamond grid in the joint locates it.
 - **Sensor:** the AS5600 board sits inside the sensor trunnion's end, so the side covers are 9.5 mm deep (Rev 3: 15).
 - **USB cable:** it leaves through a notch in the cable cover's rim instead of a spout.
-- **Brake:** a narrow, tall shoe presses on the back of the hub. Its pocket is split between the frame and the shell, and holds it with no slop.
-- **Up-stop:** two lugs under the back of the hub, one each side of the shoe, land on a pad further back than Rev 3's.
+- **Brake:** a felt-lined strap wraps the back of the hub, hinged at its bottom in the up-stop pad. A knob on top of the shell pulls it on, through a bolt that leans 30° forward.
+- **Up-stop:** two lugs under the back of the hub, one each side of the strap, land on a pad further back than Rev 3's.
 - **Frame gussets:** 45° gussets at all four corners of both pillow blocks.
 - **Strut anchor:** moved up and back, so the 45 N strut as bought balances the lever. Rev 3's first anchor was sized for a 40 N strut, so the 45 N strut pushed the lever up. Rev 3 now has the same anchor.
 
-The knob stands 31 mm out behind the plate.
+The knob stands on top of the shell, leaning 30° forward; nothing sticks out behind the back face.
 
 ## Files
 
@@ -47,13 +47,12 @@ Both scripts import Rev 3's (`../mk3_rev3.py`, `../make_renders_r3.py`) and need
 
 ## Fit-test coupons
 
-The trunnion, bearing seat and shoe pocket are new, so print these before the big parts. They're made and read like [Rev 3's coupons](../README.md#fit-test-coupons-print-these-before-the-big-parts).
+The trunnion and bearing seat are new, so print these before the big parts. They're made and read like [Rev 3's coupons](../README.md#fit-test-coupons-print-these-before-the-big-parts).
 
 | File | What it is | Good fit | Change |
 |---|---|---|---|
 | `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.9 / 40.1 / 40.3 mm | the race presses on firmly, no wobble | `TRUN_OD += step` |
 | `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.8 / 52.0 / 52.2 mm | the race goes in with thumb pressure | `BRG_SEAT_D += step` |
-| `stl/coupons/coupon_shoe_pocket.stl` | 10 mm of the shoe's pocket, 0 / 0.1 / 0.2 mm clear a side, printed as the frame prints it | the printed shoe slides through under a finger, with no rattle and no rocking | `SHOE_CLR += step / 2` |
 
 The bearing coupons' `0` comes from how the bearings fitted as built:
 - **Seat:** +0.1 on the race's outside was a perfect fit in Rev 3's one-piece blocks. In Rev 4's seat, split between the frame and the shell, it left the bearing a little play, so the seat is now 52.0 mm, the race's own size. The seat coupon is one piece, so it can't show the split: check the play in the frame and shell themselves.
@@ -82,8 +81,8 @@ The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from t
 - **Side walls:** solid, 9 mm thick. These are the caps. Each holds the bearing's upper half-seat and lip, and two of the cover's screw holes. Two M4 × 50 socket head screws per side go down through them from the top, each centred on the joint, heads down 13 mm counterbores, into M4 nuts in the pillow blocks (see [The joint](#the-joint)).
 - **Front, back and top walls:** 3 mm thick.
 - **Tube slot:** one clean opening in the front and top, the same outline as the frame's front wall below it (see [The joint](#the-joint)). It holds the socket boss, the tube, the lever's fairings and the down-stop pads through their whole swing, 0° to 32°, with at least 1 mm all round.
-- **Brake housing:** its upper half runs on out of the back wall (see [Brake](#brake)). Either side of it, the shell is solid back to the housing's back face, with the same outline as the frame below, up to its top.
-- **Assembly:** it drops straight down over the lever, the slot and the shoe's pocket both open at the bottom.
+- **Behind the hub:** solid, from 2 mm off the hub out to the side walls, the top and the back face, so the brake knob's seat, sunk into the top, bears straight into the walls. The brake strap's bay is under the seat (see [Brake](#brake)).
+- **Assembly:** it drops straight down over the lever and the strap, the slot and the strap's bay both open at the bottom.
 
 ## The joint
 
@@ -134,29 +133,38 @@ The cable comes out of the trunnion on the axis and turns toward the back inside
 
 ![Section on the tube's plane](renders/rev4_section_brake.png)
 
-The shoe is 12 mm wide and 44 mm tall (Rev 3's was 30 wide), with felt on its curved face. It presses on the hub's own cylinder from behind, ±44° either side of the axis.
+A rigid printed strap wraps the back of the hub between the up-stop lugs, from 40° below the axis to 24° above it. It's 18 mm wide and 8 mm deep, lined with 1.5 mm felt, and hinged at its bottom end in the up-stop pad, just behind the strut's clevis. Its top end is a solid head with an M5 nut in it. The knob sits on top of the shell and draws the head up and forward, so the strap swings about its hinge and the felt clamps the hub.
 
-**No slop.** The friction pulls the shoe up or down, whichever way the lever moves, so any play in its pocket would be felt every time the lever changes direction. The pocket holds it 0.1 mm clear all round, along its whole length: tune that with the shoe-pocket coupon.
+- **The pull:** the knob's M5 × 35 bolt leans 30° forward from vertical, which gives it 41 mm of leverage about the hinge. A vertical bolt there would get 12 mm, and would mostly stretch and bend the strap instead of closing it. 30° is as far as it can lean with the seat sunk into the shell's top and 2 mm or more of shell between the seat and the hub.
+- **Gussets:** the head is one solid gusset, from the band's top 12°, front and back, out to where the bolt pulls. Another runs from the band's bottom 12° down to the hinge's knuckle. Neither end is a thin tab.
+- **The hinge:** the knuckle sits in a slot through the up-stop pad, 0.5 mm clear either side. The slot guides it, so the strap stays at least 1.5 mm off each lug (2 mm when centred). The pin, an M4 × 50 socket head, goes through both pillow blocks and the pad, head in a counterbore on the USB (+y) side, nut in a hex pocket on the sensor (−y) side.
+- **The nut:** it drops into a slot in the head from the strap's +y side. The bolt holds it there, and its pull bears it on the slot's face. A lead-in in the head's face guides the bolt's tip onto it.
+- **The knob's seat:** sunk into the shell's top, square to the bolt. There's 4 mm of shell under it, then the strap's bay.
+- **The spring, if you want one:** the knob has a 10.6 mm pocket, 7 mm deep, in its underside. Without a spring, the knob sits on its seat and pulls the strap directly. With one (10 mm OD, 10 to 15 mm free length, such as Rev 3's), the spring holds the knob off its seat and the knob sets the brake through it. The M5 × 35 keeps its full thread in the nut either way.
+- **The bay:** 22 mm wide, out to the lugs' inner faces, in the frame and the shell. In the frame, the strap leans back on its own onto the bay's back wall, at 4°: far enough for the lever's hub to drop past it. In the shell, the back of the bay is a ramp parallel to the bolt, 1 mm behind the head. As the shell goes on, the ramp meets the leaning strap's head and swings it forward onto the hub, so its nut lands on the bolt's axis.
 
-- **The housing:** the pocket is split at the axis like a bearing seat. Its lower half is in the frame, its upper half in the shell, and the shell's bolts close it. Both halves come right up to the hub, 0.8 mm off it, from just behind the shoe's front corners (x = 24) back to x = 47.5.
-- **The back plate:** a plate across both halves' back faces closes the pocket and ties the halves together at the back. It runs from just over the base plate up to the shell's top. It covers the whole back face, 43 mm wide, and tapers to 26 mm at its back along the [back chamfer](#the-back).
-- **The knob:** the M5 nut sits in a pocket in the back plate's front face. The MkII knob, behind the plate, turns Rev 3's M5 × 30 hex bolt through it. The knob is reprinted with its hex pocket's floor raised to 18 mm (Rev 3's: 4), so the M5 × 30 just reaches.
-- **The spring:** the bolt's tip pushes a printed spring cap in the shoe's back. Rev 3's 10 mm spring sits under it, 6.5 mm long when fitted, and pushes the shoe.
-- **Using it:** screw the knob in for more drag. There's 3 mm between the knob and the back plate.
+**Drag:** about 10 N·mm per newton of bolt tension with the lever moving up, and 11 moving down; the strap is self-energising by about 9%. 26 N of tension gives the old shoe's 270 N·mm.
+- **With the spring:** the brake's range is spread over about 10 turns of the knob, up to the spring's 20 N or so. Past that, the knob is down on its seat and the brake firms up.
+- **Without it:** the felt is the only give, so the brake goes from free to firm within about a turn.
+
+**Strength:** checked at 400 N of bolt tension, more than a hand gets out of an 18 mm knob (about 130–210 N at 0.3–0.5 N·m).
+- **Strap:** it prints on its side, so all its bending runs along its layers (35 MPa allowed). The band peaks at 22 MPa, the neck under the head at 21, and the arm to the hinge at 10.
+- **Hinge:** the knuckle bears 7.5 MPa on its pin. The pin carries 540 N, at 214 MPa in its 12.9 steel.
+- **Shell:** the 4 mm floor under the seat bends at 17.5 MPa, along its layers. The shell is solid behind the hub, out to its side walls, top and back, so the seat's load goes straight into the walls.
 
 ![At the 32° stop](renders/rev4_section_brake_32deg.png)
 
 ## Up-stop
 
-![The shoe between the two up-stop lugs, at 0°](renders/rev4_brake_lugs.png)
+![The brake strap between the two up-stop lugs, at 0°](renders/rev4_brake_lugs.png)
 
-Two lugs under the back of the hub land on a pad on the frame at 32°. Each lug is 10 mm wide (|y| 11 to 21), with 22 mm between them for the shoe and the brake housing.
+Two lugs under the back of the hub land on a pad on the frame at 32°. Each lug is 10 mm wide (|y| 11 to 21), with 22 mm between them for the brake strap.
 
-**Where the pad is:** x = 14 to 29.5, the full width between the pillow blocks, with the brake housing running on from its back middle. Its top is at z = −28.5, 2 mm under the hub at its front edge.
+**Where the pad is:** x = 14 to 29.5, the full width between the pillow blocks, with a slot in its middle for the brake strap's knuckle. Its top is at z = −28.5, 2 mm under the hub at its front edge.
 
-**Where the lugs land:** x = 15 to 24.4. They can't land further back: the further back a lug lands, the further back it swings at 0°. These come to x = 35.8 at 0°, 1.2 mm off the webs behind the pillow blocks.
+**Where the lugs land:** x = 15 to 24.4. They can't land further back: the further back a lug lands, the further back it swings at 0°. These come to x = 35.8 at 0°. Behind them the frame is cut away on a 39 mm radius round the axis, 1.5 mm clear of their swing.
 
-At 0°, the shoe's lower end and the brake housing sit between the lugs. As the lever lifts, the lugs swing down either side of the housing onto the pad. Between them, the hub is a plain cylinder for the felt to run on.
+At 0°, the strap's arm and knuckle sit between the lugs, 2 mm clear of each. As the lever lifts, the lugs swing down either side of the strap onto the pad. Between them, the hub is a plain cylinder for the felt to run on.
 
 ![At 32°, the lugs on the pad (frame and shell hidden)](renders/rev4_brake_lugs_32deg.png)
 
@@ -168,10 +176,9 @@ The anchor clevis's back wall runs level, at the cheeks' top, into the pad's fro
 
 The plate is 63 mm wide, the pillow blocks' outer faces, and 127 mm long. The desk screws are 24 mm either side of the middle, past the blocks' ends and the down-stop pillars.
 
-Behind each pillow block, the frame is solid back to the brake housing's back face, out to the [back chamfer](#the-back).
+Behind the up-stop pad, the frame is solid back to its back face and out to the [back chamfer](#the-back), except for a 39 mm radius round the axis between the pillow blocks, 1.5 mm clear of the up-stop lugs' swing, and the brake strap's bay in the middle.
 
-Each pillow block also has a 45° gusset at three of its corners, 8 mm along each wall:
-- **Behind, inside:** the block's inner face to the web's front face. Its top is cut back to stay 1.5 mm outside the up-stop lugs' swing.
+Each pillow block also has a 45° gusset at its front corners, 8 mm along each wall:
 - **In front, inside:** the block's inner face to the down-stop pillar's back face, up to the pillar's top, 3 mm clear of the hub.
 - **In front, outside:** the block's front face to the pillar's outer face, up to the pillar's top.
 
@@ -179,18 +186,9 @@ The down-stop and strut are unchanged from Rev 3: pads on the socket boss land o
 
 ## The back
 
-![From behind: the back chamfer and the back plate's screws](renders/rev4_back.png)
+![From behind: the back chamfers and the brake knob](renders/rev4_back.png)
 
-The frame, the shell and the back plate share one 45° chamfer plane each side. It runs from the pillow blocks' outer back corners to the back plate's back face (|y| + x = 69 mm), so from behind the three read as one block. The edges where they meet aren't chamfered, so no groove shows at the seams, and none runs along the inside of the shoe's pocket at the split.
-
-**The back plate's screws:** six M3 × 16 countersunk, from its back face into M3 threads tapped 7.5 mm deep. They're in three evenly spaced pairs down the plate:
-- **Middle pair:** at the plate's centre height (z = −5.9), into the frame.
-- **Top pair:** 32.9 mm above that (z = +27), into the shell.
-- **Bottom pair:** 32.9 mm below that (z = −38.8), into the frame.
-
-The columns are 8.8 mm either side of the middle. The shoe's pocket runs out through the back face 6.1 mm either side of the middle. At 7 mm the middle pair's pilot holes would break into it, and at 8.8 they keep 1.45 mm of wall. The heads are still 0.75 mm inside the plate's 13 mm back face. Take the knob off to reach the middle pair: it's in front of them.
-
-![The back plate from behind: three evenly spaced pairs of screws](renders/rev4_back_plate.png)
+The frame and the shell share one 45° chamfer plane each side. It runs from the pillow blocks' outer back corners to the back face, at x = 52.5 (|y| + x = 69 mm), so from behind the two read as one block. The back face is 33 mm wide. The edges in the joint aren't chamfered, so no groove shows at the seam.
 
 ## Balance
 
@@ -220,25 +218,23 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 ## Printing
 
-- **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel, the grid's pyramids point up, and the front wall builds straight up.
-- **Shell:** top down. The bearing half-seats, the slot, the shoe's half-pocket and the grid's sockets all open upward.
+- **Frame:** plate down, as Rev 3. The brake strap's slot and bay open at the top, the grid's pyramids point up, and the front wall builds straight up.
+- **Shell:** top down. The bearing half-seats, the slot, the strap's bay and the grid's sockets all open upward. The knob's seat is on the bed, and its floor slopes at 30°: support it from the bed, in the seat only.
 - **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half.
-- **Shoe:** stand it on its back face. The spring's bore opens on the bed, and the curved face is on top.
-- **Spring cap:** on its flat front face, dimple up.
-- **Back plate:** on its front face, the nut pocket on the bed.
+- **Brake strap:** on its side, the nut's slot up. Its bending then runs along the layers. No supports.
 - **Side covers:** outer face down. The magnet's post and pocket, and the cable cover's notch, open upward.
-- **Knob:** as Rev 3's, floor down. Reprint it: its floor is higher.
+- **Knob:** as Rev 3's, underside down. Reprint it: its floor is now 11 mm up, and it has a pocket underneath for the spring.
 - **Strut collar:** Rev 3's, unchanged. Reuse it.
 
 ## Assembly
 
-1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Tap the six back-plate holes, four in the frame and two in the shell, 7.5 mm deep. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
+1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
 2. **Lever:** press the four M4 nuts into the lower half's pockets. Lay the USB cable and the sensor lead into its channels, close the upper half, and fit the four M4 × 40 cap screws. Press the bearings onto the trunnions.
 3. **Sensor:** solder the module to the lead, as in Rev 3, and set it in the trunnion's pocket, chip out, with a dot of hot glue.
-4. **Lever in:** lower the lever's bearings straight down into the frame's seats.
-5. **Shoe in:** glue the felt onto the shoe's face. Drop the spring into the shoe's bore, then the spring cap. Set the shoe down into the frame's half of its pocket about 10 mm back from the hub, hanging out of the open back, and slide it forward onto the hub. The shoe can't go straight down into place, because its face wraps round the hub.
-6. **Shell on:** lower it straight down over the lever and the shoe, so the grid's pyramids drop into their sockets. Fit its four M4 × 50 socket head screws into the nuts and tighten them evenly.
-7. **Back plate:** press the M5 nut into its pocket and screw the plate on (six M3 × 16). Drop the M5 × 30 bolt into the knob's hex pocket, head down, and screw it in through the nut until it meets the spring cap, then set the drag.
+4. **Brake strap in:** stick the felt (16 × 33 mm) on the strap's face, and drop the M5 nut into the slot in its head. Set the strap down into the frame with its knuckle in the up-stop pad's slot. Push an M4 × 50 socket head through from the USB (+y) side, through the pillow block, the pad and the knuckle, into an M4 nut in the sensor side's hex pocket. Tighten it: the strap still swings freely on it. Let the strap lean back onto its bay's back wall.
+5. **Lever in:** lower the lever's bearings straight down into the frame's seats. The hub drops past the leaning strap; once it's down, the felt's bottom end is 1.1 mm off it. Tip the strap forward onto the hub.
+6. **Shell on:** lower it straight down over the lever and the strap, so the grid's pyramids drop into their sockets. If the strap has leaned back, the ramp at the back of the shell's bay meets its head 4 mm before the shell is down and swings it forward. Fit the shell's four M4 × 50 socket head screws into the nuts and tighten them evenly.
+7. **Knob:** if you're using the spring, drop it into the pocket in the knob's underside. Drop the M5 × 35 bolt into the knob's hex pocket, head down. Set the knob in its seat and screw the bolt down into the strap's nut. With the shell on, the strap can lean back only 1.0°, which leaves its nut 0.8 mm off the bolt's axis, and the lead-in in the head takes up 2 mm. Then set the drag.
 8. **Covers:** fit the sensor cover, with the magnet in its post. Lay the USB cable into the cable cover's notch, push the cover onto the block and shell, and screw both down (M3 × 16).
 9. **Strut and tube:** as Rev 3.
 
@@ -251,12 +247,12 @@ All from the same kits as Rev 3: the AvrestYPT countersunk kit (M3 and M4 × 8, 
 | Lever halves | M4 × 40 socket head cap, from the top, two in front and two behind | M4 nut in a pocket in the lower half | 4 |
 | Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, just below the side cover's rim | 4 |
 | Side covers | M3 × 16 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
-| Back plate | M3 × 16 countersunk, from its back face | M3 thread tapped 7.5 mm deep in the frame (4) and the shell (2) | 6 |
-| Brake | **M5 × 30 hex-head bolt (Rev 3's)**, head on the floor of the knob's hex pocket | M5 nut in the back plate's pocket | 1 |
+| Brake | **M5 × 35 hex-head bolt**, head on the floor of the knob's hex pocket | M5 nut in the slot in the brake strap's head | 1 |
+| Brake strap's hinge | M4 × 50 socket head cap, from the +y side, head in a counterbore | M4 nut in a hex pocket on the −y side | 1 |
 | Strut eyes | M4 × 16 countersunk, head on the +y side | M4 nut in the far cheek's pocket | 2 |
 | Strut collar clamp | M4 × 12 countersunk | M4 nut in the other ear's pocket | 2 |
 
-Rev 3's shoe hinge screw is gone.
+The hinge pin is a fifth M4 × 50 from the HELIFOUNER kit.
 
 Every screw and nut, to scale:
 
@@ -272,13 +268,13 @@ Between them, these label every screw and nut in the base:
 
 ![The shell's nuts, in the pillow blocks' outer faces (sensor cover off)](renders/rev4_screws_shellnuts.png)
 
-![From behind: the back plate and the brake bolt](renders/rev4_screws_back.png)
+![From behind: the brake knob and its bolt](renders/rev4_screws_back.png)
 
-![The brake in section: the bolt, its nut in the back plate, the spring cap, the spring and the shoe](renders/rev4_screws_brake.png)
+![The brake in section: the bolt, its nut in the strap's head, the hinge pin, the strap and the knob](renders/rev4_screws_brake.png)
 
-![The sensor side: the cover, the collar clamp, the strut's body-end nut, the desk screws](renders/rev4_screws_sensorside.png)
+![The sensor side: the cover, the collar clamp, the strut's body-end nut, the hinge pin's nut, the desk screws](renders/rev4_screws_sensorside.png)
 
-![The USB side: the cover, the strut's body-end screw, the collar clamp's nuts](renders/rev4_screws_usbside.png)
+![The USB side: the cover, the strut's body-end screw, the collar clamp's nuts, the brake strap's hinge pin](renders/rev4_screws_usbside.png)
 
 ![The strut's anchor](renders/rev4_screws_strut.png)
 
@@ -290,17 +286,18 @@ Between them, these label every screw and nut in the base:
 | X AUTOHAUX 6" 45 N gas strut | 1 | Rev 3's |
 | 25 × 23 mm carbon tube, 500 mm | 1 | Rev 3's, uncut |
 | Worm-drive hose clamp, about 25–40 mm | 1 | Rev 3's |
-| Compression spring, 10 mm OD | 1 | Rev 3's |
-| M5 × 30 hex-head bolt | 1 | Rev 3's |
-| Felt, 1.5 mm, about 11 × 48 mm | 1 | on the shoe |
+| Compression spring, 10 mm OD, 10–15 mm free length | 1 | optional: Rev 3's fits |
+| M5 × 35 hex-head bolt | 1 | any hardware store |
+| Felt, 1.5 mm, 16 × 33 mm | 1 | on the brake strap |
 | AS5600 module (WWZMDiB) | 1 | Rev 3's, with its magnet |
 | #10 × 1-1/2 in wood screws | 4 | desk mounting |
 
 ## Notes
 
-- **The checks:** `python mk3_rev4.py --check` runs two checks, and both are clean.
-  - **Every pair of parts** at 0°, 8°, 16°, 24°, 31.5° and 32°. The overlaps it allows are the intended ones: screws in their holes, the bearings' inner races on the trunnions, the felt on the shoe, the spring and cap, the strut's tabs in their clevises, and the hose clamp in its groove. Just past each stop, the lever meets the frame where it should: the pads on the pillars below 0°, both lugs on the up-stop pad above 32°.
-  - **The assembly order:** the lever lowered into the frame; the shoe set down standing back and slid onto the hub; the shell lowered over both.
+- **The checks:** `python mk3_rev4.py --check` runs three checks, and all are clean.
+  - **Every pair of parts** at 0°, 8°, 16°, 24°, 31.5° and 32°. The overlaps it allows are the intended ones: screws in their holes, the bearings' inner races on the trunnions, the felt on the strap, the strut's tabs in their clevises, and the hose clamp in its groove. Just past each stop, the lever meets the frame where it should: the pads on the pillars below 0°, both lugs on the up-stop pad above 32°.
+  - **The brake's clearances,** measured as distances, not overlaps: through the whole travel, the strap stays 1.5 mm off the lever, the felt 0.02 mm off the hub, and the knob more than 6 mm off the lever; the strap is 0.5 mm off the pad's slot either side, and 1 mm off the shell's ramp.
+  - **The assembly order:** the strap set down into the frame, leaning back; the lever lowered past it; the strap swung onto the hub; the shell lowered over both, its ramp swinging the strap forward.
 - **Chamfers:** Rev 3's chamfer step once returned a valid frame with the down-stop pillars missing. Rev 4's version refuses any set of chamfers that takes off more than chamfers could. Rev 3's parts were checked, and none of them lost anything.
-- **Brake feel:** the felt patch is about 11 × 48 mm (Rev 3's drum shoe was wider and shorter). The spring is the same, so the range of drag should be similar, but it's untested.
+- **Brake feel:** untested. The felt patch is 16 × 33 mm, and the drag per newton of bolt tension is worked out for felt on PETG at μ = 0.3. Fit the spring if the knob is too touchy without it.
 - **Balance:** see [Balance](#balance). The lever is about 68 cm³ lighter than Rev 3's, mostly near the pivot, and that makes almost no difference: its load at 0° is 1.998 N·m against Rev 3's 1.996.

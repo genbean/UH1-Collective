@@ -18,8 +18,8 @@ Across the pivot axis, from the middle out (each side):
     trunnion end        |y| 32.0       40.1 mm across: the 6808's bore + 0.1
     side covers         |y| 31.5-41.0  9.5 mm deep (Rev 3: 15)
 One shell over the top takes the place of Rev 3's two bearing caps: a box over the lever whose side walls are the caps,
-with a slot in its front and top for the socket boss, tube and top gusset to swing through, and a notch in its back
-wall round the brake tower. It drops straight down over the lever and bolts on with four M4 x 50 socket head screws
+with a slot in its front and top for the socket boss, tube and top gusset to swing through, solid behind the hub
+round the brake's bay and the knob's seat. It drops straight down over the lever and bolts on with four M4 x 50 socket head screws
 into nuts slid into the pillow blocks' outer faces, under the side covers; a diamond grid of pyramids in the joint
 locates it. The frame's front wall, under the shell's, carries the shell's cut for the lever on down, so they read as one.
 The AS5600 board sits INSIDE the sensor trunnion, in a square pocket in its end, chip facing out and level with the
@@ -27,19 +27,21 @@ trunnion's end; the magnet is on a post from the sensor cover, 1 mm off the chip
 axis inside the cable cover and leaves through a notch in its rim, toward the back; the notch lets the cover go on
 over a cable that's already fitted, like Rev 3's.
 
-Brake: Rev 3's drum, shoe and knob tower sat beside the hub, and there's no room for them now. The brake is behind
-the hub instead. A narrow, tall shoe (12 mm wide, 44 mm tall, felt on its face) presses on the hub's own cylinder over
-+-44 deg either side of the axis. It slides in a pocket 0.1 mm clear all round, so the friction's pull (up or down, as
-the lever moves) can't shift it. The pocket is split at the axis like a bearing seat: its lower half is in a tower on
-the frame, its upper half in the shell, and both come right up to the hub (0.8 mm off it), wrapping the shoe from its
-front corners back. The shoe goes in once the lever is in, before the shell; a back plate screwed across both halves'
-back faces carries the M5 nut. The MkII knob turns Rev 3's M5 x 30 hex bolt through that nut; the bolt's tip pushes
-a printed spring cap, and the spring (Rev 3's, 10 mm OD, 6.5 mm long when fitted) pushes the shoe.
-Up-stop: two lugs under the back of the hub, either side of the shoe, land on a pad behind the axis at 32 deg.
+Brake: a strap behind the hub. A rigid printed strap, 18 mm wide and 8 mm deep, lined with 1.5 mm felt, wraps the
+hub's back between the up-stop lugs, from 40 deg below the axis to 24 above. Its bottom end is a knuckle on an M4 x 50
+pin through the up-stop pad, just behind the strut's clevis, in a slot 0.5 mm clear either side that keeps it 1.5 mm or
+more off the lugs; gussets run from the knuckle into the band, and from the band's top up into a solid head carrying
+an M5 nut. The knob sits in a seat sunk into the shell's top, and its M5 x 35 bolt leans forward 30 deg from vertical,
+so turning it draws the head up and forward and the strap swings about its hinge onto the hub: 41 mm of leverage
+about the hinge, where a vertical bolt would get 12. The shell is solid behind the hub, so the seat's load goes
+straight into its walls. The knob has a pocket in its underside for an optional spring; without one it sits on the
+seat. The strap goes in before the lever and leans back onto its bay's back wall while the lever drops past it; a
+ramp in the shell's bay swings it forward onto the hub as the shell goes on, so the nut is on the bolt's axis.
+Up-stop: two lugs under the back of the hub, either side of the strap, land on a pad behind the axis at 32 deg.
 
 Run with a Python that has cadquery:
     python mk3_rev4.py            -> stl/ (printed), stl/ref/ (bought, reference), step/MkIII_Rev4_assembly.step
-    python mk3_rev4.py --check    -> interference check through the travel
+    python mk3_rev4.py --check    -> interference check through the travel, the brake's clearances, the assembly order
 """
 import math
 import os
@@ -168,7 +170,7 @@ STRUT_KEY_R = 1.75                               # a 3.5 mm hole through the +y 
 # the contact face ending at x = 24.4, their back corners come to x = 35.8 at 0 deg, 1.2 mm off the webs. The pad's top
 # is 2 mm under the hub at its front edge.
 USTOP_X, USTOP_Z = (15.0, 24.4), -28.5           # contact face at the stop, world x; the pad's top
-USTOP_HW, USTOP_SLOT = 21.0, 11.0                # lugs from |y| 11 to 21: either side of the shoe and the brake tower (+-10)
+USTOP_HW, USTOP_SLOT = 21.0, 11.0                # lugs from |y| 11 to 21: either side of the brake strap (+-9)
 LUG_R = math.hypot(USTOP_X[1], USTOP_Z)          # the lugs' furthest point from the axis (37.5)
 PAD_X, PAD_DY, PAD_Z = r.PAD_X, r.PAD_DY, r.PAD_Z
 
@@ -213,42 +215,56 @@ CAP_NUT_Z = CAP_HEAD_Z - SHELL_SCREW_L + r.LS_TIP_PAST_NUT + r.LS_NUT_T   # -20.
 GRID_A, GRID_H, GRID_LANE, GRID_CLR, GRID_EDGE = 1.2, 0.7, 0.6, 0.1, 0.5   # 2.4 mm across: the largest that also
                                                  # fits round the screws on the pillow blocks behind the bearings
 
-# ---------------------------------------------------------------- brake (all on y = 0, z = 0 unless noted)
+# ---------------------------------------------------------------- brake (all on y = 0 unless noted; angles in the XZ
+# plane are from +x, behind the axis, up positive)
+# A rigid printed strap, lined with felt, wraps the back of the hub between the up-stop lugs. Its bottom end is a
+# knuckle hinged on an M4 pin through the up-stop pad, just behind the strut's clevis; its top end is a solid head with
+# an M5 nut pressed into it. The knob sits in a seat sunk into the shell's top behind the hub, and its M5 bolt leans
+# forward KNOB_TILT from vertical: turning the knob draws the head up and forward, so the strap swings about its hinge
+# onto the hub. A vertical bolt there would pull nearly along the line from the hinge to the head (12 mm of leverage
+# about the hinge), so it would mostly stretch and bend the strap; leaning it forward 30 deg gives 41 mm, so the same
+# pull closes the strap 3.4 times as hard. 30 deg is as far as it can lean with the seat sunk into the shell's top (the
+# shell prints top down, so nothing can stand proud of it) and 2 mm or more of shell between the seat and the hub.
 FELT_T = 1.5
-SHOE_HW, SHOE_HZ = 6.0, 22.0                     # 12 wide, 44 tall
-SHOE_CLR = 0.1                                   # per side, all round the shoe in its tunnel: no slop (tune it with the
-                                                 # shoe-pocket coupon)
-SHOE_X1 = 45.0                                   # its back face
-SPRING_BORE = (35.0, SHOE_X1)                    # the spring's bore in the shoe's back, 10.6 across (Rev 3's seat)
-SPRING_FIT = m.SPRING_FIT                        # 6.5 fitted, as Rev 3
-CAP_X = (SPRING_BORE[0] + SPRING_FIT, 47.0)      # printed spring cap, 3.5 mm of it in the shoe's bore: the bolt's tip
-                                                 # pushes its back face
-# The brake housing, split at z = 0 like a bearing seat: the lower half on the frame, the upper half on the shell. It
-# runs from TOWER_X0 (just behind the shoe's front corners at x = 22.5) to TOWER_X1, its front following the hub HUB_CLR
-# off, and the pocket runs out through its back face. The shoe goes in with the shell off, standing back SHOE_IN while
-# it's set down past the hub, then slid forward.
-HUB_CLR = 0.8
-TOWER_X0, TOWER_X1 = 24.0, 47.5
-TOWER_HW = 10.0
-SHOE_IN = 10.5
+STRAP_HW = 9.0                                   # 18 wide: 2 mm clear of the up-stop lugs (|y| 11..21) either side
+SLOT_HW = STRAP_HW + 0.5                         # the knuckle's slot through the up-stop pad: it guides the strap, so it
+                                                 # can't shift more than 0.5 toward a lug
+BAY_HW = USTOP_SLOT                              # 11: the strap's bay behind the pad, in the frame and the shell
+STRAP_R0, STRAP_T = HUB_R + FELT_T, 8.0          # its face (31.5, on the felt) and the band's depth
+STRAP_PHI = (-40.0, 24.0)                        # the band; the arm on its bottom end, the head on its top end
+FELT_PHI = (-38.0, 22.0)                         # the felt, 2 deg in from each end
+FELT_HW = STRAP_HW - 1.0                         # 16 wide, clear of the strap's chamfers
+HINGE_X, HINGE_Z, KNUCKLE_R = 24.0, -38.0, 6.2   # the hinge: 4 mm of strap round its pin; the knuckle 2.8 mm behind
+                                                 # the strut clevis's back walls
+HINGE_HOLE_R = 2.1                               # the knuckle on the pin's 4 mm shank: a running fit
+HINGE_HEAD_Y = 23.0                              # its pin, an M4 x 50 socket head: the head on the floor of a counterbore
+                                                 # in the +y block's outer face, the nut in a hex pocket in the -y block's
+KNOB_TILT = 30.0                                 # the bolt leans forward this far from vertical
+KNOB_AT = (30.5, 33.0)                           # the centre of the knob's seat (x, z), on the bolt's axis
+SEAT_R = 10.5                                    # the seat's recess round the knob (18 across)
+SEAT_FLOOR = 4.0                                 # shell under the seat, along the bolt, down to the bay's ceiling
+HEAD_GAP = 3.0                                   # the strap's head under that ceiling
+HEAD_WALL = 4.0                                  # strap between the head's face and the nut
+NUT_POCKET = 5.2                                 # the head below the nut's face: the nut's slot (4.2) and 1 mm under it
+HEAD_HW = 6.5                                    # the head either side of the bolt
+KNOB_FLOOR = 11.0                                # the knob's floor, under the bolt's head, above its underside
+SPRING_POCKET = 7.0                              # the optional spring's pocket in the knob's underside, 10.6 across
+BOLT_L = 35.0                                    # M5 x 35 hex bolt
+# The strap's head and centre of mass are behind its hinge, so on its own it leans back. In the frame it leans back
+# REST_DEG onto the back wall of its bay, which is far enough for the lever's hub to drop past it. In the shell the back
+# of its bay is a ramp RAMP_CLR behind the head, parallel to the bolt: lowering the shell, the ramp meets the leaning
+# head in the last few mm and swings it forward onto the hub, so the nut ends up on the bolt's axis for the knob.
+REST_DEG = 4.0
+RAMP_CLR = 1.0
+BACK_X, BACK_WALL = 52.5, 3.0                    # the frame's and shell's back face, and their wall behind the shell's bay
+BAY_Z0 = HINGE_Z - KNUCKLE_R - 1.5               # the floor of the slot and the frame's bay
+T_CEIL = -SEAT_FLOOR                             # along the bolt from the seat (+ toward the knob): the bay's ceiling,
+T_HEAD = T_CEIL - HEAD_GAP                       # the head's face,
+T_NUT = T_HEAD - HEAD_WALL                       # the nut's face
+T_FAR = T_NUT - NUT_POCKET                       # and the head's far face, where the pocket opens
 # The back: one 45 deg chamfer plane each side, |y| + x = REAR_C, from the pillow blocks' outer back corners through the
-# frame, the shell and the back plate, so the three read as one block from behind.
+# frame and the shell, so the two read as one block from behind.
 REAR_C = BLOCK_HW + BLOCK_Y1                     # 69
-# back plate: x TOWER_X1 .. +8.5, from just over the base plate up to the shell's top, the full width of the back face
-# (|y| 21.5) tapering along the chamfer to 13 at its back face
-BACK_T, BACK_Z = 8.5, Z_PLATE + 0.2
-# its screws: M3 x 16 countersunk from its back face, into M3 threads tapped 7.5 mm deep. Three pairs, evenly spaced
-# down the plate: one at its middle (z = -5.9, into the frame) and one BACK_PITCH above (into the shell) and below (into
-# the frame). Two columns at y = +-8.8: the shoe's pocket runs out through the back face 6.1 either side of the middle,
-# so the middle pair's pilots need to be this far out to keep 1.45 mm of wall off it (at +-7 they'd break into it), and
-# the heads are still 0.75 mm inside the plate's 13 mm back face.
-BACK_ZC = (BACK_Z + SHELL_TOP) / 2               # the plate's middle (-5.9)
-BACK_PITCH = 32.9
-BACK_SCREWS = [(y, BACK_ZC + k * BACK_PITCH) for y in (-8.8, 8.8) for k in (1, 0, -1)]
-NUT5_X = TOWER_X1                                # the M5 nut, in a pocket in the back plate's front face
-KNOB_X0 = TOWER_X1 + BACK_T + 3.0                # the knob's underside: 3 mm off the back plate, room to screw in
-BOLT_L = 30.0                                    # Rev 3's M5 x 30 hex bolt, its head on the knob's floor
-KNOB_FLOOR = CAP_X[1] + BOLT_L - KNOB_X0         # the knob's floor, raised to 18 mm (Rev 3's: 4) for the M5 x 30
 
 
 def collar_pin(theta=0.0):
@@ -399,11 +415,9 @@ def frame():
         yi, yo = s * BRG_Y0, s * BLOCK_Y1
         parts += [box(-BLOCK_HW, BLOCK_HW, y0, y1, Z_PLATE, 0),                                       # pillow block
                   # down-stop pillar under the pad, run on into the pillow block
-                  box(PAD_X[0], -BLOCK_HW + 0.5, *sorted((s * PAD_DY[0], yi + s * 0.5)), Z_PLATE - 0.1, PAD_Z),
-                  # behind the pillow block: the web to the brake housing and the corner, out to the back chamfer
-                  rear_fill(s, Z_PLATE - 0.1, 0.0)]
+                  box(PAD_X[0], -BLOCK_HW + 0.5, *sorted((s * PAD_DY[0], yi + s * 0.5)), Z_PLATE - 0.1, PAD_Z)]
     pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z)                            # up-stop pad
-    parts += [pad, brake_housing(Z_PLATE - 0.1, 0.0), anchor_clevis(), *corner_gussets(), front_wall()]
+    parts += [pad, frame_back(), anchor_clevis(), *corner_gussets(), front_wall()]
     f = fuse(*parts)
 
     a4, t4 = m.NUT_AF[4], m.NUT_T[4]
@@ -421,12 +435,9 @@ def frame():
              m.csk_hole(4, (r.ANCH_X, aw, r.ANCH_Z), (0, -1, 0), 1),                                   # head on +y,
              hexprism(a4, (r.ANCH_X, -aw + t4 + 0.2, r.ANCH_Z), (r.ANCH_X, -aw - 1, r.ANCH_Z)),          # nut on -y
              cyl(STRUT_KEY_R, (r.ANCH_X, BRG_Y0 - 1, r.ANCH_Z), (r.ANCH_X, BLOCK_Y1 + 1, r.ANCH_Z))]      # hex key in
-    # brake: the shoe's pocket (lower half), and the back plate's lower screws
-    cuts.append(shoe_tunnel())
+    cuts += hinge_cuts()                                       # brake: the strap's slot, bay and hinge pin
     cuts.append(strut_body_sweep(1.5))                         # the strut's cylinder: through the front wall, over the
                                                                # clevis's front gussets
-    for y, z in BACK_SCREWS:
-        cuts.append(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
     for x, y in DESK:
         cuts.append(cyl(2.75, (x, y, -AXIS_H - 1), (x, y, 0)))                                         # desk mounting
     for c in cuts:
@@ -510,30 +521,21 @@ def lever_sweep():
     return fuse(*[rot_y(env, a) for a in range(-1, int(STOP_DEG) + 3, 2)])
 
 
-def rear_fill(s, z0, z1):
-    """behind a pillow block (side s), between z0 and z1: solid from the brake housing's side (|y| 9.5) out to the
-    block's outer face and back to the housing's back face, its outer back corner cut off by the back chamfer"""
-    bx, yo, yh = BLOCK_HW, BLOCK_Y1, TOWER_HW - 0.5
-    pts = [(bx - 0.5, yh), (bx - 0.5, yo), (bx, yo), (TOWER_X1, REAR_C - TOWER_X1), (TOWER_X1, yh)]
-    return (cq.Workplane("XY").workplane(offset=z0).polyline([(x, s * y) for x, y in pts]).close()
-            .extrude(z1 - z0).val())
-
-
 def joint_edge(e):
-    """edges in the faces where the frame, shell and back plate meet: no chamfer there, so no groove shows at the seams
-    (and none runs along the inside of the shoe's pocket)"""
+    """edges in the face where the frame and the shell meet: no chamfer there, so no groove shows at the seam"""
     b = e.BoundingBox()
-    return (abs(b.zmin) < 1e-4 and abs(b.zmax) < 1e-4) or (abs(b.xmin - TOWER_X1) < 1e-4 and abs(b.xmax - TOWER_X1) < 1e-4)
+    return abs(b.zmin) < 1e-4 and abs(b.zmax) < 1e-4
 
 
 def shell():
     """the box over the lever, in place of Rev 3's two caps: its side walls are the caps (the bearing's upper half-seat
     and lip, the cover screws' upper threads, the cap screws counterbored from the top), joined by 3 mm front, back and
-    top walls. The front and top are slotted for the lever's sweep; the upper half of the brake housing runs on out of
-    the back wall. Prints top down"""
+    top walls. The front and top are slotted for the lever's sweep. Behind the hub it's solid out to the walls and the
+    back face, the knob's seat sunk into it and the strap's bay under that. Prints top down"""
     h = BLOCK_HW
     s = box(-h, h, -BLOCK_Y1, BLOCK_Y1, 0, SHELL_TOP).cut(
         box(-h + SHELL_T, h - SHELL_T, -BRG_Y0, BRG_Y0, -1, SHELL_TOP - SHELL_T))
+    s = s.fuse(shell_back())
     for side in (-1, 1):
         for k in block_cuts(side):
             s = s.cut(k)
@@ -541,10 +543,8 @@ def shell():
         for x in (-CAP_BOLT_X, CAP_BOLT_X):                                     # the M4 x 50s: clearance, counterbore
             s = s.cut(cyl(m.LS_CLR_R, (x, yb, -1), (x, yb, CAP_HEAD_Z + 0.01)))
             s = s.cut(cyl(SHELL_CB_R, (x, yb, CAP_HEAD_Z), (x, yb, SHELL_TOP + 1)))
-    s = s.fuse(brake_housing(0.0, SHELL_TOP), *[rear_fill(side, 0.0, SHELL_TOP) for side in (-1, 1)])   # brake housing
-    s = s.cut(shoe_tunnel())
-    for y, z in BACK_SCREWS:
-        s = s.cut(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
+    for c in knob_seat_cuts():                                          # brake: the knob's seat, the strap's bay
+        s = s.cut(c)
     s = s.cut(front_cut()).cut(top_cut())                               # the lever's opening, clean
     return chamfer_edges(s.clean(), exclude=joint_edge)
 
@@ -669,58 +669,155 @@ def cover_cable():
 
 
 # ================================================================ brake
-def brake_housing(z0, z1):
-    """the block round the shoe's pocket between heights z0 and z1, its front HUB_CLR off the hub"""
-    return box(TOWER_X0, TOWER_X1, -TOWER_HW, TOWER_HW, z0, z1).cut(cyl(HUB_R + HUB_CLR, (0, -20, 0), (0, 20, 0)))
+def bolt_axis():
+    """the knob's bolt: (u, w), u along it toward the knob, w across it, up and back"""
+    a = math.radians(KNOB_TILT)
+    return V(-math.sin(a), 0, math.cos(a)), V(math.cos(a), 0, math.sin(a))
 
 
-def shoe_tunnel(clr=SHOE_CLR):
-    return box(TOWER_X0 - 4, TOWER_X1 + 1, -SHOE_HW - clr, SHOE_HW + clr, -SHOE_HZ - clr, SHOE_HZ + clr)
+def on_bolt(t, s=0.0):
+    """t along the bolt from the centre of the knob's seat (+ toward the knob), s across it (+ up and back)"""
+    u, w = bolt_axis()
+    return V(KNOB_AT[0], 0, KNOB_AT[1]) + u * t + w * s
 
 
-def back_plate():
-    """closes the pocket's back, screwed across the frame's and the shell's halves of the housing; the M5 nut sits in
-    a pocket in its front face, and the bolt's push goes into it. Prints on its front face"""
-    x0, x1 = TOWER_X1, TOWER_X1 + BACK_T
-    pts = [(x0, -(REAR_C - x0)), (x1, -(REAR_C - x1)), (x1, REAR_C - x1), (x0, REAR_C - x0)]
-    p = cq.Workplane("XY").workplane(offset=BACK_Z).polyline(pts).close().extrude(SHELL_TOP - BACK_Z).val()
-    p = p.cut(hexprism(m.NUT_AF[5], (x0 - 0.1, 0, 0), (x0 + m.NUT_T[5] + 0.2, 0, 0)))
-    p = p.cut(cyl(m.CSK[5][1] / 2, (x0 - 1, 0, 0), (x1 + 1, 0, 0)))
-    for y, z in BACK_SCREWS:
-        p = p.cut(m.csk_hole(3, (x1, y, z), (-1, 0, 0), BACK_T + 1))
-    return chamfer_edges(p.clean(), exclude=joint_edge)
+def _pt(rr, a):
+    return (rr * math.cos(math.radians(a)), rr * math.sin(math.radians(a)))
 
 
-def shoe():
-    s = box(HUB_R - 9.0, SHOE_X1, -SHOE_HW, SHOE_HW, -SHOE_HZ, SHOE_HZ)
-    s = s.cut(cyl(HUB_R + FELT_T, (0, -20, 0), (0, 20, 0)))                                    # its face, under the felt
-    s = s.cut(cyl(5.3, (SPRING_BORE[0], 0, 0), (SHOE_X1 + 1, 0, 0)))                          # the spring's bore
-    return chamfer_edges(s.clean())
+def _arc(rr, a0, a1, n=24):
+    return [_pt(rr, a0 + (a1 - a0) * i / n) for i in range(n + 1)]
+
+
+def hex_on(af, p0, p1, corner):
+    """a hexagonal prism af across its flats from p0 to p1, a corner toward `corner` (square to its axis)"""
+    p0, p1 = V(*p0), V(*p1)
+    pl = cq.Plane(origin=p0, xDir=V(*corner), normal=(p1 - p0).normalized())
+    return cq.Workplane(pl).polygon(6, af / math.cos(math.radians(30))).extrude((p1 - p0).Length).val()
+
+
+def strap_outline():
+    """the strap in the XZ plane, as three outlines that overlap: the band on the hub; the head, the hull of the nut's
+    block and the band's top 12 deg, one solid gusset from the band's front and back out to where the bolt pulls; and
+    the arm, the hull of the knuckle and the band's bottom 12 deg, a gusset from the band down to the hinge. The chords
+    inside the band's face come off with the face's cylinder (strap())"""
+    r0, r1 = STRAP_R0, STRAP_R0 + STRAP_T
+    p0, p1 = STRAP_PHI
+    band = _arc(r0, p0, p1, 60) + _arc(r1, p1, p0, 60)
+    blk = [(q.x, q.z) for q in (on_bolt(t, s) for t in (T_HEAD, T_FAR) for s in (-HEAD_HW, HEAD_HW))]
+    head = r._hull(blk + _arc(r0, p1 - 12.0, p1) + _arc(r1, p1 - 12.0, p1))
+    knuckle = [(HINGE_X + KNUCKLE_R * math.cos(math.radians(a)), HINGE_Z + KNUCKLE_R * math.sin(math.radians(a)))
+               for a in range(0, 360, 3)]
+    arm = r._hull(knuckle + _arc(r0, p0, p0 + 12.0) + _arc(r1, p0, p0 + 12.0))
+    return band, head, arm
+
+
+def swing_2d(pts, deg):
+    """XZ points swung deg about the hinge (+ = back, off the hub), as strap_at() swings a part"""
+    c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+    return [(HINGE_X + (x - HINGE_X) * c + (z - HINGE_Z) * s, HINGE_Z - (x - HINGE_X) * s + (z - HINGE_Z) * c)
+            for x, z in pts]
+
+
+def frame_bay_back():
+    """the frame's bay ends where the strap, leaning back REST_DEG, rests on its top back edge: the furthest back the
+    strap's outline reaches below the joint at that angle"""
+    best = 0.0
+    for poly in strap_outline():
+        q = swing_2d(poly, REST_DEG)
+        for (x0, z0), (x1, z1) in zip(q, q[1:] + q[:1]):
+            for i in range(41):
+                x, z = x0 + (x1 - x0) * i / 40, z0 + (z1 - z0) * i / 40
+                if z <= 0.0 and math.hypot(x, z) >= STRAP_R0 - 0.01:
+                    best = max(best, x)
+    return round(best, 2)
+
+
+def nut_slot():
+    """the M5 nut's slot in the strap's head: a hex pocket on the bolt's axis, its corners along y, and a slot the
+    nut's width from it out through the strap's +y face (its top as it prints), so the nut drops in sideways and the
+    bolt holds it. The bolt's pull bears it on the slot's face toward the knob"""
+    t0, t1, a = T_NUT - m.NUT_T[5] - 0.2, T_NUT, m.NUT_AF[5] / 2
+    pts = [(q.x, q.z) for q in (on_bolt(t0, -a), on_bolt(t1, -a), on_bolt(t1, a), on_bolt(t0, a))]
+    return fuse(hex_on(m.NUT_AF[5], on_bolt(t0).toTuple(), on_bolt(t1).toTuple(), (0, 1, 0)),
+                gusset_xz(pts, 0.0, STRAP_HW + 1.0))
+
+
+def strap():
+    """felt-lined, hinged at its bottom, pulled at its head. Prints on its side, +y up, so the bending all runs along
+    its layers and the nut's slot opens upward"""
+    r0, (p0, p1), hw = STRAP_R0, STRAP_PHI, STRAP_HW
+    band, head, arm = strap_outline()
+    u, _ = bolt_axis()
+    s = fuse(m.sector(r0, r0 + STRAP_T, p0, p1, -hw, hw), gusset_xz(head, -hw, hw), gusset_xz(arm, -hw, hw),
+             cyl(KNUCKLE_R, (HINGE_X, -hw, HINGE_Z), (HINGE_X, hw, HINGE_Z)))
+    s = s.cut(cyl(r0, (0, -20, 0), (0, 20, 0)))                                              # its face, on the felt
+    s = s.cut(cyl(HINGE_HOLE_R, (HINGE_X, -20, HINGE_Z), (HINGE_X, 20, HINGE_Z)))             # the hinge pin
+    s = s.cut(nut_slot())                                                                    # the M5 nut
+    s = s.cut(cyl(2.8, on_bolt(-40.0).toTuple(), on_bolt(T_HEAD + 1.0).toTuple()))          # the bolt, right through
+    s = chamfer_edges(s.clean())
+    return s.cut(cq.Solid.makeCone(4.5, 2.8, 1.7, on_bolt(T_HEAD + 0.01), -u)).clean()   # lead-in for the bolt's tip
 
 
 def felt():
-    f = cyl(HUB_R + FELT_T, (0, -SHOE_HW + 0.5, 0), (0, SHOE_HW - 0.5, 0)).cut(cyl(HUB_R + 0.05, (0, -20, 0), (0, 20, 0)))
-    return f.intersect(box(0, 50, -20, 20, -SHOE_HZ + 0.5, SHOE_HZ - 0.5)).clean()
+    """self-adhesive felt, FELT_T thick, on the strap's face (drawn 0.02 off the hub)"""
+    return m.sector(HUB_R + 0.02, STRAP_R0, *FELT_PHI, -FELT_HW, FELT_HW)
 
 
-def spring_cap():
-    """the bolt's tip bears in the dimple on its back; the spring on its front"""
-    c = cyl(5.1, (CAP_X[0], 0, 0), (CAP_X[1], 0, 0))
-    c = c.cut(cq.Solid.makeCone(2.6, 0.5, 1.2, V(CAP_X[1] + 0.01, 0, 0), V(-1, 0, 0)))
-    return chamfer_edges(c.clean(), sizes=(0.5,))
+def strap_at(shape, deg):
+    """a part of the strap swung deg about its hinge (+ = back, off the hub)"""
+    return shape.rotate((HINGE_X, 0, HINGE_Z), (HINGE_X, 1, HINGE_Z), deg)
 
 
-def knob_spring():
-    p0 = V(SPRING_BORE[0], 0, 0)
-    L = CAP_X[0] - SPRING_BORE[0]
-    helix = cq.Wire.makeHelix(1.6, L, 4.6, p0, V(1, 0, 0))
-    pl = cq.Plane(origin=helix.startPoint(), xDir=m._perp(helix.tangentAt(0)), normal=helix.tangentAt(0))
-    return cq.Workplane(pl).circle(0.55).sweep(cq.Workplane().add(helix), isFrenet=True).val()
+def hinge_cuts():
+    """the knuckle's slot through the up-stop pad, the bay behind it, the pin's hole through the pad and both pillow
+    blocks, the pin's head's counterbore (+y) and its nut's pocket (-y)"""
+    return [box(HINGE_X - KNUCKLE_R - 1.5, PED_X[1] + 0.5, -SLOT_HW, SLOT_HW, BAY_Z0, USTOP_Z + 1),
+            box(PED_X[1], frame_bay_back(), -BAY_HW, BAY_HW, BAY_Z0, 1.0),
+            cyl(m.LS_CLR_R, (HINGE_X, -BLOCK_Y1 - 1, HINGE_Z), (HINGE_X, BLOCK_Y1 + 1, HINGE_Z)),
+            cyl(SHELL_CB_R, (HINGE_X, HINGE_HEAD_Y, HINGE_Z), (HINGE_X, BLOCK_Y1 + 1, HINGE_Z)),
+            hexprism(m.NUT_AF[4], (HINGE_X, -HINGE_HEAD_Y, HINGE_Z), (HINGE_X, -BLOCK_Y1 - 1, HINGE_Z))]
 
 
-def friction_knob():
-    """Rev 3's knob (the MkII knob with an M5 hex pocket) with its floor raised to KNOB_FLOOR, so Rev 3's M5 x 30 reaches
-    the spring cap from it; lying on its side behind the back plate"""
+def back_outline(x0, yi):
+    """the back in plan: from x0 back, |y| <= yi in front of the pillow blocks' back ends, then their full width, then
+    in along the 45 deg chamfers to the back face"""
+    yo, bx, c = BLOCK_Y1, BLOCK_HW, REAR_C
+    return [(x0, -yi), (bx, -yi), (bx, -yo), (BACK_X, -(c - BACK_X)), (BACK_X, c - BACK_X), (bx, yo), (bx, yi), (x0, yi)]
+
+
+def frame_back():
+    """behind the up-stop pad, between the pillow blocks and on behind them to the back face: solid from the base plate
+    to the joint, except round the axis, 39 mm out between the blocks (1.5 mm clear of the up-stop lugs' swing)"""
+    z0 = Z_PLATE - 0.1
+    b = cq.Workplane("XY").workplane(offset=z0).polyline(back_outline(PED_X[1], BRG_Y0 + 0.5)).close() \
+        .extrude(-z0).val()
+    return b.cut(cyl(LUG_R + 1.5, (0, -BRG_Y0 - 0.5, 0), (0, BRG_Y0 + 0.5, 0)))
+
+
+def shell_back():
+    """the shell behind the hub: solid from 2 mm off the hub out to the side walls, the top and the back face, behind a
+    plane at 75 deg over the hub's top (the upper fairing sweeps the hub down to 71 deg at the stop)"""
+    b = cq.Workplane("XY").polyline(back_outline(0.0, BRG_Y0 + 0.5)).close().extrude(SHELL_TOP).val()
+    b = b.cut(cyl(HUB_R + 2.0, (0, -BLOCK_Y1 - 1, 0), (0, BLOCK_Y1 + 1, 0)))
+    a = math.radians(75.0)
+    return b.cut(gusset_xz([(-1.0, -1.0), (60 * math.cos(a), 60 * math.sin(a)), (-1.0, 60.0)], -40, 40))
+
+
+def knob_seat_cuts():
+    """the knob's seat, sunk square to the bolt into the shell's top; the bolt's hole under it; and the strap's bay
+    under that: SEAT_FLOOR below the seat, and behind the head a ramp RAMP_CLR off it, parallel to the bolt"""
+    lo, hi = -80.0, 80.0
+    pts = [(q.x, q.z) for q in (on_bolt(lo, lo), on_bolt(T_CEIL, lo), on_bolt(T_CEIL, HEAD_HW + RAMP_CLR),
+                                on_bolt(lo, HEAD_HW + RAMP_CLR))]
+    bay = gusset_xz(pts, -BAY_HW, BAY_HW).intersect(box(0.0, BACK_X - BACK_WALL, -BAY_HW, BAY_HW, -1.0, SHELL_TOP))
+    return [cyl(SEAT_R, on_bolt(0.0).toTuple(), on_bolt(hi).toTuple()),
+            cyl(m.M5_CLR_R, on_bolt(T_CEIL - 1.0).toTuple(), on_bolt(1.0).toTuple()), bay]
+
+
+def friction_knob(s=0.0):
+    """Rev 3's knob (the MkII knob with an M5 hex pocket) with its floor at KNOB_FLOOR and a pocket in its underside for
+    an optional spring; in its seat, s along the bolt off it (0: no spring, the knob on the seat)"""
     from OCP.StlAPI import StlAPI_Reader
     from OCP.TopoDS import TopoDS_Shape
     raw = TopoDS_Shape()
@@ -732,16 +829,43 @@ def friction_knob():
     k = k.fuse(cyl(6.2, (0, 0, 0.5), (0, 0, zt - 0.3)))                     # fill the MkII's M6 pocket and hole
     k = k.cut(hexprism(m.M5_HEAD_AF, (0, 0, zf), (0, 0, zt + 1)))           # M5 hex pocket, open at the top
     k = k.cut(cyl(m.M5_CLR_R, (0, 0, -1), (0, 0, zf + 0.1)))                # M5 clearance up to the floor
+    k = k.cut(cyl(5.3, (0, 0, -1), (0, 0, SPRING_POCKET)))                  # the spring's pocket
     k = k.cut(cq.Solid.makeCone(hr + 0.8, hr - 0.2, 1.0, V(0, 0, zt - 1.0), V(0, 0, 1)))   # lead-in at the mouth
-    return rot_y(k.clean(), 90).translate(V(KNOB_X0, 0, 0))                # axis +x
+    return rot_y(k.clean(), -KNOB_TILT).translate(on_bolt(s))
 
 
-def brake_hardware():
-    """M5 x 30 hex bolt (head on the knob's floor) and its nut"""
-    hb = KNOB_X0 + KNOB_FLOOR
-    bolt = fuse(hexprism(m.M5_HEAD_AF - 0.1, (hb, 0, 0), (hb + m.KNOB_BOLT[1], 0, 0)),
-                cyl(2.4, (hb - BOLT_L, 0, 0), (hb + 0.1, 0, 0)))
-    return fuse(bolt, m.nut(5, (NUT5_X + 0.1, 0, 0), (1, 0, 0)))
+def knob_spring(fit=10.0):
+    """the optional spring (reference): fitted `fit` long between the seat and the floor of the knob's pocket, so the
+    knob stands fit - SPRING_POCKET off the seat"""
+    u, _ = bolt_axis()
+    p0 = on_bolt(0.55)
+    helix = cq.Wire.makeHelix(1.6, fit - 1.1, 4.45, p0, u)
+    pl = cq.Plane(origin=helix.startPoint(), xDir=m._perp(helix.tangentAt(0)), normal=helix.tangentAt(0))
+    return cq.Workplane(pl).circle(0.5).sweep(cq.Workplane().add(helix), isFrenet=True).val()
+
+
+def brake_screws(s=0.0):
+    """the brake's bought parts (reference), each with the way it comes out: the knob's M5 x 35 hex bolt (its head on
+    the knob's floor, the knob s off its seat), its M5 nut in the strap's slot, and the hinge's M4 x 50 socket head pin
+    (head on +y) and its M4 nut (-y). [(name, shape, out)]"""
+    u, w = bolt_axis()
+    hb = on_bolt(s + KNOB_FLOOR)                                           # the bolt head's underside
+    bolt = fuse(hex_on(m.M5_HEAD_AF - 0.1, hb.toTuple(), (hb + u * m.KNOB_BOLT[1]).toTuple(), w.toTuple()),
+                cyl(2.4, (hb - u * BOLT_L).toTuple(), (hb + u * 0.1).toTuple()))
+    nut = hex_on(m.NUT_AF[5] - 0.2, on_bolt(T_NUT - m.NUT_T[5]).toTuple(), on_bolt(T_NUT).toTuple(), (0, 1, 0)).cut(
+        cyl(2.0, on_bolt(T_NUT - 6).toTuple(), on_bolt(T_NUT + 1).toTuple()))
+    y = HINGE_HEAD_Y
+    pin = fuse(cyl(r.CAP_D / 2, (HINGE_X, y, HINGE_Z), (HINGE_X, y + r.CAP_K, HINGE_Z)),
+               cyl(2.0, (HINGE_X, y - 50, HINGE_Z), (HINGE_X, y, HINGE_Z)))
+    pnut = hexprism(7.0, (HINGE_X, -y, HINGE_Z), (HINGE_X, -y - m.NUT_T[4], HINGE_Z)).cut(
+        cyl(2.0, (HINGE_X, -y + 1, HINGE_Z), (HINGE_X, -y - 5, HINGE_Z)))
+    return [("brake bolt", bolt, u.toTuple()), ("brake nut", nut, (0, 1, 0)), ("hinge screw", pin, (0, 1, 0)),
+            ("hinge nut", pnut, (0, -1, 0))]
+
+
+def brake_hardware(s=0.0):
+    """the brake's bolt and nut and its hinge pin and nut, as one shape"""
+    return fuse(*[shp for _, shp, _ in brake_screws(s)])
 
 
 # ================================================================ bought parts and wiring
@@ -799,10 +923,9 @@ def shell_screw(x, y):
 
 
 def hardware():
-    """the fixed base's screws and nuts (reference): the shell's, the covers', the back plate's, the brake bolt and nut"""
+    """the fixed base's screws and nuts (reference): the shell's, the covers', the brake's bolt and nut and its hinge
+    pin and nut"""
     parts = [brake_hardware()]
-    for y, z in BACK_SCREWS:
-        parts.append(m.csk_screw(3, (TOWER_X1 + BACK_T, y, z), (-1, 0, 0), 16))
     for s in (-1, 1):
         yb = s * CAP_BOLT_Y
         for x in (-CAP_BOLT_X, CAP_BOLT_X):
@@ -816,8 +939,8 @@ def hardware():
 # ================================================================ build + export
 TURNS = ("lever_upper", "lever_lower", "lever_screws", "carbon_tube", "hose_clamp", "sensor_pcb", "sensor_chip",
          "bearing_inner", "sensor_wires")
-PRINTED = ["frame", "shell", "lever_upper", "lever_lower", "shoe", "spring_cap", "back_plate", "cover_sensor",
-           "cover_cable", "strut_collar", "friction_knob"]
+PRINTED = ["frame", "shell", "lever_upper", "lever_lower", "strap", "cover_sensor", "cover_cable", "strut_collar",
+           "friction_knob"]
 
 
 _STATIC = {}
@@ -835,10 +958,9 @@ def static_parts():
     """the parts that don't move, built once (chamfered, as Rev 3's)"""
     if not _STATIC:
         fr, sh, _ = joint_grid(chamfer_edges(frame(), exclude=joint_edge), shell())
-        _STATIC.update({"frame": fr, "shell": sh, "shoe": shoe(), "spring_cap": spring_cap(),
-                        "back_plate": back_plate(),
+        _STATIC.update({"frame": fr, "shell": sh, "strap": strap(), "felt": felt(),
                         "cover_sensor": cover_sensor(), "cover_cable": cover_cable(), "friction_knob": friction_knob(),
-                        "felt": felt(), "knob_spring": knob_spring(), "hardware": hardware(), "magnet": magnet(),
+                        "hardware": hardware(), "magnet": magnet(),
                         "bearing_outer": fuse(*[bearing(s)[0] for s in (-1, 1)]),
                         "bearing_seal": fuse(*[bearing(s)[2] for s in (-1, 1)])})
     return dict(_STATIC)
@@ -862,10 +984,9 @@ def build(theta=0.0):
 # ================================================================ interference check
 # Overlaps that are meant to be there: presses and fits, screws in their holes (modelled at their thread's outside
 # diameter, so they overlap a tapped pilot), parts that rest on each other, and the cables in their channels.
-ALLOWED = {("bearing_inner", "lever_upper"), ("bearing_inner", "lever_lower"), ("felt", "shoe"),
-           ("frame", "hardware"), ("hardware", "shell"), ("back_plate", "hardware"), ("cover_sensor", "hardware"),
-           ("cover_cable", "hardware"), ("friction_knob", "hardware"), ("hardware", "knob_spring"),
-           ("hardware", "spring_cap"), ("knob_spring", "shoe"), ("knob_spring", "spring_cap"),
+ALLOWED = {("bearing_inner", "lever_upper"), ("bearing_inner", "lever_lower"), ("felt", "strap"),
+           ("frame", "hardware"), ("hardware", "shell"), ("cover_sensor", "hardware"),
+           ("cover_cable", "hardware"), ("friction_knob", "hardware"),
            ("frame", "strut_pins"), ("gas_strut", "strut_pins"), ("strut_collar", "strut_pins"),
            ("lever_lower", "lever_screws"), ("lever_screws", "lever_upper"), ("carbon_tube", "hose_clamp"),
            ("hose_clamp", "lever_lower"), ("hose_clamp", "lever_upper"), ("carbon_tube", "strut_collar"),
@@ -917,12 +1038,14 @@ def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
 
 
 def check_assembly(step=2.0):
-    """the order it goes together in: the lever (bearings on) lowered straight down into the bare frame from 80 mm up;
-    the shoe (felt, spring and cap in it) set down into the frame's half of its pocket standing SHOE_IN back, from
-    60 mm up, then slid forward onto the hub; then the shell lowered straight down over both from 80 mm up"""
+    """the order it goes together in: the strap (felt on) set down into the bare frame from 60 mm up, leaning back
+    REST_DEG as it rests on its own, and its pin fitted; the lever (bearings on) lowered straight down past it from
+    80 mm up; the strap swung forward onto the hub; then the shell lowered straight down from 80 mm up, the strap
+    leaning back again until the shell's ramp meets it and swings it forward. Last, how far off the bolt's axis that
+    leaves the strap's nut for the knob"""
     S = static_parts()
     lever_b = cq.Compound.makeCompound([*lever_halves(0.0), *[bearing(s)[k] for s in (-1, 1) for k in range(3)]])
-    shoe_b = cq.Compound.makeCompound([S["shoe"], S["felt"], S["spring_cap"]])
+    strap_b = cq.Compound.makeCompound([S["strap"], S["felt"]])
     worst = {}
 
     def meet(p, q):
@@ -937,24 +1060,71 @@ def check_assembly(step=2.0):
         elif vol > 0.01:
             worst[key] = max(worst.get(key, (0, 0)), (vol, at))
 
-    for i in range(int(80 / step) + 1):
-        z = 80.0 - i * step
-        hit("lever / frame", lever_b.translate(V(0, 0, z)), S["frame"], z)
+    def gap(a_, b_):
+        return min((sa.distance(sb) for sa in a_.Solids() for sb in b_.Solids()), default=99.0)
+
+    rest = strap_at(strap_b, REST_DEG)
     for i in range(int(60 / step) + 1):
         z = 60.0 - i * step
-        for k, f in (("frame", S["frame"]), ("lever", lever_b)):
-            hit(f"shoe down / {k}", shoe_b.translate(V(SHOE_IN, 0, z)), f, z)
-    for i in range(int(SHOE_IN / 0.5) + 1):
-        d = SHOE_IN - i * 0.5
-        for k, f in (("frame", S["frame"]), ("lever", lever_b)):
-            hit(f"shoe forward / {k}", shoe_b.translate(V(d, 0, 0)), f, d)
+        hit("strap down / frame", rest.translate(V(0, 0, z)), S["frame"], z)
+    near = 99.0
+    for i in range(int(80 / step) + 1):
+        z = 80.0 - i * step
+        lv = lever_b.translate(V(0, 0, z))
+        hit("lever / frame", lv, S["frame"], z)
+        hit("lever / strap", lv, rest, z)
+        near = min(near, gap(lv, rest))
+    print(f"  the lever goes in past the strap leaning back {REST_DEG:.0f} deg: {near:.2f} mm at the closest")
+    for i in range(int(REST_DEG / 0.5) + 1):
+        a = REST_DEG - i * 0.5
+        hit("strap forward / lever", strap_at(S["strap"], a), lever_b, a)
+        hit("strap forward / frame", strap_at(strap_b, a), S["frame"], a)
+    lean, met = REST_DEG, None
     for i in range(int(80 / step) + 1):
         z = 80.0 - i * step
         sh = S["shell"].translate(V(0, 0, z))
-        for k, f in (("lever", lever_b), ("frame", S["frame"]), ("shoe", shoe_b)):
-            hit(f"shell / {k}", sh, f, z)
-    print("lever in, shoe in, shell on: " + ("clear" if not worst else
+        hit("shell / lever", sh, lever_b, z)
+        hit("shell / frame", sh, S["frame"], z)
+        while lean > 0.0 and gap(sh, strap_at(strap_b, lean)) < 0.05:     # the ramp swings the strap forward
+            lean = max(0.0, lean - 0.1)
+            met = met if met is not None else z
+        if gap(sh, strap_at(strap_b, lean)) < 0.05:
+            worst["shell / strap"] = (0.0, z)
+    u, w = bolt_axis()
+    c = V(HINGE_X, 0, HINGE_Z)
+    n0 = on_bolt(T_NUT - m.NUT_T[5] / 2)
+    a = math.radians(lean)
+    dx, dz = n0.x - c.x, n0.z - c.z
+    n1 = V(c.x + dx * math.cos(a) + dz * math.sin(a), 0, c.z - dx * math.sin(a) + dz * math.cos(a))
+    off = (n1 - n0) - u * (n1 - n0).dot(u)
+    print(f"  the shell's ramp meets the leaning strap {met if met is not None else 0:.0f} mm up and swings it forward; "
+          f"on, the strap can lean back {lean:.1f} deg, the nut {off.Length:.2f} mm off the bolt's axis "
+          f"(the lead-in takes up to {4.5 - 2.5:.1f})")
+    print("strap in, lever in, shell on: " + ("clear" if not worst else
           "; ".join(f"{k} {v:.2f} mm3 at {zz:.1f}" for k, (v, zz) in worst.items())))
+
+
+def check_brake(angles=None):
+    """the brake's clearances as distances (OCC's boolean can miss a clash with a chamfered part): the strap, felt and
+    knob against the lever through its travel, and the strap against the frame, the shell and the hardware"""
+    S = static_parts()
+    angles = angles or [float(a) for a in range(0, int(STOP_DEG) + 1, 2)] + [STOP_DEG]
+
+    def gap(a_, b_):
+        return min(sa.distance(sb) for sa in a_.Solids() for sb in b_.Solids())
+
+    lo = {}
+    for th in angles:
+        lev = cq.Compound.makeCompound([*lever_halves(th), lever_screws(th)])
+        for k in ("strap", "felt", "friction_knob"):
+            d = gap(S[k], lev)
+            if k not in lo or d < lo[k][0]:
+                lo[k] = (d, th)
+    for k, (d, th) in lo.items():
+        print(f"  {k:14s} to the lever: {d:.2f} mm at the closest ({th:.0f} deg)")
+    for k in ("frame", "shell", "hardware", "friction_knob"):
+        print(f"  strap to the {k}: {gap(S['strap'], S[k]):.2f} mm, overlap {overlap(S['strap'], S[k]):.2f} mm3")
+    print("  (the strap touches the hardware where the nut bears on its slot's face)")
 
 
 def export():
@@ -1033,20 +1203,10 @@ def coupon_seat(d, depth=BRG_B, lip=BLOCK_Y1 - BRG_Y1, wall=4.0):
     return c.cut(cyl(LIP_R, (0, 0, -1), (0, 0, lip + 1)))
 
 
-def coupon_shoe_pocket(d, length=10.0, wall=4.0):
-    """10 mm of the brake shoe's tunnel, printed as the frame prints it (its axis level, its roof a bridge). The step
-    changes the clearance across it, on its width and height alike: -0.2 / 0 / +0.2 = 0 / 0.1 / 0.2 mm a side. Slide
-    the printed shoe through each: no rattle, no rocking, and still sliding under a finger"""
-    w, h = 2 * (SHOE_HW + SHOE_CLR) + d, 2 * (SHOE_HZ + SHOE_CLR) + d
-    c = box(-w / 2 - wall, w / 2 + wall, 0, length, 0, h + 2 * wall)
-    return c.cut(box(-w / 2, w / 2, -1, length + 1, wall, wall + h)).clean()
-
-
 def export_coupons():
     out = os.path.join(HERE, "stl", "coupons")
     os.makedirs(out, exist_ok=True)
-    for name, f in (("coupon_trunnion_6808", coupon_trunnion), ("coupon_bearing_seat_6808", coupon_seat),
-                    ("coupon_shoe_pocket", coupon_shoe_pocket)):
+    for name, f in (("coupon_trunnion_6808", coupon_trunnion), ("coupon_bearing_seat_6808", coupon_seat)):
         shp = m.coupon_plate(f)
         bb = shp.BoundingBox()
         print(f"{name:26s} valid={shp.isValid()} size={bb.xlen:.0f} x {bb.ylen:.0f} x {bb.zlen:.0f}")
@@ -1056,6 +1216,7 @@ def export_coupons():
 if __name__ == "__main__":
     if "--check" in sys.argv[1:]:
         check()
+        check_brake()
         check_assembly()
     elif "--balance" in sys.argv[1:]:
         balance(plot=os.path.join(HERE, "renders", "strut_balance_r4.png"))
