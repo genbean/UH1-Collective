@@ -18,7 +18,7 @@ Across the pivot axis, from the middle out (each side):
     trunnion end        |y| 32.0       40.1 mm across: the 6808's bore + 0.1
     side covers         |y| 31.5-41.0  9.5 mm deep (Rev 3: 15)
 One shell over the top takes the place of Rev 3's two bearing caps: a box over the lever whose side walls are the caps,
-with a slot in its front and top for the socket boss, tube and top gusset to swing through, and a notch in its back
+with an opening in its front and top that follows the lever's sweep 2 mm clear, and a notch in its back
 wall round the brake tower. It drops straight down over the lever and bolts on with four M4 x 50 socket head screws
 into nuts slid into the pillow blocks' outer faces, under the side covers; a diamond grid of pyramids in the joint
 locates it. The frame's front wall, under the shell's, carries the shell's cut for the lever on down, so they read as one.
@@ -39,7 +39,8 @@ Up-stop: two lugs under the back of the hub, either side of the shoe, land on a 
 
 Run with a Python that has cadquery:
     python mk3_rev4.py            -> stl/ (printed), stl/ref/ (bought, reference), step/MkIII_Rev4_assembly.step
-    python mk3_rev4.py --check    -> interference check through the travel
+    python mk3_rev4.py --check    -> interference check through the travel, the assembly order, the openings' clearance
+    python mk3_rev4.py --openings -> the openings' clearance alone
 """
 import math
 import os
@@ -183,17 +184,35 @@ DESK = [(x, y) for x in (-57.0, 54.0) for y in (-24.0, 24.0)]   # past the pillo
 # the shell over the top: a box on the pillow blocks, x +-BLOCK_HW, |y| <= BLOCK_Y1, z 0..SHELL_TOP, 3 mm walls; its side
 # walls (|y| 22.5..31.5) are solid, the bearing caps; the brake housing's upper half runs on out of its back wall
 SHELL_TOP, SHELL_T = 38.0, 3.0
-SWEEP_CLR = 1.0                                  # the slot in its front and top: this far round the lever's sweep
-# The front walls' opening, the frame's and the shell's alike: straight sides FRONT_HW either side of the tube (the
-# down-stop pads' outer faces, 1 mm clear) from above the top down to the pivot axis, and a round bottom about it. The
-# top wall's slot carries on from it: FRONT_HW wide over the socket boss's swing, then narrowing at 45 deg to the top
-# gusset's width plus 1 mm a side, with a round end just past the gusset at the stop. Both are clean 2D cuts that
-# contain the lever's whole sweep with 1 mm or more to spare.
-FRONT_HW = PAD_DY[1] + SWEEP_CLR                 # 21
-FRONT_ZC = -7.0                                  # the round bottom's centre: the lower fairing swings down to z -24.5 in
-                                                 # the front walls' plane, 11.5 either side (1 mm clear included)
-TOP_TAPER_X, TOP_NOSE_HW = -22.0, FAIR_HW + SWEEP_CLR + 1.0   # the taper starts here; 12.5: the upper fairing needs 11.5
-TOP_NOSE_X = -5.0                                # in the top wall, back to x -5.6: the round end's centre
+# The lever's opening in the front walls (the frame's and the shell's: one outline, so they read as one) and in the top
+# wall: each a clean 2D cut straight through its 3 mm wall, of lines, arcs and ellipse arcs, that follows the lever's
+# sweep from the down-stop to the up-stop SWEEP_CLR off everything that passes (the socket boss, the fairings and their
+# rounds, the down-stop pads, the hose clamp), measured in 3D (check_openings()). Front walls, from the bottom up:
+#   the lower fairing's tab   OPEN_FAIR either side, its bottom open_bottom() (-24.7), its corners rounded FAIR_R +
+#                             SWEEP_CLR (the fairing at 0 deg, in the front wall's back face)
+#   the boss                  a circle OPEN_BOSS about the axis up to the joint, then straight sides on up
+#   the pads' reliefs         from 20 deg on, the pads' back corners swing up through the walls: each side bows out on
+#                             one arc to OPEN_PAD, runs straight up and turns back in on a small one under the pads'
+#                             tops at the stop
+#   the boss at the stop      an ellipse, the boss's section in the front face at 32 deg (OPEN_ELL_Z its centre, the
+#                             boss's tilt stretching it to OPEN_ELL_B tall), up through the top
+# The joint between the fairing's tab and the boss's circle, and the reliefs' ends, are rounded. Top wall, from the front:
+# the boss's footprint at the stop (TOP_ELL, an ellipse), rounded into straight sides OPEN_FAIR either side over the
+# fairing, and a square end at TOP_END_X where the fairing's top passes under the wall at the stop, its corners
+# quarter-ellipses TOP_END_A long, the fairing's rounds' shadow.
+SWEEP_CLR = 2.05                                 # 2 mm, and 0.05 so that no check reads under 2
+OPEN_BOSS = m.SOCK_BOSS_R + SWEEP_CLR            # 20.05
+OPEN_PAD = PAD_DY[1] + SWEEP_CLR                 # 22.05
+OPEN_FAIR = FAIR_HW + SWEEP_CLR                  # 12.55
+OPEN_ELL_Z, OPEN_ELL_B = 23.4, 23.75             # BLOCK_HW tan 32 = 23.4; (18 + 2.05) / cos 32 = 23.65, and 0.1 for the
+                                                 # boss's top rising in front of the face
+OPEN_EAR = (6.4, 15.0, 23.8, 2.25, 4.0, 1.0)     # the reliefs: leave the boss's side at z, reach OPEN_PAD at z, leave it at
+                                                 # z, top corner's radius; the fillets at the bottom and top
+OPEN_TAB_R = 3.0                                 # where the fairing's tab meets the boss's circle
+TOP_ELL = (-52.0, 33.55, 19.45)                  # the boss's footprint: centre x, half length, half width (fitted to the
+                                                 # 3D clearance through the wall: the boss crosses it at 32 deg)
+TOP_ELL_R = 8.0                                  # where it meets the straight sides
+TOP_END_X, TOP_END_A = -3.15, 13.3              # the slot's square end; its corners' length along x
 # the shell to the frame: four M4 x 50 socket head cap screws (the lever's HELIFOUNER kit), two each side, from the top
 # down the middle of the shell's side walls, centred on the joint: the head's seat 25 mm above it, at the floor of a
 # 13 mm counterbore, the tip 25 mm below. Each goes into an M4 nut slid into the pillow block from its outer face, just
@@ -436,28 +455,120 @@ def frame():
 
 def front_wall():
     """the frame's front wall between the pillow blocks, SHELL_T thick like the shell's above it, from the plate up to
-    the joint, with the same cut for the lever's sweep as the shell's front wall, so the two read as one; the strut's
+    the joint, with the same opening for the lever as the shell's front wall, so the two read as one; the strut's
     cylinder passes through it, in a slot cut from its sweep (frame())"""
     w = box(-BLOCK_HW, -BLOCK_HW + SHELL_T, -BRG_Y0 - 0.1, BRG_Y0 + 0.1, Z_PLATE - 0.1, 0.0)
     return w.cut(front_cut()).clean()
 
 
+def _rounded(edges, corners):
+    """a face from a closed loop of edges, its corners at the given points rounded: [(point, radius), ...]"""
+    f = cq.Face.makeFromWires(cq.Wire.assembleEdges(edges))
+    for p, rad in corners:
+        f = f.fillet2D(rad, [v for v in f.Vertices() if (v.Center() - p).Length < 1e-4])
+    return f
+
+
+def _mirror_y(edges):
+    return [e.mirror("XZ") for e in edges]
+
+
+def _ell(c, a, b, t):
+    """a point on the ellipse about c (semi-axes a, b along the plane's two axes) at parameter t, and its outward
+    normal"""
+    n = (b * math.cos(t), a * math.sin(t))
+    k = math.hypot(*n)
+    return (c[0] + a * math.cos(t), c[1] + b * math.sin(t)), (n[0] / k, n[1] / k)
+
+
+def _root(f, lo, hi):
+    """f's root between lo and hi (f(lo) < 0 < f(hi)), by bisection"""
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if f(mid) < 0 else (lo, mid)
+    return (lo + hi) / 2
+
+
+def _mid(c, rad, p, q):
+    """the middle of the shorter arc of radius rad about c from p to q"""
+    u = (p[0] + q[0] - 2 * c[0], p[1] + q[1] - 2 * c[1])
+    k = math.hypot(*u)
+    return c[0] + rad * u[0] / k, c[1] + rad * u[1] / k
+
+
+def open_bottom():
+    """the bottom of the fairing's tab in the front walls: the lower fairing's underside at 0 deg (it drops toward the
+    hub, so it's lowest in the walls' back face), SWEEP_CLR under it, square to it"""
+    px, pz = GROOVE_X, m.SOCK_BOSS_R
+    a = math.atan2(pz, px) - math.acos(HUB_R / math.hypot(px, pz))
+    k = (HUB_R * math.sin(a) - pz) / (HUB_R * math.cos(a) - px)               # the underside's slope
+    return -(pz + k * (-BLOCK_HW + SHELL_T - px)) - SWEEP_CLR * math.sqrt(1 + k * k)
+
+
+def front_profile(x0):
+    """the front walls' opening (see OPEN_*), as a face in the plane x = x0, run on above the shell's top"""
+    P = lambda y, z: V(x0, y, z)
+    wb, wp, wf, zb = OPEN_BOSS, OPEN_PAD, OPEN_FAIR, open_bottom()
+    za, zt, zu, r2, f1, f2 = OPEN_EAR
+    a, b, ce, ztop = OPEN_BOSS, OPEN_ELL_B, (0.0, OPEN_ELL_Z), SHELL_TOP + 2.0
+    zj = -math.sqrt(wb ** 2 - wf ** 2)                                     # the tab's side meets the boss's circle
+    ra = ((wp - wb) ** 2 + (zt - za) ** 2) / (2 * (wp - wb))                # the relief's lower arc, tangent at (wp, zt)
+    ca = (wp - ra, zt)
+    c2 = (wp - r2, zu)                                                     # the relief's top corner, rounded f2 into the
+    t = _root(lambda t: math.hypot(_ell(ce, a, b, t)[0][0] + f2 * _ell(ce, a, b, t)[1][0] - c2[0],   # ellipse
+                                   _ell(ce, a, b, t)[0][1] + f2 * _ell(ce, a, b, t)[1][1] - c2[1]) - (r2 + f2), 0.0, 0.7)
+    pe, n = _ell(ce, a, b, t)
+    cf = (pe[0] + f2 * n[0], pe[1] + f2 * n[1])
+    k = math.hypot(cf[0] - c2[0], cf[1] - c2[1])
+    pc = (c2[0] + r2 * (cf[0] - c2[0]) / k, c2[1] + r2 * (cf[1] - c2[1]) / k)
+    yt = a * math.sqrt(1 - ((ztop - ce[1]) / b) ** 2)
+    t9 = math.atan2((ztop - ce[1]) / b, yt / a)
+    side = [cq.Edge.makeLine(P(wf, zb), P(wf, zj)),
+            cq.Edge.makeThreePointArc(P(wf, zj), P(*_mid((0, 0), wb, (wf, zj), (wb, 0))), P(wb, 0)),
+            cq.Edge.makeLine(P(wb, 0), P(wb, za)),
+            cq.Edge.makeThreePointArc(P(wb, za), P(*_mid(ca, ra, (wb, za), (wp, zt))), P(wp, zt)),
+            cq.Edge.makeLine(P(wp, zt), P(wp, zu)),
+            cq.Edge.makeThreePointArc(P(wp, zu), P(*_mid(c2, r2, (wp, zu), pc)), P(*pc)),
+            cq.Edge.makeThreePointArc(P(*pc), P(*_mid(cf, f2, pc, pe)), P(*pe)),
+            cq.Edge.makeEllipse(a, b, P(*ce), (1, 0, 0), (0, 1, 0), math.degrees(t), math.degrees(t9))]
+    edges = [cq.Edge.makeLine(P(-wf, zb), P(wf, zb)), cq.Edge.makeLine(P(-yt, ztop), P(yt, ztop))] + side + _mirror_y(side)
+    corners = [(P(s * wf, zb), FAIR_R + SWEEP_CLR) for s in (-1, 1)] + [(P(s * wf, zj), OPEN_TAB_R) for s in (-1, 1)] + \
+              [(P(s * wb, za), f1) for s in (-1, 1)]
+    return _rounded(edges, corners)
+
+
 def front_cut():
-    """the front walls' opening (frame and shell): straight sides FRONT_HW either side of the tube from above the top
-    down to the pivot axis, and a round bottom about it, straight through the 3 mm walls"""
-    w, zc = FRONT_HW, FRONT_ZC
-    return (cq.Workplane("YZ", origin=(-BLOCK_HW - 1.0, 0, 0)).moveTo(-w, SHELL_TOP + 2).lineTo(-w, zc)
-            .threePointArc((0, zc - w), (w, zc)).lineTo(w, SHELL_TOP + 2).close().extrude(SHELL_T + 1.01).val())
+    """the front walls' opening (frame and shell), straight through the 3 mm walls"""
+    f = front_profile(-BLOCK_HW - 1.0)
+    return cq.Solid.extrudeLinear(f.outerWire(), [], V(SHELL_T + 1.01, 0, 0))
+
+
+def top_profile(z0):
+    """the top wall's slot (see TOP_*), as a face in the plane z = z0, from in front of the shell"""
+    P = lambda x, y: V(x, y, z0)
+    xc, A, B = TOP_ELL
+    R, ce = TOP_ELL_R, (TOP_ELL[0], 0.0)
+    wf, yf, x0 = OPEN_FAIR, FAIR_HW - FAIR_R, -BLOCK_HW - 2.0
+    ye = B * math.sqrt(1 - ((x0 - xc) / A) ** 2)
+    tk = math.atan2(wf / B, math.sqrt(1 - (wf / B) ** 2))                  # the boss's footprint meets the sides here;
+    t = _root(lambda t: _ell(ce, A, B, t)[0][1] + R * _ell(ce, A, B, t)[1][1] - (wf + R), tk, tk + 0.6)   # rounded R
+    pe, n = _ell(ce, A, B, t)
+    cf = (pe[0] + R * n[0], wf + R)
+    xe0 = TOP_END_X - TOP_END_A
+    t0 = math.atan2(ye / B, (x0 - xc) / A)
+    side = [cq.Edge.makeEllipse(A, B, P(*ce), (0, 0, 1), (1, 0, 0), math.degrees(t), math.degrees(t0)),
+            cq.Edge.makeThreePointArc(P(*pe), P(*_mid(cf, R, pe, (cf[0], wf))), P(cf[0], wf)),
+            cq.Edge.makeLine(P(cf[0], wf), P(xe0, wf)),
+            cq.Edge.makeEllipse(TOP_END_A, wf - yf, P(xe0, yf), (0, 0, 1), (1, 0, 0), 0, 90)]
+    edges = [cq.Edge.makeLine(P(x0, -ye), P(x0, ye)), cq.Edge.makeLine(P(TOP_END_X, -yf), P(TOP_END_X, yf))] + side + \
+        _mirror_y(side)
+    return _rounded(edges, [])
 
 
 def top_cut():
-    """the top wall's slot: FRONT_HW wide from the front over the socket boss's swing, narrowing at 45 deg from
-    TOP_TAPER_X to TOP_NOSE_HW either side, and a round end of that radius just past the top gusset at the stop"""
-    w, g, xt, xe = FRONT_HW, TOP_NOSE_HW, TOP_TAPER_X, TOP_NOSE_X
-    xn = xt + (w - g)                                                    # where the taper meets the nose's width
-    return (cq.Workplane("XY", origin=(0, 0, SHELL_TOP - SHELL_T - 0.5)).moveTo(-BLOCK_HW - 2, -w).lineTo(xt, -w)
-            .lineTo(xn, -g).lineTo(xe, -g).threePointArc((xe + g, 0), (xe, g)).lineTo(xn, g).lineTo(xt, w)
-            .lineTo(-BLOCK_HW - 2, w).close().extrude(SHELL_T + 1.0).val())
+    """the top wall's slot, straight through it"""
+    f = top_profile(SHELL_TOP - SHELL_T - 0.5)
+    return cq.Solid.extrudeLinear(f.outerWire(), [], V(0, 0, SHELL_T + 1.0))
 
 
 def strut_body_sweep(clr):
@@ -498,16 +609,65 @@ def fairing(sz, grow=0.0):
     return f if sz > 0 else f.mirror("XY")
 
 
-def lever_sweep():
-    """what the frame's and shell's openings have to let through: the socket boss, the fairings top and bottom and the
-    down-stop pads, SWEEP_CLR bigger all round, at every angle from 1 deg below the down-stop to 1 deg past the up-stop
-    (2 deg apart: 0.02 mm between them at the shell)"""
-    c = SWEEP_CLR
-    boss = cyl(m.SOCK_BOSS_R + c, (-8.0, 0, 0), (-90.0, 0, 0))
-    pads = [box(PAD_X[0] - c, PAD_X[1] + c, *sorted((s * (PAD_DY[0] - c), s * (PAD_DY[1] + c))), PAD_Z - c, 0)
-            for s in (-1, 1)]                                                  # the down-stop pads, 20 out from the tube
-    env = fuse(boss, fairing(1, c), fairing(-1, c), *pads)
-    return fuse(*[rot_y(env, a) for a in range(-1, int(STOP_DEG) + 3, 2)])
+def lever_sweep(theta, extra=()):
+    """what passes through the frame's and shell's openings, at angle theta: the lever's halves, the hose clamp and the
+    tube, whole (trimming them with a boolean first isn't safe: OCC returns nothing for the chamfered lower half), and
+    any extra solids on the lever (drawn at 0 deg)"""
+    return [rot_y(s, theta) for p in (*lever_halves(0.0), moved(m.hose_clamp()), carbon_tube(), *extra)
+            for s in p.Solids()]
+
+
+def check_openings(step=0.25, fine=0.02, extra=()):
+    """the openings' clearance, measured in 3D: the least distance from the frame's front wall and the shell's front and
+    top walls (near the opening) to everything that passes through them, every step degrees from the down-stop to the
+    up-stop, then every fine degrees round each wall's three closest passes. The walls are frame() and shell() before
+    the frame's chamfers and the joint's knurl: chamfers and the shell's sockets only take material away, and the
+    frame's pyramids stand inside the shell's own outline, so this is the closest the finished parts can be"""
+    from OCP.BRepExtrema import BRepExtrema_DistShapeShape
+    fr, sh = frame(), shell()
+    front = box(-BLOCK_HW, -BLOCK_HW + SHELL_T + 0.01, -BRG_Y0, BRG_Y0, -30.0, SHELL_TOP + 1)   # not the pillars
+    top = box(-BLOCK_HW - 1, 5.0, -BRG_Y0, BRG_Y0, SHELL_TOP - SHELL_T - 0.01, SHELL_TOP + 1)
+    walls = {"frame front wall": fr.intersect(front), "shell front wall": sh.intersect(front),
+             "shell top wall": sh.intersect(top)}
+    walls = {k: [x for x in w.Solids() if x.Volume() > 1e-3] for k, w in walls.items()}
+    for k, ws in walls.items():
+        if not ws:
+            raise RuntimeError(f"no {k} to measure (boolean failed)")
+
+    def apart(a, b):
+        p, q = a.BoundingBox(), b.BoundingBox()
+        return max(p.xmin - q.xmax, q.xmin - p.xmax, p.ymin - q.ymax, q.ymin - p.ymax, p.zmin - q.zmax, q.zmin - p.zmax)
+
+    def dist(k, th):
+        best = (1e9, None)
+        for part in lever_sweep(th, extra):
+            for w in walls[k]:
+                if apart(w, part) > 3.0:
+                    continue
+                d = BRepExtrema_DistShapeShape(w.wrapped, part.wrapped)
+                if not d.IsDone() or d.NbSolution() == 0:
+                    raise RuntimeError(f"no distance for {k} at {th} deg")
+                if d.Value() < best[0]:
+                    p = d.PointOnShape1(1)
+                    best = (d.Value(), (p.X(), p.Y(), p.Z()))
+        return best
+
+    n = int(round(STOP_DEG / step))
+    ths = [STOP_DEG * i / n for i in range(n + 1)]
+    worst = {}
+    for k in walls:
+        ds = [dist(k, th)[0] for th in ths]
+        picks = []
+        for i in sorted(range(n + 1), key=lambda i: ds[i]):
+            if len(picks) < 3 and all(abs(i - j) > 2 for j in picks):
+                picks.append(i)
+        res = min(dist(k, th) + (th,) for i in picks for j in range(int(round(2 * step / fine)) + 1)
+                  for th in [min(max(ths[i] - step + j * fine, 0.0), STOP_DEG)])
+        worst[k] = (res[0], res[2], res[1])
+    for k, (dv, th, p) in worst.items():
+        where = f", at ({p[0]:.1f}, {p[1]:.1f}, {p[2]:.1f})" if p else ""
+        print(f"{k:17s} {dv:6.3f} mm at {th:5.2f} deg{where}")
+    return worst
 
 
 def rear_fill(s, z0, z1):
@@ -1057,6 +1217,9 @@ if __name__ == "__main__":
     if "--check" in sys.argv[1:]:
         check()
         check_assembly()
+        check_openings()
+    elif "--openings" in sys.argv[1:]:
+        check_openings()
     elif "--balance" in sys.argv[1:]:
         balance(plot=os.path.join(HERE, "renders", "strut_balance_r4.png"))
     elif "--coupons" in sys.argv[1:]:
