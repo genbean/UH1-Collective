@@ -159,6 +159,14 @@ def lever_views(C):
          "rev4_lever_side.png")
     save(title(R.render(P, (-0.55, -0.2, 1.0), size=(1300, 1100), zoom=1.0)[0], "Rev 4 lever from the front and above",
                "The upper fairing, 21 mm wide, between the front screws' counterbores"), "rev4_lever_top.png")
+    P32 = scene(v.STOP_DEG, C, tube_to=-120.0)
+    keep = ("lever_upper", "lever_lower", "lever_screws", "gas_strut", "strut_pins", "carbon_tube", "bearing_outer",
+            "bearing_inner", "bearing_seal")
+    save(title(R.render({k: x for k, x in P32.items() if k in keep}, (-0.25, -0.75, -0.6), size=(1300, 1050),
+                        focus=((-45, -25, -50), (15, 25, 5)), zoom=1.0)[0],
+               "Rev 4 lever from below, at the 32° stop",
+               "The relief in the hub's underside for the strut's cylinder: 1.5 mm clear of it all the way up"),
+         "rev4_strut_relief.png")
 
 
 def joint_views(C, P0=None):

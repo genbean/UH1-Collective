@@ -297,7 +297,8 @@ def lever():
             tube(m.SOCK_BOSS_R + 1, m.SOCK_BOSS_R - 1.2, (-54, 0, 0), (-63, 0, 0)),               # hose-clamp groove
             cyl(m.CABLE_R, (0, -POCKET_FLOOR - 0.5, 0), (0, TRUN_OUT + 1, 0)),                   # axial 1/2" bore
             cyl(m.CABLE_R, (-m.SOCK_BOTTOM - 1, 0, 0), (3, 0, 0)),                               # radial 1/2" bore
-            sensor_pocket()]
+            sensor_pocket(),
+            strut_relief()]                                                                       # the strut's cylinder
     for c in cuts:
         h = h.cut(c)
     return h.clean()
@@ -491,6 +492,39 @@ def strut_body_sweep(clr):
     if fan.intersect(cyl(h - 0.5, (A + u1 * (s0 + 1)).toTuple(), (A + u1 * (s1 - 1)).toTuple())).Volume() < 1.0:
         fan = cq.Solid.revolve(cq.Wire.makePolygon(pts + [pts[0]]), [], -turn, A, A + V(0, 1, 0))   # the other way
     return fuse(fan, *[cyl(h, (A + uu * s0).toTuple(), (A + uu * s1).toTuple()) for uu in (u0, u1)])
+
+
+STRUT_RELIEF_CLR = 1.5
+
+
+def strut_relief(clr=STRUT_RELIEF_CLR):
+    """the strut's cylinder, clr bigger all round, where the lever sees it over the travel (-1 to 33 deg). As fitted
+    (cylinder on the base end) its anchor end comes in under the hub's front from 28 deg up, 0.94 mm into it at the
+    stop, so this is cut from the lower half's underside. In the lever's frame the strut pivots on the collar's pin
+    while its anchor swings round the pivot, so this is its long section (as far along as it ever reaches) revolved
+    about the pin from the lowest angle to the highest, with the cylinder itself at both ends: smooth, no facets"""
+    C = V(-r.COLLAR_D, 0, -r.COLLAR_E)                                   # the collar's pin, fixed on the lever
+
+    def anchor(th):                                                      # the anchor, in the lever's frame
+        c, s = math.cos(math.radians(th)), math.sin(math.radians(th))
+        return V(ANCH_X * c - ANCH_Z * s, 0, ANCH_X * s + ANCH_Z * c)
+
+    t0, t1 = -1.0, STOP_DEG + 1.0
+    span = [(anchor(t0 + 0.5 * k) - C).Length for k in range(int((t1 - t0) / 0.5) + 1)]
+    d0 = min(span) - r.TAB_L - r.STRUT_BODY_L - clr                     # from the pin, toward the anchor; clr past
+    d1 = max(span) - r.TAB_L + clr                                       # both ends too
+    h = r.STRUT_BODY_D / 2 + clr
+    w0, w1 = (anchor(t0) - C).normalized(), (anchor(t1) - C).normalized()
+    turn = math.degrees(math.atan2(w0.z, w0.x) - math.atan2(w1.z, w1.x))
+    pts = [C + w0 * d0 + V(0, -h, 0), C + w0 * d1 + V(0, -h, 0), C + w0 * d1 + V(0, h, 0), C + w0 * d0 + V(0, h, 0)]
+    wire = cq.Wire.makePolygon(pts + [pts[0]])
+    fan = cq.Solid.revolve(wire, [], turn, C, C + V(0, 1, 0))
+    probe = cyl(h - 0.5, (C + w1 * (d0 + 1)).toTuple(), (C + w1 * (d1 - 1)).toTuple())
+    if fan.intersect(probe).Volume() < 1.0:
+        fan = cq.Solid.revolve(wire, [], -turn, C, C + V(0, 1, 0))      # the other way
+    ends = [cyl(h, (C + w * ((anchor(t) - C).Length - r.TAB_L - r.STRUT_BODY_L - clr)).toTuple(),
+                (C + w * ((anchor(t) - C).Length - r.TAB_L + clr)).toTuple()) for w, t in ((w0, t0), (w1, t1))]
+    return fuse(fan, *ends)
 
 
 def fairing(sz, grow=0.0):
@@ -904,23 +938,44 @@ ALLOWED = {("bearing_inner", "lever_upper"), ("bearing_inner", "lever_lower"), (
            ("lever_lower", "lever_screws"), ("lever_screws", "lever_upper"), ("carbon_tube", "hose_clamp"),
            ("hose_clamp", "lever_lower"), ("hose_clamp", "lever_upper"), ("carbon_tube", "strut_collar"),
            ("cover_sensor", "magnet"), ("sensor_pcb", "sensor_wires"), ("frame", "gas_strut")}
+# Parts that share a curved face (the races in their seats, the seal between them): the mesh boolean finds a sliver
+# where the two faces' facets don't line up (2.3 mm3 for an outer race in its seat, up to 2.7 for an inner race against
+# its seal). Up to this much is that sliver; more would be a real interference.
+SHARED = {("bearing_outer", "frame"): 5.0, ("bearing_outer", "shell"): 5.0, ("bearing_inner", "bearing_seal"): 5.0,
+          ("bearing_outer", "bearing_seal"): 5.0}
+
+
+_MESH = {}
+
+
+def _mesh(s, tol=0.02):
+    """s tessellated (cached: the static parts are the same solids at every angle)"""
+    import numpy as np
+    import trimesh
+    bb = s.BoundingBox()
+    key = (s.hashCode(), round(s.Volume(), 3), round(bb.xmin, 3), round(bb.zmax, 3))
+    if key not in _MESH:
+        vs, fs = s.tessellate(tol, 0.1)
+        _MESH[key] = trimesh.Trimesh(np.array([v.toTuple() for v in vs]), np.array(fs))
+    return _MESH[key]
 
 
 def overlap(a, b):
-    """the volume two solids share: OCC's boolean, or a mesh boolean (manifold) where OCC fails on the pair"""
+    """the volume two solids share, the larger of OCC's boolean and a mesh boolean (manifold). OCC alone can come back
+    empty when it isn't: it gave 0 for the chamfered lower lever half against the strut's cylinder, 26 mm3 into it at
+    32 deg. NaN if both fail. The mesh is 0.02 mm off true, so parts that share a curved face (a press fit, a race in
+    its seat) show a sliver: those pairs are in ALLOWED"""
+    import trimesh
+    got = []
     try:
-        return a.intersect(b).Volume()
+        got.append(a.intersect(b).Volume())
     except Exception:
-        import numpy as np
-        import trimesh
-
-        def tm(s):
-            vs, fs = s.tessellate(0.05, 0.2)
-            return trimesh.Trimesh(np.array([v.toTuple() for v in vs]), np.array(fs))
-        try:
-            return trimesh.boolean.intersection([tm(a), tm(b)], engine="manifold").volume
-        except Exception:
-            return float("nan")
+        pass
+    try:
+        got.append(trimesh.boolean.intersection([_mesh(a), _mesh(b)], engine="manifold").volume)
+    except Exception:
+        pass
+    return max(got) if got else float("nan")
 
 
 def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
@@ -945,7 +1000,7 @@ def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
                         and sa.BoundingBox().ymax >= sb.BoundingBox().ymin and sb.BoundingBox().ymax >= sa.BoundingBox().ymin)
                 if v != v:
                     hits.append(f"{a} / {b} NOT CHECKED (both booleans failed)")
-                elif v > 0.01:
+                elif v > SHARED.get((a, b), 0.01):
                     hits.append(f"{a} / {b} {v:.2f}")
         print(f"{th:5.1f} deg: " + ("clear" if not hits else "; ".join(hits)))
 
