@@ -328,11 +328,11 @@ def screw_views(src):
              focus=((-150, -55, -58), (55, 60, 45)), zoom=1.05)
     labelled(P, [("M3 x 25 countersunk  (x4)", "cable cover: tap the block and cap M3, 11 mm deep", cover_heads(1)),
                  ("M4 nut", "shoe hinge: in the +y lug's pocket", [hinge_nut]),
-                 ("M4 x 16 countersunk", "strut, body end: head on +y", eye)],
+                 ("M4 x 16 countersunk", "strut, collar end (rod): head on +y", eye)],
              (0.6, 1.0, 0.45), "MkIII base Rev 3 screws: knob (+y) side, from behind", "rev3_screws_knobside.png",
              focus=((-150, -50, -58), (55, 62, 40)), zoom=1.05)
     labelled(P, [("M4 x 12 countersunk  (x2)", "strut collar clamp: head 2 mm into the -y ear", collar_heads),
-                 ("M4 nut", "strut, body end: in the -y cheek's pocket", eye_nut),
+                 ("M4 nut", "strut, collar end (rod): in the -y cheek's pocket", eye_nut),
                  ("M4 x 20 countersunk", "shoe hinge: head in the -y lug, nut in the +y lug; snug, thread-lock",
                   [hinge_head]),
                  ("M3 x 25 countersunk  (x4)", "sensor cover: tap the block and cap M3, 11 mm deep", cover_heads(-1)),
@@ -345,7 +345,7 @@ def screw_views(src):
              (-1.0, -0.1, 0.18), "MkIII base Rev 3 screws: from the front, under the socket (tube and collar hidden)",
              "rev3_screws_front.png", focus=((-62, -55, -58), (10, 55, 40)), zoom=1.0)
     cutP = cut(P, 1, 12.0, keep="below")
-    labelled(cutP, [("M4 x 16 countersunk + M4 nut", "strut, rod end: head on +y, nut in the -y cheek's pocket", [anch])],
+    labelled(cutP, [("M4 x 16 countersunk + M4 nut", "strut, base end (cylinder): head on +y, nut in the -y cheek's pocket", [anch])],
              (0.15, 1.0, 0.35), "MkIII base Rev 3 screws: the strut's anchor (cut away at y = +12)",
              "rev3_screws_strut.png", focus=((-60, 12, -58), (30, 12, -5)), zoom=0.8)
 

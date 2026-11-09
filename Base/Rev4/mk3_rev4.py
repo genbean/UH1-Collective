@@ -19,7 +19,9 @@ Across the pivot axis, from the middle out (each side):
     side covers         |y| 31.5-41.0  9.5 mm deep (Rev 3: 15)
 One shell over the top takes the place of Rev 3's two bearing caps: a box over the lever whose side walls are the caps,
 with a slot in its front and top for the socket boss, tube and top gusset to swing through, and a notch in its back
-wall round the brake tower. It drops straight down over the lever and bolts on with the four cap screws.
+wall round the brake tower. It drops straight down over the lever and bolts on with four M4 x 50 socket head screws
+into nuts slid into the pillow blocks' outer faces, under the side covers; a diamond grid of pyramids in the joint
+locates it. The frame's front wall, under the shell's, carries the shell's cut for the lever on down, so they read as one.
 The AS5600 board sits INSIDE the sensor trunnion, in a square pocket in its end, chip facing out and level with the
 trunnion's end; the magnet is on a post from the sensor cover, 1 mm off the chip. The USB cable turns out of the
 axis inside the cable cover and leaves through a notch in its rim, toward the back; the notch lets the cover go on
@@ -62,6 +64,20 @@ def chamfer_edges(shape, sizes=r.CHAMFERS, chunk=8, exclude=None):
     for c in sizes:
         es = r.sharp_edges(shape, exclude=exclude)
         v0 = shape.Volume()
+        # each edge goes with its mirror twin across y = 0, kept or dropped together, so the chamfers stay symmetrical
+        key = lambda b, sy=1: (round(b.xmin, 3), round(b.xmax, 3), round(sy * (b.ymin if sy > 0 else b.ymax), 3),
+                               round(sy * (b.ymax if sy > 0 else b.ymin), 3), round(b.zmin, 3), round(b.zmax, 3))
+        idx = {}
+        for e in es:
+            idx.setdefault(key(e.BoundingBox()), []).append(e)
+        groups, seen = [], set()
+        for e in es:
+            if id(e) in seen:
+                continue
+            twin = [t for t in idx.get(key(e.BoundingBox(), -1), []) if t is not e and id(t) not in seen][:1]
+            for t in [e] + twin:
+                seen.add(id(t))
+            groups.append([e] + twin)
 
         def ok(edges):
             res = r._chamfer(shape, edges, c)
@@ -71,14 +87,14 @@ def chamfer_edges(shape, sizes=r.CHAMFERS, chunk=8, exclude=None):
             return -0.5 <= dv <= sum(e.Length() for e in edges) * c * c * 1.2 + 0.5
 
         keep = []
-        for i in range(0, len(es), chunk):
-            part = es[i:i + chunk]
+        for i in range(0, len(groups), chunk):
+            part = [e for g in groups[i:i + chunk] for e in g]
             if ok(keep + part):
                 keep += part
                 continue
-            for e in part:
-                if ok(keep + [e]):
-                    keep.append(e)
+            for g in groups[i:i + chunk]:
+                if ok(keep + g):
+                    keep += g
         if keep:
             shape = shape.chamfer(c, None, keep)
     return shape
@@ -95,13 +111,11 @@ BLOCK_Y1 = BRG_Y1 + 2.0                          # pillow block's outer face (31
 TRUN_OD = BRG_d + 0.1                            # Rev 3's +0.2 on the race's bore pressed on a hair too tight (as
                                                  # built, 2026-11-08), so +0.1
 TRUN_OUT = BLOCK_Y1 + 0.5                        # (32)
-BRG_SEAT_D = BRG_D + 0.1                         # +0.1 on the race's outside: a perfect fit on Rev 3, as built
+BRG_SEAT_D = BRG_D + 0.0                         # +0.1 (perfect on Rev 3's one-piece blocks) left the 6808 a little
+                                                 # play in Rev 4's seat, split between the frame and the shell (as
+                                                 # built, 2026-11-08), so 0.1 less
 LIP_R = 23.0                                     # clears the inner race (22.0), holds the outer (24.15)
 BLOCK_HW = m.BLOCK_HW                            # 37.5, as Rev 3
-# pillow-block caps: two M3 x 20 countersunk each, from the top, into an M3 nut slid in fore and aft (the 9 mm blocks are
-# too narrow for Rev 3's M4 heads)
-CAP_BOLT_X, CAP_HEAD_Z, CAP_SCREW_L = 30.5, 8.0, 20
-CAP_NUT_Z = -8.3                                 # the nut's top face, as Rev 3
 # side covers: four M3 x 16 countersunk each, into M3 threads tapped in the block and shell; the pilot holes go right
 # through their 9 mm walls (COVER_TAP is the back plate's screws' tapped depth)
 COVER_HOLE_R, COVER_R, COVER_IN_R = 30.5, 35.5, 25.0
@@ -123,12 +137,17 @@ USB_BEND_R, USB_Y = 4.0, BLOCK_Y1 + 4.0
 USB_R = 2.3
 
 # ---------------------------------------------------------------- lever
-# four M4 socket head cap screws (Rev 3's), 16.25 mm either side of the tube: 1.25 mm from the counterbore to the hub's end
-# and 1.35 mm from the clearance hole to the socket at the front pair. The back pair are at x = 10 (Rev 3: 17), clear of
-# the up-stop lugs, with 1.3 mm to the axial cable bore.
-LEVER_SCREWS = [(x, y) for x in (-17.0, 10.0) for y in (-16.25, 16.25)]
-GUSSET_T = 8.0
-GUSSET_TOP = [(-48, 16.5), (-4, 33.0), (2, 30.5), (2, 16.5)]  # Rev 1's, its back end cut to x = 2: clear of the shoe at 32 deg
+# four M4 x 40 socket head cap screws, where Rev 3 has them: x = +-17, symmetrical fore and aft, 16.25 mm either side of
+# the tube: 1.25 mm from the counterbore to the hub's end and 1.35 mm from the clearance hole to the socket at the front
+# pair.
+LEVER_SCREWS = [(x, y) for x in (-17.0, 17.0) for y in (-16.25, 16.25)]
+# The fairing over the socket boss, on the upper half and mirrored underneath on the lower (in place of Rev 3's 8 mm top
+# gusset): FAIR_HW either side of the tube, from the hose-clamp groove's back edge back to the hub. Its top is one
+# straight line from the boss's top at the groove to the hub's circle and tangent to it, so it runs into the hub without
+# a corner; its long top edges are rounded FAIR_R. 10.5 keeps it 1.75 mm clear of the front lever screws' counterbores
+# on top and 1.6 mm of their nut pockets underneath.
+GROOVE_X = -54.0                                 # the hose-clamp groove's back edge
+FAIR_HW, FAIR_R = 10.5, 3.0
 STOP_DEG = r.STOP_DEG
 # The gas strut's anchor. Rev 3's first, at x -12, z -40.5, balanced a 40 N strut, the bottom of the range the 45 N strut
 # is sold as; the 45 N strut as bought lifted the lever (about +50..+70 g at the grip). Moved up and back to x -9.5,
@@ -141,6 +160,9 @@ STRUT_F_DESIGN = 45.0
 ANCH_X, ANCH_Z, CLEVIS_R = -9.5, -36.5, 6.5
 r.ANCH_X, r.ANCH_Z, r.CLEVIS_R, r.STRUT_F_DESIGN = ANCH_X, ANCH_Z, CLEVIS_R, STRUT_F_DESIGN
 ANCH_WALL_Z = -(HUB_R + 2.0)                     # the clevis's back wall's top, 2 mm under the hub
+STRUT_KEY_R = 1.75                               # a 3.5 mm hole through the +y pillow block on the anchor screw's axis:
+                                                 # a 2.5 mm hex key (2.9 across its corners) reaches its head. It's
+                                                 # 37.7 mm from the pivot, so it clears the side cover's rim by 0.45 mm
 # up-stop: two lugs under the back of the hub land on a pad behind the axis at STOP_DEG. The further back they land,
 # the further back they swing at 0 deg, toward the webs behind the pillow blocks (x = 37): with the pad at z = -28.5 and
 # the contact face ending at x = 24.4, their back corners come to x = 35.8 at 0 deg, 1.2 mm off the webs. The pad's top
@@ -162,6 +184,34 @@ DESK = [(x, y) for x in (-57.0, 54.0) for y in (-24.0, 24.0)]   # past the pillo
 # walls (|y| 22.5..31.5) are solid, the bearing caps; the brake housing's upper half runs on out of its back wall
 SHELL_TOP, SHELL_T = 38.0, 3.0
 SWEEP_CLR = 1.0                                  # the slot in its front and top: this far round the lever's sweep
+# The front walls' opening, the frame's and the shell's alike: straight sides FRONT_HW either side of the tube (the
+# down-stop pads' outer faces, 1 mm clear) from above the top down to the pivot axis, and a round bottom about it. The
+# top wall's slot carries on from it: FRONT_HW wide over the socket boss's swing, then narrowing at 45 deg to the top
+# gusset's width plus 1 mm a side, with a round end just past the gusset at the stop. Both are clean 2D cuts that
+# contain the lever's whole sweep with 1 mm or more to spare.
+FRONT_HW = PAD_DY[1] + SWEEP_CLR                 # 21
+FRONT_ZC = -7.0                                  # the round bottom's centre: the lower fairing swings down to z -24.5 in
+                                                 # the front walls' plane, 11.5 either side (1 mm clear included)
+TOP_TAPER_X, TOP_NOSE_HW = -22.0, FAIR_HW + SWEEP_CLR + 1.0   # the taper starts here; 12.5: the upper fairing needs 11.5
+TOP_NOSE_X = -5.0                                # in the top wall, back to x -5.6: the round end's centre
+# the shell to the frame: four M4 x 50 socket head cap screws (the lever's HELIFOUNER kit), two each side, from the top
+# down the middle of the shell's side walls, centred on the joint: the head's seat 25 mm above it, at the floor of a
+# 13 mm counterbore, the tip 25 mm below. Each goes into an M4 nut slid into the pillow block from its outer face, just
+# under the side cover's rim, its pocket 1 mm short of the tip. The nut sits flats-in: its inner flat stops it turning
+# and keeps 0.9 mm of block to the inner face, and the counterbore keeps 0.9 mm of shell both sides.
+CAP_BOLT_X, CAP_BOLT_Y = 30.5, 27.0
+SHELL_SCREW_L = 50
+SHELL_CB_R = 3.6                                 # the 7 mm heads, 0.1 mm clear
+CAP_HEAD_Z = SHELL_SCREW_L / 2                   # 25: the joint at the screw's middle
+CAP_NUT_Z = CAP_HEAD_Z - SHELL_SCREW_L + r.LS_TIP_PAST_NUT + r.LS_NUT_T   # -20.8: the nut pocket's top
+# The joint between the frame and the shell: a diamond grid of square pyramids standing on the frame's top faces and
+# sunk into the shell's, wherever the two meet, so the shell locates positively, fore and aft and side to side, as the
+# screws pull it down. Diamond bases (corners fore-aft and across), 45 deg flanks (no supports, either part's way up),
+# GRID_A from centre to corner, GRID_H tall with flat tops, GRID_LANE flat between them. The shell's sockets are
+# GRID_CLR clear on the flanks and deeper than the pyramids, so the flat faces close on each other; none comes within
+# GRID_EDGE of an edge or a hole.
+GRID_A, GRID_H, GRID_LANE, GRID_CLR, GRID_EDGE = 1.2, 0.7, 0.6, 0.1, 0.5   # 2.4 mm across: the largest that also
+                                                 # fits round the screws on the pillow blocks behind the bearings
 
 # ---------------------------------------------------------------- brake (all on y = 0, z = 0 unless noted)
 FELT_T = 1.5
@@ -230,7 +280,7 @@ def lever():
     boss = cyl(m.SOCK_BOSS_R, (-10, 0, 0), (-m.SOCK_MOUTH, 0, 0))
     shoulders = [cyl(BRG_IR_SH / 2 - 1.1, (0, s * HUB_HW, 0), (0, s * BRG_Y0, 0)) for s in (-1, 1)]
     trunnions = [cyl(TRUN_OD / 2, (0, s * BRG_Y0, 0), (0, s * TRUN_OUT, 0)) for s in (-1, 1)]
-    gusset = gusset_xz(GUSSET_TOP, -GUSSET_T / 2, GUSSET_T / 2)
+    gusset = fuse(fairing(1), fairing(-1))
     pads = [box(*PAD_X, *sorted((s * PAD_DY[0], s * PAD_DY[1])), PAD_Z, 0) for s in (-1, 1)]
     h = fuse(core, boss, gusset, *shoulders, *trunnions, *pads, *up_stop_lugs())
     cuts = [cyl(m.SOCK_BORE_R, (-m.SOCK_BOTTOM, 0, 0), (-m.SOCK_MOUTH - 1, 0, 0)),               # tube socket
@@ -353,25 +403,28 @@ def frame():
                   # behind the pillow block: the web to the brake housing and the corner, out to the back chamfer
                   rear_fill(s, Z_PLATE - 0.1, 0.0)]
     pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z)                            # up-stop pad
-    parts += [pad, brake_housing(Z_PLATE - 0.1, 0.0), anchor_clevis(), *corner_gussets()]
+    parts += [pad, brake_housing(Z_PLATE - 0.1, 0.0), anchor_clevis(), *corner_gussets(), front_wall()]
     f = fuse(*parts)
 
-    a3, t3, a4, t4 = m.NUT_AF[3], m.NUT_T[3], m.NUT_AF[4], m.NUT_T[4]
+    a4, t4 = m.NUT_AF[4], m.NUT_T[4]
     cuts = []
     for s in (-1, 1):
         cuts += block_cuts(s)
-        yb = s * (BRG_Y0 + BLOCK_Y1) / 2
+        yb = s * CAP_BOLT_Y
         for x in (-CAP_BOLT_X, CAP_BOLT_X):
-            zn = CAP_NUT_Z - t3 - 0.2
-            cuts += [cyl(m.CSK[3][1] / 2, (x, yb, CAP_HEAD_Z - CAP_SCREW_L - 1), (x, yb, 1)),
-                     hexprism(a3, (x, yb, zn), (x, yb, CAP_NUT_Z)),
-                     box(*sorted((x, math.copysign(70.0, x))), yb - a3 / 2, yb + a3 / 2, zn, CAP_NUT_Z)]
+            zb, hc = CAP_NUT_Z - t4 - 0.3, a4 / math.sqrt(3)                       # hc: centre to corner
+            cuts += [cyl(m.LS_CLR_R, (x, yb, CAP_HEAD_Z - SHELL_SCREW_L - 1), (x, yb, 1)),   # M4 x 50, past its tip
+                     hexprism(a4, (x, yb, zb), (x, yb, CAP_NUT_Z)),                          # its nut, flats facing y,
+                     box(x - hc, x + hc, *sorted((yb, s * (BLOCK_Y1 + 1))), zb, CAP_NUT_Z)]  # slid in from outside
     aw = (r.ROD_TAB_T + 0.6) / 2 + r.CLEVIS_T
     cuts += [cyl(r.PIN_R, (r.ANCH_X, -12, r.ANCH_Z), (r.ANCH_X, 12, r.ANCH_Z)),                      # anchor: M4 x 16,
              m.csk_hole(4, (r.ANCH_X, aw, r.ANCH_Z), (0, -1, 0), 1),                                   # head on +y,
-             hexprism(a4, (r.ANCH_X, -aw + t4 + 0.2, r.ANCH_Z), (r.ANCH_X, -aw - 1, r.ANCH_Z))]         # nut on -y
+             hexprism(a4, (r.ANCH_X, -aw + t4 + 0.2, r.ANCH_Z), (r.ANCH_X, -aw - 1, r.ANCH_Z)),          # nut on -y
+             cyl(STRUT_KEY_R, (r.ANCH_X, BRG_Y0 - 1, r.ANCH_Z), (r.ANCH_X, BLOCK_Y1 + 1, r.ANCH_Z))]      # hex key in
     # brake: the shoe's pocket (lower half), and the back plate's lower screws
     cuts.append(shoe_tunnel())
+    cuts.append(strut_body_sweep(1.5))                         # the strut's cylinder: through the front wall, over the
+                                                               # clevis's front gussets
     for y, z in BACK_SCREWS:
         cuts.append(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
     for x, y in DESK:
@@ -381,15 +434,79 @@ def frame():
     return f.clean()
 
 
+def front_wall():
+    """the frame's front wall between the pillow blocks, SHELL_T thick like the shell's above it, from the plate up to
+    the joint, with the same cut for the lever's sweep as the shell's front wall, so the two read as one; the strut's
+    cylinder passes through it, in a slot cut from its sweep (frame())"""
+    w = box(-BLOCK_HW, -BLOCK_HW + SHELL_T, -BRG_Y0 - 0.1, BRG_Y0 + 0.1, Z_PLATE - 0.1, 0.0)
+    return w.cut(front_cut()).clean()
+
+
+def front_cut():
+    """the front walls' opening (frame and shell): straight sides FRONT_HW either side of the tube from above the top
+    down to the pivot axis, and a round bottom about it, straight through the 3 mm walls"""
+    w, zc = FRONT_HW, FRONT_ZC
+    return (cq.Workplane("YZ", origin=(-BLOCK_HW - 1.0, 0, 0)).moveTo(-w, SHELL_TOP + 2).lineTo(-w, zc)
+            .threePointArc((0, zc - w), (w, zc)).lineTo(w, SHELL_TOP + 2).close().extrude(SHELL_T + 1.01).val())
+
+
+def top_cut():
+    """the top wall's slot: FRONT_HW wide from the front over the socket boss's swing, narrowing at 45 deg from
+    TOP_TAPER_X to TOP_NOSE_HW either side, and a round end of that radius just past the top gusset at the stop"""
+    w, g, xt, xe = FRONT_HW, TOP_NOSE_HW, TOP_TAPER_X, TOP_NOSE_X
+    xn = xt + (w - g)                                                    # where the taper meets the nose's width
+    return (cq.Workplane("XY", origin=(0, 0, SHELL_TOP - SHELL_T - 0.5)).moveTo(-BLOCK_HW - 2, -w).lineTo(xt, -w)
+            .lineTo(xn, -g).lineTo(xe, -g).threePointArc((xe + g, 0), (xe, g)).lineTo(xn, g).lineTo(xt, w)
+            .lineTo(-BLOCK_HW - 2, w).close().extrude(SHELL_T + 1.0).val())
+
+
+def strut_body_sweep(clr):
+    """the strut's cylinder, clr bigger all round, over the travel (-1 to 33 deg). As fitted it's on the base end, from
+    the anchor's tab forward, so it swings up through the clevis's front gussets and the front wall. It pivots on the
+    anchor's pin, so this is its long section revolved about the pin from the lowest angle to the highest, with the
+    cylinder itself at both ends: smooth, without facets"""
+    A = V(ANCH_X, 0, ANCH_Z)
+
+    def u(th):
+        cx, cz = r.collar_pin(th)
+        return (V(cx, 0, cz) - A).normalized()
+
+    s0, s1, h = r.TAB_L - 0.5, r.TAB_L + r.STRUT_BODY_L + 0.5, r.STRUT_BODY_D / 2 + clr
+    u0, u1 = u(-1.0), u(STOP_DEG + 1.0)
+    turn = math.degrees(math.atan2(u0.z, u0.x) - math.atan2(u1.z, u1.x))
+    pts = [A + u0 * s0 + V(0, -h, 0), A + u0 * s1 + V(0, -h, 0), A + u0 * s1 + V(0, h, 0), A + u0 * s0 + V(0, h, 0)]
+    fan = cq.Solid.revolve(cq.Wire.makePolygon(pts + [pts[0]]), [], turn, A, A + V(0, 1, 0))
+    if fan.intersect(cyl(h - 0.5, (A + u1 * (s0 + 1)).toTuple(), (A + u1 * (s1 - 1)).toTuple())).Volume() < 1.0:
+        fan = cq.Solid.revolve(cq.Wire.makePolygon(pts + [pts[0]]), [], -turn, A, A + V(0, 1, 0))   # the other way
+    return fuse(fan, *[cyl(h, (A + uu * s0).toTuple(), (A + uu * s1).toTuple()) for uu in (u0, u1)])
+
+
+def fairing(sz, grow=0.0):
+    """the fairing over the socket boss (sz = 1) or under it (sz = -1), grow bigger all round (for the sweep): a prism
+    FAIR_HW either side of the tube under the line from the boss's top at the groove to its tangent point on the hub"""
+    px, pz = GROOVE_X - grow, m.SOCK_BOSS_R + grow
+    rr = HUB_R + grow
+    a = math.atan2(pz, px) - math.acos(rr / math.hypot(px, pz))         # the upper tangent point, from the groove
+    tx, tz = rr * math.cos(a), rr * math.sin(a)
+    hw = FAIR_HW + grow
+    f = gusset_xz([(px, 0.0), (px, pz), (tx, tz), (tx, 0.0)], -hw, hw)
+    if grow == 0.0:                                                     # round the two long top edges
+        top = [e for e in f.Edges() if abs(abs(e.BoundingBox().ymin) - hw) < 1e-6 and
+               abs(e.BoundingBox().ymax - e.BoundingBox().ymin) < 1e-6 and e.BoundingBox().zmin > pz - 0.1 and
+               e.BoundingBox().xmax - e.BoundingBox().xmin > 10]
+        f = f.fillet(FAIR_R, top)
+    return f if sz > 0 else f.mirror("XY")
+
+
 def lever_sweep():
-    """what the shell has to let through: the socket boss and the top gusset, SWEEP_CLR bigger all round, at every
-    angle from 1 deg below the down-stop to 1 deg past the up-stop (2 deg apart: 0.02 mm between them at the shell)"""
+    """what the frame's and shell's openings have to let through: the socket boss, the fairings top and bottom and the
+    down-stop pads, SWEEP_CLR bigger all round, at every angle from 1 deg below the down-stop to 1 deg past the up-stop
+    (2 deg apart: 0.02 mm between them at the shell)"""
     c = SWEEP_CLR
     boss = cyl(m.SOCK_BOSS_R + c, (-8.0, 0, 0), (-90.0, 0, 0))
-    g = [(-48 - c, 16.5), (-4, 33.0 + c * 1.2), (2 + c, 30.5 + c * 0.7), (2 + c, 16.5)]
     pads = [box(PAD_X[0] - c, PAD_X[1] + c, *sorted((s * (PAD_DY[0] - c), s * (PAD_DY[1] + c))), PAD_Z - c, 0)
             for s in (-1, 1)]                                                  # the down-stop pads, 20 out from the tube
-    env = fuse(boss, gusset_xz(g, -GUSSET_T / 2 - c, GUSSET_T / 2 + c), *pads)
+    env = fuse(boss, fairing(1, c), fairing(-1, c), *pads)
     return fuse(*[rot_y(env, a) for a in range(-1, int(STOP_DEG) + 3, 2)])
 
 
@@ -420,15 +537,107 @@ def shell():
     for side in (-1, 1):
         for k in block_cuts(side):
             s = s.cut(k)
-        yb = side * (BRG_Y0 + BLOCK_Y1) / 2
-        for x in (-CAP_BOLT_X, CAP_BOLT_X):
-            s = s.cut(m.csk_hole(3, (x, yb, CAP_HEAD_Z), (0, 0, -1), 10, out=SHELL_TOP))
+        yb = side * CAP_BOLT_Y
+        for x in (-CAP_BOLT_X, CAP_BOLT_X):                                     # the M4 x 50s: clearance, counterbore
+            s = s.cut(cyl(m.LS_CLR_R, (x, yb, -1), (x, yb, CAP_HEAD_Z + 0.01)))
+            s = s.cut(cyl(SHELL_CB_R, (x, yb, CAP_HEAD_Z), (x, yb, SHELL_TOP + 1)))
     s = s.fuse(brake_housing(0.0, SHELL_TOP), *[rear_fill(side, 0.0, SHELL_TOP) for side in (-1, 1)])   # brake housing
     s = s.cut(shoe_tunnel())
     for y, z in BACK_SCREWS:
         s = s.cut(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
-    s = s.cut(lever_sweep())
+    s = s.cut(front_cut()).cut(top_cut())                               # the lever's opening, clean
     return chamfer_edges(s.clean(), exclude=joint_edge)
+
+
+# ================================================================ the joint's diamond grid
+def grid_pyramid(cx, cy, a, z0, z1):
+    """a square pyramid on a diamond base (its corners fore-aft and across), a from its centre to a corner at z = 0,
+    45 deg flanks, from z0 up to z1 (cut flat there)"""
+    k = math.sqrt(2)
+    ws = [cq.Wire.makePolygon([V(cx + h, cy, z), V(cx, cy + h, z), V(cx - h, cy, z), V(cx, cy - h, z), V(cx + h, cy, z)])
+          for z, h in ((z0, a - k * z0), (z1, a - k * z1))]
+    return cq.Solid.makeLoft(ws, True)
+
+
+def joint_face(frame_s, shell_s):
+    """the face the frame and the shell share at z = 0, as a thin slab just under it"""
+    t = 0.05
+    return frame_s.intersect(box(-200, 200, -100, 100, -t, 0)).intersect(
+        shell_s.intersect(box(-200, 200, -100, 100, 0, t)).translate(V(0, 0, -t)))
+
+
+def _inset(slab, d, z0, z1):
+    """the slab's top faces (z = 0) brought in d from their outlines and out d from their holes, as prisms z0..z1"""
+    def pick(w, d, smaller):
+        got = [(cq.Face.makeFromWires(o).Area(), o) for k in (d, -d) for o in w.offset2D(k, "arc")]
+        return min(got)[1] if smaller else max(got)[1]
+    out = []
+    for f in slab.Faces():
+        c = f.Center()
+        if abs(c.z) > 1e-6 or f.normalAt(c).z < 0.5:
+            continue
+        face = cq.Face.makeFromWires(pick(f.outerWire(), d, True))
+        for w in f.innerWires():
+            face = face.cut(cq.Face.makeFromWires(pick(w, d, False)))
+        for ff in face.Faces():
+            ff = ff.translate(V(0, 0, z0))
+            out.append(cq.Solid.extrudeLinear(ff.outerWire(), ff.innerWires(), V(0, 0, z1 - z0)))
+    return fuse(*out)
+
+
+_KNURL = {}
+
+
+def knurl(frame_s, shell_s):
+    """the joint's diamond grid as a knurl over the whole shared face: one lattice, symmetrical about both axes, kept
+    GRID_EDGE inside every edge and hole (the shell's sockets GRID_CLR more), the pyramids at its edges cut off square
+    and any piece under a third of a pyramid left out. Returns (pyramids, sockets, centres)."""
+    if _KNURL:
+        return _KNURL["v"]
+    k, slab = math.sqrt(2), joint_face(frame_s, shell_s)
+    keep = _inset(slab, GRID_EDGE, -0.3, GRID_H + 0.5)
+    room = _inset(slab, GRID_EDGE - GRID_CLR, -0.3, GRID_H + 1.0)
+    af = GRID_A + k * GRID_CLR
+    zf = min(GRID_H + 0.3, af / k - 0.05)                               # 0.3 deeper than the pyramids, short of a point
+    full = grid_pyramid(0, 0, GRID_A, -0.2, GRID_H).Volume()
+    bb, d = keep.BoundingBox(), GRID_A + GRID_LANE / k
+    inside = lambda x, y: keep.isInside(V(x, y, 0.1))
+    males, females, centres = [], [], []
+    for i in range(math.floor((bb.xmin - GRID_A) / d), math.ceil((bb.xmax + GRID_A) / d) + 1):
+        for j in range(math.floor((bb.ymin - GRID_A) / d), math.ceil((bb.ymax + GRID_A) / d) + 1):
+            if (i + j) % 2:
+                continue
+            x, y = i * d, j * d
+            pm, pf = grid_pyramid(x, y, GRID_A, -0.2, GRID_H), grid_pyramid(x, y, af, -0.2, zf)
+            ring = [(x + u, y + w) for u, w in ((0, 0), (GRID_A, 0), (-GRID_A, 0), (0, GRID_A), (0, -GRID_A))]
+            hits = [inside(*q) for q in ring]
+            if all(hits):
+                m_, f_ = pm, pf.intersect(room)
+            elif not any(hits) and not inside(x + GRID_A / 2, y + GRID_A / 2) and not inside(x - GRID_A / 2, y - GRID_A / 2) \
+                    and not inside(x + GRID_A / 2, y - GRID_A / 2) and not inside(x - GRID_A / 2, y + GRID_A / 2):
+                continue
+            else:
+                m_ = pm.intersect(keep)
+                if m_.Volume() < full / 3:
+                    continue
+                f_ = pf.intersect(room)
+            males.append(m_)
+            females.append(f_)
+            centres.append((x, y))
+    _KNURL["v"] = (males, females, centres)
+    return _KNURL["v"]
+
+
+def grid_sites(frame_s, shell_s):
+    """the knurl's pyramid centres"""
+    return knurl(frame_s, shell_s)[2]
+
+
+def joint_grid(frame_s, shell_s):
+    """the frame with the pyramids on, the shell with their sockets in"""
+    males, females, centres = knurl(frame_s, shell_s)
+    return (frame_s.fuse(cq.Compound.makeCompound(males)).clean(),
+            shell_s.cut(cq.Compound.makeCompound(females)).clean(), centres)
 
 
 # ================================================================ side covers
@@ -580,16 +789,24 @@ def carbon_tube(length=160.0):
     return tube(m.TUBE_OD / 2, m.TUBE_ID / 2, (-m.SOCK_BOTTOM, 0, 0), (-m.SOCK_BOTTOM - length, 0, 0))
 
 
+def shell_screw(x, y):
+    """an M4 x 50 socket head cap screw (reference) with its head on the counterbore's floor, and its nut pulled up
+    against its pocket's top: [screw, nut]"""
+    zt = CAP_HEAD_Z - SHELL_SCREW_L
+    return [fuse(cyl(r.CAP_D / 2, (x, y, CAP_HEAD_Z), (x, y, CAP_HEAD_Z + r.CAP_K)), cyl(2.0, (x, y, zt), (x, y, CAP_HEAD_Z))),
+            hexprism(7.0, (x, y, CAP_NUT_Z - r.LS_NUT_T), (x, y, CAP_NUT_Z)).cut(
+                cyl(2.0, (x, y, CAP_NUT_Z - 5), (x, y, CAP_NUT_Z + 1)))]
+
+
 def hardware():
     """the fixed base's screws and nuts (reference): the shell's, the covers', the back plate's, the brake bolt and nut"""
     parts = [brake_hardware()]
     for y, z in BACK_SCREWS:
         parts.append(m.csk_screw(3, (TOWER_X1 + BACK_T, y, z), (-1, 0, 0), 16))
     for s in (-1, 1):
-        yb = s * (BRG_Y0 + BLOCK_Y1) / 2
+        yb = s * CAP_BOLT_Y
         for x in (-CAP_BOLT_X, CAP_BOLT_X):
-            parts += [m.csk_screw(3, (x, yb, CAP_HEAD_Z), (0, 0, -1), CAP_SCREW_L),
-                      m.nut(3, (x, yb, CAP_NUT_Z), (0, 0, -1))]
+            parts += shell_screw(x, yb)
         for a in (45, 135, 225, 315):
             px, pz = m.on_circle(COVER_HOLE_R, a)
             parts.append(m.csk_screw(3, (px, s * W_HALF, pz), (0, -s, 0), COVER_SCREW_L))
@@ -617,7 +834,8 @@ def strut_collar(theta=0.0):
 def static_parts():
     """the parts that don't move, built once (chamfered, as Rev 3's)"""
     if not _STATIC:
-        _STATIC.update({"frame": chamfer_edges(frame(), exclude=joint_edge), "shell": shell(), "shoe": shoe(), "spring_cap": spring_cap(),
+        fr, sh, _ = joint_grid(chamfer_edges(frame(), exclude=joint_edge), shell())
+        _STATIC.update({"frame": fr, "shell": sh, "shoe": shoe(), "spring_cap": spring_cap(),
                         "back_plate": back_plate(),
                         "cover_sensor": cover_sensor(), "cover_cable": cover_cable(), "friction_knob": friction_knob(),
                         "felt": felt(), "knob_spring": knob_spring(), "hardware": hardware(), "magnet": magnet(),
@@ -654,6 +872,23 @@ ALLOWED = {("bearing_inner", "lever_upper"), ("bearing_inner", "lever_lower"), (
            ("cover_sensor", "magnet"), ("sensor_pcb", "sensor_wires"), ("frame", "gas_strut")}
 
 
+def overlap(a, b):
+    """the volume two solids share: OCC's boolean, or a mesh boolean (manifold) where OCC fails on the pair"""
+    try:
+        return a.intersect(b).Volume()
+    except Exception:
+        import numpy as np
+        import trimesh
+
+        def tm(s):
+            vs, fs = s.tessellate(0.05, 0.2)
+            return trimesh.Trimesh(np.array([v.toTuple() for v in vs]), np.array(fs))
+        try:
+            return trimesh.boolean.intersection([tm(a), tm(b)], engine="manifold").volume
+        except Exception:
+            return float("nan")
+
+
 def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
     names = None
     for th in angles:
@@ -668,8 +903,15 @@ def check(angles=(0.0, 8.0, 16.0, 24.0, 31.5, 32.0)):
                 A, B = bb[a], bb[b]
                 if A.xmax < B.xmin or B.xmax < A.xmin or A.ymax < B.ymin or B.ymax < A.ymin or A.zmax < B.zmin or B.zmax < A.zmin:
                     continue
-                v = P[a].intersect(P[b]).Volume()
-                if v > 0.01:
+                # solid by solid: OCC can hand back a whole solid of a multi-solid part as the "overlap" (it did for
+                # the collar's screw against the lever, 30 mm apart)
+                v = sum(overlap(sa, sb) for sa in P[a].Solids() for sb in P[b].Solids()
+                        if sa.BoundingBox().xmax >= sb.BoundingBox().xmin and sb.BoundingBox().xmax >= sa.BoundingBox().xmin
+                        and sa.BoundingBox().zmax >= sb.BoundingBox().zmin and sb.BoundingBox().zmax >= sa.BoundingBox().zmin
+                        and sa.BoundingBox().ymax >= sb.BoundingBox().ymin and sb.BoundingBox().ymax >= sa.BoundingBox().ymin)
+                if v != v:
+                    hits.append(f"{a} / {b} NOT CHECKED (both booleans failed)")
+                elif v > 0.01:
                     hits.append(f"{a} / {b} {v:.2f}")
         print(f"{th:5.1f} deg: " + ("clear" if not hits else "; ".join(hits)))
 
@@ -679,13 +921,20 @@ def check_assembly(step=2.0):
     the shoe (felt, spring and cap in it) set down into the frame's half of its pocket standing SHOE_IN back, from
     60 mm up, then slid forward onto the hub; then the shell lowered straight down over both from 80 mm up"""
     S = static_parts()
-    lever_b = fuse(*lever_halves(0.0), *[bearing(s)[k] for s in (-1, 1) for k in range(3)])
-    shoe_b = fuse(S["shoe"], S["felt"], S["spring_cap"])
+    lever_b = cq.Compound.makeCompound([*lever_halves(0.0), *[bearing(s)[k] for s in (-1, 1) for k in range(3)]])
+    shoe_b = cq.Compound.makeCompound([S["shoe"], S["felt"], S["spring_cap"]])
     worst = {}
 
+    def meet(p, q):
+        a, b = p.BoundingBox(), q.BoundingBox()
+        return (a.xmax >= b.xmin and b.xmax >= a.xmin and a.ymax >= b.ymin and b.ymax >= a.ymin and
+                a.zmax >= b.zmin and b.zmax >= a.zmin)
+
     def hit(key, a_, b_, at):
-        vol = a_.intersect(b_).Volume()
-        if vol > 0.01:
+        vol = sum(overlap(sa, sb) for sa in a_.Solids() for sb in b_.Solids() if meet(sa, sb))
+        if vol != vol:
+            worst[key + " NOT CHECKED"] = (0.0, at)
+        elif vol > 0.01:
             worst[key] = max(worst.get(key, (0, 0)), (vol, at))
 
     for i in range(int(80 / step) + 1):

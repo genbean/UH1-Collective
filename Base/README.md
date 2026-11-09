@@ -144,7 +144,9 @@ The figures assume the strut gains 30 % in force from fully extended to fully co
 
 A 40 N cabinet strut ([QLXHBOT](https://www.amazon.com/dp/B0C8DJ8W9H)) was considered and rejected: its ends are snap-on sockets, which pop off if the strut ever pulls. This strut has eyelets that bolt through.
 
-**Measure yours** before printing the frame and collar. The listing gives the eye holes as 4 mm, the body as 12.1 mm and the rod as 4 mm, and the script uses those (`PIN_R` is the M4 screw's 4.4 mm clearance in the printed cheeks). The collar end's tab and boss are measured (`BODY_TAB_T`, `BODY_TAB_W`, `BODY_BOSS_D`, `BODY_BOSS_AT`, `BODY_BOSS_L`). The anchor end's tab is still a guess: `ROD_TAB_T`, `ROD_TAB_W`. The clevis slots are the tab thickness plus 0.6 mm.
+**Measure yours** before printing the frame and collar. The listing gives the eye holes as 4 mm and the rod as 4 mm; the cylinder measures 0.475 in (12.07 mm). The script uses those (`PIN_R` is the M4 screw's 4.4 mm clearance in the printed cheeks). The collar end's tab and boss are measured (`BODY_TAB_T`, `BODY_TAB_W`, `BODY_BOSS_D`, `BODY_BOSS_AT`, `BODY_BOSS_L`). The anchor end's tab is still a guess: `ROD_TAB_T`, `ROD_TAB_W`. The clevis slots are the tab thickness plus 0.6 mm.
+
+**Fit it cylinder down:** the cylinder's end in the anchor clevis on the frame, the rod's end in the collar on the tube.
 
 ## Anchor: a fixed, gusseted clevis
 
@@ -154,7 +156,7 @@ Two 6 mm cheeks rise from the plate either side of the strut's steel tab, printe
 
 Each cheek is a round boss over the eye, 6.5 mm in radius (8 with the first anchor), standing on a block down to the plate. A triangular gusset runs 20 mm forward, from the top of the boss down to the plate. Behind the eye, each cheek carries on as a wall straight back into the stop pedestal, 19.5 mm away. The wall's top runs from the top of the boss, 1.5 mm under the hub, down to the pedestal's front edge, so the clevis and the pedestal brace each other. Behind the tab, from 1 mm past its round end, the gap between the cheeks is filled back to the pedestal. The two walls print as one solid block, with proper infill.
 
-The front gussets are 3.8 mm thick, so they stop 1 mm short of the strut's rod on each side and the rod swings up between them. Their outer faces are flush with the cheeks, so the screw's head and the nut seat flat. The screw goes in from the knob side, which has about 35 mm of room. Nothing at the anchor adjusts.
+The front gussets are 3.8 mm thick and stop 3 mm either side of the strut's centre line. The strut's cylinder, at this end, swings up clear above them over the whole travel. Their outer faces are flush with the cheeks, so the screw's head and the nut seat flat. The screw goes in from the knob side, which has about 35 mm of room. Nothing at the anchor adjusts.
 
 ## Up-stop: a boss on the lever, a pedestal on the frame
 
@@ -293,8 +295,8 @@ It can't be checked beforehand: until programming is done, AX1 reads full scale 
 4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
 5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
 6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
-7. **Strut, collar end:** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
-8. **Strut, rod end:** hold the lever on its down-stop and push the strut in to about 119 mm. Fit the steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the body end.
+7. **Strut, collar end (the rod's):** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
+8. **Strut, base end (the cylinder's):** with the cylinder down, hold the lever on its down-stop and push the strut in to about 119 mm. Fit the cylinder's steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the collar end.
 9. Balance it as above. The down-stop is fixed, so there's nothing to set.
 
 ## Screws

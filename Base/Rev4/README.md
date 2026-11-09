@@ -22,8 +22,8 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 
 - **Lever:** the hub is 43 mm long (Rev 3: 64), centred on the tube. The tube's plane moves from 9 mm off-centre to the middle. Rev 3's friction drum is gone.
 - **Bearings:** 6808-2RS thin-section bearings, 40 × 52 × 7 mm, in place of the 6006-2RS (30 × 55 × 13). The trunnions grow to 40 mm across to suit.
-- **Frame:** 9 mm pillow blocks (Rev 3: 17). The base plate stops at their outer faces, so it's 63 × 127 mm (Rev 3: 100 × 116), with no wings or gussets out beside it.
-- **Shell:** one box over the lever, bolted to both pillow blocks, in place of the two caps. It's slotted for the tube.
+- **Frame:** 9 mm pillow blocks (Rev 3: 17). The base plate stops at their outer faces, so it's 63 × 127 mm (Rev 3: 100 × 116), with no wings or gussets out beside it. A front wall under the shell's carries its cut for the lever on down, so the two read as one piece.
+- **Shell:** one box over the lever, in place of the two caps, slotted for the tube. Four M4 × 50 socket head screws hold it to the pillow blocks, and a diamond grid in the joint locates it.
 - **Sensor:** the AS5600 board sits inside the sensor trunnion's end, so the side covers are 9.5 mm deep (Rev 3: 15).
 - **USB cable:** it leaves through a notch in the cable cover's rim instead of a spout.
 - **Brake:** a narrow, tall shoe presses on the back of the hub. Its pocket is split between the frame and the shell, and holds it with no slop.
@@ -52,11 +52,11 @@ The trunnion, bearing seat and shoe pocket are new, so print these before the bi
 | File | What it is | Good fit | Change |
 |---|---|---|---|
 | `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.9 / 40.1 / 40.3 mm | the race presses on firmly, no wobble | `TRUN_OD += step` |
-| `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.9 / 52.1 / 52.3 mm | the race goes in with thumb pressure | `BRG_SEAT_D += step` |
+| `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.8 / 52.0 / 52.2 mm | the race goes in with thumb pressure | `BRG_SEAT_D += step` |
 | `stl/coupons/coupon_shoe_pocket.stl` | 10 mm of the shoe's pocket, 0 / 0.1 / 0.2 mm clear a side, printed as the frame prints it | the printed shoe slides through under a finger, with no rattle and no rocking | `SHOE_CLR += step / 2` |
 
-The bearing coupons' `0` comes from how Rev 3's bearings fitted as built:
-- **Seat:** +0.1 on the race's outside was a perfect fit, so it stays.
+The bearing coupons' `0` comes from how the bearings fitted as built:
+- **Seat:** +0.1 on the race's outside was a perfect fit in Rev 3's one-piece blocks. In Rev 4's seat, split between the frame and the shell, it left the bearing a little play, so the seat is now 52.0 mm, the race's own size. The seat coupon is one piece, so it can't show the split: check the play in the frame and shell themselves.
 - **Trunnion:** +0.2 on the race's bore pressed on a hair too tight, so Rev 4 uses +0.1 (40.1 mm).
 
 The tube socket is unchanged, so Rev 3's socket fit stands.
@@ -79,19 +79,39 @@ From the middle out, each side:
 
 The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from the pillow blocks' tops. It replaces Rev 3's two caps.
 
-- **Side walls:** solid, 9 mm thick. These are the caps. Each holds the bearing's upper half-seat and lip, and two of the cover's screw holes. Two M3 × 20 countersunk screws per side go down counterbores into M3 nuts in the pillow blocks, as the caps' did.
+- **Side walls:** solid, 9 mm thick. These are the caps. Each holds the bearing's upper half-seat and lip, and two of the cover's screw holes. Two M4 × 50 socket head screws per side go down through them from the top, each centred on the joint, heads down 13 mm counterbores, into M4 nuts in the pillow blocks (see [The joint](#the-joint)).
 - **Front, back and top walls:** 3 mm thick.
-- **Tube slot:** the front and top are slotted just wide enough for the socket boss, the tube, the top gusset and the down-stop pads to swing from 0° to 32°, with 1 mm all round. The slot is cut from the lever's actual sweep, 2° at a time.
+- **Tube slot:** one clean opening in the front and top, the same outline as the frame's front wall below it (see [The joint](#the-joint)). It holds the socket boss, the tube, the lever's fairings and the down-stop pads through their whole swing, 0° to 32°, with at least 1 mm all round.
 - **Brake housing:** its upper half runs on out of the back wall (see [Brake](#brake)). Either side of it, the shell is solid back to the housing's back face, with the same outline as the frame below, up to its top.
 - **Assembly:** it drops straight down over the lever, the slot and the shoe's pocket both open at the bottom.
 
+## The joint
+
+![The frame's half of the joint: the knurl on every land, both sides of the bearings](renders/rev4_joint_grid.png)
+
+The frame and the shell meet on one flat plane through the pivot axis, which also splits the bearing seats.
+
+- **Screws:** four M4 × 50 socket head cap screws from the lever's HELIFOUNER kit, two per side, 30.5 mm either side of the axis, down the middle of the shell's 9 mm side walls (y = ±27). Each is centred on the joint: its head seats 25 mm above it, at the floor of a 13 mm counterbore, and its tip is 25 mm below. Each goes into an M4 nut slid into a slot in the pillow block's outer face, about 21–24 mm under the joint. The slots open just below the side covers' rim. The nut sits flats-in: its inner flat stops it turning when you tighten the screw. The counterbore leaves 0.9 mm of shell either side, and the nut's slot leaves 0.9 mm of block to its inside face.
+- **Diamond knurl:** the whole face the frame and the shell share is knurled.
+  - **Shape:** square pyramids 2.4 mm across their corners and 0.7 mm tall with flat tops, on a diamond grid with 0.6 mm flat lanes. They stand on the frame's half and fit into sockets in the shell's half, 0.1 mm clear on their 45° flanks and 0.2 mm deeper than the pyramids. The flat faces still close on each other, so the bearing seats close, and the knurl stops the shell sliding fore and aft or sideways as the screws pull it down.
+  - **Coverage:** it runs over every land, in front of the bearings and behind them, and on across the solid frame behind the pillow blocks. It stops 0.5 mm short of every edge and hole: pyramids at its edge are cut off square, and any piece smaller than a third of a pyramid is left out. The grid is the same mirror image either side of the tube, and fore and aft on the pillow blocks.
+  - **Printing:** neither half needs supports: the pyramids point up on the frame, and the sockets open upward on the shell, which prints top down.
+- **Front opening:** the frame has a 3 mm front wall between the pillow blocks, under the shell's, and one clean opening runs through both. It has straight sides 21 mm either side of the tube (the down-stop pads, 1 mm clear) from the top down to 7 mm under the pivot axis, and a round bottom of the same radius below that: the lever's lower fairing swings down to 24.5 mm under the axis in the walls' plane. On top it carries on as one slot, as wide at the front, narrowing at 45° to 12.5 mm either side of the tube for the upper fairing, and ending round just behind the hub's top. Both contain the lever's whole sweep, 1 mm clear or more. Below the opening, a smooth round-ended slot lets the strut's cylinder through, 1.5 mm clear over the whole travel. It's cut by the cylinder swung about its anchor pin, so it has no facets.
+- **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis, just below the side cover's rim. A 2.5 mm hex key goes straight in to the M4 × 16's head.
+
+![The front: the frame's wall carries on the shell's cut for the lever](renders/rev4_front.png)
+
 ## Lever
 
-Two halves split at the pivot axis, as Rev 3, joined by four M4 socket head cap screws from the top into nuts in the lower half. The screws are 16.25 mm either side of the tube:
-- **Front pair, x = −17:** M4 × 40, as Rev 3. Each hole is 1.35 mm from the socket.
-- **Back pair, x = +10** (Rev 3: +17): M4 × 50, so their nut pockets clear the up-stop lugs. Each hole is 1.3 mm from the axial cable bore.
+Two halves split at the pivot axis, as Rev 3, joined by four M4 × 40 socket head cap screws from the top into nuts in the lower half. They're where Rev 3 has them: x = ±17, symmetrical fore and aft, 16.25 mm either side of the tube. The front pair's holes are 1.35 mm from the socket.
 
-Each counterbore is 1.25 mm from the hub's end. The bores, the down-stop pads, the hose-clamp groove and the socket for the uncut 500 mm tube are all Rev 3's. The top gusset over the socket stops at x = 2 (Rev 3: 8), so it clears the brake at 32°.
+Each counterbore is 1.25 mm from the hub's end. The bores, the down-stop pads, the hose-clamp groove and the socket for the uncut 500 mm tube are all Rev 3's.
+
+**Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss on the upper half, and the same one mirrored under it on the lower half. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm. It stays 1.75 mm clear of the front screws' counterbores on top and 1.6 mm clear of their nut pockets underneath.
+
+![The lever from the side: the fairings top and bottom, tangent to the hub](renders/rev4_lever_side.png)
+
+![The lever from the front and above: the upper fairing between the front screws](renders/rev4_lever_top.png)
 
 ![The lever's screws, with the shell off](renders/rev4_screws_lever.png)
 
@@ -148,7 +168,7 @@ The anchor clevis's back wall runs level, at the cheeks' top, into the pad's fro
 
 The plate is 63 mm wide, the pillow blocks' outer faces, and 127 mm long. The desk screws are 24 mm either side of the middle, past the blocks' ends and the down-stop pillars.
 
-Behind each pillow block, the frame is solid back to the brake housing's back face, out to the [back chamfer](#the-back). The cap screws' nut slots run out through the chamfer.
+Behind each pillow block, the frame is solid back to the brake housing's back face, out to the [back chamfer](#the-back).
 
 Each pillow block also has a 45° gusset at three of its corners, 8 mm along each wall:
 - **Behind, inside:** the block's inner face to the web's front face. Its top is cut back to stay 1.5 mm outside the up-stop lugs' swing.
@@ -180,6 +200,8 @@ Rev 3 was first built with the anchor at x = −12, z = −40.5, sized for a 40 
 
 The anchor is now at x = −9.5, z = −36.5, in Rev 4 and in Rev 3's updated frame: 4 mm up and 2.5 mm back. The strut's line passes closer to the pivot, so it has less leverage. It now balances 45 N to within 3 g at the grip over the whole travel. The strut is 119 mm long at 0° and 140 mm at 32°, inside its 102–152 mm stroke.
 
+The strut is fitted cylinder down, as built: its cylinder (0.475 in, 12.07 mm, measured) on the anchor clevis, and its rod on the collar. The frame is cut 1.5 mm clear of the cylinder's sweep, through the front wall and over the clevis's front gussets.
+
 | Strut force | Out of balance at the grip | Fix |
 |---|---|---|
 | 40 N | −58 to −50 g (drops) | — |
@@ -198,8 +220,8 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 ## Printing
 
-- **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel.
-- **Shell:** top down. The bearing half-seats, the slot and the shoe's half-pocket all open upward.
+- **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel, the grid's pyramids point up, and the front wall builds straight up.
+- **Shell:** top down. The bearing half-seats, the slot, the shoe's half-pocket and the grid's sockets all open upward.
 - **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half.
 - **Shoe:** stand it on its back face. The spring's bore opens on the bed, and the curved face is on top.
 - **Spring cap:** on its flat front face, dimple up.
@@ -210,12 +232,12 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 ## Assembly
 
-1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Tap the six back-plate holes, four in the frame and two in the shell, 7.5 mm deep. Slide an M3 nut into each of the four slots in the blocks' front and back faces.
-2. **Lever:** press the four M4 nuts into the lower half's pockets. Lay the USB cable and the sensor lead into its channels, close the upper half, and fit the cap screws: M4 × 40 at the front, M4 × 50 at the back. Press the bearings onto the trunnions.
+1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Tap the six back-plate holes, four in the frame and two in the shell, 7.5 mm deep. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
+2. **Lever:** press the four M4 nuts into the lower half's pockets. Lay the USB cable and the sensor lead into its channels, close the upper half, and fit the four M4 × 40 cap screws. Press the bearings onto the trunnions.
 3. **Sensor:** solder the module to the lead, as in Rev 3, and set it in the trunnion's pocket, chip out, with a dot of hot glue.
 4. **Lever in:** lower the lever's bearings straight down into the frame's seats.
 5. **Shoe in:** glue the felt onto the shoe's face. Drop the spring into the shoe's bore, then the spring cap. Set the shoe down into the frame's half of its pocket about 10 mm back from the hub, hanging out of the open back, and slide it forward onto the hub. The shoe can't go straight down into place, because its face wraps round the hub.
-6. **Shell on:** lower it straight down over the lever and the shoe, and fit its four M3 × 20s into the slotted nuts.
+6. **Shell on:** lower it straight down over the lever and the shoe, so the grid's pyramids drop into their sockets. Fit its four M4 × 50 socket head screws into the nuts and tighten them evenly.
 7. **Back plate:** press the M5 nut into its pocket and screw the plate on (six M3 × 16). Drop the M5 × 30 bolt into the knob's hex pocket, head down, and screw it in through the nut until it meets the spring cap, then set the drag.
 8. **Covers:** fit the sensor cover, with the magnet in its post. Lay the USB cable into the cable cover's notch, push the cover onto the block and shell, and screw both down (M3 × 16).
 9. **Strut and tube:** as Rev 3.
@@ -226,9 +248,8 @@ All from the same kits as Rev 3: the AvrestYPT countersunk kit (M3 and M4 × 8, 
 
 | Where | Screw | Into | Qty |
 |---|---|---|---|
-| Lever halves, front | M4 × 40 socket head cap, from the top | M4 nut in a pocket in the lower half | 2 |
-| Lever halves, back | M4 × 50 socket head cap, from the top | M4 nut in a pocket in the lower half | 2 |
-| Shell | M3 × 20 countersunk, down counterbores from the top | M3 nut slid into a slot in the block's front or back face | 4 |
+| Lever halves | M4 × 40 socket head cap, from the top, two in front and two behind | M4 nut in a pocket in the lower half | 4 |
+| Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, just below the side cover's rim | 4 |
 | Side covers | M3 × 16 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
 | Back plate | M3 × 16 countersunk, from its back face | M3 thread tapped 7.5 mm deep in the frame (4) and the shell (2) | 6 |
 | Brake | **M5 × 30 hex-head bolt (Rev 3's)**, head on the floor of the knob's hex pocket | M5 nut in the back plate's pocket | 1 |
@@ -249,9 +270,9 @@ Between them, these label every screw and nut in the base:
 
 ![The lever's nuts, from below](renders/rev4_screws_levernuts.png)
 
-![From the front: the shell's front nuts](renders/rev4_screws_front.png)
+![The shell's nuts, in the pillow blocks' outer faces (sensor cover off)](renders/rev4_screws_shellnuts.png)
 
-![From behind: the back plate, the brake bolt, the shell's back nuts](renders/rev4_screws_back.png)
+![From behind: the back plate and the brake bolt](renders/rev4_screws_back.png)
 
 ![The brake in section: the bolt, its nut in the back plate, the spring cap, the spring and the shoe](renders/rev4_screws_brake.png)
 

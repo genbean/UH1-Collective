@@ -17,6 +17,23 @@ sys.path.insert(0, HERE)
 import numpy as np                                     # noqa: E402
 import trimesh                                         # noqa: E402
 from PIL import Image, ImageDraw                        # noqa: E402
+
+_pil_save = Image.Image.save
+
+
+def _save_retrying(self, fp, *a, **kw):
+    """Windows: a PNG open in a viewer (or being indexed) can refuse a write for a moment; try again before failing"""
+    import time
+    for k in range(20):
+        try:
+            return _pil_save(self, fp, *a, **kw)
+        except OSError:
+            if k == 19:
+                raise
+            time.sleep(0.5)
+
+
+Image.Image.save = _save_retrying
 import make_renders_r3 as R                            # noqa: E402
 import mk3_rev4 as v                                   # noqa: E402
 from mk3_pivot import cyl, fuse, hexprism              # noqa: E402
@@ -25,7 +42,7 @@ d, m = R.d, R.m
 OUT = os.path.join(HERE, "renders")
 RED = (214, 48, 39)
 HW = ("hardware", "lever_screws", "strut_pins")
-SUB = ("Screws in red. Countersunk screws and nuts: AvrestYPT kit (the lever halves: HELIFOUNER M4 x 30-50 socket head "
+SUB = ("Screws in red. Countersunk screws and nuts: AvrestYPT kit (the lever halves and the shell: HELIFOUNER M4 x 30-50 socket head "
        "cap kit and its nuts). Brake bolt: M5 x 30 hex head (Rev 3's).")
 
 
@@ -132,10 +149,41 @@ def back_view(C, P0=None):
                "plate's six M3 screws"), "rev4_back.png")
 
 
+def lever_views(C):
+    """the lever alone: from the side, the fairings over and under the socket boss running into the hub; and from the
+    front and above"""
+    lu, ll = v.lever_halves(0.0)
+    P = {"lever_upper": (to_mesh(lu), C["lever_upper"]), "lever_lower": (to_mesh(ll), C["lever_lower"])}
+    save(title(R.render(P, (0.0, -1.0, 0.05), size=(1500, 950), zoom=1.0)[0], "Rev 4 lever from the side",
+               "The fairings over and under the socket boss: from the hose-clamp groove, tangent to the hub"),
+         "rev4_lever_side.png")
+    save(title(R.render(P, (-0.55, -0.2, 1.0), size=(1300, 1100), zoom=1.0)[0], "Rev 4 lever from the front and above",
+               "The upper fairing, 21 mm wide, between the front screws' counterbores"), "rev4_lever_top.png")
+
+
+def joint_views(C, P0=None):
+    """the frame's half of the joint with the grid's pyramids; and the front, the frame's wall carrying on the shell's
+    cut for the lever"""
+    P0 = P0 or scene(0.0, C, tube_to=-200.0)
+    n = len(v.grid_sites(v.chamfer_edges(v.frame(), exclude=v.joint_edge), v.shell()))
+    save(title(R.render({"frame": P0["frame"]}, (0.35, -0.3, 1.0), size=(1400, 1100), zoom=1.0)[0],
+               "Rev 4 frame: its half of the joint",
+               f"A diamond knurl, {n} pyramids 2.4 mm across and 0.7 mm tall, on every land either side of the bearings; the shell has a socket over each"),
+         "rev4_joint_grid.png")
+    keep = ("frame", "shell", "cover_sensor", "cover_cable", "lever_upper", "lever_lower", "lever_screws", "gas_strut",
+            "bearing_outer", "bearing_inner", "bearing_seal", "hardware")
+    save(title(R.render({k: x for k, x in P0.items() if k in keep}, (-1.0, -0.35, 0.3), size=(1300, 1100),
+                        focus=((-50, -45, -58), (40, 45, 40)), zoom=1.0)[0],
+               "Rev 4 from the front (tube off)", "The frame's front wall carries on the shell's cut for the lever, "
+               "and lets the strut through below it"), "rev4_front.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     C = colours()
     back_view(C)
+    joint_views(C)
+    lever_views(C)
     frame_top(C)
     assembly_top(C)
     P0 = scene(0.0, C, tube_to=-200.0)
@@ -214,10 +262,10 @@ def screws_and_nuts():
     r = v.r
     H = []
     for s in (-1, 1):
-        yb = s * (v.BRG_Y0 + v.BLOCK_Y1) / 2
+        yb = s * v.CAP_BOLT_Y
         for x in (-v.CAP_BOLT_X, v.CAP_BOLT_X):
-            H += [("shell screw", m.csk_screw(3, (x, yb, v.CAP_HEAD_Z), (0, 0, -1), v.CAP_SCREW_L), (0, 0, 1)),
-                  ("shell nut", m.nut(3, (x, yb, v.CAP_NUT_Z), (0, 0, -1)), (np.sign(x), 0, 0))]
+            scr, nut = v.shell_screw(x, yb)
+            H += [("shell screw", scr, (0, 0, 1)), ("shell nut", nut, (0, s, 0))]
         for a in (45, 135, 225, 315):
             px, pz = m.on_circle(v.COVER_HOLE_R, a)
             H.append(("cover screw", m.csk_screw(3, (px, s * v.W_HALF, pz), (0, -s, 0), v.COVER_SCREW_L), (0, s, 0)))
@@ -261,20 +309,18 @@ def screw_views(P0):
     """between them, every screw and nut in the base, labelled"""
     covers = lambda s: [np.array([px, s * v.W_HALF, pz]) for px, pz in
                         (m.on_circle(v.COVER_HOLE_R, a) for a in (45, 135, 225, 315))]
-    yb = (v.BRG_Y0 + v.BLOCK_Y1) / 2
-    zn = v.CAP_NUT_Z - m.NUT_T[3] / 2
-    front_nuts = [np.array([-v.BLOCK_HW, s * yb, zn]) for s in (-1, 1)]               # the slots' mouths
-    back_nuts = [np.array([v.REAR_C - yb, s * yb, zn]) for s in (-1, 1)]              # (through the back chamfer)
+    zn = v.CAP_NUT_Z - m.NUT_T[4] / 2
+    side_nuts = [np.array([x, -v.BLOCK_Y1, zn]) for x in (-v.CAP_BOLT_X, v.CAP_BOLT_X)]   # the slots' mouths, -y
     desk = [np.array([x, y, v.Z_PLATE]) for x, y in v.DESK]
     bare = hide(P0, "carbon_tube", "strut_collar", "gas_strut", "strut_pins", "hose_clamp", "usb_cable", "sensor_wires")
-    labelled(P0, [("M3 x 20 countersunk  (x4)", "the shell, from the top, down counterbores into M3 nuts slid into the "
-                   "pillow blocks from the front and back", heads_of("shell screw"))],
+    labelled(P0, [("M4 x 50 socket head cap  (x4)", "the shell, from the top, heads down 13 mm counterbores, each "
+                   "centred on the joint, into M4 nuts slid into the pillow blocks from the sides (HELIFOUNER kit)",
+                   heads_of("shell screw"))],
              (0.45, 0.3, 1.0), "MkIII base Rev 4 screws: the shell, from above", "rev4_screws_top.png",
              focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
     labelled(hide(P0, "shell", "back_plate"),
-             [("M4 x 40 socket head cap  (x2)", "lever halves, front pair, from the top into M4 nuts in the lower half "
-               "(HELIFOUNER kit)", heads_of("lever screw 40")),
-              ("M4 x 50 socket head cap  (x2)", "lever halves, back pair, the same way", heads_of("lever screw 50"))],
+             [("M4 x 40 socket head cap  (x4)", "lever halves, two in front and two behind, as Rev 3: from the top "
+               "into M4 nuts in the lower half (HELIFOUNER kit)", heads_of("lever screw 40"))],
              (0.55, 0.35, 1.0), "MkIII base Rev 4 screws: the lever (shell off)", "rev4_screws_lever.png",
              focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
     keep = ("lever_upper", "lever_lower", "lever_screws", "bearing_inner", "bearing_outer", "bearing_seal")
@@ -283,18 +329,17 @@ def screw_views(P0):
                "closing the halves", heads_of("lever nut"))],
              (0.35, -0.45, -1.0), "MkIII base Rev 4 screws: the lever's nuts, from below (lever only)",
              "rev4_screws_levernuts.png", focus=((-45, -35, -35), (35, 35, 35)), zoom=1.0)
-    labelled(bare,
-             [("M3 nut  (x2)", "front pair for the shell's screws: slide into the slots in the pillow blocks' "
-               "front faces before the shell goes on", front_nuts)],
-             (-1.0, -0.2, 0.3), "MkIII base Rev 4 screws: from the front (tube and strut off)", "rev4_screws_front.png",
-             focus=((-50, -45, -58), (40, 45, 40)), zoom=1.0)
+    labelled(hide(P0, "cover_sensor", "magnet", "carbon_tube", "strut_collar", "hose_clamp", "usb_cable",
+                  "sensor_wires", "gas_strut", "strut_pins"),
+             [("M4 nut  (x4)", "the shell's: two each side, slid into the slots in the pillow blocks' outer faces "
+               "before the shell goes on; the slots open just below the side covers' rim", side_nuts)],
+             (-0.15, -1.0, 0.2), "MkIII base Rev 4 screws: the shell's nuts (sensor cover off; the same on the USB side)",
+             "rev4_screws_shellnuts.png", focus=((-45, -32, -30), (45, -32, 40)), zoom=1.0)
     labelled(bare,
              [("M3 x 16 countersunk  (x6)", "the back plate: four into the frame, two into the shell, tapped M3 7.5 mm "
                "deep", heads_of("back screw")),
               ("M5 x 30 hex bolt (Rev 3's)", "brake: its head on the floor of the knob's hex pocket; its nut is in "
-               "the section through the brake", [np.array([v.KNOB_X0 + 34, 0, 0])]),
-              ("M3 nut  (x2)", "back pair for the shell's screws: slide into the slots, which open on the back chamfer",
-               back_nuts)],
+               "the section through the brake", [np.array([v.KNOB_X0 + 34, 0, 0])])],
              (1.0, 0.4, 0.45), "MkIII base Rev 4 screws: from behind", "rev4_screws_back.png",
              focus=((-40, -45, -58), (110, 45, 40)), zoom=1.0)
     hb = v.KNOB_X0 + v.KNOB_FLOOR                                                     # the bolt head's underside
@@ -317,19 +362,21 @@ def screw_views(P0):
     labelled(P0, [("M3 x 16 countersunk  (x4)", "sensor cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(-1)),
                   ("M4 x 12 countersunk  (x2)", "strut collar clamp: heads 2 mm into the -y ear", heads_of("clamp screw")),
-                  ("M4 nut", "strut, body end: in the collar's -y cheek", heads_of("eye nut")),
+                  ("M4 nut", "strut, collar end (rod): in the collar's -y cheek", heads_of("eye nut")),
                   ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting: not in the kits", desk)],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
     labelled(P0, [("M3 x 16 countersunk  (x4)", "cable cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(1)),
-                  ("M4 x 16 countersunk", "strut, body end: head on +y, nut in the -y cheek", heads_of("eye screw")),
-                  ("M4 nut  (x2)", "strut collar clamp: in the +y ear's pockets", heads_of("clamp nut"))],
-             (0.3, 1.0, 0.4), "MkIII base Rev 4 screws: USB (+y) side", "rev4_screws_usbside.png",
+                  ("M4 x 16 countersunk", "strut, collar end (rod): head on +y, nut in the -y cheek", heads_of("eye screw")),
+                  ("M4 nut  (x2)", "strut collar clamp: in the +y ear's pockets", heads_of("clamp nut")),
+                  ("Hex-key hole (3.5 mm)", "through the pillow block, on the strut anchor's M4 x 16: a 2.5 mm key reaches "
+                   "its head", [np.array([v.ANCH_X, v.BLOCK_Y1, v.ANCH_Z])])],
+             (0.3, 1.0, -0.12), "MkIII base Rev 4 screws: USB (+y) side", "rev4_screws_usbside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
     labelled(R.cut(P0, 1, 12.0, keep="below"),
-             [("M4 x 16 countersunk", "strut, rod end: head on +y", heads_of("anchor screw")),
-              ("M4 nut", "strut, rod end: in the -y cheek's pocket", heads_of("anchor nut"))],
+             [("M4 x 16 countersunk", "strut, base end (cylinder): head on +y", heads_of("anchor screw")),
+              ("M4 nut", "strut, base end (cylinder): in the -y cheek's pocket", heads_of("anchor nut"))],
              (0.15, 1.0, 0.35), "MkIII base Rev 4 screws: the strut's anchor (cut away at y = +12)",
              "rev4_screws_strut.png", focus=((-60, 12, -58), (30, 12, -5)), zoom=0.8)
 
@@ -364,7 +411,6 @@ def exploded(C):
     mv(["lever_lower"], L)
     mv(["lever_upper"], L + (0, 0, 45))
     pull("lever screw 40", L + (0, 0, 45), 55)
-    pull("lever screw 50", L + (0, 0, 45), 55)
     pull("lever nut", L, 22)
     for s in (-1, 1):
         mv([f"bearing_outer{s}", f"bearing_inner{s}", f"bearing_seal{s}"], L + (0, 32 * s, 0))
@@ -410,9 +456,9 @@ def exploded(C):
              ("Strut collar", "clamped on the tube", ["strut_collar"]),
              ("Hose clamp", "on the socket's mouth", ["hose_clamp"]),
              ("Carbon tube", "25 x 23 mm, 500 mm (shortened here)", ["tube"])]
-    screws = [("M4 socket head + nut  (x4)", "lever halves: two M4 x 40 in front, two M4 x 50 behind, the nuts in "
-               "the lower half", S["lever screw 40"] + S["lever screw 50"] + S["lever nut"]),
-              ("M3 x 20 + M3 nut  (x4)", "the shell, countersunk, into nuts slid into the pillow blocks",
+    screws = [("M4 x 40 + M4 nut  (x4)", "lever halves: socket head, from the top, the nuts in the lower half",
+               S["lever screw 40"] + S["lever nut"]),
+              ("M4 x 50 + M4 nut  (x4)", "the shell: socket head, into nuts slid into the pillow blocks' sides",
                S["shell screw"] + S["shell nut"]),
               ("M3 x 16  (x8)", "side covers, countersunk", S["cover screw"]),
               ("M3 x 16  (x6)", "back plate, countersunk", S["back screw"]),
@@ -429,23 +475,23 @@ def exploded(C):
 
 
 def screw_chart():
-    rows = [(d.screw_tile("shcs", 4, 40), "M4 x 40 socket head cap", 2,
-             "The lever halves' front pair, from the top, into M4 nuts in the lower half (HELIFOUNER M4 x 30-50 kit)."),
-            (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 2, "The lever halves' back pair, the same way."),
+    rows = [(d.screw_tile("shcs", 4, 40), "M4 x 40 socket head cap", 4,
+             "The lever halves, two in front and two behind, as Rev 3: from the top into M4 nuts in the lower half "
+             "(HELIFOUNER M4 x 30-50 kit)."),
+            (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 4,
+             "The shell, from the top, each centred on the joint, into M4 nuts slid into the pillow blocks from the "
+             "sides."),
             (d.screw_tile("hex", 5, 30), "M5 x 30 hex bolt (Rev 3's)", 1,
              "The brake: head in the knob's hex pocket, through the M5 nut in the back plate, onto the spring cap."),
-            (d.screw_tile("csk", 3, 20), "M3 x 20 countersunk", 4,
-             "The shell, down counterbores into M3 nuts slid into the pillow blocks."),
             (d.screw_tile("csk", 3, 16), "M3 x 16 countersunk", 14,
              "The side covers (8), into threads tapped through the blocks and the shell; the back plate (6), tapped "
              "7.5 mm deep."),
             (d.screw_tile("csk", 4, 16), "M4 x 16 countersunk", 2, "The strut's two eyes, into nuts in the far cheeks."),
             (d.screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the other ear."),
-            (d.nut_tile(5.5, 2.4, 3.0), "M3 nut", 4, "The shell's: slid into the pillow blocks' slots, front and back."),
-            (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 8, "Lever (4), strut eyes (2), collar clamp (2)."),
+            (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 12, "Lever (4), shell (4), strut eyes (2), collar clamp (2)."),
             (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the back plate's front face.")]
     d.chart(rows, "MkIII base Rev 4: every screw, to scale",
-            "Countersunk screws and nuts: AvrestYPT kit. Lever screws: HELIFOUNER kit. Brake bolt: Rev 3's M5 x 30. "
+            "Countersunk screws and nuts: AvrestYPT kit. Socket head screws (lever and shell): HELIFOUNER kit. Brake bolt: Rev 3's M5 x 30. "
             "Not shown: four #10 wood screws for the desk.", os.path.join(OUT, "rev4_screw_sizes.png"))
 
 

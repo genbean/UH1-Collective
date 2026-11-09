@@ -180,7 +180,7 @@ SECTIONS.append(("Huey head: hardware", [
 SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
     ("Pivot", 2, "Thin-section ball bearing 6808-2RS, 40 x 52 x 7 mm, double sealed", "", "6808-2RS", "Amazon",
      "B012BIHBTQ", None, 2, CHECK, 0, "2-pack listing found 2026-11-08: price not checked, and any 6808-2RS fits (SKF "
-     "61808-2RS1, VXB, WJB and others sell it). Pressed onto the 40.1 mm trunnions, seated in the frame and the shell. "
+     "61808-2RS1, VXB, WJB and others sell it). Pressed onto the 40.1 mm trunnions, in 52.0 mm seats split between the frame and the shell. "
      "Print the 6808 coupons first", "Amazon search 2026-11-08; " + BASE),
     ("Tube", 1, "Carbon fibre tube, 25 mm OD x 23 mm ID, 500 mm, 3K plain weave, wrapped", "MECCANIXITY", "", "Amazon",
      "B0CFFT1B31", 27.49, 2, "", 0, "Sold in pairs. Wrapped, as the base needs (not pultruded). Used whole, 500 mm, uncut (470 + the head's extra 12.7 mm of bore + 17.3 mm down in the base's socket). Drill the "
@@ -188,21 +188,21 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
      "the socket and head fits with it (coupons)", AMZ + "; " + BASE),
     amz("Socket mouth", 1, "Worm-drive hose clamp, 25-40 mm range, 304 stainless, pack of 25", "MISPIRE", "B0F8QWCFWR", 18.99, 25,
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
-    amz("Lever halves", 4, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
+    amz("Lever halves and shell", 8, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
         "flat and lock washers and a hex key (200 pieces)", "HELIFOUNER", "B0CDSKK7V1", 9.99, "once",
-        "Uses 2 x M4 x 40 (the front pair) and 2 x M4 x 50 (the back pair), with 4 of its M4 nuts. "
-        "The heads sit in counterbores at the top and the nuts in hex pockets open to the underside, as far apart "
-        "as the lever allows; no tip protrudes. The nuts go into the lower half's pockets first", BASE,
-        ORDERED),
+        "Uses 4 x M4 x 40 and 4 x M4 x 50, with 8 of its M4 nuts. Lever halves: four M4 x 40, two in front and "
+        "two behind, as Rev 3, heads in counterbores at the top, nuts in hex pockets open to the underside (they go "
+        "into the lower half first); no tip protrudes. Shell: four M4 x 50, two each side, from the top down 13 mm "
+        "counterbores in its side walls, each centred on the joint, into nuts slid into the pillow blocks from "
+        "their outer faces; the slots open just below the side covers' rim", BASE, ORDERED),
     ("Strut", 1, "Gas strut, 6 in (152.4 mm eye to eye), 45 N (sold as 9-12 lb), flat eyelet tabs", "X AUTOHAUX", "",
      "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half. The anchor is placed so the "
-     "45 N strut as bought balances the lever", BASE),
+     "45 N strut as bought balances the lever. Fit it cylinder down: the cylinder (0.475 in) on the anchor clevis, "
+     "the rod on the collar", BASE),
     kit("Strut eyes", 2, "M4 x 16 countersunk screw + M4 hex nut", "One per eye: head on +y, nut in the -y cheek's pocket. "
         "The listing gives the strut's eye holes as 4 mm. Snug, then thread-lock: the eye must still turn"),
     kit("Strut collar", 2, "M4 x 12 countersunk screw + M4 hex nut", "Collar clamp, two 20 mm apart: each head sits 2 mm into the -y ear, "
         "its nut in the +y ear's pocket"),
-    kit("Shell", 4, "M3 x 20 countersunk screw + M3 hex nut", "Two each side, from the top down counterbores in the "
-        "shell's side walls (its bearing caps); each nut slides into a slot in the pillow block's front or back face"),
     kit("Side covers", 8, "M3 x 16 countersunk screw", "Four per cover, from its outer face into M3 threads tapped right "
         "through the pillow block and the shell's 9 mm side wall"),
     kit("Back plate", 6, "M3 x 16 countersunk screw", "From its back face into M3 threads tapped 7.5 mm deep: four in "
@@ -384,8 +384,11 @@ DROPPED = [
      "on 6808-2RS thin-section bearings", "Base/README.md (Rev 3)"),
     ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 16: the "
      "set is still used for the head's trigger pivot", "Base/README.md (Rev 3)"),
-    ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M3 "
-     "x 20 + M3 nuts), and its brake has no hinge", "Base/README.md (Rev 3)"),
+    ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M4 "
+     "x 50 socket heads + M4 nuts), and its brake has no hinge", "Base/README.md (Rev 3)"),
+    ("Base Rev 4's first shell screws: 4 x M3 x 20 countersunk + M3 nuts", 4, "The shell now takes four M4 x 50 socket "
+     "head cap screws from the lever's kit, into M4 nuts slid in from the pillow blocks' sides (2026-11-08)",
+     "Base/Rev4/README.md"),
 ]
 SOURCES = [
     ("HeliSR Rev 4.0 board", "PCB/HeliSR_Rev4.0 (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",

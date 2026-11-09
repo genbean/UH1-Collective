@@ -113,7 +113,9 @@ STRUT_F_RANGE = (40.0, 53.0)                     # as sold ("9-12 lb")
 STRUT_F_DESIGN = 45.0                            # the geometry balances this, the strut as bought (first 40, the bottom
                                                  # of the range: the 45 N strut as bought lifted the lever)
 STRUT_PROG = 1.3                                 # force rise from extended to compressed (assumed; not in the listing)
-STRUT_BODY_D, STRUT_ROD_D, STRUT_BODY_L = 12.1, 4.0, 70.0   # diameters from the listing
+STRUT_BODY_D, STRUT_ROD_D, STRUT_BODY_L = 12.07, 4.0, 70.0  # the cylinder measured 0.475 in; the rod from the listing.
+                                                 # As fitted: the cylinder at the anchor, on the base; the rod toward
+                                                 # the collar, on the head side
 TAB_L = 12.0                                     # eye centre to where the tab meets the rod or body
 ROD_TAB_T, ROD_TAB_W = 3.0, 10.0                 # steel tab on the rod end (anchor)
 # collar end of the 40 N strut, measured: a steel tab with a 4.45 mm eye, then a Ø8 mm boss whose face is 5.72 mm from the eye's
@@ -420,7 +422,8 @@ def collar(theta=0.0):
 
 # ---------------------------------------------------------------- bought parts (for renders)
 def strut(theta=0.0):
-    """the gas strut between the anchor eye and the collar eye at lever angle theta"""
+    """the gas strut between the anchor eye and the collar eye at lever angle theta, as fitted: its cylinder from the
+    anchor's tab, on the base, and its rod to the collar's fitting, on the head side"""
     cx, cz = collar_pin(theta)
     a, c = V(ANCH_X, Y0, ANCH_Z), V(cx, Y0, cz)
     u = (c - a).normalized()
@@ -433,8 +436,8 @@ def strut(theta=0.0):
 
     boss = cyl(BODY_BOSS_D / 2, (c - u * BODY_TAB_L).toTuple(), (c - u * BODY_BOSS_AT).toTuple())
     return fuse(tab(a, ROD_TAB_T, ROD_TAB_W, u, TAB_L), tab(c, BODY_TAB_T, BODY_TAB_W, -u, BODY_BOSS_AT + 1.0), boss,
-                cyl(STRUT_ROD_D / 2, (a + u * TAB_L).toTuple(), (c - u * (BODY_TAB_L + STRUT_BODY_L - 2)).toTuple()),
-                cyl(STRUT_BODY_D / 2, (c - u * (BODY_TAB_L + STRUT_BODY_L)).toTuple(), (c - u * BODY_TAB_L).toTuple()))
+                cyl(STRUT_BODY_D / 2, (a + u * TAB_L).toTuple(), (a + u * (TAB_L + STRUT_BODY_L)).toTuple()),
+                cyl(STRUT_ROD_D / 2, (a + u * (TAB_L + STRUT_BODY_L - 2)).toTuple(), (c - u * BODY_TAB_L).toTuple()))
 
 
 def pins(theta=0.0):
