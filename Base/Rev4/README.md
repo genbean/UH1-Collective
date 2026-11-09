@@ -25,7 +25,7 @@ This is the current base. It hasn't been printed yet: print the [fit-test coupon
 - **Frame:** 9 mm pillow blocks (Rev 3: 17). The base plate stops at their outer faces, so it's 63 × 127 mm (Rev 3: 100 × 116), with no wings or gussets out beside it. A front wall under the shell's carries its cut for the lever on down, so the two read as one piece.
 - **Shell:** one box over the lever, in place of the two caps, slotted for the tube. Four M4 × 50 socket head screws hold it to the pillow blocks, and a diamond grid in the joint locates it.
 - **Sensor:** the AS5600 board sits inside the sensor trunnion's end, flush with the bearing, so the side covers are 5 mm plates (Rev 3's are 15 mm deep).
-- **USB cable:** it turns out of the axis inside the bearing's retaining lip and runs back in a tunnel under the cable cover, instead of Rev 3's spout.
+- **USB cable:** it turns toward the front on an 18 mm bend, through a pie-shaped relief in the cable trunnion's end, and runs forward in a tunnel under the cable cover, instead of Rev 3's spout.
 - **Brake:** a narrow, tall shoe presses on the back of the hub. Its pocket is split between the frame and the shell, and holds it with no slop.
 - **Up-stop:** two lugs under the back of the hub, one each side of the shoe, land on a pad further back than Rev 3's.
 - **Frame gussets:** 45° gussets at all four corners of both pillow blocks.
@@ -143,7 +143,15 @@ The chip stands inside the bearing's retaining lip. The magnet (4 × 2 mm, in Re
 
 ## USB cable
 
-The cable comes out of the trunnion on the axis and turns toward the back on a 4 mm radius (Rev 3: 6), inside the bearing's retaining lip. It runs straight back in a round tunnel 5 mm across, 1.3 mm out from the pillow block's face: half of it is a groove in the block's and the shell's outer faces, half a channel in the cable cover. It leaves through the cover's back bevel. Lay the cable in the groove and the cover goes on over it, so it can go on over a cable that's already through the lever, as Rev 3's does. The groove leaves 1.1 mm of block to the nearest shell screw's hole, and the cover 1.2 mm over the channel. The trunnions end flush with the bearings so the cable can turn inside the lip: that's what lets the covers be 5 mm.
+![The cable's bend, cover off, at 0° (left) and at the 32° stop (right): the relief in the trunnion's end turns with the lever, under the cable](renders/rev4_usb_bend.png)
+
+The cable leaves on the right-hand (USB) side and faces the front.
+
+- **The bend:** it comes along the axis and turns toward the front on an 18 mm radius, about four times its 4.6 mm thickness (Rev 3: 6 mm). The bend starts inside the axial bore and ends just past the trunnion, inside the bearing's retaining lip.
+- **The relief:** where the bend would rub the trunnion's end, a pie-shaped relief flares the bore's mouth. It's 4.8 mm deep at the bore and runs out 14 mm from the axis, well inside the bearing. The bend stays put while the trunnion turns under it, so the relief spans the cable's way out over the whole travel, 0° to 32°, and 1° past each end. Its sides are round, the cable's own section. The cable clears the turning trunnion by 0.5 mm all the way.
+- **The tunnel:** from the lip, the cable runs straight forward in a round tunnel 5 mm across, 1.3 mm out from the pillow block's face. Half of it is a groove in the block's and the shell's outer faces, half a channel in the cable cover. It leaves through the cover's front bevel. Lay the cable in the groove and the cover goes on over it, so it can go on over a cable that's already through the lever, as Rev 3's does. The groove leaves 1.1 mm of block to the nearest shell screw's hole, and the cover 1.2 mm over the channel.
+
+The trunnions end flush with the bearings so the cable can turn inside the lip: that's what lets the covers be 5 mm.
 
 ## Brake
 

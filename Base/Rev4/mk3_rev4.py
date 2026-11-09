@@ -24,9 +24,9 @@ into nuts slid into the pillow blocks' outer faces, under the side covers; a dia
 locates it. The frame's front wall, under the shell's, carries the shell's cut for the lever on down, so they read as one.
 The AS5600 board sits INSIDE the sensor trunnion, in a square pocket in its end, chip facing out, the board's face
 level with the trunnion's end; the magnet sits in a pocket in the sensor cover's inside face, 1 mm off the chip. The
-USB cable turns out of the axis just past the cable trunnion's end and runs back in a round tunnel, half in the
-pillow block's outer face and half in the cable cover, out through the cover's back bevel; the cover goes on over a
-cable that's already fitted. The side covers are square plates over the bearings and the shell screws' nut slots,
+USB cable turns out of the axis toward the front on an 18 mm bend, through a pie-shaped relief in the cable trunnion's
+end, and runs forward in a round tunnel, half in the pillow block's outer face and half in the cable cover, out
+through the cover's front bevel; the cover goes on over a cable that's already fitted. The side covers are square plates over the bearings and the shell screws' nut slots,
 their front and back ends bevelled 45 deg in line with the frame's corner chamfers.
 
 Brake: Rev 3's drum, shoe and knob tower sat beside the hub, and there's no room for them now. The brake is behind
@@ -140,11 +140,13 @@ BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and f
 CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top (31.0)
 MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (32.0)
 POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (24.4)
-# USB cable: out of the axis just past the cable trunnion's end, a 4 mm bend, then straight back at USB_Y in a round
-# tunnel USB_TUNNEL_R round, half in the pillow block's outer face (frame and shell) and half in the cable cover, out
-# through the cover's back bevel. It leaves 1.1 mm of block to the shell screw's hole and 1.2 mm of cover over it
-USB_BEND_R, USB_Y = 4.0, BLOCK_Y1 + 1.3          # (32.8)
-USB_R, USB_TUNNEL_R = 2.3, 2.5
+# USB cable: along the axis, then an 18 mm bend (about 4x its 4.6 mm across) toward the front, then straight forward at
+# USB_Y in a round tunnel USB_TUNNEL_R round, half in the pillow block's outer face (frame and shell) and half in the
+# cable cover, out through the cover's front bevel. It leaves 1.1 mm of block to the shell screw's hole and 1.2 mm of
+# cover over it. The bend starts inside the axial bore; where it would rub the turning trunnion's end, a pie-shaped
+# relief flares the bore's mouth (usb_relief()). On the cable's way out it stays clear of everything by USB_CLR
+USB_BEND_R, USB_Y = 18.0, BLOCK_Y1 + 1.3         # (32.8)
+USB_R, USB_TUNNEL_R, USB_CLR = 2.3, 2.5, 0.5
 
 # ---------------------------------------------------------------- lever
 # four M4 x 40 socket head cap screws, where Rev 3 has them: x = +-17, symmetrical fore and aft, 16.25 mm either side of
@@ -298,7 +300,8 @@ def lever():
             cyl(m.CABLE_R, (0, -POCKET_FLOOR - 0.5, 0), (0, TRUN_OUT + 1, 0)),                   # axial 1/2" bore
             cyl(m.CABLE_R, (-m.SOCK_BOTTOM - 1, 0, 0), (3, 0, 0)),                               # radial 1/2" bore
             sensor_pocket(),
-            strut_relief()]                                                                       # the strut's cylinder
+            strut_relief(),                                                                       # the strut's cylinder
+            usb_relief()]                                                                         # the USB cable's bend
     for c in cuts:
         h = h.cut(c)
     return h.clean()
@@ -824,11 +827,42 @@ def magnet():
 
 
 def usb_path():
-    """the USB cable's fixed run: the bend out of the axis, then straight back at USB_Y"""
+    """the USB cable's fixed run: the bend out of the axis toward the front, then straight forward at USB_Y"""
     s45 = math.sin(math.radians(45))
     rb, yk = USB_BEND_R, USB_Y - USB_BEND_R
-    return (cq.Workplane("XY").moveTo(0, yk).threePointArc((rb - rb * s45, yk + rb * s45), (rb, USB_Y))
-            .lineTo(90, USB_Y).wire().val())
+    return (cq.Workplane("XY").moveTo(0, yk).threePointArc((-(rb - rb * s45), yk + rb * s45), (-rb, USB_Y))
+            .lineTo(-90, USB_Y).wire().val())
+
+
+def usb_relief():
+    """the pie-shaped relief in the cable trunnion's end. The bend is fixed while the trunnion turns under it, so in the
+    lever's frame the cable's way out swings from straight forward at 0 deg to 32 deg below it at the stop. This is the
+    bend, USB_R + USB_CLR round, swung through that (and 1 deg past each end): its long section revolved about the axis,
+    with the bend itself at both ends. Only the trunnion's end, round the bore's mouth, is in it"""
+    rb, yk, w = USB_BEND_R, USB_Y - USB_BEND_R, USB_R + USB_CLR
+    c = (-rb, yk)                                                         # the bend's centre (x, y), at z = 0
+    band = (cq.Workplane("XY").moveTo(c[0] + rb - w, c[1])
+            .threePointArc((c[0] + (rb - w) * math.cos(math.pi / 4), c[1] + (rb - w) * math.sin(math.pi / 4)),
+                           (c[0], c[1] + rb - w))
+            .lineTo(c[0], c[1] + rb + w)
+            .threePointArc((c[0] + (rb + w) * math.cos(math.pi / 4), c[1] + (rb + w) * math.sin(math.pi / 4)),
+                           (c[0] + rb + w, c[1]))
+            .close().wire().val())
+    band = cq.Face.makeFromWires(band).intersect(cq.Face.makeFromWires(
+        cq.Wire.makePolygon([V(-60, -5, 0), V(-0.01, -5, 0), V(-0.01, 60, 0), V(-60, 60, 0), V(-60, -5, 0)])))
+    wire = band.Faces()[0].outerWire()
+    t0, t1 = -1.0, STOP_DEG + 1.0
+    start = rot_y(cq.Face.makeFromWires(wire), -t0)                       # lever frame: the way out is rot_y(-theta)
+    sweep = cq.Solid.revolve(start.outerWire(), [], t1 - t0, V(0, 0, 0), V(0, 1, 0))
+    a = math.radians(-(t0 + t1) / 2)                                     # the bend's middle, at the middle angle
+    px, py = -(rb - rb * math.sin(math.pi / 4)), yk + rb * math.sin(math.pi / 4)
+    if not sweep.isInside(V(px * math.cos(a), py, -px * math.sin(a))):
+        sweep = cq.Solid.revolve(start.outerWire(), [], -(t1 - t0), V(0, 0, 0), V(0, 1, 0))   # the other way
+    bend = (cq.Workplane("XY").moveTo(0, yk - 1).lineTo(0, yk)
+            .threePointArc((-(rb - rb * math.sin(math.pi / 4)), yk + rb * math.sin(math.pi / 4)), (-rb, USB_Y))
+            .wire().val())
+    ends = [rot_y(m.sweep_circle(w, bend, (0, yk - 1, 0), (0, 1, 0)), -t) for t in (t0, t1)]
+    return fuse(sweep, *ends)
 
 
 def usb_tunnel():

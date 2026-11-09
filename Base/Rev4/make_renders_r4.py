@@ -136,7 +136,7 @@ def assembly_top(C, P0=None):
     P0 = P0 or scene(0.0, C, tube_to=-200.0)
     img, px = R.render(P0, (0, 0, 1), up=(-1, 0, 0), size=(1100, 1500), focus=((-200, -45, -60), (100, 45, 45)),
                        parallel=True, anchors=[(97, -v.W_HALF, 45), (97, v.W_HALF, 45)])
-    width_bar(img, px[0][0], px[1][0], int(px[0][1]) + 40, "82 mm (3.25 in)")
+    width_bar(img, px[0][0], px[1][0], int(px[0][1]) + 40, "73 mm (2.87 in)")
     save(title(img, "Rev 4 from above", "Straight down, to scale, at 0 deg"), "rev4_top.png")
 
 
@@ -169,6 +169,20 @@ def lever_views(C):
          "rev4_strut_relief.png")
 
 
+def usb_views(C):
+    """the USB cable's bend, cable cover off, at 0 deg and at the stop: the relief in the trunnion's end turns under it"""
+    imgs = []
+    for th in (0.0, v.STOP_DEG):
+        P = {k: x for k, x in scene(th, C, tube_to=-120.0).items() if k != "cover_cable"}
+        imgs.append(R.render(P, (-0.15, 1.0, 0.12), size=(1000, 900), focus=((-45, 15, -25), (15, 40, 25)), zoom=1.0)[0])
+    both = Image.new("RGB", (2000, 900), (255, 255, 255))
+    both.paste(imgs[0], (0, 0))
+    both.paste(imgs[1], (1000, 0))
+    save(title(both, "The USB cable's bend, cable cover off: 0° (left) and the 32° stop (right)",
+               "18 mm radius, toward the front. The pie-shaped relief in the trunnion's end turns with the lever, "
+               "0.5 mm clear of the cable all the way"), "rev4_usb_bend.png")
+
+
 def joint_views(C, P0=None):
     """the frame's half of the joint with the grid's pyramids; and the front, the frame's wall carrying on the shell's
     cut for the lever"""
@@ -192,6 +206,7 @@ def main():
     back_view(C)
     joint_views(C)
     lever_views(C)
+    usb_views(C)
     frame_top(C)
     assembly_top(C)
     P0 = scene(0.0, C, tube_to=-200.0)
@@ -200,7 +215,7 @@ def main():
     focus = ((-150, -60, -58), (100, 60, 40))
 
     save(title(R.render(P0, (-0.45, -0.85, 0.38), size=(1600, 1050), focus=focus, zoom=1.05)[0],
-               "MkIII base Rev 4: 82 mm (3.25 in) wide",
+               "MkIII base Rev 4: 73 mm (2.87 in) wide",
                "One shell over the lever in place of the caps, 6808-2RS thin bearings, the brake behind the hub"),
          "rev4_hero.png")
     save(title(R.render(hide(P0, "shell", "back_plate"), (-0.45, -0.85, 0.38), size=(1600, 1050), focus=focus,
@@ -233,21 +248,21 @@ def main():
     img_n, px_n = R.render(P0, view, up=up, size=(1000, 1300), focus=fo, parallel=True,
                            anchors=[(92, -v.W_HALF, 50), (92, v.W_HALF, 50)])
     width_bar(img_o, px_o[0][0], px_o[1][0], int(px_o[0][1]), "Rev 3: 130 mm (5.1 in)")
-    width_bar(img_n, px_n[0][0], px_n[1][0], int(px_n[0][1]), "Rev 4: 82 mm (3.25 in)")
+    width_bar(img_n, px_n[0][0], px_n[1][0], int(px_n[0][1]), "Rev 4: 73 mm (2.87 in)")
     both = Image.new("RGB", (2000, 1300), (255, 255, 255))
     both.paste(img_o, (0, 0))
     both.paste(img_n, (1000, 0))
     save(title(both, "Rev 3 and Rev 4 from above, to the same scale",
-               "Lever symmetrical about the tube; bearings, covers and brake all inside the 82 mm"), "rev4_vs_rev3_top.png")
+               "Lever symmetrical about the tube; bearings, covers and brake all inside the 73 mm"), "rev4_vs_rev3_top.png")
 
     # section on the pivot axis, from the front
     Pc = R.cut(hide(P0, "carbon_tube"), 0, 0.0, keep="above")
     img, px = R.render(Pc, (-1, 0, 0), size=(1600, 1100), focus=((0, -45, -58), (40, 45, 40)), parallel=True,
                        anchors=[(0, -v.W_HALF, 36), (0, v.W_HALF, 36)])
-    width_bar(img, px[0][0], px[1][0], int(px[0][1]) - 10, "82 mm")
+    width_bar(img, px[0][0], px[1][0], int(px[0][1]) - 10, "73 mm")
     save(title(img, "Section on the pivot axis, from the front",
-               "6808-2RS bearings. Sensor (right): the AS5600 in the trunnion's end, the magnet on the cover's post. "
-               "USB (left): the cable turns out of the axis inside the cover"), "rev4_section_axis.png")
+               "6808-2RS bearings. Sensor (right): the AS5600 in the trunnion's end, the magnet in the cover's pocket. "
+               "USB (left): the cable turns toward the front, through the relief in the trunnion's end"), "rev4_section_axis.png")
 
     # sections on the tube's plane, from the sensor side
     for P, name, t in ((P0, "rev4_section_brake.png", "Section on the tube's plane, 0 deg"),
@@ -367,14 +382,14 @@ def screw_views(P0):
                [np.array([v.KNOB_X0 + 6.0, 0, 6.0])])],
              (0, -1, 0), "MkIII base Rev 4 screws: the brake, in section on the tube's plane", "rev4_screws_brake.png",
              focus=((10, 0, -32), (115, 0, 32)), zoom=1.0, parallel=True)
-    labelled(P0, [("M3 x 16 countersunk  (x4)", "sensor cover: into M3 threads tapped through the pillow block and the "
+    labelled(P0, [("M3 x 12 countersunk  (x4)", "sensor cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(-1)),
                   ("M4 x 12 countersunk  (x2)", "strut collar clamp: heads 2 mm into the -y ear", heads_of("clamp screw")),
                   ("M4 nut", "strut, collar end (rod): in the collar's -y cheek", heads_of("eye nut")),
                   ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting: not in the kits", desk)],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
-    labelled(P0, [("M3 x 16 countersunk  (x4)", "cable cover: into M3 threads tapped through the pillow block and the "
+    labelled(P0, [("M3 x 12 countersunk  (x4)", "cable cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(1)),
                   ("M4 x 16 countersunk", "strut, collar end (rod): head on +y, nut in the -y cheek", heads_of("eye screw")),
                   ("M4 nut  (x2)", "strut collar clamp: in the +y ear's pockets", heads_of("clamp nut")),
@@ -468,7 +483,7 @@ def exploded(C):
                S["lever screw 40"] + S["lever nut"]),
               ("M4 x 50 + M4 nut  (x4)", "the shell: socket head, into nuts slid into the pillow blocks' sides",
                S["shell screw"] + S["shell nut"]),
-              ("M3 x 16  (x8)", "side covers, countersunk", S["cover screw"]),
+              ("M3 x 12  (x8)", "side covers, countersunk", S["cover screw"]),
               ("M3 x 16  (x6)", "back plate, countersunk", S["back screw"]),
               ("M5 x 30 + M5 nut", "the brake: a hex bolt, head in the knob, nut in the back plate",
                S["brake bolt"] + S["brake nut"]),
@@ -491,9 +506,9 @@ def screw_chart():
              "sides."),
             (d.screw_tile("hex", 5, 30), "M5 x 30 hex bolt (Rev 3's)", 1,
              "The brake: head in the knob's hex pocket, through the M5 nut in the back plate, onto the spring cap."),
-            (d.screw_tile("csk", 3, 16), "M3 x 16 countersunk", 14,
-             "The side covers (8), into threads tapped through the blocks and the shell; the back plate (6), tapped "
-             "7.5 mm deep."),
+            (d.screw_tile("csk", 3, 12), "M3 x 12 countersunk", 8,
+             "The side covers, into threads tapped through the blocks and the shell."),
+            (d.screw_tile("csk", 3, 16), "M3 x 16 countersunk", 6, "The back plate, into threads tapped 7.5 mm deep."),
             (d.screw_tile("csk", 4, 16), "M4 x 16 countersunk", 2, "The strut's two eyes, into nuts in the far cheeks."),
             (d.screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the other ear."),
             (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 12, "Lever (4), shell (4), strut eyes (2), collar clamp (2)."),

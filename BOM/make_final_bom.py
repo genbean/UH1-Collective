@@ -203,7 +203,7 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
         "The listing gives the strut's eye holes as 4 mm. Snug, then thread-lock: the eye must still turn"),
     kit("Strut collar", 2, "M4 x 12 countersunk screw + M4 hex nut", "Collar clamp, two 20 mm apart: each head sits 2 mm into the -y ear, "
         "its nut in the +y ear's pocket"),
-    kit("Side covers", 8, "M3 x 16 countersunk screw", "Four per cover, from its outer face into M3 threads tapped right "
+    kit("Side covers", 8, "M3 x 12 countersunk screw", "Four per cover, from its outer face into M3 threads tapped right "
         "through the pillow block and the shell's 9 mm side wall"),
     kit("Back plate", 6, "M3 x 16 countersunk screw", "From its back face into M3 threads tapped 7.5 mm deep: four in "
         "the frame, two in the shell"),
@@ -382,7 +382,7 @@ DROPPED = [
      "The down-stop is fixed at 0 deg: two pillars printed into the frame", "Base/mk3_rev3.py"),
     ("6006-2RS ball bearings, 30 x 55 x 13 (BlueStars, Amazon B09XTV8XYK)", 2, "Bought for base Rev 3. Base Rev 4 runs "
      "on 6808-2RS thin-section bearings", "Base/README.md (Rev 3)"),
-    ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 16: the "
+    ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 12: the "
      "set is still used for the head's trigger pivot", "Base/README.md (Rev 3)"),
     ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M4 "
      "x 50 socket heads + M4 nuts), and its brake has no hinge", "Base/README.md (Rev 3)"),
@@ -401,7 +401,7 @@ SOURCES = [
     ("Huey head", "Head/Rev5", "Current head design: Rev 5, Rev 4 cut to the real UH-1 panels' dimensions, with printed "
      "threads. Rev 4 (Head/Rev4), the larger one-piece head it came from, is kept as a fallback"),
     ("MkIII base Rev 4", "Base/Rev4 (mk3_rev4.py imports Base/mk3_rev3.py and Base/mk3_pivot.py)",
-     "Current base, 82 mm wide, not yet printed: check the orange lines"),
+     "Current base, 73 mm wide; its first frame, shell and lever were printed and built 2026-11-08: check the orange lines"),
     ("MkIII base Rev 3", "Base (mk3_rev3.py)", "The base built first (2026-11). Rev 4 replaces it"),
     ("Prices", "Digi-Key cart 2026-10-19 (JST headers 2026-10-22; Rev 4.0's new parts and cables 2026-10-27); Amazon "
      "listings 2026-10-22; OSH Park order 2026-10-21",
