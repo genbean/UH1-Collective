@@ -1,7 +1,7 @@
 """
-MkIII collective base - Rev 4: narrow, 82 mm (3.25 in) wide (CONCEPT, not print-tested)
+MkIII collective base - Rev 4: narrow, 73 mm (2.87 in) wide
 
-Rev 3 (../mk3_rev3.py) with the base cut down from 130 mm to 82 mm along the pivot axis, and the lever symmetrical about
+Rev 3 (../mk3_rev3.py) with the base cut down from 130 mm to 73 mm along the pivot axis, and the lever symmetrical about
 the tube. Everything Rev 4 doesn't change comes from Rev 3: the gas strut, its collar and anchor, the socket for the
 uncut 500 mm carbon tube, the down-stop pads and pillars, the lever's cap-screw joint, the MkII friction knob, the
 chamfers and the fits.
@@ -15,17 +15,19 @@ Across the pivot axis, from the middle out (each side):
     bearing             |y| 22.5-29.5  6808-2RS thin-section, 40 x 52 x 7 (Rev 3: 6006-2RS, 30 x 55 x 13)
     retaining lip       |y| 29.5-31.5  the pillow blocks are 9 mm wide (Rev 3: 17); the base plate stops at their
                                        outer faces, 63 mm across
-    trunnion end        |y| 32.0       40.1 mm across: the 6808's bore + 0.1
-    side covers         |y| 31.5-41.0  9.5 mm deep (Rev 3: 15)
+    trunnion end        |y| 29.5       40.1 mm across (the 6808's bore + 0.1), flush with the bearing's outer face
+    side covers         |y| 31.5-36.5  5 mm square plates (Rev 3's: 15 mm deep)
 One shell over the top takes the place of Rev 3's two bearing caps: a box over the lever whose side walls are the caps,
 with a slot in its front and top for the socket boss, tube and top gusset to swing through, and a notch in its back
 wall round the brake tower. It drops straight down over the lever and bolts on with four M4 x 50 socket head screws
 into nuts slid into the pillow blocks' outer faces, under the side covers; a diamond grid of pyramids in the joint
 locates it. The frame's front wall, under the shell's, carries the shell's cut for the lever on down, so they read as one.
-The AS5600 board sits INSIDE the sensor trunnion, in a square pocket in its end, chip facing out and level with the
-trunnion's end; the magnet is on a post from the sensor cover, 1 mm off the chip. The USB cable turns out of the
-axis inside the cable cover and leaves through a notch in its rim, toward the back; the notch lets the cover go on
-over a cable that's already fitted, like Rev 3's.
+The AS5600 board sits INSIDE the sensor trunnion, in a square pocket in its end, chip facing out, the board's face
+level with the trunnion's end; the magnet sits in a pocket in the sensor cover's inside face, 1 mm off the chip. The
+USB cable turns out of the axis just past the cable trunnion's end and runs back in a round tunnel, half in the
+pillow block's outer face and half in the cable cover, out through the cover's back bevel; the cover goes on over a
+cable that's already fitted. The side covers are square plates over the bearings and the shell screws' nut slots,
+their front and back ends bevelled 45 deg in line with the frame's corner chamfers.
 
 Brake: Rev 3's drum, shoe and knob tower sat beside the hub, and there's no room for them now. The brake is behind
 the hub instead. A narrow, tall shoe (12 mm wide, 44 mm tall, felt on its face) presses on the hub's own cylinder over
@@ -101,7 +103,6 @@ def chamfer_edges(shape, sizes=r.CHAMFERS, chunk=8, exclude=None):
 DY = -m.SOCK_Y                                   # +9: Rev 3's parts that sit on the tube's plane move here
 
 # ---------------------------------------------------------------- across the pivot axis
-W_HALF = 41.0                                    # overall 82 mm
 HUB_R, HUB_HW = 30.0, 21.5
 BRG_d, BRG_D, BRG_B = 40.0, 52.0, 7.0            # 6808-2RS
 BRG_IR_SH, BRG_OR_SH = 44.0, 48.3                # inner race's outside, outer race's inside (approx.)
@@ -110,31 +111,40 @@ BRG_Y1 = BRG_Y0 + BRG_B                          # (29.5)
 BLOCK_Y1 = BRG_Y1 + 2.0                          # pillow block's outer face (31.5): a 2 mm lip holds the outer race
 TRUN_OD = BRG_d + 0.1                            # Rev 3's +0.2 on the race's bore pressed on a hair too tight (as
                                                  # built, 2026-11-08), so +0.1
-TRUN_OUT = BLOCK_Y1 + 0.5                        # (32)
+TRUN_OUT = BRG_Y1                                # (29.5) flush with the bearing's outer face (it was 0.5 past the block,
+                                                 # at 32): the USB cable turns out of the axis just past it, inside the
+                                                 # lip, which is what lets the covers be 5 mm
 BRG_SEAT_D = BRG_D + 0.0                         # +0.1 (perfect on Rev 3's one-piece blocks) left the 6808 a little
                                                  # play in Rev 4's seat, split between the frame and the shell (as
                                                  # built, 2026-11-08), so 0.1 less
 LIP_R = 23.0                                     # clears the inner race (22.0), holds the outer (24.15)
 BLOCK_HW = m.BLOCK_HW                            # 37.5, as Rev 3
-# side covers: four M3 x 16 countersunk each, into M3 threads tapped in the block and shell; the pilot holes go right
-# through their 9 mm walls (COVER_TAP is the back plate's screws' tapped depth)
-COVER_HOLE_R, COVER_R, COVER_IN_R = 30.5, 35.5, 25.0
-COVER_FLOOR, COVER_TAP, COVER_SCREW_L = 2.5, 7.5, 16
-COVER_D = W_HALF - BLOCK_Y1                      # 9.5
-# AS5600 in the sensor trunnion's end: the board (0.915 in = 23.24 mm square, measured; 1.6 thick) in a square pocket 0.15 mm
-# clear each side, front face level
-# with the trunnion's end, on two ledges along its top and bottom edges (clear of both pad columns), with 3.5 mm behind it
-# for the wires soldered in from the back and the DIR jumper
+# side covers: square plates COVER_T thick on the pillow blocks' and the shell's side faces, COVER_HZ either side of the
+# axis, over the bearings and the shell screws' nut slots, and 2 mm clear of the strut's hex-key hole below them. Their
+# ends are bevelled 45 deg: the back on the plane of the frame's and shell's back chamfer (x + |y| = REAR_C), the front
+# on the plane of the 0.8 mm chamfer on the pillow blocks' front corners, so both run on flush. Four M3 x 12 countersunk
+# each, where the round covers had them, into M3 threads tapped right through the block's and the shell's 9 mm walls
+# (COVER_TAP is the back plate's screws' tapped depth)
+COVER_HOLE_R, COVER_T, COVER_HZ = 30.5, 5.0, 32.75
+COVER_TAP, COVER_SCREW_L = 7.5, 12
+COVER_FRONT_C = 0.8                              # the blocks' front corner chamfer (Rev 3's first size)
+W_HALF = BLOCK_Y1 + COVER_T                      # 36.5: overall 73 mm
+# AS5600 in the sensor trunnion's end: the board (0.915 in = 23.24 mm square, measured; 1.6 thick) in a square pocket
+# 0.15 mm clear each side, its front face level with the trunnion's end (2.5 mm deeper than at first), on two ledges
+# along its top and bottom edges (clear of both pad columns), with 3.5 mm behind it for the wires soldered in from the
+# back and the DIR jumper. The chip sits inside the retaining lip; the magnet sits in a pocket in the sensor cover's
+# inside face, 0.5 mm below it, 1 mm off the chip
 BOARD = 23.24
 BOARD_CLR, BOARD_T, LEDGE, BEHIND = 0.15, 1.6, 1.6, 3.5
-BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and front
-CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top
-MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (34.5)
-POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (26.9)
-MAG_POST_R = 4.5
-# USB cable: out of the axis at the trunnion's end, a 4 mm bend, then out through the cable cover's rim toward the back
-USB_BEND_R, USB_Y = 4.0, BLOCK_Y1 + 4.0
-USB_R = 2.3
+BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and front (27.9, 29.5)
+CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top (31.0)
+MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (32.0)
+POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (24.4)
+# USB cable: out of the axis just past the cable trunnion's end, a 4 mm bend, then straight back at USB_Y in a round
+# tunnel USB_TUNNEL_R round, half in the pillow block's outer face (frame and shell) and half in the cable cover, out
+# through the cover's back bevel. It leaves 1.1 mm of block to the shell screw's hole and 1.2 mm of cover over it
+USB_BEND_R, USB_Y = 4.0, BLOCK_Y1 + 1.3          # (32.8)
+USB_R, USB_TUNNEL_R = 2.3, 2.5
 
 # ---------------------------------------------------------------- lever
 # four M4 x 40 socket head cap screws, where Rev 3 has them: x = +-17, symmetrical fore and aft, 16.25 mm either side of
@@ -162,7 +172,7 @@ r.ANCH_X, r.ANCH_Z, r.CLEVIS_R, r.STRUT_F_DESIGN = ANCH_X, ANCH_Z, CLEVIS_R, STR
 ANCH_WALL_Z = -(HUB_R + 2.0)                     # the clevis's back wall's top, 2 mm under the hub
 STRUT_KEY_R = 1.75                               # a 3.5 mm hole through the +y pillow block on the anchor screw's axis:
                                                  # a 2.5 mm hex key (2.9 across its corners) reaches its head. It's
-                                                 # 37.7 mm from the pivot, so it clears the side cover's rim by 0.45 mm
+                                                 # 2 mm below the side cover's bottom edge
 # up-stop: two lugs under the back of the hub land on a pad behind the axis at STOP_DEG. The further back they land,
 # the further back they swing at 0 deg, toward the webs behind the pillow blocks (x = 37): with the pad at z = -28.5 and
 # the contact face ending at x = 24.4, their back corners come to x = 35.8 at 0 deg, 1.2 mm off the webs. The pad's top
@@ -345,6 +355,8 @@ def block_cuts(s):
     for a in (45, 135, 225, 315):
         px, pz = m.on_circle(COVER_HOLE_R, a)
         cuts.append(cyl(m.TAP[3] / 2, (px, s * (BRG_Y0 - 1), pz), (px, s * (BLOCK_Y1 + 1), pz)))   # covers' M3: tap drill, right through the wall
+    if s > 0:
+        cuts.append(usb_tunnel())                                       # the USB cable's tunnel: the block's half
     return cuts
 
 
@@ -546,6 +558,7 @@ def shell():
     for y, z in BACK_SCREWS:
         s = s.cut(cyl(m.TAP[3] / 2, (TOWER_X1 - COVER_TAP, y, z), (TOWER_X1 + 1, y, z)))
     s = s.cut(front_cut()).cut(top_cut())                               # the lever's opening, clean
+    s = s.cut(usb_tunnel())                                             # the USB cable's tunnel, through the back corner too
     return chamfer_edges(s.clean(), exclude=joint_edge)
 
 
@@ -624,6 +637,10 @@ def knurl(frame_s, shell_s):
             males.append(m_)
             females.append(f_)
             centres.append((x, y))
+    # only those whose twin across y = 0 is there too (the USB tunnel takes a few off the +y side), so it stays symmetrical
+    have = {(round(x, 3), round(y, 3)) for x, y in centres}
+    keep = [i for i, (x, y) in enumerate(centres) if (round(x, 3), round(-y, 3)) in have]
+    males, females, centres = [males[i] for i in keep], [females[i] for i in keep], [centres[i] for i in keep]
     _KNURL["v"] = (males, females, centres)
     return _KNURL["v"]
 
@@ -641,31 +658,38 @@ def joint_grid(frame_s, shell_s):
 
 
 # ================================================================ side covers
+def cover_seat_edge(e):
+    """edges in the face a cover seats on: no chamfer there, so no groove shows at the seam"""
+    b = e.BoundingBox()
+    return abs(abs(b.ymin) - BLOCK_Y1) < 1e-4 and abs(abs(b.ymax) - BLOCK_Y1) < 1e-4
+
+
 def _cover(s):
-    y0, y1 = s * BLOCK_Y1, s * W_HALF
-    c = cyl(COVER_R, (0, y0, 0), (0, y1, 0))
-    c = c.cut(cyl(COVER_IN_R, (0, y0 - s, 0), (0, s * (W_HALF - COVER_FLOOR), 0)))
+    """a square plate COVER_T thick on the side face (side s), COVER_HZ either side of the axis, its back bevelled on the
+    back chamfer's plane and its front on the plane of the pillow blocks' front corner chamfer; four countersunk M3s"""
+    y0, y1 = BLOCK_Y1, W_HALF
+    xb = lambda y: REAR_C - y                                      # back bevel: x + |y| = REAR_C
+    xf = lambda y: y - (REAR_C - COVER_FRONT_C)                    # front bevel: x - |y| = -(REAR_C - 0.8)
+    pts = [(xf(y0), s * y0), (xb(y0), s * y0), (xb(y1), s * y1), (xf(y1), s * y1)]
+    c = cq.Workplane("XY").workplane(offset=-COVER_HZ).polyline(pts).close().extrude(2 * COVER_HZ).val()
     for a in (45, 135, 225, 315):
         px, pz = m.on_circle(COVER_HOLE_R, a)
-        c = c.cut(m.csk_hole(3, (px, y1, pz), (0, -s, 0), COVER_D + 1))
+        c = c.cut(m.csk_hole(3, (px, s * y1, pz), (0, -s, 0), COVER_T + 1))
     return c
 
 
 def cover_sensor():
-    """the magnet on a post from the floor, 1 mm off the chip"""
-    c = _cover(-1).fuse(cyl(MAG_POST_R, (0, -(W_HALF - COVER_FLOOR) - 0.5, 0), (0, -MAGNET_Y, 0)))
-    c = c.cut(cyl(m.MAGNET_POCKET / 2, (0, -MAGNET_Y + 0.1, 0), (0, -(MAGNET_Y + m.MAGNET_H + 0.1), 0)))
-    return chamfer_edges(c.clean())
+    """the magnet in a pocket in its inside face, its face 0.5 mm below it and 1 mm off the chip. Prints outside face
+    down"""
+    c = _cover(-1).cut(cyl(m.MAGNET_POCKET / 2, (0, -BLOCK_Y1 + 0.5, 0), (0, -(MAGNET_Y + m.MAGNET_H + 0.1), 0)))
+    return chamfer_edges(c.clean(), exclude=cover_seat_edge)
 
 
 def cover_cable():
-    """the cable leaves through a hole in the rim toward the back, with a notch from the face that seats on the block,
-    so the cover goes on over the cable"""
-    c = chamfer_edges(_cover(1).clean())
-    w = r.NOTCH_W
-    c = c.cut(cyl(w / 2 + 0.05, (0, USB_Y, 0), (COVER_R + 2, USB_Y, 0)))
-    c = c.cut(box(COVER_IN_R - 1, COVER_R + 2, BLOCK_Y1 - 1, USB_Y, -w / 2, w / 2))
-    return c.clean()
+    """the cable's half of its tunnel in its inside face, round the bend and straight back out through the back bevel,
+    so the cover goes on over a cable that's already fitted. Prints outside face down"""
+    c = _cover(1).cut(usb_tunnel()).clean()
+    return chamfer_edges(c, exclude=cover_seat_edge)
 
 
 # ================================================================ brake
@@ -765,17 +789,27 @@ def magnet():
     return cyl(m.MAGNET_D / 2, (0, -MAGNET_Y, 0), (0, -(MAGNET_Y + m.MAGNET_H), 0))
 
 
+def usb_path():
+    """the USB cable's fixed run: the bend out of the axis, then straight back at USB_Y"""
+    s45 = math.sin(math.radians(45))
+    rb, yk = USB_BEND_R, USB_Y - USB_BEND_R
+    return (cq.Workplane("XY").moveTo(0, yk).threePointArc((rb - rb * s45, yk + rb * s45), (rb, USB_Y))
+            .lineTo(90, USB_Y).wire().val())
+
+
+def usb_tunnel():
+    """the cable's tunnel, USB_TUNNEL_R round along its run: cut from the +y pillow block and shell, and the cable cover"""
+    return m.sweep_circle(USB_TUNNEL_R, usb_path(), (0, USB_Y - USB_BEND_R, 0), (0, 1, 0))
+
+
 def usb_cable(theta=0.0, x0=-190.0):
     """down the tube and along the axis, turning with the lever; then the bend and the run out through the cover, fixed"""
     s45 = math.sin(math.radians(45))
-    rr, rb = 5.0, USB_BEND_R
-    yk = USB_Y - rb
+    rr, yk = 5.0, USB_Y - USB_BEND_R
     inside = (cq.Workplane("XY").moveTo(x0, 0).lineTo(-rr, 0).threePointArc((-rr + rr * s45, rr - rr * s45), (0, rr))
               .lineTo(0, yk).wire().val())
-    out = (cq.Workplane("XY").moveTo(0, yk).threePointArc((rb - rb * s45, yk + rb * s45), (rb, USB_Y))
-           .lineTo(90, USB_Y).wire().val())
     return fuse(rot_y(m.sweep_circle(USB_R, inside, (x0, 0, 0), (1, 0, 0)), theta),
-                m.sweep_circle(USB_R, out, (0, yk, 0), (0, 1, 0)))
+                m.sweep_circle(USB_R, usb_path(), (0, yk, 0), (0, 1, 0)))
 
 
 def sensor_wires():
@@ -1019,7 +1053,8 @@ def balance(plot=None):
 
 # ================================================================ fit-test coupons for the 6808
 # Rev 3's coupon plates (Rev 1's coupon_plate: steps -0.2, 0, +0.2 on the diameter, engraved), sized for the 6808-2RS.
-# The tube socket is Rev 3's, so its coupon (and TRUN/seat steps found on the 6006) carry over only as a starting point.
+# Printed and tried, 2026-11-08: the trunnion's 0 (40.1) and the seat's 0 (52.0) both fit the 6808 perfectly, so
+# TRUN_OD and BRG_SEAT_D stand. The tube socket is Rev 3's, which fit perfectly as built, so it has no coupon.
 def coupon_trunnion(d, h=8.0, sh=2.0):
     """the trunnion's stub on its inner-race shoulder, with the 1/2" bore, standing on the shoulder"""
     c = fuse(cyl(BRG_IR_SH / 2 - 1.1, (0, 0, 0), (0, 0, sh)), cyl((TRUN_OD + d) / 2, (0, 0, sh), (0, 0, sh + h)))
