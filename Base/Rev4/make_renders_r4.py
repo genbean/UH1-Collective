@@ -36,7 +36,7 @@ def _save_retrying(self, fp, *a, **kw):
 Image.Image.save = _save_retrying
 import make_renders_r3 as R                            # noqa: E402
 import mk3_rev4 as v                                   # noqa: E402
-from mk3_pivot import cyl, fuse, hexprism              # noqa: E402
+from mk3_pivot import cyl, fuse                         # noqa: E402
 
 d, m = R.d, R.m
 OUT = os.path.join(HERE, "renders")
@@ -44,7 +44,7 @@ RED = (214, 48, 39)
 DOWEL = (236, 190, 62)
 HW = ("hardware", "lever_screws", "strut_pins")
 SUB = ("Screws in red. Countersunk screws and nuts: AvrestYPT kit (the lever halves and the shell: HELIFOUNER M4 x 30-50 socket head "
-       "cap kit and its nuts). Brake bolt: M5 x 30 hex head (Rev 3's).")
+       "cap kit and its nuts). Brake bolt: M5 x 35 hex head.")
 
 
 def to_mesh(shape):
@@ -54,9 +54,8 @@ def to_mesh(shape):
 
 def colours():
     c = {k: col for k, (_, col) in R.load_glb(R.BASE_GLB).items()}
-    c.update({"spring_cap": c["shoe"], "sensor_wires": (200, 60, 160), "shell": c["cap_left"],
-              "back_plate": c["cap_left"], "lever_sensor": c["lever_upper"], "lever_cable": c["lever_lower"],
-              "lever_dowel": DOWEL})
+    c.update({"strap": c["shoe"], "sensor_wires": (200, 60, 160), "shell": c["cap_left"],
+              "lever_sensor": c["lever_upper"], "lever_cable": c["lever_lower"], "lever_dowel": DOWEL})
     return c
 
 
@@ -126,11 +125,11 @@ def glb(P, path):
 
 
 def frame_top(C):
-    """the frame alone from above, the brake tower at the top of the picture"""
+    """the frame alone from above, the brake strap's bay at the top of the picture"""
     P = {"frame": (to_mesh(v.static_parts()["frame"]), C["frame"])}
     save(title(R.render(P, (-0.3, 0.0, 1.0), up=(1, 0, 0), size=(1100, 1400), zoom=1.0)[0],
-               "Rev 4 frame from above", "The up-stop pad behind the axis, and the 45 deg gussets at each corner of the "
-               "pillow blocks"), "rev4_frame_top.png")
+               "Rev 4 frame from above", "The up-stop pad behind the axis, slotted for the brake strap's knuckle, the "
+               "strap's bay behind it, and the 45 deg gussets at the pillow blocks' front corners"), "rev4_frame_top.png")
 
 
 def assembly_top(C, P0=None):
@@ -143,12 +142,12 @@ def assembly_top(C, P0=None):
 
 
 def back_view(C, P0=None):
-    """from behind and a little above: the back chamfer through the frame, shell and back plate, and the plate's screws"""
+    """from behind and a little above: the back chamfers through the frame and the shell, and the knob's seat"""
     P0 = P0 or scene(0.0, C, tube_to=-200.0)
     save(title(R.render(hide(P0, "carbon_tube", "strut_collar", "gas_strut", "strut_pins", "hose_clamp"), (1.0, 0.35, 0.45),
                         size=(1400, 1100), focus=((-40, -45, -58), (110, 45, 40)), zoom=1.0)[0],
-               "Rev 4 from behind", "One 45 deg chamfer each side through the frame, the shell and the back plate; the "
-               "plate's six M3 screws"), "rev4_back.png")
+               "Rev 4 from behind", "One 45 deg chamfer each side through the frame and the shell; the brake knob in "
+               "its seat in the shell's top, leaning 30 deg forward"), "rev4_back.png")
 
 
 def lever_views(C):
@@ -225,26 +224,26 @@ def main():
                "MkIII base Rev 4: 73 mm (2.87 in) wide",
                "One shell over the lever in place of the caps, 6808-2RS thin bearings, the brake behind the hub"),
          "rev4_hero.png")
-    save(title(R.render(hide(P0, "shell", "back_plate"), (-0.45, -0.85, 0.38), size=(1600, 1050), focus=focus,
-                        zoom=1.05)[0], "Rev 4 with the shell off",
-               "The lever on its bearings, the shoe in the frame's half of its pocket"), "rev4_open.png")
+    save(title(R.render(hide(P0, "shell", "friction_knob", "hardware"), (-0.45, -0.85, 0.38), size=(1600, 1050),
+                        focus=focus, zoom=1.05)[0], "Rev 4 with the shell off",
+               "The lever on its bearings, the brake strap behind the hub"), "rev4_open.png")
     save(title(R.render(P0, (0.75, 0.6, 0.5), size=(1600, 1050), focus=focus, zoom=1.05)[0],
-               "Rev 4 from behind", "The brake knob on the back plate, across both halves of the brake housing; the "
-               "USB cable leaves through the cable cover's rim"), "rev4_rear.png")
+               "Rev 4 from behind", "The brake knob in its seat in the shell's top; the USB cable leaves through the "
+               "cable cover's rim"), "rev4_rear.png")
     save(title(R.render(P32, (-0.2, -1.0, 0.25), size=(1600, 1000), focus=((-170, -60, -58), (100, 60, 100)))[0],
-               "Rev 4 at the 32 deg up-stop", "Both up-stop lugs land on the pad behind the axis; the shoe stays on the hub's back"),
+               "Rev 4 at the 32 deg up-stop", "Both up-stop lugs land on the pad behind the axis; the strap stays on the hub's back"),
          "rev4_32deg.png")
 
     # the brake and the slotted up-stop: frame, caps and covers hidden, from behind and below
-    inner = ("frame", "shell", "back_plate", "cover_sensor", "cover_cable", "hardware", "bearing_outer",
+    inner = ("frame", "shell", "friction_knob", "cover_sensor", "cover_cable", "hardware", "bearing_outer",
              "bearing_seal", "usb_cable", "gas_strut", "strut_pins", "strut_collar", "carbon_tube", "hose_clamp")
-    for th, P, name, sub in ((0.0, P0, "rev4_brake_lugs.png", "At 0 deg the shoe's lower end sits between the two "
-                              "up-stop lugs; the hub between them is a plain cylinder for the felt"),
+    for th, P, name, sub in ((0.0, P0, "rev4_brake_lugs.png", "At 0 deg the strap's arm and knuckle sit between the two "
+                              "up-stop lugs, 2 mm clear of each; the hub between them is a plain cylinder for the felt"),
                              (v.STOP_DEG, P32, "rev4_brake_lugs_32deg.png", "At 32 deg the lugs have swung down, "
-                              "either side of the shoe, onto the pad behind the axis (frame hidden)")):
+                              "either side of the strap, onto the pad behind the axis (frame hidden)")):
         save(title(R.render(hide(P, *inner), (1.0, -0.55, -0.45), size=(1500, 1050),
                             focus=((-10, -35, -45), (75, 35, 35)), zoom=1.0)[0],
-                   f"Brake shoe and up-stop lugs, {th:.0f} deg", sub), name)
+                   f"Brake strap and up-stop lugs, {th:.0f} deg", sub), name)
 
     # widths: Rev 3 and Rev 4 from above, same scale, tube pointing up the page
     src = R.load_glb(R.BASE_GLB)
@@ -275,9 +274,9 @@ def main():
     for P, name, t in ((P0, "rev4_section_brake.png", "Section on the tube's plane, 0 deg"),
                        (P32, "rev4_section_brake_32deg.png", "Section on the tube's plane, at the 32 deg stop")):
         Pc = R.cut(P, 1, -0.01, keep="above")
-        save(title(R.render(Pc, (0, -1, 0), size=(1700, 1000), focus=((-140, 0, -58), (100, 0, 40)), parallel=True)[0],
-                   t, "The shoe's pocket, split between the frame and the shell; the knob's M5 bolt pushes the spring "
-                   "cap, the spring pushes the shoe onto the hub"), name)
+        save(title(R.render(Pc, (0, -1, 0), size=(1700, 1150), focus=((-140, 0, -58), (100, 0, 72)), parallel=True)[0],
+                   t, "The brake strap, hinged in the up-stop pad; the knob's M5 bolt leans 30 deg forward and draws its "
+                   "head up and forward, swinging the felt onto the hub"), name)
 
     screw_views(P0)
     exploded(C)
@@ -299,12 +298,7 @@ def screws_and_nuts():
         for a in (45, 135, 225, 315):
             px, pz = m.on_circle(v.COVER_HOLE_R, a)
             H.append(("cover screw", m.csk_screw(3, (px, s * v.W_HALF, pz), (0, -s, 0), v.COVER_SCREW_L), (0, s, 0)))
-    for y, z in v.BACK_SCREWS:
-        H.append(("back screw", m.csk_screw(3, (v.TOWER_X1 + v.BACK_T, y, z), (-1, 0, 0), 16), (1, 0, 0)))
-    hb = v.KNOB_X0 + v.KNOB_FLOOR
-    H += [("brake bolt", fuse(hexprism(m.M5_HEAD_AF - 0.1, (hb, 0, 0), (hb + m.KNOB_BOLT[1], 0, 0)),
-                              cyl(2.4, (hb - v.BOLT_L, 0, 0), (hb + 0.1, 0, 0))), (1, 0, 0)),
-          ("brake nut", m.nut(5, (v.NUT5_X + 0.1, 0, 0), (1, 0, 0)), (-1, 0, 0))]
+    H += v.brake_screws()
     for x, z, sh in v.JOINT_SCREWS:                                               # the lever's, along the pivot axis
         H += [(f"lever screw {v.JS_SCREW_L}", fuse(cyl(r.CAP_D / 2, (x, sh * v.JS_SEAT, z),
                                                        (x, sh * (v.JS_SEAT + r.CAP_K), z)),
@@ -369,37 +363,34 @@ def screw_views(P0):
     labelled(hide(P0, "cover_sensor", "magnet", "carbon_tube", "strut_collar", "hose_clamp", "usb_cable",
                   "sensor_wires", "gas_strut", "strut_pins"),
              [("M4 nut  (x4)", "the shell's: two each side, slid into the slots in the pillow blocks' outer faces "
-               "before the shell goes on; the slots open just below the side covers' rim", side_nuts)],
+               "before the shell goes on; the side covers hide the slots", side_nuts)],
              (-0.15, -1.0, 0.2), "MkIII base Rev 4 screws: the shell's nuts (sensor cover off; the same on the USB side)",
              "rev4_screws_shellnuts.png", focus=((-45, -32, -30), (45, -32, 40)), zoom=1.0)
     labelled(bare,
-             [("M3 x 16 countersunk  (x6)", "the back plate: four into the frame, two into the shell, tapped M3 7.5 mm "
-               "deep", heads_of("back screw")),
-              ("M5 x 30 hex bolt (Rev 3's)", "brake: its head on the floor of the knob's hex pocket; its nut is in "
-               "the section through the brake", [np.array([v.KNOB_X0 + 34, 0, 0])])],
+             [("M5 x 35 hex bolt", "the brake: drop it into the knob's hex pocket, head down, and screw it down "
+               "through the seat into the strap's nut", [np.array(v.on_bolt(v.r.MK2_KNOB_H).toTuple())])],
              (1.0, 0.4, 0.45), "MkIII base Rev 4 screws: from behind", "rev4_screws_back.png",
-             focus=((-40, -45, -58), (110, 45, 40)), zoom=1.0)
-    hb = v.KNOB_X0 + v.KNOB_FLOOR                                                     # the bolt head's underside
-    xs = (v.SPRING_BORE[0] + v.CAP_X[0]) / 2
+             focus=((-40, -45, -58), (110, 45, 75)), zoom=1.0)
+    hb = v.on_bolt(v.KNOB_FLOOR + m.KNOB_BOLT[1] / 2)                                # the bolt's head
+    a = np.radians(v.STRAP_PHI[0] + 30)
     labelled(R.cut(P0, 1, -0.01, keep="above"),
-             [("M5 x 30 hex bolt (Rev 3's)", "turn the knob: its head sits on the floor of the knob's hex pocket",
-               [np.array([hb + m.KNOB_BOLT[1] / 2, 0, 0])]),
-              ("M5 nut", "in a pocket in the back plate's front face, before the plate goes on",
-               [np.array([v.NUT5_X + m.NUT_T[5] / 2, 0, 3.4])]),
-              ("Spring cap (printed)", "the bolt's tip bears in the dimple on its back",
-               [np.array([(v.CAP_X[0] + v.CAP_X[1]) / 2, 0, -2.0])]),
-              ("Spring (Rev 3's)", "in the shoe's bore, pushes the shoe and felt onto the hub",
-               [np.array([xs, 0, -4.6])]),
-              ("Brake shoe + felt (printed)", "held in the pocket with no slop; the felt on the hub",
-               [np.array([v.HUB_R + 4.0, 0, 14.0])]),
-              ("Friction knob (printed)", "the MkII knob, its floor raised for the M5 x 30",
-               [np.array([v.KNOB_X0 + 6.0, 0, 6.0])])],
+             [("M5 x 35 hex bolt", "turn the knob: the bolt's head sits on the floor of its hex pocket",
+               [np.array(hb.toTuple())]),
+              ("M5 nut", "dropped into the slot in the strap's head from its +y side; the bolt holds it",
+               [np.array(v.on_bolt(v.T_NUT - m.NUT_T[5] / 2).toTuple())]),
+              ("M4 x 50 socket head cap", "the strap's hinge pin: through the pillow blocks and the up-stop pad, head "
+               "on +y, nut on -y", [np.array([v.HINGE_X, 0, v.HINGE_Z])]),
+              ("Brake strap + felt (printed)", "hinged in the up-stop pad; the felt on the hub",
+               [np.array([(v.STRAP_R0 + 4) * np.cos(a), 0, (v.STRAP_R0 + 4) * np.sin(a)])]),
+              ("Friction knob (printed)", "the MkII knob, in its seat; the pocket in its underside takes an optional "
+               "10 mm spring", [np.array(v.on_bolt(4.0, -9.0).toTuple())])],
              (0, -1, 0), "MkIII base Rev 4 screws: the brake, in section on the tube's plane", "rev4_screws_brake.png",
-             focus=((10, 0, -32), (115, 0, 32)), zoom=1.0, parallel=True)
+             focus=((0, 0, -50), (70, 0, 72)), zoom=1.0, parallel=True)
     labelled(P0, [("M3 x 12 countersunk  (x4)", "sensor cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(-1)),
                   ("M4 x 12 countersunk  (x2)", "strut collar clamp: heads 2 mm into the -y ear", heads_of("clamp screw")),
                   ("M4 nut", "strut, collar end (rod): in the collar's -y cheek", heads_of("eye nut")),
+                  ("M4 nut", "the brake strap's hinge pin: in the pillow block's hex pocket", heads_of("hinge nut")),
                   ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting: not in the kits", desk)],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
@@ -408,7 +399,9 @@ def screw_views(P0):
                   ("M4 x 16 countersunk", "strut, collar end (rod): head on +y, nut in the -y cheek", heads_of("eye screw")),
                   ("M4 nut  (x2)", "strut collar clamp: in the +y ear's pockets", heads_of("clamp nut")),
                   ("Hex-key hole (3.5 mm)", "through the pillow block, on the strut anchor's M4 x 16: a 2.5 mm key reaches "
-                   "its head", [np.array([v.ANCH_X, v.BLOCK_Y1, v.ANCH_Z])])],
+                   "its head", [np.array([v.ANCH_X, v.BLOCK_Y1, v.ANCH_Z])]),
+                  ("M4 x 50 socket head cap", "the brake strap's hinge pin, its head in a counterbore in the pillow "
+                   "block", heads_of("hinge screw"))],
              (0.3, 1.0, -0.12), "MkIII base Rev 4 screws: USB (+y) side", "rev4_screws_usbside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
     labelled(R.cut(P0, 1, 12.0, keep="below"),
@@ -467,9 +460,8 @@ def lever_exploded(C):
 def exploded(C):
     P = v.build(0.0)
     I = {}
-    for n in ("frame", "shell", "lever_sensor", "lever_cable", "back_plate", "shoe", "felt", "spring_cap", "knob_spring",
-              "friction_knob", "cover_sensor", "cover_cable", "magnet", "sensor_pcb", "sensor_chip", "gas_strut",
-              "strut_collar", "hose_clamp"):
+    for n in ("frame", "shell", "lever_sensor", "lever_cable", "strap", "felt", "friction_knob", "cover_sensor",
+              "cover_cable", "magnet", "sensor_pcb", "sensor_chip", "gas_strut", "strut_collar", "hose_clamp"):
         I[n] = d.Item(n, to_mesh(P[n]), C[n])
     for s in (-1, 1):
         for k, n in enumerate(("bearing_outer", "bearing_inner", "bearing_seal")):
@@ -518,17 +510,19 @@ def exploded(C):
     mv(["cover_cable"], (0, 130, 30))
     pull("cover screw", (0, -130, 30), 30, lambda it: it.head[1] < 0)
     pull("cover screw", (0, 130, 30), 30, lambda it: it.head[1] > 0)
-    B = np.array([70.0, 0, 0])                                         # the back plate, the brake behind it
-    mv(["back_plate"], B)
-    pull("back screw", B, 30)
-    pull("brake nut", B, 20)
-    mv(["shoe", "felt", "knob_spring", "spring_cap"], (32, 0, 60))
-    mv(["friction_knob"], B + (40, 0, 0))
-    pull("brake bolt", B + (40, 0, 0), 0)
+    B = np.array([100.0, 0, 10.0])                                     # the strap, back out of its bay
+    mv(["strap", "felt"], B)
+    pull("brake nut", B, 22)
+    pull("hinge screw", (0, 0, 0), 48)
+    pull("hinge nut", (0, 0, 0), 30)
+    u = np.array(v.bolt_axis()[0].toTuple())
+    K = T + u * 45                                                     # the knob, up its bolt's axis off the shell
+    mv(["friction_knob"], K)
+    pull("brake bolt", K, 40)
 
-    parts = [("Frame", "pillow blocks, the brake housing's lower half, anchor clevis, up-stop pad, down-stop pillars",
+    parts = [("Frame", "pillow blocks, anchor clevis, up-stop pad, down-stop pillars, the brake strap's bay",
               ["frame"]),
-             ("Shell", "the bearing caps and the brake housing's upper half in one", ["shell"]),
+             ("Shell", "the bearing caps, the knob's seat and the brake strap's bay in one", ["shell"]),
              ("Lever, sensor half", "split on the tube's plane; each half prints on its joint face, trunnion up",
               ["lever_sensor"]),
              ("Lever, cable half", "the cables lie in the halves' channels", ["lever_cable"]),
@@ -536,11 +530,12 @@ def exploded(C):
               ["dowel0", "dowel2"]),
              ("6808-2RS bearings  (x2)", "pressed onto the trunnions", ["bearing_outer-1", "bearing_outer1"]),
              ("AS5600 board", "in the sensor trunnion's end, chip out", ["sensor_pcb"]),
-             ("Sensor cover", "with the magnet on its post", ["cover_sensor"]),
+             ("Sensor cover", "with the magnet in a pocket in its inside face", ["cover_sensor"]),
              ("Cable cover", "goes on over the USB cable", ["cover_cable"]),
-             ("Shoe + felt, spring, spring cap", "slide into the pocket from behind, before the shell", ["shoe"]),
-             ("Back plate", "closes the pocket; the M5 nut in its front face", ["back_plate"]),
-             ("Friction knob", "the MkII knob, its floor raised for the M5 x 30", ["friction_knob"]),
+             ("Brake strap + felt", "on its hinge pin before the lever goes in; its nut drops into the head's slot",
+              ["strap"]),
+             ("Friction knob", "the MkII knob: an M5 hex pocket, and a pocket underneath for an optional spring",
+              ["friction_knob"]),
              ("Gas strut", "X AUTOHAUX 6 in, 45 N", ["gas_strut"]),
              ("Strut collar", "clamped on the tube", ["strut_collar"]),
              ("Hose clamp", "on the socket's mouth", ["hose_clamp"]),
@@ -550,9 +545,9 @@ def exploded(C):
               ("M4 x 50 + M4 nut  (x4)", "the shell: socket head, into nuts slid into the pillow blocks' sides",
                S["shell screw"] + S["shell nut"]),
               ("M3 x 12  (x8)", "side covers, countersunk", S["cover screw"]),
-              ("M3 x 16  (x6)", "back plate, countersunk", S["back screw"]),
-              ("M5 x 30 + M5 nut", "the brake: a hex bolt, head in the knob, nut in the back plate",
+              ("M5 x 35 + M5 nut", "the brake: a hex bolt, head in the knob, nut in the strap's head",
                S["brake bolt"] + S["brake nut"]),
+              ("M4 x 50 + M4 nut", "the brake strap's hinge pin, socket head", S["hinge screw"] + S["hinge nut"]),
               ("M4 x 16 + M4 nut  (x2)", "strut eyes, countersunk",
                S["anchor screw"] + S["anchor nut"] + S["eye screw"] + S["eye nut"]),
               ("M4 x 12 + M4 nut  (x2)", "strut collar clamp, countersunk", S["clamp screw"] + S["clamp nut"])]
@@ -567,20 +562,21 @@ def screw_chart():
     rows = [(d.screw_tile("shcs", 4, v.JS_SCREW_L), f"M4 x {v.JS_SCREW_L} socket head cap", 4,
              "The lever halves: along the pivot axis through the hub, behind the bearings, into M4 nuts in the other "
              "half; two heads and two nuts in each half (HELIFOUNER M4 x 30-50 kit)."),
-            (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 4,
-             "The shell, from the top, each centred on the joint, into M4 nuts slid into the pillow blocks from the "
-             "sides."),
-            (d.screw_tile("hex", 5, 30), "M5 x 30 hex bolt (Rev 3's)", 1,
-             "The brake: head in the knob's hex pocket, through the M5 nut in the back plate, onto the spring cap."),
+            (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 5,
+             "The shell (4), from the top, each centred on the joint, into M4 nuts slid into the pillow blocks from "
+             "the sides; the brake strap's hinge pin (1), through the pillow blocks and the up-stop pad."),
+            (d.screw_tile("hex", 5, 35), "M5 x 35 hex bolt", 1,
+             "The brake: head in the knob's hex pocket, down through the knob's seat into the M5 nut in the strap's "
+             "head."),
             (d.screw_tile("csk", 3, 12), "M3 x 12 countersunk", 8,
              "The side covers, into threads tapped through the blocks and the shell."),
-            (d.screw_tile("csk", 3, 16), "M3 x 16 countersunk", 6, "The back plate, into threads tapped 7.5 mm deep."),
             (d.screw_tile("csk", 4, 16), "M4 x 16 countersunk", 2, "The strut's two eyes, into nuts in the far cheeks."),
             (d.screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the other ear."),
-            (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 12, "Lever (4), shell (4), strut eyes (2), collar clamp (2)."),
-            (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the back plate's front face.")]
+            (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 13,
+             "Lever (4), shell (4), strut eyes (2), collar clamp (2), the strap's hinge pin (1)."),
+            (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the slot in the brake strap's head.")]
     d.chart(rows, "MkIII base Rev 4: every screw, to scale",
-            "Countersunk screws and nuts: AvrestYPT kit. Socket head screws (lever and shell): HELIFOUNER kit. Brake bolt: Rev 3's M5 x 30. "
+            "Countersunk screws and nuts: AvrestYPT kit. Socket head screws (lever, shell, hinge pin): HELIFOUNER kit. Brake bolt: M5 x 35. "
             "Not shown: four #10 wood screws for the desk.", os.path.join(OUT, "rev4_screw_sizes.png"))
 
 

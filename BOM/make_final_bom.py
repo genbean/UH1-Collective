@@ -188,14 +188,16 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
      "the socket and head fits with it (coupons)", AMZ + "; " + BASE),
     amz("Socket mouth", 1, "Worm-drive hose clamp, 25-40 mm range, 304 stainless, pack of 25", "MISPIRE", "B0F8QWCFWR", 18.99, 25,
         "Pack of 25 is the smallest 25-40 mm pack found; you need one", BASE1),
-    amz("Lever halves and shell", 8, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
+    amz("Lever halves, shell, brake hinge", 9, "Socket head cap screws M4 x 30 / 35 / 40 / 45 / 50, 12.9 black oxide, 10 of each, with 50 M4 nuts, "
         "flat and lock washers and a hex key (200 pieces)", "HELIFOUNER", "B0CDSKK7V1", 9.99, "once",
-        "Uses 4 x M4 x 35 and 4 x M4 x 50, with 8 of its M4 nuts. Lever halves (split on the tube's plane): four "
+        "Uses 4 x M4 x 35 and 5 x M4 x 50, with 9 of its M4 nuts. Lever halves (split on the tube's plane): four "
         "M4 x 35 along the pivot axis through the hub, behind the bearings, two from each end, heads in 7.5 mm "
         "counterbores, nuts in hex pockets in the other half's end face; printed hollow dowels round them locate the "
         "halves. Screw the halves up before pressing the bearings on. Shell: four M4 x 50, two each side, from the top down 13 mm "
         "counterbores in its side walls, each centred on the joint, into nuts slid into the pillow blocks from "
-        "their outer faces; the slots open just below the side covers' rim", BASE, ORDERED),
+        "their outer faces, under the side covers. Brake strap: one M4 x 50 is its hinge "
+        "pin, through the pillow blocks and the up-stop pad, head in a counterbore on the +y side, nut in a hex pocket "
+        "on the -y side", BASE, ORDERED),
     ("Strut", 1, "Gas strut, 6 in (152.4 mm eye to eye), 45 N (sold as 9-12 lb), flat eyelet tabs", "X AUTOHAUX", "",
      "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half. The anchor is placed so the "
      "45 N strut as bought balances the lever. Fit it cylinder down: the cylinder (0.475 in) on the anchor clevis, "
@@ -206,21 +208,23 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
         "its nut in the +y ear's pocket"),
     kit("Side covers", 8, "M3 x 12 countersunk screw", "Four per cover, from its outer face into M3 threads tapped right "
         "through the pillow block and the shell's 9 mm side wall"),
-    kit("Back plate", 6, "M3 x 16 countersunk screw", "From its back face into M3 threads tapped 7.5 mm deep: four in "
-        "the frame, two in the shell"),
-    any_("Brake", 1, "M5 x 30 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
-         "have only countersunk heads): Rev 3's, or any hardware store. Its head sits on the floor of the hex pocket in "
-         "the printed knob (Base/Rev4/stl/friction_knob.stl: the MkII knob, its floor raised to 18 mm), so the knob turns "
-         "it; it goes through the M5 nut in the back plate and pushes the spring cap",
+    any_("Brake", 1, "M5 x 35 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
+         "have only countersunk heads): any hardware store. Its head sits on the floor of the hex pocket in the printed "
+         "knob (Base/Rev4/stl/friction_knob.stl: the MkII knob, its floor 11 mm up), so the knob turns it; it runs down "
+         "through the knob's seat in the shell's top, leaning 30 deg forward, into the M5 nut in the brake strap's head. "
+         "35 mm keeps the nut's full thread with or without the optional spring",
          "Base/Rev4/README.md, Brake", CHECK),
-    kit("Brake", 1, "M5 hex nut", "Pressed into the pocket in the back plate's front face; the brake bolt threads into it"),
-    amz("Brake", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon", "B09FF6VQ55",
-        11.10, 10, "In the shoe's bore, under the printed spring cap; 6.5 mm long when fitted in the CAD. The CAD asked "
-        "for 1.1 mm wire and 10-12 mm free length; this is the nearest stock size, so trim a coil if it is too long",
-        CAD, CHECK),
-    amz("Brake shoe", 1, "Self-adhesive felt tape, 1.5 mm thick, 3/4 in x 50 ft, black", "FindTape", "B077TCDNYT", 24.98, 1,
-        "Lines the shoe's curved face: cut a 48 mm length and trim it to 11 mm wide. It is the only 1.5 mm felt found "
-        "in a usable width, and you need a few cm of the 50 ft", CAD, CHECK),
+    kit("Brake", 1, "M5 hex nut", "Dropped into the slot in the brake strap's head from its +y side; the bolt holds it. "
+        "A nyloc nut fits the slot too, if you want the knob to stay put"),
+    amz("Brake (optional)", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon",
+        "B09FF6VQ55", 11.10, 10, "Optional. It sits in the 10.6 mm, 7 mm deep pocket in the knob's underside and pushes "
+        "the knob off its seat, so the knob sets the brake through the spring: a soft range of about 10 turns up to "
+        "the spring's 20 N or so, then firm once the knob is down on its seat. Without it the knob sits on the seat "
+        "and the brake goes from free to firm within about a turn. Any spring up to 10 mm OD (over the 5 mm bolt), "
+        "0.8-1.0 mm wire, 10-15 mm free length, fits", CAD, CHECK),
+    amz("Brake strap", 1, "Self-adhesive felt tape, 1.5 mm thick, 3/4 in x 50 ft, black", "FindTape", "B077TCDNYT", 24.98, 1,
+        "Lines the brake strap's curved face: cut a 33 mm length and trim it to 16 mm wide. It is the only 1.5 mm felt "
+        "found in a usable width, and you need a few cm of the 50 ft", CAD, CHECK),
     amz("Desk mounting", 4, "Screw, #10 x 1-1/2 in pan head, 304 stainless, pack of 50", "Amazon", "B0F43RY9S6", 8.29, 50,
         "Through the 5.5 mm holes in the frame plate's corners (8 mm plate). Not in the kits: they go into the desk. "
         "1-1/2 in suits a typical desktop: check yours", CAD, CHECK),
@@ -320,24 +324,24 @@ PRINTED = [
     ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
     ("Head", "Head/Rev5/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
-    ("Base", "Base/Rev4/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_shoe_pocket.stl, "
-     "coupon_dowel_hole.stl", 1,
-     "Fit-test coupons: print first and tune mk3_rev4.py (TRUN_OD, BRG_SEAT_D, SHOE_CLR, DOWEL_CLR). The tube socket is Rev 3's: "
-     "Base/stl/coupons/coupon_tube_socket.stl, with the carbon tube"),
+    ("Base", "Base/Rev4/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_dowel_hole.stl", 1,
+     "Fit-test coupons: the trunnion's and the seat's 0 fitted (2026-11-08); print the dowel-hole coupon first and tune "
+     "DOWEL_CLR in mk3_rev4.py. The tube socket is Rev 3's, which fits"),
     ("Base", "Base/Rev4/stl/frame.stl", 1, "Plate down"),
-    ("Base", "Base/Rev4/stl/shell.stl", 1, "Top down: the bearing half-seats, the slot and the shoe's half-pocket open upward"),
+    ("Base", "Base/Rev4/stl/shell.stl", 1, "Top down: the bearing half-seats, the slot and the brake strap's bay open "
+     "upward. The knob's seat is sunk into the top, on the bed, and its floor slopes 30 deg: support it from the bed, "
+     "in the seat only"),
     ("Base", "Base/Rev4/stl/lever_sensor.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
      "inner face"),
     ("Base", "Base/Rev4/stl/lever_cable.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
      "inner face"),
     ("Base", "Base/Rev4/stl/lever_dowel.stl", 4, "Standing on end"),
     ("Base", "Base/Rev4/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
-    ("Base", "Base/Rev4/stl/shoe.stl", 1, "On its back face: the spring's bore on the bed, the curved face on top"),
-    ("Base", "Base/Rev4/stl/spring_cap.stl", 1, "On its flat front face, dimple up"),
-    ("Base", "Base/Rev4/stl/back_plate.stl", 1, "On its front face, the nut pocket on the bed"),
+    ("Base", "Base/Rev4/stl/strap.stl", 1, "On its side, the nut's slot up: its bending then runs along the layers. "
+     "No supports"),
     ("Base", "Base/Rev4/stl/strut_collar.stl", 1, "Standing on one end. The same part as Rev 3's"),
-    ("Base", "Base/Rev4/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket, its floor raised to 18 mm for "
-     "the M5 x 30. Floor down, pocket open at the top"),
+    ("Base", "Base/Rev4/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket, its floor 11 mm up, and a "
+     "pocket in its underside for the optional spring. Underside down, hex pocket open at the top"),
 ]
 DROPPED = [
     ("TE 1825910-6 tact switches for the SEARCH CONT hat (450-1650-ND)", 4, "Bought in order for the tact-switch "
@@ -390,7 +394,10 @@ DROPPED = [
     ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 12: the "
      "set is still used for the head's trigger pivot", "Base/README.md (Rev 3)"),
     ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M4 "
-     "x 50 socket heads + M4 nuts), and its brake has no hinge", "Base/README.md (Rev 3)"),
+     "x 50 socket heads + M4 nuts), and its brake strap's hinge pin is an M4 x 50 socket head", "Base/README.md (Rev 3)"),
+    ("Base Rev 4's first brake: the sliding shoe's back plate (6 x M3 x 16 countersunk) and its M5 x 30 hex bolt", 7,
+     "Replaced by the hinged brake strap (2026-11-09): no back plate, and the knob's bolt is an M5 x 35",
+     "Base/Rev4/README.md"),
     ("Base Rev 4's first shell screws: 4 x M3 x 20 countersunk + M3 nuts", 4, "The shell now takes four M4 x 50 socket "
      "head cap screws from the lever's kit, into M4 nuts slid in from the pillow blocks' sides (2026-11-08)",
      "Base/Rev4/README.md"),
