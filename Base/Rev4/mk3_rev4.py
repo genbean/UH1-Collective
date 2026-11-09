@@ -785,6 +785,108 @@ def balance(plot=None):
         print("wrote", plot)
 
 
+# ================================================================ the trunnion's profile
+# The first Rev 4 lever (drawn round, 40.1), both halves held together, by calliper (2026-11-08), and the bearing's bore
+# by the same calliper
+TRUN_PRINTED = {"axes": 1.575 * 25.4, "diagonals": 1.585 * 25.4, "drawn": 40.1}
+BORE_MEASURED = 1.578 * 25.4
+
+
+def trunnion_drawing(path, k=40.0):
+    """the trunnion's section with its departures from round blown up k times, and its diameter all the way round:
+    the first print as measured, the profile drawn now, and what that should print as (the same printer error)"""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import numpy as np
+    ink, ink2, grid, surf = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
+    c_bore, c_old, c_new, c_exp = "#8b8a86", "#eb6834", "#2a78d6", "#1baf7a"
+    th = np.linspace(0, 2 * np.pi, 721)
+    s2 = np.sin(2 * th) ** 2
+    ax_m, dg_m, d0 = TRUN_PRINTED["axes"], TRUN_PRINTED["diagonals"], TRUN_PRINTED["drawn"]
+    old = ax_m + (dg_m - ax_m) * s2                                   # diameters, as printed (fitted to the 2 readings)
+    new = TRUN_OD - TRUN_DIAG * s2                                    # as drawn now
+    exp = new + (old - d0)                                            # drawn now, plus the first print's error
+    ref = 40.0
+
+    fig = plt.figure(figsize=(14.5, 7.4))
+    fig.patch.set_facecolor(surf)
+    fig.suptitle("MkIII base Rev 4: the trunnion, drawn out of round so it prints round", x=0.03, y=0.985,
+                 ha="left", color=ink, fontsize=15, fontweight="bold")
+    fig.text(0.03, 0.925, f"The first lever, drawn round at {d0:.1f} mm, printed {ax_m / 25.4:.3f} in across the axes but "
+             f"{dg_m / 25.4:.3f} in across the diagonals. So the diagonals are now drawn {TRUN_DIAG} mm smaller.",
+             color=ink2, fontsize=10.5)
+
+    # ---- left: the section, departures from 40.0 mm blown up k times
+    a = fig.add_axes([0.02, 0.20, 0.44, 0.69])
+    a.set_aspect("equal")
+    a.axis("off")
+    big = lambda d: (ref + (d - ref) * k) / 2                         # diameter -> exaggerated radius
+    for d, col, ls, lw, lab in ((np.full_like(th, BORE_MEASURED), c_bore, (0, (5, 3)), 1.4,
+                                 f"bearing's bore, {BORE_MEASURED / 25.4:.3f} in by the same calliper"),
+                                (old, c_old, "-", 2.0, "first print, as measured (drawn round, 40.1)"),
+                                (new, c_new, "-", 2.6, "drawn now (the STL)"),
+                                (exp, c_exp, (0, (2, 2)), 2.0, "drawn now, plus the first print's error: round")):
+        a.plot(big(d) * np.cos(th), big(d) * np.sin(th), color=col, ls=ls, lw=lw, label=lab)
+    R = big(dg_m) + 3
+    a.plot([-R - 2, R + 2], [0, 0], color=ink, lw=1.2)                # the joint
+    a.text(-R - 2, 0.6, "joint", color=ink, fontsize=9, va="bottom")
+    a.text(0, 3.0, "upper half\nprinted on the joint face", color=ink2, fontsize=8.5, ha="center", va="bottom")
+    a.text(0, -3.0, "lower half\nprinted on the joint face", color=ink2, fontsize=8.5, ha="center", va="top")
+    for ang, col in ((90, "#3b4bd1"), (45, "#e0302a"), (135, "#e0302a")):
+        u = np.array([np.cos(np.radians(ang)), np.sin(np.radians(ang))])
+        a.plot([-R * u[0], R * u[0]], [-R * u[1], R * u[1]], color=col, lw=0.9, alpha=0.55)
+    a.plot([-R, R], [0, 0], color="#3b4bd1", lw=0.9, alpha=0.55)
+
+    def note(ang, lines, off=(0, 0), ha="left"):
+        u = np.array([np.cos(np.radians(ang)), np.sin(np.radians(ang))])
+        p = u * (R + 1.0) + np.array(off)
+        a.text(*p, "\n".join(lines), fontsize=8.6, color=ink, ha=ha, va="center", linespacing=1.35)
+
+    note(45, [f"diagonal: printed {dg_m / 25.4:.3f} in ({dg_m:.2f} mm)",
+              f"drawn now {TRUN_OD - TRUN_DIAG:.2f} mm ({(TRUN_OD - TRUN_DIAG) / 25.4:.4f} in)"])
+    note(90, [f"square to the joint: printed {ax_m / 25.4:.3f} in",
+              f"drawn now {TRUN_OD:.2f} mm, as before"], off=(0, 1.2), ha="center")
+    note(0, [f"along the joint: printed {ax_m / 25.4:.3f} in",
+             f"drawn now {TRUN_OD:.2f} mm, as before"], off=(0.5, -3.2))
+    a.text(0, -R - 3.5, f"Departures from 40.0 mm drawn {k:.0f} times bigger, so 0.1 mm shows as 4 mm.",
+           color=ink2, fontsize=9, ha="center", va="top")
+    a.legend(loc="upper left", bbox_to_anchor=(0.04, -0.02), frameon=False, fontsize=9)
+    a.set_xlim(-R - 6, R + 22)
+    a.set_ylim(-R - 6, R + 6)
+
+    # ---- right: the diameter all the way round
+    b = fig.add_axes([0.565, 0.24, 0.36, 0.60])
+    b.set_facecolor(surf)
+    b.grid(True, color=grid, lw=0.8)
+    for sd in ("top", "right"):
+        b.spines[sd].set_visible(False)
+    deg = np.degrees(th)
+    m = deg <= 180
+    b.axhline(BORE_MEASURED, color=c_bore, ls=(0, (5, 3)), lw=1.4, label="bearing's bore (measured)")
+    b.plot(deg[m], old[m], color=c_old, lw=2.0, label="first print, as measured")
+    b.plot([0, 45, 90, 135, 180], [ax_m, dg_m, ax_m, dg_m, ax_m], "o", color=c_old, ms=6, label="your readings")
+    b.plot(deg[m], new[m], color=c_new, lw=2.6, label="drawn now")
+    b.plot(deg[m], exp[m], color=c_exp, ls=(0, (2, 2)), lw=2.0, label="what it should print")
+    b.axhline(d0, color=c_old, lw=0.8, alpha=0.45)
+    b.text(71, d0 + 0.006, "first lever, drawn", color=c_old, fontsize=8, va="bottom")
+    b.set_xlim(0, 180)
+    b.set_xticks([0, 45, 90, 135, 180])
+    b.set_xticklabels(["0\nalong\nthe joint", "45\ndiagonal", "90\nsquare to it", "135\ndiagonal", "180\nalong\nthe joint"])
+    b.set_ylabel("diameter across the trunnion, mm", color=ink2)
+    b.set_ylim(39.80, 40.32)
+    b.tick_params(colors=ink2)
+    sec = b.secondary_yaxis("right", functions=(lambda x: x / 25.4, lambda x: x * 25.4))
+    sec.set_ylabel("inches", color=ink2)
+    sec.tick_params(colors=ink2)
+    b.set_title("The diameter at each angle (one half-turn: the other half is the same)", loc="left", color=ink,
+                fontsize=10.5)
+    b.legend(loc="upper center", bbox_to_anchor=(0.5, -0.20), ncol=3, frameon=False, fontsize=8.6)
+    fig.savefig(path, dpi=150, facecolor=surf)
+    plt.close(fig)
+    print("wrote", path)
+
+
 # ================================================================ fit-test coupons for the 6808
 # Rev 3's coupon plates (Rev 1's coupon_plate: steps -0.2, 0, +0.2 on the diameter, engraved), sized for the 6808-2RS.
 # The tube socket is Rev 3's, so its coupon (and TRUN/seat steps found on the 6006) carry over only as a starting point.
@@ -833,5 +935,7 @@ if __name__ == "__main__":
         balance(plot=os.path.join(HERE, "renders", "strut_balance_r4.png"))
     elif "--coupons" in sys.argv[1:]:
         export_coupons()
+    elif "--trunnion" in sys.argv[1:]:
+        trunnion_drawing(os.path.join(HERE, "renders", "rev4_trunnion_profile.png"))
     else:
         export()

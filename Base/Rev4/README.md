@@ -37,7 +37,7 @@ The knob stands 31 mm out behind the plate.
 
 | | |
 |---|---|
-| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference and assembly checks; `--coupons` writes `stl/coupons/` |
+| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference and assembly checks; `--coupons` writes `stl/coupons/`; `--trunnion` draws the trunnion's profile |
 | `make_renders_r4.py` | the renders, screw maps, exploded view and screw chart, `renders/MkIII_Rev4_Assembly.glb`, and the complete collective with head Rev 5 in [`../../renders`](../../renders) |
 | `stl/` | the printed parts |
 | `stl/ref/` | bought parts and hardware, for reference |
@@ -67,6 +67,10 @@ The bearing coupons' `0` comes from how the bearings fitted as built:
 | the 45° diagonals | 1.585 in (40.26 mm) | 0.25 mm big: the layers' stair-steps stick out on the sloped flanks |
 
 So the trunnion's profile isn't round any more. It's 40.1 mm across the axes, as printed, and comes in by `TRUN_DIAG` = 0.25 mm across the diagonals (39.85 mm), easing in and out between them (r = R − 0.125 sin² 2θ). It should print about 1.575 in every way. Check a new print, or the coupon, with a calliper across both axes and both diagonals: if they still differ, change `TRUN_DIAG` by the difference.
+
+![The trunnion's profile: the first print as measured, the profile drawn now, and what it should print](renders/rev4_trunnion_profile.png)
+
+`python mk3_rev4.py --trunnion` redraws this from the readings at the top of the script's trunnion section.
 
 The tube socket is unchanged, so Rev 3's socket fit stands.
 
