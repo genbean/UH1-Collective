@@ -92,8 +92,11 @@ BRG_IR_SH, BRG_OR_SH = 44.0, 48.3                # inner race's outside, outer r
 BRG_Y0 = HUB_HW + 1.0                            # bearing inner face (22.5)
 BRG_Y1 = BRG_Y0 + BRG_B                          # (29.5)
 BLOCK_Y1 = BRG_Y1 + 2.0                          # pillow block's outer face (31.5): a 2 mm lip holds the outer race
-TRUN_OD = BRG_d + 0.1                            # Rev 3's +0.2 on the race's bore pressed on a hair too tight (as
-                                                 # built, 2026-11-08), so +0.1
+TRUN_OD = BRG_d + 0.0                            # Rev 3's +0.2 on the race's bore pressed on a hair too tight (as
+                                                 # built, 2026-11-08); +0.1 was still too tight, so nominal
+SEAM_RELIEF = 0.5                                # 45 deg chamfer leg along the trunnions' joint edges, both halves:
+                                                 # the halves print on the joint face, and its elephant foot made the
+                                                 # trunnion widest right at the seam
 TRUN_OUT = BLOCK_Y1 + 0.5                        # (32)
 BRG_SEAT_D = BRG_D + 0.1                         # +0.1 on the race's outside: a perfect fit on Rev 3, as built
 LIP_R = 23.0                                     # clears the inner race (22.0), holds the outer (24.15)
@@ -275,16 +278,28 @@ def lever_screws(theta=0.0):
 _HALVES = []
 
 
+def seam_relief(rad, y0, y1, c=SEAM_RELIEF):
+    """a 45 deg chamfer, c a leg, along both of a trunnion's edges on the joint plane (z = 0), from y0 to y1, in both
+    halves at once: a square prism along y, turned 45 deg, on each edge"""
+    a = c * math.sqrt(2)
+    y0, y1 = sorted((y0, y1))
+    return [rot_y(box(-a / 2, a / 2, y0, y1, -a / 2, a / 2), 45).translate(V(sx * rad, 0, 0)) for sx in (-1, 1)]
+
+
 def lever_halves(theta=0.0):
-    """split at z = 0, chamfered everywhere but the joint plane (Rev 3)"""
+    """split at z = 0, chamfered everywhere but the joint plane (Rev 3); the trunnions' seams relieved"""
     if not _HALVES:
         h = lever()
         for c in lever_screw_cuts():
             h = h.cut(c)
         h = h.clean()
         on_joint = lambda e: abs(e.BoundingBox().zmin) < 1e-4 and abs(e.BoundingBox().zmax) < 1e-4
-        _HALVES.append(chamfer_edges(h.intersect(box(-200, 200, -100, 100, 0, 200)).clean(), exclude=on_joint))
-        _HALVES.append(chamfer_edges(h.intersect(box(-200, 200, -100, 100, -200, 0)).clean(), exclude=on_joint))
+        relief = [p for s in (-1, 1) for p in seam_relief(TRUN_OD / 2, s * BRG_Y0, s * (TRUN_OUT + 1))]
+        for zs in ((0, 200), (-200, 0)):
+            half = chamfer_edges(h.intersect(box(-200, 200, -100, 100, *zs)).clean(), exclude=on_joint)
+            for p in relief:
+                half = half.cut(p)
+            _HALVES.append(half.clean())
     return [rot_y(s, theta) for s in _HALVES]
 
 
@@ -771,10 +786,18 @@ def balance(plot=None):
 # ================================================================ fit-test coupons for the 6808
 # Rev 3's coupon plates (Rev 1's coupon_plate: steps -0.2, 0, +0.2 on the diameter, engraved), sized for the 6808-2RS.
 # The tube socket is Rev 3's, so its coupon (and TRUN/seat steps found on the 6006) carry over only as a starting point.
-def coupon_trunnion(d, h=8.0, sh=2.0):
-    """the trunnion's stub on its inner-race shoulder, with the 1/2" bore, standing on the shoulder"""
-    c = fuse(cyl(BRG_IR_SH / 2 - 1.1, (0, 0, 0), (0, 0, sh)), cyl((TRUN_OD + d) / 2, (0, 0, sh), (0, 0, sh + h)))
-    return c.cut(cyl(m.CABLE_R, (0, 0, -1), (0, 0, sh + h + 1)))
+def coupon_trunnion(d, h=8.0, sh=2.0, gap=4.0):
+    """the trunnion's stub on its inner-race shoulder, with the 1/2" bore and the seam relief, split at the joint like
+    the lever: two halves lying on their joint faces, one behind the other, so they print as the lever's halves do and
+    carry the same elephant foot. Glue them face to face, then press a 6808 on"""
+    rad = (TRUN_OD + d) / 2
+    full = fuse(cyl(BRG_IR_SH / 2 - 1.1, (0, 0, 0), (0, sh, 0)), cyl(rad, (0, sh, 0), (0, sh + h, 0)))
+    full = full.cut(cyl(m.CABLE_R, (0, -1, 0), (0, sh + h + 1, 0)))
+    half = full.intersect(box(-50, 50, -1, sh + h + 1, 0, 50))
+    for p in seam_relief(rad, sh, sh + h + 1):
+        half = half.cut(p)
+    half = half.clean()
+    return fuse(half, half.translate(V(0, sh + h + gap, 0)))
 
 
 def coupon_seat(d, depth=BRG_B, lip=BLOCK_Y1 - BRG_Y1, wall=4.0):

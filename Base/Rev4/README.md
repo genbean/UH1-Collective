@@ -51,13 +51,15 @@ The trunnion, bearing seat and shoe pocket are new, so print these before the bi
 
 | File | What it is | Good fit | Change |
 |---|---|---|---|
-| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.9 / 40.1 / 40.3 mm | the race presses on firmly, no wobble | `TRUN_OD += step` |
+| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, 39.8 / 40.0 / 40.2 mm, each split in two halves that print on their joint faces like the lever's, with the seam relief | glue each pair face to face: the race presses on firmly by hand, no wobble | `TRUN_OD += step` |
 | `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.9 / 52.1 / 52.3 mm | the race goes in with thumb pressure | `BRG_SEAT_D += step` |
 | `stl/coupons/coupon_shoe_pocket.stl` | 10 mm of the shoe's pocket, 0 / 0.1 / 0.2 mm clear a side, printed as the frame prints it | the printed shoe slides through under a finger, with no rattle and no rocking | `SHOE_CLR += step / 2` |
 
 The bearing coupons' `0` comes from how Rev 3's bearings fitted as built:
 - **Seat:** +0.1 on the race's outside was a perfect fit, so it stays.
-- **Trunnion:** +0.2 on the race's bore pressed on a hair too tight, so Rev 4 uses +0.1 (40.1 mm).
+- **Trunnion:** +0.2 on the race's bore pressed on a hair too tight, and +0.1 was still too tight. Rev 4 now uses the bore's own size, 40.0 mm, with a seam relief (below).
+
+**Seam relief.** The lever's halves print on their joint faces, and elephant foot there makes each trunnion widest right at the seam, where it matters most. So each trunnion has a 0.5 mm × 45° chamfer along both seam edges, in both halves: 39.0 mm across the joint face, 40.0 mm everywhere else. The trunnion coupon prints split, on its joint faces, so it shows this; Rev 3's upright coupons didn't.
 
 The tube socket is unchanged, so Rev 3's socket fit stands.
 
@@ -70,7 +72,7 @@ From the middle out, each side:
 | Hub | 0 – 21.5 | 60 mm across; 3.5 mm past the socket boss |
 | Bearing | 22.5 – 29.5 | 6808-2RS |
 | Retaining lip | 29.5 – 31.5 | the pillow blocks' and the shell's outer faces, and the plate's edge, are at 31.5 |
-| Trunnion end | 32.0 | 40.1 mm across |
+| Trunnion end | 32.0 | 40.0 mm across, a 0.5 mm seam relief along the joint |
 | Side cover | 31.5 – 41.0 | 2.5 mm floor; it overhangs the plate |
 
 ## Shell
@@ -200,7 +202,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 - **Frame:** plate down, as Rev 3. The shoe's half-pocket is an open channel.
 - **Shell:** top down. The bearing half-seats, the slot and the shoe's half-pocket all open upward.
-- **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half.
+- **Lever halves:** on their joint faces, as Rev 3. The sensor pocket's roof bridges 23 mm in each half. Turn on elephant-foot compensation if your slicer has it: the seam relief allows for some, but not a heavy first layer.
 - **Shoe:** stand it on its back face. The spring's bore opens on the bed, and the curved face is on top.
 - **Spring cap:** on its flat front face, dimple up.
 - **Back plate:** on its front face, the nut pocket on the bed.
