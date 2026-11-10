@@ -1,15 +1,16 @@
 # Check the Rev 4.0 netlist pad by pad.
 #   - The parts carried over from Rev 3.0 (J1, J2, U1, U2, RN1, RN2, C1-C3, SW1's RST/GND) must be on the same nets as
-#     in the ordered Rev 3.0 board, read from ../HeliSR_Rev3.0. Only the shift-register lines' names to the Pro Micro
+#     in the ordered Rev 3.0 board, read from HeliSR_Rev3.0_reference.kicad_pcb (kept here for this check). Only the shift-register lines' names to the Pro Micro
 #     are allowed to differ, and they are checked below.
 #   - Every other pad is checked against the table written out here by hand from the PCA9546A datasheet and the
 #     Pro Micro pinout (not from gen_v4.py).
 #   - Every net must join at least two pads, and every pad of a part must be on a net, except the Pro Micro's
 #     unused pins.
-# With a third argument, also writes the input map: Rev 3.0's IN1-IN16 rows (HeliSR_Rev3.0_Input_Map.csv, next to its
-# board), less its Rev 2.0 column, which hold for Rev 4.0 only because the check above finds the inputs' parts on the
+# With a third argument, also writes the input map: Rev 3.0's IN1-IN16 rows (HeliSR_Rev3.0_Input_Map.csv, kept here
+# too), less its Rev 2.0 column, which hold for Rev 4.0 only because the check above finds the inputs' parts on the
 # same nets; then a row for each AS5600 port with its PCA9546A channel.
-# Run with KiCad 9's python. usage: verify_netlist_v4.py <rev4.kicad_pcb> <rev3.kicad_pcb> [out Input_Map.csv]
+# Run with KiCad 9's python. usage (in PCB/HeliSR): verify_netlist_v4.py HeliSR_Rev4.0.kicad_pcb tools/HeliSR_Rev3.0_reference.kicad_pcb
+#        [HeliSR_Rev4.0_Input_Map.csv]
 import sys
 import pcbnew
 

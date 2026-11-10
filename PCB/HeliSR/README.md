@@ -272,7 +272,8 @@ the BOM.
    (`stitch_v4.py`), writes the DRC rules and title block (`finish_v4.py`), places the silk labels on both sides
    (`silk_fix_v4.py`), and DRCs the result.
 4. `verify_netlist_v4.py` checks the netlist against Rev 3.0's board and the PCA9546A datasheet's pinout, and writes
-   the input map.
+   the input map. Rev 3.0's board file and input map are kept in `tools/` for it (`HeliSR_Rev3.0_reference.kicad_pcb`,
+   `HeliSR_Rev3.0_Input_Map.csv`); the rest of Rev 3.0 is gone from the repo.
 5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders, and `make_board_bom_v4.py` the board BOM
    (it stops if the board's parts and its list disagree).
 

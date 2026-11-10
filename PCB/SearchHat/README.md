@@ -1,6 +1,6 @@
 # SearchHat Rev 1.0: breakout board for the SEARCH CONT hat
 
-A small board for hat Rev 4 in the Huey head Rev 5 ([`Head/Rev5/Hat`](../../Head/Rev5/Hat/README.md#rev-4-an-alps-8-way-stick-on-a-breakout-board)). It carries an **ALPS RKJXM1015004** 8-direction stick switch with a centre push, and screws to four bosses printed on the back of the lower panel. The switch's body comes through the panel's 13.5 mm hole and the cap goes on its stick.
+A small board for hat Rev 4 in the Huey head Rev 5 ([`Head/Hat`](../../Head/Hat/README.md)). It carries an **ALPS RKJXM1015004** 8-direction stick switch with a centre push, and screws to four bosses printed on the back of the lower panel. The switch's body comes through the panel's 13.5 mm hole and the cap goes on its stick.
 
 | Front: faces the panel | Back, mirrored: as you see it from behind |
 |---|---|
@@ -51,14 +51,14 @@ The pin order isn't GND first. On J1 the signals follow the order their switch p
 2. **SW1** on the front: its peg goes in the 1.2 mm hole, so it only fits one way. Hold it flat against the board and solder its nine pins on the back. It must sit flat: it is what places the stick in the panel's hole.
 3. Check with a meter, with nothing pressed: no direction or CTR is joined to GND. Tilt each way and press the middle: each joins its own signal to GND, and each diagonal joins two.
 
-Fitting it to the panel and the cap: [hat Rev 4](../../Head/Rev5/Hat/README.md#rev-4-an-alps-8-way-stick-on-a-breakout-board).
+Fitting it to the panel and the cap: [the hat](../../Head/Hat/README.md).
 
 ## Checks
 
 - **DRC:** `kicad-cli pcb drc` reports no violations and nothing unconnected. The rules are the HeliSR boards' cheap-fab rules: 0.127 mm minimum track and clearance, with this board's net class at 0.3 mm tracks and 0.2 mm clearance. Two exceptions are written into `SearchHat_Rev1.0.kicad_dru`, each limited to the parts it names:
   - The lower M2 holes' library courtyards overlap J2's by about 0.5 mm. The screw head itself is 0.9 mm from the nearest pad.
   - The left PUSH pin gets one thermal spoke on the back, where R runs past it. A ground track on the back and the front pour join it as well.
-- **Fit in the head:** `Head/Rev5/check_r5.py` places the board, the switch, J1 and a plug with its wires against the body, the toggles and the HeliSR board: all clear. The tightest spot is the end of J1's plug, 2.2 mm below the lower box's top wall. From about 12 mm behind the panel the slot up to the upper box is open, so the wires turn straight back and go up to the HeliSR.
+- **Fit in the head:** `Head/check_r5.py` places the board, the switch, J1 and a plug with its wires against the body, the toggles and the HeliSR board: all clear. The tightest spot is the end of J1's plug, 2.2 mm below the lower box's top wall. From about 12 mm behind the panel the slot up to the upper box is open, so the wires turn straight back and go up to the HeliSR.
 
 ## Not checked
 
@@ -75,7 +75,7 @@ Nothing is ordered or built yet. Still to check on a real part:
 | `SearchHat.pretty/` | The switch's footprint |
 | `SearchHat_Rev1.0_Gerbers.zip` | Gerbers with Protel extensions and a job file, plus the PTH and NPTH drill files: send it to any PCB maker |
 | `SearchHat_Rev1.0_Top.png`, `_Bottom_mirrored.png` | The pictures above |
-| `SearchHat_Rev1.0_mech.json` | The outline, holes and parts' places, measured from the switch's centre. `Head/Rev5/Hat/hat4_r5.py` reads it, so the panel's bosses always match the board |
+| `SearchHat_Rev1.0_mech.json` | The outline, holes and parts' places, measured from the switch's centre. `Head/Hat/hat4_r5.py` reads it, so the panel's bosses always match the board |
 | `tools/gen_searchhat.py` | Builds the board from scratch: parts, hand-placed tracks, pours, silkscreen, rules and the JSON |
 | `tools/export_searchhat.py` | Writes the Gerbers and the pictures (the HeliSR's export script, sized for this board) |
 
@@ -95,4 +95,4 @@ From this folder:
 python tools/export_searchhat.py SearchHat_Rev1.0.kicad_pcb .
 ```
 
-Then, in `Head/Rev5/Hat`, run `python hat4_r5.py ../stl` so the panel's bosses follow any change.
+Then, in `Head/Hat`, run `python hat4_r5.py ../stl` so the panel's bosses follow any change.
