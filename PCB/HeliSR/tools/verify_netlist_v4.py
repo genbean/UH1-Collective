@@ -81,7 +81,7 @@ if bad:
 print("netlist OK")
 if len(sys.argv) > 3:
     import csv, os
-    src = os.path.join(os.path.dirname(os.path.abspath(sys.argv[2])), "HeliSR_Rev3.0_Input_Map.csv")
+    src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "HeliSR_Rev3.0_Input_Map.csv")   # its IN rows: unchanged on Rev 4.0
     rows = list(csv.reader(open(src, newline="")))
     assert rows[0][-1] == "Rev 2.0 shift order", rows[0]
     rows = [r[:-1] for r in rows if r[0] == "Input" or r[0].startswith("IN")]     # Rev 3.0's analog AX rows don't apply

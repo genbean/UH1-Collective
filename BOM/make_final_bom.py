@@ -20,8 +20,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "Heli_Collective_Final_BOM.xlsx")
 CSV_OUT = os.path.join(os.path.dirname(OUT), "Heli_Collective_DigiKey.csv")
-R3, R4 = os.path.join(ROOT, "PCB", "HeliSR_Rev3.0"), os.path.join(ROOT, "PCB", "HeliSR_Rev4.0")
-BOARD_PY, FULL_PY = os.path.join(R4, "tools", "make_board_bom_v4.py"), os.path.join(R3, "tools", "make_bom_v3.py")
+R4 = os.path.join(ROOT, "PCB", "HeliSR")
+BOARD_PY, FULL_PY = os.path.join(R4, "tools", "make_board_bom_v4.py"), os.path.join(HERE, "helisr_rev30_order.py")
 BOARD_PCB = os.path.join(R4, "HeliSR_Rev4.0.kicad_pcb")
 
 # ---- pull the HeliSR data out of the frozen scripts without running them ----------------------------------------
