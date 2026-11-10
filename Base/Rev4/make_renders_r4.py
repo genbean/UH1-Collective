@@ -323,7 +323,7 @@ def brake_lever_in(C, lift=12.0):
     Pc = R.cut(P, 1, -0.01, keep="above")
     save(title(R.render(Pc, (0, -1, 0), size=(1500, 1150), focus=((-40, 0, -58), (65, 0, 50)), parallel=True)[0],
                f"The lever going in, {lift:.0f} mm above its seats (section on the tube's plane)",
-               f"The brake strap leans back {v.REST_DEG:.0f} deg on its own, onto its bay's back wall, and the hub drops "
+               f"The brake strap leans back {v.REST_DEG:g} deg on its own, onto its bay's back wall, and the hub drops "
                "past its felt"), "rev4_brake_lever_in.png")
 
 
