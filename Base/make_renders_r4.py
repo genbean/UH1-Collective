@@ -1,17 +1,17 @@
 """
-Renders for the MkIII base Rev 4, with Rev 3's renderer (../make_renders_r3.py), the diagram helpers in
-../../renders/make_diagrams.py, and Rev 3's colours.
+Renders for the MkIII base Rev 4, with the shared render helpers (make_renders_r3.py, as R), the diagram helpers in
+../renders/make_diagrams.py, and the parts' colours (COLOURS, as the earlier revisions had them).
     python make_renders_r4.py      -> renders/*.png (views, sections, screw maps, the exploded view and the screw chart),
-                                      renders/MkIII_Rev4_Assembly.glb, and the complete collective with head Rev 5:
-                                      ../../renders/HeliCollective_Assembly.glb, _0deg.png, _32deg.png, _side.png
-Run ../../renders/make_diagrams.py after it: the head's diagrams read the head from that collective GLB.
+                                      renders/MkIII_Rev4_Assembly.glb, and the complete collective with the head:
+                                      ../renders/HeliCollective_Assembly.glb, _0deg.png, _32deg.png, _side.png
+The head comes from ../Head (its STLs and its hat script), apart from its bought parts, which only the collective GLB has.
+Run ../renders/make_diagrams.py after it: the head's diagrams read the head from that collective GLB.
 Needs cadquery, trimesh, manifold3d, pyvista and pillow.
 """
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 
 import numpy as np                                     # noqa: E402
@@ -52,11 +52,23 @@ def to_mesh(shape):
     return trimesh.Trimesh(np.array([(p.x, p.y, p.z) for p in vv]), np.array(f), process=True)
 
 
+# every part's colour (RGB). The same as Rev 3's: the shell is its caps' colour, the strap its shoe's, the lever halves
+# its upper and lower halves'
+COLOURS = {
+    "frame": (227, 178, 60), "shell": (217, 166, 48),
+    "lever_sensor": (76, 175, 80), "lever_cable": (59, 143, 64), "lever_dowel": DOWEL,
+    "strap": (192, 57, 43), "felt": (91, 80, 72), "friction_knob": (35, 37, 39),
+    "cover_sensor": (63, 120, 194), "cover_cable": (63, 120, 194), "strut_collar": (232, 118, 44),
+    "bearing_inner": (141, 148, 156), "bearing_outer": (141, 148, 156), "bearing_seal": (32, 34, 36),
+    "carbon_tube": (58, 61, 66), "gas_strut": (43, 46, 51), "hose_clamp": (213, 217, 221),
+    "hardware": (74, 79, 86), "lever_screws": (74, 79, 86), "strut_pins": (74, 79, 86), "knob_spring": (184, 190, 197),
+    "magnet": (154, 163, 173), "sensor_pcb": (91, 47, 145), "sensor_chip": (17, 17, 17),
+    "sensor_wires": (200, 60, 160), "usb_cable": (24, 25, 27),
+}
+
+
 def colours():
-    c = {k: col for k, (_, col) in R.load_glb(R.BASE_GLB).items()}
-    c.update({"strap": c["shoe"], "sensor_wires": (200, 60, 160), "shell": c["cap_left"],
-              "lever_sensor": c["lever_upper"], "lever_cable": c["lever_lower"], "lever_dowel": DOWEL})
-    return c
+    return dict(COLOURS)
 
 
 def scene(theta, C, tube_to=None):
@@ -258,22 +270,6 @@ def main():
         save(title(R.render(hide(P, *inner), (1.0, -0.55, -0.45), size=(1500, 1050),
                             focus=((-10, -35, -45), (75, 35, 35)), zoom=1.0)[0],
                    f"Brake strap and up-stop lugs, {th:.0f} deg", sub), name)
-
-    # widths: Rev 3 and Rev 4 from above, same scale, tube pointing up the page
-    src = R.load_glb(R.BASE_GLB)
-    old = R.base_only(R.pose(src, 0.0, tube_to=-200.0))
-    view, up, fo = (0, 0, 1), (-1, 0, 0), ((-150, -70, -60), (100, 70, 45))
-    img_o, px_o = R.render(old, view, up=up, size=(1000, 1300), focus=fo, parallel=True,
-                           anchors=[(92, -65.0, 50), (92, 65.0, 50)])
-    img_n, px_n = R.render(P0, view, up=up, size=(1000, 1300), focus=fo, parallel=True,
-                           anchors=[(92, -v.W_HALF, 50), (92, v.W_HALF, 50)])
-    width_bar(img_o, px_o[0][0], px_o[1][0], int(px_o[0][1]), "Rev 3: 130 mm (5.1 in)")
-    width_bar(img_n, px_n[0][0], px_n[1][0], int(px_n[0][1]), "Rev 4: 73 mm (2.87 in)")
-    both = Image.new("RGB", (2000, 1300), (255, 255, 255))
-    both.paste(img_o, (0, 0))
-    both.paste(img_n, (1000, 0))
-    save(title(both, "Rev 3 and Rev 4 from above, to the same scale",
-               "Lever symmetrical about the tube; bearings, covers and brake all inside the 73 mm"), "rev4_vs_rev3_top.png")
 
     # section on the pivot axis, from the front
     Pc = R.cut(hide(P0, "carbon_tube"), 0, 0.0, keep="above")
@@ -624,14 +620,66 @@ def screw_chart():
 
 
 # ---------------------------------------------------------------------------------------------------- the collective
-def collective(C):
-    """head Rev 5 on base Rev 4: the collective's GLB and pictures in ../../renders. The head's parts ("H:...") live only
-    in that GLB; they're moved onto this base's tube, measured from where the GLB's own tube is (it was at y = -9 with
-    base Rev 3, so they moved 9 mm the first time; after that they're already there)"""
+HEAD = os.path.join(os.path.dirname(HERE), "Head")
+HEAD_STL = os.path.join(HEAD, "stl")
+# the head's parts that come from its own files: (node, file in ../Head/stl, colour). The head's STLs are in its frame
+# (x across its face, y into it, z up the tube), so head_to_base() turns them onto this base's tube
+HEAD_PARTS = [
+    ("Body", "HueyHeadR5-Body.stl", (43, 47, 52)),
+    ("Upper panel", "HueyHeadR5-UpperPanel-Black.stl", (35, 38, 41)),
+    ("Upper panel text", "HueyHeadR5-UpperPanel-WhiteText.stl", (242, 242, 242)),
+    ("Lower panel", "HueyHeadR5-LowerPanel-Black.stl", (35, 38, 41)),
+    ("Lower panel text", "HueyHeadR5-LowerPanel-WhiteText.stl", (242, 242, 242)),
+    ("Throttle grip", "HueyHeadR5-ThrottleGrip.stl", (74, 79, 87)),
+    ("Trigger", "HueyHeadR5-Trigger.stl", (75, 81, 88)),
+    ("Friction collar", "HueyHeadR5-FrictionCollar.stl", (192, 57, 43)),
+    ("Pinion", "HueyHeadR5-Pinion.stl", (76, 175, 80)),
+    ("Magnet shaft", "HueyHeadR5-MagnetShaft.stl", (232, 118, 44)),
+    ("Magnet", "ref/magnet.stl", (154, 163, 173)),
+    ("AS5600 chip", "ref/chip.stl", (17, 17, 17)),
+    ("AS5600 module", "ref/module.stl", (91, 47, 145)),
+    ("Tube set screw M5 x 8", "ref/m5_grub.stl", (141, 148, 156)),
+]
+# the search hat, from the head's hat script (through make_diagrams.hat_meshes(), in the same frame): (node, its key, colour)
+HAT_PARTS = [("Search hat cap", "cap", (43, 47, 52)), ("SearchHat board", "board", (31, 111, 67)),
+             ("Hat stick switch", "switch", (17, 17, 17)), ("Hat board screws M2 x 8", "screws", (141, 148, 156))]
+# head parts in the collective's GLB that the head no longer has (hat 1)
+HEAD_GONE = ("4-way hat: bezel, rocker plate, set screw", "Hat tact switches")
+
+
+def head_to_base():
+    """4 x 4 transform from the head's frame onto this base's tube: the head's tube (../Head/stl/ref/tube.stl) on this
+    base's, its top end at the far end of the whole 500 mm tube"""
+    t = trimesh.load(os.path.join(HEAD_STL, "ref", "tube.stl"), force="mesh")
+    (tx0, ty0, _), (tx1, ty1, tz1) = t.bounds
+    full = -m.SOCK_BOTTOM - v.r.TUBE_BOUGHT                                     # the tube's far end, base x
+    # base (X, Y, Z) = (full - (z - tz1), x - tx, ty - y)
+    return np.array([[0, 0, -1, full + tz1], [1, 0, 0, -(tx0 + tx1) / 2], [0, -1, 0, (ty0 + ty1) / 2], [0, 0, 0, 1.0]])
+
+
+def head_parts():
+    """{"H:name": (mesh, colour)}: the head on this base at 0 deg. Its printed parts and the sensor bits from ../Head/stl,
+    the search hat from its script; the rest (the HeliSR board, switches, screws, wires: the head has no files for
+    them) carried over from the collective's GLB, where they already sit on this base's tube"""
+    T = head_to_base()
+    H = {}
+    for name, f, col in HEAD_PARTS:
+        H["H:" + name] = (trimesh.load(os.path.join(HEAD_STL, f), force="mesh").apply_transform(T), col)
+    hat = d.hat_meshes()
+    for name, k, col in HAT_PARTS:
+        H["H:" + name] = (hat[k].apply_transform(T), col)
     src = R.load_glb(R.ALL_GLB)
-    ty = float(src["carbon_tube"][0].bounds.mean(0)[1])
-    head = {k: (msh.copy().apply_translation((0, -ty, 0)), col) for k, (msh, col) in src.items() if k.startswith("H:")}
-    print(f"head moved {-ty:+.1f} mm in y onto the tube")
+    ty = float(src["carbon_tube"][0].bounds.mean(0)[1])                         # the GLB's tube, if it's off the middle
+    skip = set(H) | {"H:" + n for n in HEAD_GONE}
+    for k, (msh, col) in src.items():
+        if k.startswith("H:") and k not in skip:
+            H[k] = (msh.copy().apply_translation((0, -ty, 0)), col)
+    return H
+
+
+def collective(C):
+    """the head on base Rev 4: the collective's GLB and pictures in ../renders"""
+    head = head_parts()
     glb({**scene(0.0, C), **head}, R.ALL_GLB)
     full = -m.SOCK_BOTTOM - v.r.TUBE_BOUGHT
     for th, name, view, size in ((0.0, "HeliCollective_0deg.png", (-0.35, -1.0, 0.45), (1800, 1100)),

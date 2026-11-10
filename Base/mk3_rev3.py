@@ -1,12 +1,17 @@
 """
-MkIII collective base, Rev 3 - GAS STRUT BALANCE (CONCEPT, not print-tested)
+MkIII collective base - shared library: Rev 3's model (base Rev 3, gas strut balance; built 2026-11, since replaced by Rev 4)
+
+This is not a build script. Base Rev 4 (mk3_rev4.py) imports it as r, with Rev 1's model (mk3_pivot.py) as r.m, for
+everything Rev 4 keeps from Rev 3: the gas strut and its numbers (STRUT_*, TAB_L, the tabs), the strut's collar
+(_collar), anchor and pins, collar_pin(), the strut's torque and the balance model (forward_gm, rear_items, gravity,
+printed_mass, frange), the down-stop pads' sizes, the MkII friction knob's source (source/MkII-AdjustKnob.stl), the
+lever-screw kit sizes, the convex hull, gusset_xz(), hex_y() and the edge chamfers (chamfer_edges, sharp_edges). Rev 3's
+own lever and frame are still modelled here, but nothing exports them. Importing it changes some of Rev 1's parameters
+in mk3_pivot (below), as Rev 3 did, and Rev 4 sets r.ANCH_X etc. at import. Don't change the values Rev 4 uses:
+mk3_rev4.py --check, --balance and its exported volumes depend on them. The notes below describe Rev 3.
 
 Rev 3 = Rev 1 with a gas strut, centred under the tube and the hub, doing the ballast bucket's job, a fixed 32 deg
-up-stop, and a 470 mm carbon tube. This script imports Rev 1's model, mk3_pivot.py in this folder, for every part
-they share and for the fit parameters you tune with its coupons (python mk3_pivot.py), and writes everything to
-this folder:
-    python mk3_rev3.py           -> stl/ (all printed parts), stl/ref/ and step/MkIII_Rev3_assembly.step
-    python mk3_rev3.py --curve   -> prints the balance table and writes renders/strut_balance.png
+up-stop, and a 470 mm carbon tube.
 
 Tube: 25 x 23 mm carbon fibre, used whole, 500 mm, uncut: 470 + the head boss's 12.7 + 17.3 down in the socket (it ends at x = -2.7, inside the axial cable bore; notch its sides there for the cables). No lock screw: the hose clamp holds it. The grip's top sits 445 mm from the pivot, and at the
 32 deg stop the hand rises about 9.4 in, the real UH-1's 9.25 in.
@@ -240,7 +245,7 @@ def lever_r3():
     return h.clean()
 
 
-m.lever = lever_r3                               # Rev 1's lever_halves() and build() now split this one
+m.lever = lever_r3                               # Rev 1's lever_halves() now splits this one
 
 
 # ---------------------------------------------------------------- frame: Rev 1's on the taller pivot, new stops and anchor
@@ -542,64 +547,6 @@ def frange(t_max, step=0.5):
     return [i * step for i in range(int(t_max / step) + 1)]
 
 
-def balance(plot=None):
-    nmm = lambda gm: gm * 9.80665                                                           # g*m -> N*mm
-    grip = lambda n: n / 9.80665e-3 / GRIP_R                                                # N*mm -> grams at the grip
-    items = rear_items(build())
-    load = lambda t: nmm(gravity(t, items))
-    th = frange(STOP_DEG)
-    print(f"forward moment {FWD_GM:.1f} g*m (470 mm carbon tube); load {load(0) / 1000:.3f} N*m at 0 deg, "
-          f"{load(STOP_DEG) / 1000:.3f} at {STOP_DEG:.0f}")
-    L0, L1 = (math.hypot(collar_pin(t)[0] - ANCH_X, collar_pin(t)[1] - ANCH_Z) for t in (0, STOP_DEG))
-    print(f"strut {L0:.0f} mm at 0 deg -> {L1:.0f} mm at {STOP_DEG:.0f} deg (stroke window {STRUT_COMP:.0f}..{STRUT_EXT:.0f})")
-    for F in (STRUT_F_RANGE[0], STRUT_F_DESIGN, STRUT_F_RANGE[1]):
-        err = [strut_torque(t, F) - load(t) for t in th]
-        ballast = sum(err) / len(err) / 9.80665e-3 / BOX_R
-        print(f"  {F:.0f} N: {grip(min(err)):+.0f} .. {grip(max(err)):+.0f} g at the grip (+ = rises)"
-              + (f"; about {ballast:.0f} g of ballast in the head evens it out" if ballast > 5 else ""))
-    for k in COLLAR_RANGE:
-        print(f"  collar {k:+.0f} mm: {grip(strut_torque(0, STRUT_F, k) - strut_torque(0, STRUT_F)):+.0f} g at 0 deg")
-    if plot:
-        plot_balance(plot, load, grip)
-
-
-def plot_balance(path, load, grip):
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    ink, ink2, grid, surf = "#0b0b0b", "#52514e", "#e4e3df", "#fcfcfb"
-    blue, aqua, orange = "#2a78d6", "#1baf7a", "#eb6834"
-    th = frange(STOP_DEG, 0.25)
-    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10, "axes.edgecolor": ink2, "axes.labelcolor": ink2,
-                         "xtick.color": ink2, "ytick.color": ink2})
-    fig, (a1, a2) = plt.subplots(2, 1, figsize=(8.4, 7.6), sharex=True, gridspec_kw=dict(height_ratios=[1, 1.05], hspace=0.12))
-    fig.patch.set_facecolor(surf)
-    for a in (a1, a2):
-        a.set_facecolor(surf)
-        a.grid(True, color=grid, lw=0.8)
-        for sd in ("top", "right"):
-            a.spines[sd].set_visible(False)
-    a1.plot(th, [load(t) / 1000 for t in th], color=ink2, lw=2, label="gravity, nose down (head, grip, tube, lever)")
-    a1.plot(th, [strut_torque(t, STRUT_F_DESIGN) / 1000 for t in th], color=orange, lw=2,
-            label=f"strut at {STRUT_F_DESIGN:.0f} N, as bought (the geometry's design point)")
-    a1.set_ylabel("torque about the pivot, N·m")
-    a1.legend(loc="lower left", frameon=False, fontsize=9)
-    a1.set_title(f"MkIII Rev 3: gas strut, 470 mm carbon tube, {STOP_DEG:.0f}° stop", loc="left", color=ink, fontsize=12, pad=10)
-    a2.axhline(0, color=ink2, lw=1)
-    for F, col, ls in ((STRUT_F_RANGE[0], blue, (0, (5, 3))), (STRUT_F_DESIGN, orange, "-"), (STRUT_F_RANGE[1], aqua, (0, (5, 3)))):
-        err = [strut_torque(t, F) - load(t) for t in th]
-        ballast = sum(err) / len(err) / 9.80665e-3 / BOX_R
-        lab = f"{F:.0f} N" + (" (as bought)" if F == STRUT_F_DESIGN else "") + (
-            f": add about {ballast:.0f} g to the head" if ballast >= 10 else ": too weak, it drops" if ballast <= -10 else "")
-        a2.plot(th, [grip(x) for x in err], color=col, lw=2, ls=ls, label=lab)
-    a2.set_ylabel(f"out of balance at the grip ({GRIP_R:.0f} mm), g\n+ = rises, − = drops")
-    a2.set_xlabel("lever angle, deg (0 = down-stop)")
-    a2.set_xlim(0, STOP_DEG)
-    a2.legend(loc="center right", frameon=False, fontsize=9)
-    fig.savefig(path, dpi=150, bbox_inches="tight", facecolor=surf)
-    print("wrote", path)
-
-
 # ---------------------------------------------------------------- edge chamfers
 # Every printed part's sharp outside edges get a 45 degree chamfer, as on the head: CHAMFERS[0] where it fits, then the
 # smaller sizes on what's left (thin walls, crowded corners). Hole rims are left alone, so bores, bearing seats and
@@ -736,48 +683,3 @@ def lever_halves_r3():
 
 
 m.lever_halves = lever_halves_r3
-
-
-# ---------------------------------------------------------------- build + export
-def build():
-    parts = m.build()                                                                       # lever halves are Rev 3's (m.lever)
-    for k in ("ballast_bucket", "bucket_lid", "ballast", "frame", "hardware", "striker", "stop_block", "stop_thumb_knob",
-              "alu_tube"):
-        parts.pop(k)
-    parts.update({
-        # printed
-        "frame": frame_r3(),
-        "strut_collar": collar(),
-        "friction_knob": friction_knob_r3(),
-        "cover_cable": cover_cable_r3(),
-        # bought / reference
-        "carbon_tube": carbon_tube(160.0),
-        "gas_strut": strut(),
-        "strut_pins": pins(),
-        "hardware": hardware_r3(),
-        "lever_screws": lever_hardware(),
-    })
-    for name in PRINTED:
-        if name not in ("cover_cable", "lever_upper", "lever_lower", "friction_knob"):   # those: see their own steps; the knob keeps the MkII's edges
-            parts[name] = chamfer_edges(parts[name])
-    return parts
-
-
-PRINTED = ["frame", "cap_left", "cap_right", "lever_upper", "lever_lower", "shoe", "sensor_carrier", "cover_sensor",
-           "cover_cable", "strut_collar", "friction_knob"]
-
-if __name__ == "__main__" and "--curve" in sys.argv[1:]:
-    balance(plot=os.path.join(HERE, "renders", "strut_balance.png"))
-elif __name__ == "__main__":
-    parts = build()
-    for name, shp in parts.items():
-        print(f"{name:22s} valid={shp.isValid()} vol={shp.Volume():10.1f}")
-        sub = os.path.join(HERE, "stl") if name in PRINTED else os.path.join(HERE, "stl", "ref")
-        os.makedirs(sub, exist_ok=True)
-        cq.exporters.export(cq.Workplane().add(shp), os.path.join(sub, f"{name}.stl"), tolerance=0.04, angularTolerance=0.12)
-    os.makedirs(os.path.join(HERE, "step"), exist_ok=True)
-    asm = cq.Assembly(name="MkIII_Rev3")
-    for name, shp in parts.items():
-        asm.add(shp, name=name)
-    asm.export(os.path.join(HERE, "step", "MkIII_Rev3_assembly.step"))
-    print("done")

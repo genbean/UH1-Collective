@@ -1,10 +1,12 @@
 """
-MkIII collective base - Rev 1 model (CONCEPT, not print-tested)
+MkIII collective base - shared library: Rev 1's model (base Rev 1, a concept, never built)
 
-Rev 3 (mk3_rev3.py) imports this file for every part it shares with Rev 1 and for the fit parameters, and writes
-the base's STLs and STEP itself. Rev 1's own parts (ballast bucket, quadrant up-stop, striker) are still modelled
-here but no longer exported; the notes below describe Rev 1. Run with a Python that has cadquery installed:
-    python mk3_pivot.py            -> only writes the fit-test coupons to stl/coupons/ (see README.md)
+This is not a build script. Base Rev 4 (mk3_rev4.py) imports it, by way of mk3_rev3.py, for the parameters, helpers and
+parts it shares with the earlier revisions: the fit parameters, the fastener tables (CSK, NUT_AF, NUT_T, TAP), the
+geometry helpers (cyl, tube, box, hexprism, csk_hole, csk_screw, nut, sweep_circle, sector, ...), the hose clamp and the
+coupon plate. Rev 1's own parts (ballast bucket, quadrant up-stop, striker, its lever and frame) are still modelled here
+but nothing exports them; the notes below describe Rev 1. Don't change the values Rev 4 uses: mk3_rev4.py --check and
+its exported volumes depend on them.
 
 Coordinate frame (same as the MkII STLs):
     origin = pivot centre, Y = pivot axis, Z = up, tube points along -X at 0 deg.
@@ -705,8 +707,8 @@ def hardware(include_stop_bolt=True):
 
 
 # ---------------------------------------------------------------- fit-test coupons
-# python mk3_pivot.py --coupons -> stl/coupons/. Short slices of the real fits, one plate per fit, one variant
-# per step. A step changes the fitted diameter (nut pocket: across flats) by that many mm; see README.md.
+# Short slices of the real fits, one plate per fit, one variant per step. A step changes the fitted diameter (nut
+# pocket: across flats) by that many mm. mk3_rev4.py --coupons writes the current coupons with coupon_plate(); see README.md.
 COUPON_STEPS = (-0.2, 0.0, 0.2)
 COUPON_BASE_T, COUPON_SPINE_W = 2.0, 9.0     # spine tying the variants together, step labels engraved in it
 COUPON_FONT = 4.5
@@ -786,72 +788,3 @@ def coupon_stop_block(d, tab=9.0):
     b = _stop_block(M5_CLR_R + d / 2, M5_NUT_AF + d).rotate((0, 0, 0), (1, 0, 0), -90)
     b = fuse(b.translate((-STRIKER_R, 0, QUAD_Y0)), box(-h, h, h - 1, h + tab, 0, 2))
     return b.cut(label(step_label(d), 0, h + tab / 2, 2, size=4.0)).clean()
-
-
-def coupons():
-    return {                    # Rev 1's stop-slot coupon is left out: Rev 3 has no quadrant
-        "coupon_trunnion": coupon_plate(coupon_trunnion),
-        "coupon_bearing_seat": coupon_plate(coupon_seat),
-        "coupon_tube_socket": coupon_plate(coupon_socket),
-    }
-
-
-def export_coupons():
-    out = os.path.join(HERE, "stl", "coupons")
-    os.makedirs(out, exist_ok=True)
-    for name, shp in coupons().items():
-        solids = shp.Solids()
-        valid = shp.isValid() and all(s.isValid() for s in solids)
-        bb = shp.BoundingBox()
-        print(f"{name:20s} solids={len(solids)} valid={valid} vol={shp.Volume():8.1f}"
-              f" size={bb.xlen:.0f} x {bb.ylen:.0f} x {bb.zlen:.0f}")
-        cq.exporters.export(cq.Workplane().add(shp), os.path.join(out, f"{name}.stl"),
-                            tolerance=0.04, angularTolerance=0.12)
-
-
-# ---------------------------------------------------------------- build + export
-def build():
-    outer_l, inner_l, seal_l = bearing(-1)
-    outer_r, inner_r, seal_r = bearing(1)
-    pcb, chip = sensor_board()
-    lever_up, lever_lo = lever_halves()
-    return {
-        # printed
-        "frame": frame_solid(),
-        "cap_left": cap(-1),
-        "cap_right": cap(1),
-        "lever_upper": lever_up,
-        "lever_lower": lever_lo,
-        "ballast_bucket": bucket(),
-        "bucket_lid": bucket_lid(),
-        "shoe": shoe(),
-        "stop_block": stop_block(),
-        "stop_thumb_knob": thumb_knob(),
-        "sensor_carrier": sensor_carrier(),
-        "cover_sensor": cover_sensor(),
-        "cover_cable": cover_cable(),
-        # bought / reference
-        "felt": felt(),
-        "bearing_outer": fuse(outer_l, outer_r),
-        "bearing_inner": fuse(inner_l, inner_r),
-        "bearing_seal": fuse(seal_l, seal_r),
-        "alu_tube": alu_tube(),
-        "hose_clamp": hose_clamp(),
-        "usb_cable": usb_cable(),
-        "sensor_wires": sensor_wires(),
-        "sensor_pcb": pcb,
-        "sensor_chip": chip,
-        "magnet": magnet(),
-        "striker": striker(),
-        "ballast": ballast(),
-        "knob_spring": knob_spring(),
-        "hardware": hardware(),
-        "lever_screws": lever_screws(),
-    }
-
-
-PRINTED = ["frame", "cap_left", "cap_right", "lever_upper", "lever_lower", "ballast_bucket", "bucket_lid", "shoe", "stop_block",
-           "stop_thumb_knob", "sensor_carrier", "cover_sensor", "cover_cable"]
-
-if __name__ == "__main__":      # the base's own STLs and STEP come from mk3_rev3.py, which shares this folder
-    export_coupons()

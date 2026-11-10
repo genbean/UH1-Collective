@@ -1,136 +1,299 @@
-# MkIII base, Rev 3: gas strut balance
+# MkIII base, Rev 4: narrow
 
-> **This is Rev 3, the first base built.** The current base is **Rev 4** ([`Rev4/`](Rev4/README.md)): this one cut down to 73 mm (2.87 in) wide, with the lever symmetrical about the tube, thin-section bearings, a shell over the lever and the brake behind the hub. Rev 3's files stay here, and Rev 4's scripts build on them.
+The collective's pivot base. The lever runs on two thin-section bearings and is printed as two halves; the 500 mm carbon tube slides into its socket. A small gas strut, from a clevis on the frame to a collar on the tube, holds the lever up against the head's weight, and a felt-lined brake strap behind the hub sets the drag. An AS5600 magnetic sensor in the lever's end reads its angle, and the USB cable leaves on the other side.
 
-The collective's pivot base. The lever runs on two 6006-2RS bearings and is printed as two halves, and an adjustable friction knob sets the drag. An AS5600 magnetic sensor reads the lever angle, and the USB cable leaves on the knob side.
+Rev 4 is Rev 3, the first base built (2026-11), cut down to **73 mm (2.87 in)** wide along the pivot axis, against Rev 3's 130 mm, with the lever symmetrical about the tube. One shell over the top encloses the lever, in place of Rev 3's two bearing caps. The strut, collar, tube, socket, down-stops and fits are Rev 3's. What changes is everything along the pivot axis, the enclosure, and the brake, which moves behind the hub. Rev 3's own files are no longer in the repository (they're in its git history); the parts of its model that Rev 4 still uses are in `mk3_rev3.py` and `mk3_pivot.py` (see [Files](#files)).
 
-A small gas strut, centred under the tube and the hub, holds the lever up. Its lower end is bolted into a gusseted clevis on the base, just ahead of the pivot. Its upper end sits on a collar clamped to the tube. Rev 1 balanced the lever with a ballast bucket and about a kilogram of ballast, and Rev 2 with a clock spring.
+This is the current base. Its first frame, shell and lever were printed and assembled on 2026-11-08, and the bearing coupons fitted. Since then the lever is split on the tube's plane, the brake is a hinged strap, the side covers are 5 mm square plates, the USB cable leaves toward the front, and the lever's opening is 2 mm clear. So reprint every printed part except the strut collar, and print the dowel-hole [coupon](#fit-test-coupons) before the lever.
 
-Rev 3 also changes five other things from Rev 1:
-- **Tube:** the whole 500 mm carbon tube, uncut (470 mm, plus the 12.7 mm the head's boss takes, plus 17.3 mm down in the socket).
-- **Up-stop:** a boss on the back of the lever lands on a pedestal on the frame at 32°, instead of Rev 1's adjustable quadrant and striker.
-- **Down-stop:** fixed at 0°: the lever's pads land on two pillars printed into the frame, with no screws to set.
-- **Lever:** the hub is 60 mm across all the way.
-- **Pivot height:** 58 mm above the desk, on an 8 mm (5/16 in) base plate.
+![Rev 4, exploded](renders/rev4_exploded.png)
 
-![Rev 3 with the full 500 mm tube](renders/rev3_full.png)
+![Rev 4 from the front](renders/rev4_hero.png)
 
-![From the sensor side](renders/rev3_hero.png)
+![Rev 4 with the shell off](renders/rev4_open.png)
 
-![From the front, knob side](renders/rev3_base_front.png)
+![Rev 4 straight down from above, to scale](renders/rev4_top.png)
 
-![From behind, knob side](renders/rev3_base_rear.png)
+![From behind: the brake knob in the shell's top; the USB cable leaves the cable cover toward the front](renders/rev4_rear.png)
 
-![Exploded: the lever lifted out of the frame, the caps, bearings and covers off, every screw pulled out along its axis](renders/rev3_exploded.png)
+![At the 32° up-stop](renders/rev4_32deg.png)
 
-`renders/MkIII_Rev3_Assembly.glb` is the whole base in 3D at the down-stop: every printed part in its colour, plus the bearings, strut, tube, clamp, hardware and sensor stand-ins. It opens in Windows 3D Viewer or any glTF viewer. The complete collective in [`../renders`](../renders) shows the current base, Rev 4, with head Rev 5.
+## What changes from Rev 3
 
-`mk3_rev3.py` builds the base. It imports Rev 1's model, `mk3_pivot.py`, for every part the two share, and for the fit parameters you tune with the coupons below.
+- **Lever:** the hub is 43 mm long (Rev 3: 64), centred on the tube. The tube's plane moves from 9 mm off-centre to the middle. Rev 3's friction drum is gone. The halves split on the tube's plane instead of at the pivot axis, so each trunnion prints round, in one piece.
+- **Bearings:** 6808-2RS thin-section bearings, 40 × 52 × 7 mm, in place of the 6006-2RS (30 × 55 × 13). The trunnions grow to 40 mm across to suit.
+- **Frame:** 9 mm pillow blocks (Rev 3: 17). The base plate stops at their outer faces, so it's 63 × 127 mm (Rev 3: 100 × 116), with no wings or gussets out beside it. A front wall under the shell's carries its cut for the lever on down, so the two read as one piece.
+- **Shell:** one box over the lever, in place of the two caps, slotted for the tube. Four M4 × 50 socket head screws hold it to the pillow blocks, and a diamond grid in the joint locates it.
+- **Sensor:** the AS5600 board sits inside the sensor trunnion's end, flush with the bearing, so the side covers are 5 mm plates (Rev 3's are 15 mm deep).
+- **USB cable:** it turns toward the front on an 18 mm bend, through a pie-shaped relief in the cable trunnion's end, and runs forward in a tunnel under the cable cover, instead of Rev 3's spout.
+- **Brake:** a felt-lined strap wraps the back of the hub, hinged at its bottom in the up-stop pad. A knob on top of the shell pulls it on, through a bolt that leans 30° forward.
+- **Up-stop:** two lugs under the back of the hub, one each side of the strap, land on a pad further back than Rev 3's.
+- **Frame gussets:** 45° gussets at all four corners of both pillow blocks.
+- **Strut anchor:** moved up and back, so the 45 N strut as bought balances the lever. Rev 3's first anchor was sized for a 40 N strut, so the 45 N strut pushed the lever up. Rev 3 now has the same anchor.
 
-```bash
-python mk3_rev3.py
-```
+The knob stands on top of the shell, leaning 30° forward; nothing sticks out behind the back face.
 
-That writes the complete print set to `stl/`, the bought and reference parts to `stl/ref/`, and `step/MkIII_Rev3_assembly.step`.
-
-```bash
-python mk3_rev3.py --curve
-```
-
-That prints the balance table and redraws `renders/strut_balance.png`.
-
-```bash
-python make_renders_r3.py
-```
-
-That rebuilds `renders/MkIII_Rev3_Assembly.glb` from the STLs and redraws the base renders here. It needs CadQuery too, for the strut at 32°. Run `../renders/make_diagrams.py` after it for the exploded view and screw-size chart. (The collective's model and pictures in `../renders` now come from `Rev4/make_renders_r4.py`.)
-
-```bash
-python mk3_pivot.py
-```
-
-That writes only the fit-test coupons, to `stl/coupons/`.
-
-## Fit-test coupons: print these before the big parts
-
-None of the base's printed fits has been tested yet. The coupons are short slices of the three critical fits, so you can tune the tolerances on a few small prints instead of a failed lever or frame.
-
-Each file is one plate holding three variants side by side. The number engraved in front of each variant is its step in mm, taken from `COUPON_STEPS = (-0.2, 0.0, 0.2)` in `mk3_pivot.py`. A step changes the fitted **diameter**. `0` is exactly what the current parameters would print.
-
-| File | What it is | Printed as | Plate size |
-|---|---|---|---|
-| `coupon_trunnion.stl` | 8 mm trunnion stubs (`TRUN_OD`) on a 2 mm inner-race shoulder, with the ½" cable bore, each one solid ring | standing on the shoulder | 116 × 45 mm |
-| `coupon_bearing_seat.stl` | pillow-block seat (`BRG_SEAT_D`) plus the retaining lip (`LIP_R`), 7 mm deep | lip down | 197 × 72 mm |
-| `coupon_tube_socket.stl` | 20 mm of the socket bore (`SOCK_BORE_R`), each one a single closed ring | rings standing on end | 102 × 40 mm |
-
-**How to print them:** use the same printer, filament and slicer profile as the real parts: walls, line width, layer height, flow and elephant-foot compensation. The STLs are already oriented, so don't rotate them.
-
-The trunnion variants are one-piece rings standing on their shoulder, which keeps the first layers and any elephant foot off the stub. They keep the lever's ½" bore, so the stub's wall is as thick as the lever's and gives under the race the same way.
-
-The socket variants are one-piece rings standing on end, so the tube slides in from the top.
-
-Standing up, the round faces build up layer by layer with no overhangs.
-
-### Reading them
-
-Try the real part on each variant and pick the one that fits best. If the best fit falls between two variants, use the value halfway between them. Then change the parameter at the top of `mk3_pivot.py` and re-export:
-
-| Coupon | Test with | Good fit | Change |
-|---|---|---|---|
-| trunnion | 6006-2RS inner race pushed down onto the stub | firm push by hand, or a light press in a vise; no wobble, and the race does not turn on the stub. The race is wider than the stub, so it stops on the shoulder with its top standing 5 mm proud. On the lever the race is what holds the two half-trunnions together, so err on the firm side. To get a tight race off, press the stub down out of it with something under 30 mm across, such as a socket | `TRUN_OD += step` |
-| bearing seat | 6006-2RS outer race | goes in with thumb pressure and does not drop out upside down. Leave it slightly free rather than tight: the cap clamps the race, and a tight seat distorts it | `BRG_SEAT_D += step` |
-| tube socket | the carbon tube slid into each ring | slides in by hand with no rattle or rocking | `SOCK_BORE_R += step / 2` (radius) |
-
-Examples:
-- (The base's trunnion is now locked at +0.2: `TRUN_OD = 30.2`.) The `0` trunnion is too tight but `-0.2` is right: set `TRUN_OD = 29.8`. If `-0.2` is now a bit loose, use `29.9`.
-- The `+0.2` socket is the first one that closes fully around the tube: set `SOCK_BORE_R = 12.8`.
-
-If even the end variant is wrong, move the whole range, e.g. `COUPON_STEPS = (0.2, 0.4, 0.6)`, and print again. After you change a parameter, the new value becomes `0`, so reprint the coupon to confirm it. Then run `python mk3_rev3.py` to rebuild the parts.
-
-### Notes
-
-- **Joint-face elephant foot:** the lever halves print on the joint face. Elephant foot there makes the trunnion oval (wide across the joint) and keeps the halves from closing. Use elephant-foot compensation, or scrape the first-layer edge. The coupons stand on end, so they won't show this.
-- **Arch tops:** on the lever, the half-trunnions, half-socket and cable channels print as arches. Their crowns are the last, least accurate layers. The upright coupons don't have them, so if the lever's fit is tight only along the crown, scrape it rather than going up a step.
-- **Frame bearing seat:** the frame's lower half-seat prints with its axis horizontal. The ring coupon checks the diameter in the XY plane, which sets the width across the split line, and that is what matters there.
-
-## Length and travel
+## Files
 
 | | |
 |---|---|
-| Tube | 25 × 23 mm carbon fibre, **500 mm**, uncut: 470 mm plus the 12.7 mm (1/2 in) the head's boss takes, plus the 17.3 mm the socket takes |
-| Grip centre / grip top from the pivot | 387 mm / 445 mm: two-thirds of the real UH-1's 26.25" (667 mm) |
-| Travel | 0° (level) to a fixed **32°** |
-| Hand rise | the head's lower front corner rises **9.4"**, against the real Huey's 9.25" |
-| Pivot above the desk | 58 mm (Rev 1: 40), on an 8 mm (5/16 in) plate (Rev 1: 6 mm) |
+| `mk3_rev4.py` | the model. `python mk3_rev4.py` writes `stl/`, `stl/ref/` and `step/`; `--check` runs the interference, assembly and opening-clearance checks; `--openings` the openings' check alone; `--balance` the balance table and `renders/strut_balance_r4.png`; `--coupons` writes `stl/coupons/` |
+| `make_renders_r4.py` | the renders, screw maps, exploded view and screw chart, `renders/MkIII_Rev4_Assembly.glb`, and the complete collective in [`../renders`](../renders): the head's printed parts from `../Head/stl`, its search hat from `../Head/Hat`, and its bought parts (board, switches, screws, wires) carried over from the collective's GLB |
+| `mk3_rev3.py`, `mk3_pivot.py` | the shared library `mk3_rev4.py` builds on: Rev 3's and Rev 1's models, for the strut, its collar and anchor, the balance model, the MkII knob, the chamfers, the fit parameters and the geometry helpers. Nothing in them writes files |
+| `make_renders_r3.py` | the shared render helpers `make_renders_r4.py` uses (drawing, sections, GLB loading) |
+| `source/MkII-AdjustKnob.stl` | the MkII friction knob, which the brake knob is made from |
+| `stl/` | the printed parts |
+| `stl/ref/` | bought parts and hardware, for reference |
+| `stl/coupons/` | the fit-test coupons |
+| `step/MkIII_Rev4_assembly.step` | the whole base |
 
-The real collective starts about 30° above level and swings about 30–40°. Our lever starts level, so a lever two-thirds as long swinging 32° gives the same hand travel as the real one. Program the AS5600's range across 0–32°.
+Both scripts need CadQuery; the renders also need trimesh, manifold3d, pyvista and pillow, and `../renders/make_diagrams.py`'s helpers.
 
-## How it balances
+## Fit-test coupons
 
-![Section through the strut, at the down-stop](renders/rev3_section.png)
+The coupons are short slices of the critical fits, so you can tune the tolerances on a few small prints instead of a failed lever or frame. The trunnion's and the bearing seat's have been printed and fitted (below). The lever's dowel holes are new, so print their coupon before the lever halves. The tube socket fitted as built; print its coupon if your tube or printer is new.
 
-![The same at the 32° stop](renders/rev3_section32.png)
+| File | What it is | Good fit | Change |
+|---|---|---|---|
+| `stl/coupons/coupon_trunnion_6808.stl` | 8 mm trunnion stubs on the inner-race shoulder, with the ½" cable bore, 39.9 / 40.1 / 40.3 mm, standing on the shoulder | the race presses on firmly by hand or in a vise, no wobble, and doesn't turn on the stub | `TRUN_OD += step` |
+| `stl/coupons/coupon_bearing_seat_6808.stl` | the seat and 2 mm lip, 51.8 / 52.0 / 52.2 mm, lip down | the race goes in with thumb pressure and doesn't drop out upside down; leave it slightly free rather than tight | `BRG_SEAT_D += step` |
+| `stl/coupons/coupon_dowel_hole.stl` | one of the lever's dowel holes, 7.4 / 7.6 / 7.8 mm, 4.2 mm deep, opening on the bed with its lead-in, as the halves print it | a printed dowel (`lever_dowel.stl`) pushes in by hand, with no play | `DOWEL_CLR += step / 2` |
+| `stl/coupons/coupon_tube_socket.stl` | 20 mm of the tube socket's bore, 25.2 / 25.4 / 25.6 mm, each a closed ring standing on end | the carbon tube slides in from the top by hand, with no rattle or rocking | `SOCK_BORE_R += step / 2` (a radius, in `mk3_pivot.py`) |
 
-At the down-stop the strut lies almost flat under the socket boss, and its line passes about 37 mm below the pivot. As the tube lifts, the collar rises and the strut swings up toward the pivot. Its leverage shrinks in step with the head's weight, which also gets easier to hold as the tube rises. The strut also loses a little force as it extends, from 119 mm at the bottom to 140 mm at 32°, out of its 102–152 mm stroke.
+**Making them:** `python mk3_rev4.py --coupons` writes all four. Each file is one plate of three variants side by side, tied by a spine. The number engraved in front of each is its step in mm, from `COUPON_STEPS = (-0.2, 0.0, 0.2)` in `mk3_pivot.py`. A step changes the fitted **diameter**, and `0` is exactly what the current parameters print.
 
-![Torque and out-of-balance against lever angle](renders/strut_balance.png)
+**Printing them:** use the same printer, filament and slicer profile as the real parts: walls, line width, layer height, flow and elephant's-foot compensation. The STLs are already oriented, so don't rotate them. The rings stand on end, so their round faces build up layer by layer with no overhangs and any elephant's foot stays off the fit.
 
-The geometry is set so **the 45 N strut, as bought, balances to within 2 g at the grip**. A stronger strut lifts a little too much, nearly the same amount at every angle, so a fixed weight in the head cancels it. A weaker one sags:
+**Reading them:** try the real part on each variant and pick the one that fits best. If the best fit falls between two, use the value halfway between them. Change the parameter (above) and re-export the parts. If even an end variant is wrong, move the whole range, for example `COUPON_STEPS = (0.2, 0.4, 0.6)`, and print again. After a change the new value is the new `0`, so reprint the coupon to confirm it.
+
+**What the coupons can't show:** the bearing seat coupon is one piece, so it can't show the frame and shell's split seat (below). The lever halves print as arches in the joint face (the socket and the radial cable bore), whose crowns are the least accurate layers; if the tube is tight only along the crown, scrape it rather than going up a step.
+
+The bearing coupons' `0` comes from how the bearings fitted as built:
+- **Seat:** +0.1 on the race's outside was a perfect fit in Rev 3's one-piece blocks. In Rev 4's seat, split between the frame and the shell, it left the bearing a little play, so the seat is now 52.0 mm, the race's own size. The seat coupon is one piece, so it can't show the split: check the play in the frame and shell themselves.
+- **Trunnion:** +0.2 on the race's bore pressed on a hair too tight, so Rev 4 uses +0.1 (40.1 mm).
+
+The tube socket is unchanged from Rev 3, where it fitted as built (25.4 mm, `SOCK_BORE_R = 12.7`).
+
+## Across the pivot axis
+
+From the middle out, each side:
+
+| | \|y\|, mm | |
+|---|---|---|
+| Hub | 0 – 21.5 | 60 mm across; 3.5 mm past the socket boss |
+| Bearing | 22.5 – 29.5 | 6808-2RS |
+| Retaining lip | 29.5 – 31.5 | the pillow blocks' and the shell's outer faces, and the plate's edge, are at 31.5 |
+| Trunnion end | 29.5 | 40.1 mm across, flush with the bearing's outer face |
+| Side cover | 31.5 – 36.5 | a 5 mm plate; it overhangs the base plate by 5 mm |
+
+## Shell
+
+![Section on the pivot axis, from the front](renders/rev4_section_axis.png)
+
+The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from the pillow blocks' tops. It replaces Rev 3's two caps.
+
+- **Side walls:** solid, 9 mm thick. These are the caps. Each holds the bearing's upper half-seat and lip, and two of the cover's screw holes. Two M4 × 50 socket head screws per side go down through them from the top, each centred on the joint, heads down 13 mm counterbores, into M4 nuts in the pillow blocks (see [The joint](#the-joint)).
+- **Front, back and top walls:** 3 mm thick.
+- **Tube slot:** one clean opening in the front and top, the same outline as the frame's front wall below it (see [The joint](#the-joint)). It fits the lever closely: 2 mm clear of the socket boss, the lever's fairings, the down-stop pads and the hose clamp, measured in 3D, through their whole swing, 0° to 32°.
+- **Behind the hub:** solid, from 2 mm off the hub out to the side walls, the top and the back face, so the brake knob's seat, sunk into the top, bears straight into the walls. The brake strap's bay is under the seat (see [Brake](#brake)).
+- **Assembly:** it drops straight down over the lever and the strap, the slot and the strap's bay both open at the bottom.
+
+## Side covers
+
+![The USB side: the square cover over the bearing and the shell screws' nut slots](renders/rev4_hero.png)
+
+Square plates, 5 mm thick, on the pillow blocks' and the shell's side faces, centred on the pivot axis, over the bearing and the shell screws' nut slots. They're bevelled 45° all round, so each reads as one with the block and shell: the back on the plane of the frame's and shell's [back chamfer](#the-back), the front on the plane of the 0.8 mm chamfer on the pillow blocks' front corners, the top on the plane of the 0.8 mm chamfer on the shell's top edge, and the bottom the top's mirror image. The inside face is 74.4 mm tall and the outside face 64.4 mm. Each is held by four M3 × 12 countersunk screws, where the round covers had them, into M3 threads tapped right through the block's and the shell's 9 mm walls. The USB side's cover hides the strut's hex-key hole, so fit the anchor screw before the covers.
+
+- **Sensor cover:** the magnet sits in a pocket in its inside face (see [Sensor](#sensor)).
+- **Cable cover:** half of the USB cable's tunnel is a channel in its inside face (see [USB cable](#usb-cable)).
+
+The edges against the block and shell aren't chamfered, so no groove shows at the seams.
+
+## The joint
+
+![The frame's half of the joint: the knurl on every land, both sides of the bearings](renders/rev4_joint_grid.png)
+
+The frame and the shell meet on one flat plane through the pivot axis, which also splits the bearing seats.
+
+- **Screws:** four M4 × 50 socket head cap screws from the lever's HELIFOUNER kit, two per side, 30.5 mm either side of the axis, down the middle of the shell's 9 mm side walls (y = ±27). Each is centred on the joint: its head seats 25 mm above it, at the floor of a 13 mm counterbore, and its tip is 25 mm below. Each goes into an M4 nut slid into a slot in the pillow block's outer face, about 21–24 mm under the joint. The slots open on the blocks' outer faces, under the side covers. The nut sits flats-in: its inner flat stops it turning when you tighten the screw. The counterbore leaves 0.9 mm of shell either side, and the nut's slot leaves 0.9 mm of block to its inside face.
+- **Diamond knurl:** the whole face the frame and the shell share is knurled.
+  - **Shape:** square pyramids 2.4 mm across their corners and 0.7 mm tall with flat tops, on a diamond grid with 0.6 mm flat lanes. They stand on the frame's half and fit into sockets in the shell's half, 0.1 mm clear on their 45° flanks and 0.2 mm deeper than the pyramids. The flat faces still close on each other, so the bearing seats close, and the knurl stops the shell sliding fore and aft or sideways as the screws pull it down.
+  - **Coverage:** it runs over every land, in front of the bearings and behind them, and on across the solid frame behind the pillow blocks. It stops 0.5 mm short of every edge and hole: pyramids at its edge are cut off square, and any piece smaller than a third of a pyramid is left out. The grid is the same mirror image either side of the tube, and fore and aft on the pillow blocks.
+  - **Printing:** neither half needs supports: the pyramids point up on the frame, and the sockets open upward on the shell, which prints top down.
+- **Front opening:** the frame has a 3 mm front wall between the pillow blocks, under the shell's, and one clean opening runs through both. It follows the lever 2 mm clear (2.0 to 2.4 mm wherever the lever passes close), measured in 3D from the down-stop to the up-stop: `python mk3_rev4.py --openings` measures it. It's drawn in lines, arcs and ellipse arcs, with no facets. From the bottom up:
+  - **Lower fairing:** a tab 12.55 mm either side of the tube, its bottom 24.7 mm under the axis, its corners rounded to follow the fairing's 3 mm rounds.
+  - **Socket boss:** a circle 20.05 mm about the axis up to the joint, then straight sides. Where the tab meets it, the corners are rounded 3 mm.
+  - **Pads' reliefs:** from about 20° on, the down-stop pads' back corners swing up through the shell's wall. Each side bows out on one long arc to 22.05 mm and runs straight up to the pads' tops at the stop, then turns back in.
+  - **Boss at the stop:** an ellipse, the boss's own section in the front face at 32°, narrows up to the top. It meets the top slot's sides through the top wall's 3 mm.
+  
+  On top it carries on as one slot. At the front it follows the boss's footprint as it crosses the wall at the stop, an ellipse, and is rounded into straight sides 12.55 mm either side of the tube over the upper fairing. It ends square 3.15 mm in front of the axis, where the fairing's top passes under the wall at the stop, with corners that follow the fairing's rounds. Below the opening, a smooth round-ended slot lets the strut's cylinder through, 1.5 mm clear over the whole travel. It's cut by the cylinder swung about its anchor pin, so it has no facets.
+- **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis. A 2.5 mm hex key goes straight in to the M4 × 16's head. The USB side's cover hides it, so fit the anchor screw before the covers; to reach it later, take the cable cover off.
+
+![The front: the frame's wall carries on the shell's cut for the lever](renders/rev4_front.png)
+
+## Lever
+
+Two halves, split on the tube's plane (y = 0) rather than at the pivot axis as Rev 3: `lever_sensor` (−y) and `lever_cable` (+y). Each prints on its joint face with its trunnion up, so each trunnion is one round piece, printed the same way as the trunnion coupon that fitted the 6808.
+
+- **Screws:** four M4 × 35 socket head cap screws run along the pivot axis through the hub, behind the bearings, on a 24.7 mm circle at ±50° from fore and aft. Each half has two heads and two nuts, diagonally opposite: the sensor half has the front-top and back-bottom heads, the cable half the other two. The heads sit in 7.5 mm counterbores 5 mm deep in the hub's end face, and the nuts in hex pockets in the other half's end face, a flat toward the axis. Each tip stands 1 mm past its nut, 3 mm inside the far end face.
+- **Walls:** the counterbores leave 1.55 mm of hub over them and the nut pockets 1.6 mm. The counterbores come within 0.05 mm of the bearing's shoulder without breaking into it.
+- **Behind the bearings:** the 6808s cover the heads and nuts. Screw the halves up before pressing the bearings on. To split the lever again, pull a bearing first.
+- **Dowels:** a printed hollow dowel sits round each screw at the joint, half in each half, like the dowels between an engine and its gearbox. Each is 7.5 mm across with a 4.5 mm bore, and 8 mm long (`lever_dowel.stl`, print four).
+  - **Holes:** 7.6 mm across and 4.2 mm deep each side, so the joint faces close on each other, with a 0.4 mm 45° lead-in at the mouth that takes the first layer's squish.
+  - **Shear:** the steel screw inside each dowel carries the load across the dowel's layers.
+  - **Fit:** tune it with the dowel-hole coupon.
+  - **Walls:** the front pair's holes are 2.4 mm from the socket, and the back pair's 1.5 mm under the hub's surface.
+- **Seam:** a 0.3 mm chamfer runs round the joint face's outside edge, against elephant's foot at the seam. The bores have none.
+- **Down-stop pads:** each runs in to the lower fairing. It's filled from the pad's inner face to the fairing's side over its whole length, and from its bottom up into the boss, so pad and fairing are one piece. With the lever split on the tube's plane, the pad's inner face would otherwise print as a flat overhang.
+- **Strength:** up and down at the grip, the main load, the two halves sit side by side, each carrying its share, and nothing crosses the joint. With Rev 3's split at the axis, each half alone had only about a fifth of the section's stiffness, and the joint had to carry the shear between them, about 3 N/mm at 100 N on the grip. A side load crosses the joint now instead: 20 N at the grip puts about 0.7 N/mm across it, which the dowels and the screws' clamp carry easily.
+- **Unchanged:** the outside, the bores, the fairings, the strut relief, the hose-clamp groove, the trunnions and the socket for the uncut 500 mm tube. The halves are mirror images, except the sensor's pocket in the sensor half's trunnion and the USB cable's relief in the cable half's (see [USB cable](#usb-cable)).
+
+![The lever exploded: the halves, dowels, screws and nuts](renders/rev4_lever_exploded.png)
+
+**Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss, and the same one mirrored runs under it. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm.
+
+**Strut relief:** the strut's cylinder sits on the base end, and from 28° up its end comes in under the front of the hub. A shallow relief in the hub's underside lets it by, 1.5 mm clear all the way to the stop: 2.65 mm deep at most, 11.6 mm wide, centred on the tube's plane. It's cut by the cylinder swung about the collar's pin as the lever sees it, so it's smooth, with no facets. It's under the lever, away from the brake's felt.
+
+![The lever from below at the 32° stop: the relief for the strut's cylinder](renders/rev4_strut_relief.png)
+
+![The lever from the side: the fairings top and bottom, tangent to the hub](renders/rev4_lever_side.png)
+
+![The lever from the front and above: the upper fairing; the halves meet on the tube's plane](renders/rev4_lever_top.png)
+
+![The lever from the front and below: the down-stop pads run in to the lower fairing](renders/rev4_lever_under.png)
+
+![The lever's sensor end, bearing off: two heads and two nuts](renders/rev4_screws_lever_sensor.png)
+
+## Sensor
+
+The AS5600 module (WWZMDiB) sits in a square pocket in the sensor trunnion's end, chip facing out, its front face level with the trunnion's end, which is flush with the bearing's outer face. There's no carrier.
+
+- **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, as measured, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges, clear of both pad columns.
+- **Behind the board:** 3.5 mm of space for the wires soldered in from the back and the DIR jumper. It opens into the axial bore, which takes the lead to the tube.
+- **Orientation:** set it in with the pad columns vertical. It fits either way up.
+- **Holding it:** a dot of hot glue in two corners. Nothing else holds it in.
+
+The chip stands inside the bearing's retaining lip. The magnet (the module's own diametric magnet, about 4 × 2 mm) sits in a 4.2 mm pocket in the sensor cover's inside face, the same as the head axle's, its face 0.5 mm below the cover's and 1.0 mm off the chip. The lead runs from the back of the board through the axial bore and up the tube to **AX1** on the HeliSR board.
+
+**Wiring:** the module (WWZMDiB, Amazon B0CM3C8KFT) has no header. Its pads are two columns of through-holes, 4.7 mm in from opposite edges: **VCC, OUT, GND** along one, **DIR, SCL, SDA, GPO** along the other. Solder the wires straight in from the back; the space behind the board takes them and the DIR jumper. The pad positions are measured from the product photos (±0.3 mm), so check them against yours.
+
+**With HeliSR Rev 4.0 (I²C):** four wires, **VCC, GND, SDA and SCL**, to the AX1 port (pin 1 SDA, 2 GND, 3 VCC, 4 SCL).
+- **5 V:** remove the module's 0 Ω R1. It ties VDD3V3 to VDD5V, and the 3V3 pin is rated 4 V max.
+- **DIR to VCC:** a short jumper across the back of the board, from DIR to VCC. DIR floats on this module. The chip turns with the lever and the magnet is fixed, so DIR = VCC makes the angle rise as the lever lifts.
+- **Remove R4**, the 1 kΩ from PGO (labelled GPO) to GND. PGO low selects the OUT-pin programming used with Rev 3.0; without R4 the chip's own pull-up holds it high.
+- **Pull-ups:** measure the module's SDA→VCC and SCL→VCC resistance before you fit it (see the HeliSR Rev 4.0 board's README, AS5600 modules).
+- The range is set by the firmware over I²C, not burnt into the chip, so it can be changed at any time.
+
+**With HeliSR Rev 3.0 (analog):** three wires, **VCC, OUT and GND**, to AX1. Remove R1 and jumper DIR to VCC as above, but keep R4. The range is programmed once through the OUT pin (datasheet option B) with the board's **PROG1** button:
+1. Hold the lever on its down-stop and press PROG1 for about a second.
+2. Lift it to the 32° stop and press PROG1 again.
+
+It can't be checked beforehand: until programming is done, AX1 reads full scale whatever the lever does.
+
+## USB cable
+
+![The cable's bend, cover off, at 0° (left) and at the 32° stop (right): the relief in the trunnion's end turns with the lever, under the cable](renders/rev4_usb_bend.png)
+
+The cable leaves on the right-hand (USB) side and faces the front.
+
+- **The bend:** it comes along the axis and turns toward the front on an 18 mm radius, about four times its 4.6 mm thickness (Rev 3: 6 mm). The bend starts inside the axial bore and ends just past the trunnion, inside the bearing's retaining lip.
+- **The relief:** where the bend would rub the trunnion's end, a pie-shaped relief flares the bore's mouth. It's 4.8 mm deep at the bore and runs out 14 mm from the axis, well inside the bearing. The bend stays put while the trunnion turns under it, so the relief spans the cable's way out over the whole travel, 0° to 32°, and 1° past each end. Its sides are round, the cable's own section. The cable clears the turning trunnion by 0.5 mm all the way.
+- **The tunnel:** from the lip, the cable runs straight forward in a round tunnel 5 mm across, 1.3 mm out from the pillow block's face. Half of it is a groove in the block's and the shell's outer faces, half a channel in the cable cover. It leaves through the cover's front bevel. Lay the cable in the groove and the cover goes on over it, so it can go on over a cable that's already through the lever, as Rev 3's does. The groove leaves 1.1 mm of block to the nearest shell screw's hole, and the cover 1.2 mm over the channel.
+
+The trunnions end flush with the bearings so the cable can turn inside the lip: that's what lets the covers be 5 mm.
+
+## Brake
+
+![Section on the tube's plane](renders/rev4_section_brake.png)
+
+A rigid printed strap wraps the back of the hub between the up-stop lugs, from 54° below the axis to 42° above it, and its felt from 52° below to 40° above. It's 18 mm wide and 8 mm deep, lined with 1.5 mm felt. At the bottom the band turns into an arm that runs forward under the hub, through the up-stop pad's slot, to the hinge, just behind the strut's clevis. At the top it runs on under the head, its end cut off level with the head's face, 3 mm under the bay's ceiling. The head is solid, with an M5 nut in it. The knob sits on top of the shell and draws the head up and forward, so the strap swings about its hinge and the felt clamps the hub.
+
+- **The pull:** the knob's M5 × 35 bolt leans 30° forward from vertical, which gives it 59 mm of leverage about the hinge. A vertical bolt would get 31 mm (12 with the hinge where it first was, behind the hub), and would stretch and bend the strap more than close it. 30° is as far as it can lean with the seat sunk into the shell's top and 2 mm or more of shell between the seat and the hub.
+- **Gussets:** the head is one solid gusset, from the band 12° above the axis up to its top end, front and back, out to where the bolt pulls. The arm runs from the band's bottom 12° forward to the hinge, with a gusset under it down to the knuckle's bottom. Neither end is a thin tab.
+- **Where the hinge is:** under the hub, at x = 5, z = −40, just behind the strut clevis's cheeks, as far forward as it fits. The strap's swing presses each bit of felt in proportion to the hinge's distance from the felt's radius through it. With the hinge forward under the hub, that's even along the felt: its bottom end gets half the pressure of its middle, against a tenth with the hinge behind the hub, where it first was. And the knob's bolt passes further from the hinge, so it gets more leverage.
+- **The hinge:** the pin, an M4 × 50 socket head, goes through both pillow blocks, a web inside each, and the strut clevis's back block. Behind the clevis's cheeks the block is cut down to a 6 mm rib, 2 mm under the hub like the rest of it. The strap forks round the rib into two 4.5 mm cheeks, and each runs on the pin between the rib and a web, 1.5 mm clear of both. Its arm runs through the up-stop pad's slot, 0.5 mm clear either side. The slot guides it, so the strap stays at least 1.5 mm off each lug (2 mm when centred). The pin's head is in a counterbore on the USB (+y) side, and its nut in a hex pocket on the sensor (−y) side, both below the side covers.
+- **The nut:** it drops into a slot in the head from the strap's +y side. The bolt holds it there, and its pull bears it on the slot's face. A lead-in in the head's face guides the bolt's tip onto it.
+- **The knob's seat:** sunk into the shell's top, square to the bolt. There's 4 mm of shell under it, then the strap's bay.
+- **The spring, if you want one:** the knob has a 10.6 mm pocket, 7 mm deep, in its underside. Without a spring, the knob sits on its seat and pulls the strap directly. With one (10 mm OD, 10 to 15 mm free length, such as Rev 3's friction knob used), the spring holds the knob off its seat and the knob sets the brake through it. The M5 × 35 keeps its full thread in the nut either way.
+- **The bay:** 22 mm wide, out to the lugs' inner faces, in the frame and the shell. In the frame, the strap leans back on its own onto the bay's back wall, at 8.5°: far enough for the lever's hub to drop past the felt's top end, 1.6 mm clear. In the shell, the back of the bay is a ramp parallel to the bolt, 1 mm behind the head. As the shell goes on, the ramp meets the leaning strap's head and swings it forward onto the hub, so its nut lands on the bolt's axis.
+
+**Drag:** about 12.2 N·mm per newton of bolt tension with the lever moving up, and 18.2 moving down: the strap is self-energising by about 49%. It would lock itself only above a friction coefficient of about 1.5, and felt runs about 0.3. 18 N of tension gives the old shoe's 270 N·mm.
+- **Pressure along the felt:** it peaks 7° above the axis, and falls to half that at the felt's bottom end and 84% at its top. The felt below 38° under the axis now takes 11% of the grip (5% with the hinge behind the hub), the felt above 22° over it 20% (28%), and the middle 69%. The peak at 400 N is 1.0 MPa.
+- **With the spring:** the brake's range is spread over about 10 turns of the knob, up to the spring's 20 N or so. Past that, the knob is down on its seat and the brake firms up.
+- **Without it:** the felt is the only give, so the brake goes from free to firm within about a turn.
+
+**Strength:** checked at 400 N of bolt tension, more than a hand gets out of an 18 mm knob (about 130–210 N at 0.3–0.5 N·m).
+- **Strap:** it prints on its side, so all its bending runs along its layers (35 MPa allowed). The band peaks at 18.5 MPa, the neck under the head at 21, the arm's cheeks at 20 and the arm behind them at 14.
+- **Hinge:** the pin carries 760 N. The cheeks bear 21 MPa on it. It runs between the rib and the webs, so it bends only to 79 MPa in its 12.9 steel. The rib bears 16 MPa, with 5.8 mm of rib over the pin, and the webs 4.
+- **Shell:** the 4 mm floor under the seat bends at 17.5 MPa, along its layers. The shell is solid behind the hub, out to its side walls, top and back, so the seat's load goes straight into the walls.
+
+![At the 32° stop](renders/rev4_section_brake_32deg.png)
+
+## Up-stop
+
+![The brake strap between the two up-stop lugs, at 0°](renders/rev4_brake_lugs.png)
+
+Two lugs under the back of the hub land on a pad on the frame at 32°. Each lug is 10 mm wide (|y| 11 to 21), with 22 mm between them for the brake strap.
+
+**Where the pad is:** x = 14 to 29.5, the full width between the pillow blocks, with a slot in its middle for the brake strap's arm. Its top is at z = −28.5, 2 mm under the hub at its front edge.
+
+**Where the lugs land:** x = 15 to 24.4. They can't land further back: the further back a lug lands, the further back it swings at 0°. These come to x = 35.8 at 0°. Behind them the frame is cut away on a 39 mm radius round the axis, 1.5 mm clear of their swing.
+
+At 0°, the strap's arm runs between the lugs, 2 mm clear of each. As the lever lifts, the lugs swing down either side of the strap onto the pad. Between them, the hub is a plain cylinder for the felt to run on.
+
+![At 32°, the lugs on the pad (frame and shell hidden)](renders/rev4_brake_lugs_32deg.png)
+
+The anchor clevis's back wall runs level, at the cheeks' top, into the pad's front face.
+
+## Frame
+
+![The frame from above](renders/rev4_frame_top.png)
+
+The plate is 63 mm wide, the pillow blocks' outer faces, and 127 mm long. The desk screws are 24 mm either side of the middle, past the blocks' ends and the down-stop pillars.
+
+Behind the up-stop pad, the frame is solid back to its back face and out to the [back chamfer](#the-back), except for a 39 mm radius round the axis between the pillow blocks, 1.5 mm clear of the up-stop lugs' swing, and the brake strap's bay in the middle.
+
+**The brake strap's hinge:** behind the strut clevis's cheeks, its back block is cut down to a 6 mm rib through the strap's hinge pin, between the strap's two cheeks, still running 2 mm under the hub into the up-stop pad. Inside each pillow block, a web runs in to 10.5 mm from the middle, round the pin and level with the rib, so the pin is held either side of each of the strap's cheeks. The webs end 3 mm short of the up-stop lugs' swing.
+
+![The frame from above, with the brake strap in](renders/rev4_frame_strap_top.png)
+
+Each pillow block also has a 45° gusset at its front corners, 8 mm along each wall:
+- **In front, inside:** the block's inner face to the down-stop pillar's back face, up to the pillar's top, 3 mm clear of the hub.
+- **In front, outside:** the block's front face to the pillar's outer face, up to the pillar's top.
+
+The down-stop and strut are unchanged from Rev 3: pads on the socket boss land on two pillars at 0°, and the gas strut runs from a clevis on the frame to the collar on the tube. Everything is on the new centre line. Each pillar runs on into its pillow block.
+
+## The back
+
+![From behind: the back chamfers and the brake knob](renders/rev4_back.png)
+
+The frame and the shell share one 45° chamfer plane each side. It runs from the pillow blocks' outer back corners to the back face, at x = 57 (|y| + x = 69 mm), so from behind the two read as one block. The back face is 24 mm wide. It's that far back so the shell's bay has room for the brake strap's head when the strap leans back 8.5°. The edges in the joint aren't chamfered, so no groove shows at the seam.
+
+## Balance
+
+![Out of balance at the grip, against lever angle](renders/strut_balance_r4.png)
+
+Rev 3 was first built with the anchor at x = −12, z = −40.5, sized for a 40 N strut: the bottom of the range the 45 N strut is sold as. The 45 N strut as bought lifted the lever, by about 50 to 70 g at the grip.
+
+The anchor is now at x = −9.5, z = −36.5 (Rev 3's frame was updated to it too): 4 mm up and 2.5 mm back. The strut's line passes closer to the pivot, so it has less leverage. It now balances 45 N to within 3 g at the grip over the whole travel. The strut is 119 mm long at 0° and 140 mm at 32°, inside its 102–152 mm stroke.
+
+The strut is fitted cylinder down, as built: its cylinder (0.475 in, 12.07 mm, measured) on the anchor clevis, and its rod on the collar. The frame is cut 1.5 mm clear of the cylinder's sweep, through the front wall and over the clevis's front gussets.
 
 | Strut force | Out of balance at the grip | Fix |
 |---|---|---|
-| 40 N | −58 to −50 g (drops) | — |
-| **45 N (as bought)** | **−2 to +2 g** | none |
-| 50 N | +50 to +61 g (rises) | about 42 g of ballast in the head |
-| 53 N (top of the range) | +80 to +96 g | about 68 g of ballast |
+| 40 N | −59 to −50 g (drops) | — |
+| **45 N (as bought)** | **−3 to +1 g** | none |
+| 50 N | +49 to +60 g (rises) | about 42 g of ballast in the head |
+| 53 N (top of the range) | +79 to +95 g | about 68 g of ballast |
 
-The collar does the fine tuning. Sliding it 8 mm toward the pivot adds about 21 g of lift at the grip, and 8 mm away takes 21 g off. For comparison, Rev 1's bucket was out by ±130 g at the ends of its travel.
+The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at the grip, and 8 mm away takes 21 g off.
 
-**The anchor moved on 2026-11-08.** Rev 3 was first built with the anchor 12 mm ahead of and 40.5 mm below the pivot, sized for a 40 N strut, the bottom of the 45 N strut's range. The 45 N strut as bought lifted the lever, by about 50 to 70 g at the grip. The anchor is now 9.5 mm ahead and 36.5 mm below, so the strut's line passes closer to the pivot and has less leverage.
+**The clevis:**
+- **Cheeks:** they're 6.5 mm round the eye (Rev 3: 8), so they stay 1.5 mm under the hub.
+- **Back walls:** they run 2 mm under the hub into the up-stop pad. Behind the tab, from 1 mm past its round end, the gap between them is filled, so they print as one solid block with proper infill.
+- **Screw:** the strut's M4 × 16 still fits.
 
-To update a base built before then, reprint the frame. Nothing else changes: the strut, collar, screws and lever are the same, and the strut's lower M4 × 16 goes back in as before.
-
-The figures assume the strut gains 30 % in force from fully extended to fully compressed. The listing doesn't give this, so the real curve may differ by a few grams. Ballast and the collar take up any offset.
+`python mk3_rev4.py --balance` prints the table and redraws the plot. It uses the balance model from Rev 3 (`mk3_rev3.py`): Rev 4's lever halves, the collar and half the strut behind the pivot, and an estimate of the head, grip, tube and cables in front of it (a 368 g head, a forward moment of about 195 g·m). The figures assume the strut gains 30 % in force from fully extended to fully compressed; the listing doesn't say, so the real curve may differ by a few grams. If your head is lighter than that, the strut will still lift a little. Slide the collar away from the pivot, or add ballast.
 
 ## The strut
 
@@ -140,224 +303,120 @@ The figures assume the strut gains 30 % in force from fully extended to fully co
 |---|---|
 | Length | 152.4 mm eye to eye extended, 101.6 mm compressed (51 mm stroke) |
 | Force | 45 N, sold as 9–12 lb (40–53 N) |
-| Ends | flat eyelet tabs. The 40 N strut's collar end, measured: a steel tab 3.94 mm thick and 8 mm wide, a 4.45 mm eye, then a Ø8 mm boss whose face is 5.72 mm from the eye's centre and which runs about 7 mm |
+| Ends | flat eyelet tabs that bolt through. The collar end, measured: a steel tab 3.94 mm thick and 8 mm wide, a 4.45 mm eye, then a Ø8 mm boss whose face is 5.72 mm from the eye's centre and which runs about 7 mm |
 
-A 40 N cabinet strut ([QLXHBOT](https://www.amazon.com/dp/B0C8DJ8W9H)) was considered and rejected: its ends are snap-on sockets, which pop off if the strut ever pulls. This strut has eyelets that bolt through.
+**Measure yours** before printing the frame and collar. The listing gives the eye holes as 4 mm and the rod as 4 mm; the cylinder measures 0.475 in (12.07 mm). The model uses those (`PIN_R` is the M4 screw's 4.4 mm clearance in the printed cheeks). The collar end's tab and boss are measured (`BODY_TAB_T`, `BODY_TAB_W`, `BODY_BOSS_D`, `BODY_BOSS_AT`, `BODY_BOSS_L` in `mk3_rev3.py`); the anchor end's tab is still a guess (`ROD_TAB_T`, `ROD_TAB_W`). The clevis slots are the tab's thickness plus 0.6 mm.
 
-**Measure yours** before printing the frame and collar. The listing gives the eye holes as 4 mm and the rod as 4 mm; the cylinder measures 0.475 in (12.07 mm). The script uses those (`PIN_R` is the M4 screw's 4.4 mm clearance in the printed cheeks). The collar end's tab and boss are measured (`BODY_TAB_T`, `BODY_TAB_W`, `BODY_BOSS_D`, `BODY_BOSS_AT`, `BODY_BOSS_L`). The anchor end's tab is still a guess: `ROD_TAB_T`, `ROD_TAB_W`. The clevis slots are the tab thickness plus 0.6 mm.
-
-**Fit it cylinder down:** the cylinder's end in the anchor clevis on the frame, the rod's end in the collar on the tube.
-
-## Anchor: a fixed, gusseted clevis
-
-![The anchor clevis, cut just past the strut](renders/rev3_anchor.png)
-
-Two 6 mm cheeks rise from the plate either side of the strut's steel tab, printed into the frame. An M4 × 16 countersunk screw goes through both cheeks and the tab into an M4 nut in a pocket in the far cheek, so the joint holds whether the strut pushes or pulls.
-
-Each cheek is a round boss over the eye, 6.5 mm in radius (8 with the first anchor), standing on a block down to the plate. A triangular gusset runs 20 mm forward, from the top of the boss down to the plate. Behind the eye, each cheek carries on as a wall straight back into the stop pedestal, 19.5 mm away. The wall's top runs from the top of the boss, 1.5 mm under the hub, down to the pedestal's front edge, so the clevis and the pedestal brace each other. Behind the tab, from 1 mm past its round end, the gap between the cheeks is filled back to the pedestal. The two walls print as one solid block, with proper infill.
-
-The front gussets are 3.8 mm thick and stop 3 mm either side of the strut's centre line. The strut's cylinder, at this end, swings up clear above them over the whole travel. Their outer faces are flush with the cheeks, so the screw's head and the nut seat flat. The screw goes in from the knob side, which has about 35 mm of room. Nothing at the anchor adjusts.
-
-## Up-stop: a boss on the lever, a pedestal on the frame
-
-![Cut through the stop boss at 32°, resting on the pedestal](renders/rev3_upstop.png)
-
-There's no quadrant, stop block, thumb knob or striker, and no bucket pad on the lever. The plate is a plain 116 × 100 mm rectangle.
-
-Instead, a block grows from the back of the hub's underside. A pedestal stands on the frame between the pillow blocks, under the hub, and runs into the sensor-side block. At exactly 32° the block's flat face lands squarely on the pedestal's top.
-
-The block is 43 mm wide. It runs from the hub's sensor-side end to 1 mm short of the friction drum. The last 20 mm of the hub, on the knob side, can't carry it, because the drum's shoe, felt and hinge lugs sit right under it. The pedestal and the upper half's wedge are the same width.
-
-![The stop block and pedestal from behind, at 32°](renders/rev3_upstop_rear.png)
-
-The block's back face runs straight up and meets the hub tangentially, so there's no notch between block and hub. The lever's split line crosses the block:
-- **Lower half:** carries the stop face and most of the block.
-- **Upper half:** carries a small wedge that fills the corner up to the tangent.
-
-At the stop the pedestal pushes the lower half's block up into that wedge, so the joint between the halves is in compression.
-
-The contact is about 40 mm from the pivot, so a hard push on the grip loads it roughly ten times over: about 450 N for a 50 N push. That's in compression, and spread over an 18 × 43 mm face, under 0.6 MPa.
-
-To change the angle, set `STOP_DEG` and reprint the lever's lower half and the frame.
-
-## The lever
-
-![The lower half from below: stop boss, down-stop pads, nut pockets](renders/rev3_lever_lower.png)
-
-- **Hub:** 60 mm across all the way, the friction drum's diameter, where Rev 1 stepped down to 56 mm on the sensor side. The step had no purpose; the felt still only runs on the drum section.
-- **Removed:** Rev 1's bucket pad and its inserts, and the bottom gusset under the socket boss, which sat in the strut's path. The top gusset is unchanged.
-- **Down-stop pads:** two flat pads stand on the sides of the socket boss. They start 13.5 mm off the tube's centre line and are added before the bores are cut, so they stay clear of the 25.4 mm tube bore.
-
-### Split lever
-
-The lever is two prints, `lever_upper.stl` and `lever_lower.stl`, split at z = 0 through the pivot axis and the tube axis. Print both flat on the joint face; they need no supports.
-
-- **Joint:** four M4 × 40 socket head cap screws (from the HELIFOUNER M4 × 30–50 kit, with its nuts) go in from the top, into M4 hex nuts in hex pockets in the bottom half. 40 mm is the longest that fits: each head sits flush in an 8 mm counterbore at the top of the lever, level with the hub's surface at the counterbore's lowest edge, and each nut sits as far out as the underside allows, level with the hub's curve at its flats (the hex has its corners along y, so the flats face fore and aft). The seats are about 40 mm apart (16.5 mm before) and no tip sticks out. The nut pockets leave only about 0.2 mm of wall at their fore and aft flats where they meet the hub's curve, so slice them as they are and push each nut up to the top of its pocket with a screwdriver. A 3 mm hex key reaches the heads; the counterbores are only as deep as the heads. Tighten the four evenly. The four screws form a rectangle centred on the socket's axis (16.75 mm either side of it) and on the pivot axis (17 mm fore and aft of it), which leaves 1.85 mm of wall beside the socket.
-- **Cables:** both ½" cable bores are half-round channels in each half. Lay the USB cable and the sensor lead (4 cores for I²C, 3 for analog) into the lower half, then close the upper half over them. Nothing has to be threaded through a hole.
-- **Trunnions:** each bearing's inner race holds the two half-trunnions together. Press the bearings on after the screws are tight, and before the sensor carrier and module: neither passes through a bearing. Lay the sensor lead in bare and solder the module on afterwards.
-- **Socket depth:** the tube socket runs 63.3 mm in from the mouth, to 2.7 mm from the pivot axis, so it opens into the axial cable bore (Rev 1: 46 mm). The tube is 500 mm, uncut, so the head sits where it did. The tube's end sits 3.8 mm into the axial bore: file a notch in each side of the tube, 13 mm wide (centred on the tube's horizontal midline) and at least 4 mm deep from its end, where the axial bore crosses the tube's wall, so the cables can get in.
-![The lever's socket and screws](renders/rev3_lever_socket.png)
-
-- **Socket mouth:** the halves meet face to face all the way to the mouth. The hose clamp in the groove holds them together there. There is no tube lock screw: the hose clamp and the press fit hold the tube.
-
-## Down-stop
-
-![The down-stop pillars at 0°, the sensor-side one blended into the pillow block](renders/rev3_downstop.png)
-
-The down-stop is fixed at 0°, with nothing to adjust. Under each of the lever's two pads, either side of the strut, a pillar stands on the plate with exactly the pad's footprint: 12 × 6.5 mm, 13.5 to 20 mm off the strut's centre line. Its flat top is at z = −16 mm, 34 mm up from the plate, where the pad's underside sits with the tube level. Each pillar is blended into the tower beside it, so it prints as one piece with that tower:
-
-- **Knob side:** the friction-knob tower is 2 mm away, so the pillar just carries straight on into it, still 12 mm deep. It stays below the knob's M5 nut slot and clear of the bolt.
-- **Sensor side:** in plan, the pillar's footprint is swept back at 45° into the sensor-side pillow block, 15.5 mm along x and y, so the blend's two sloping faces are parallel and keep the pad's width. 45° is the angle of every other gusset on the frame. The blend runs the pillar's full height, and its inner face stays 4 mm or more clear of the hub. It stays below the cap screw's nut slot, so that nut still slides in from the front, and clear of the corner desk screw.
-
-The pads are 12 × 6.5 mm; with the chamfers on both, each lands on its pillar over about 52 mm². As the tube lifts they swing up and forward, away from the pillars. Earlier versions of Rev 3 had a post on each side with an M4 × 16 screw, head up, to set the height. (Rev 1 had one post under the socket boss, right where the strut now runs.)
-
-## Inside-corner gussets
-
-![The frame from above: corner gussets on the knob-side pillow block (left), down-stop pillars (bottom)](renders/rev3_frame_plan.png)
-
-The knob-side pillow block's inner face has two triangular gussets, one into each of the walls that meet it. Toward the back, one runs to the hinge-lug web, as high as the web (z = −14). At the front, one runs to the friction-knob tower, up to 1 mm under the tower's top. The two are mirror images: 45° right triangles in plan, with 16 mm legs along the wall and along the block's face. Both are cut away in a 33 mm radius round the pivot, so they stay 3 mm clear of the hub and the friction drum and below the shoe.
-
-## Hinge-lug gusset
-
-![The corner gusset between the shoe's hinge lugs and the knob-side pillow block](renders/rev3_lug_gusset.png)
-
-A corner gusset braces the knob tower to the knob-side pillow block, as in Rev 1. Rev 3 adds one at the back corner too, from the shoe's outer hinge lug to the same pillow block.
-
-It stands 36 mm off the plate, level with the web between the hinge lugs. That leaves the shoe's hinge pin and its end 8 mm clear above it.
-
-The hinge lugs and the web between them are 14 mm wide (x = 38 to 52; Rev 1: 11 mm, 40 to 51), centred on the hinge screw. That leaves 2.7 mm of wall either side of the M4 countersink and 4.8 mm either side of the clearance hole, so they print solid with the normal wall loops. (Rev 1 left 0.7 mm beside the countersink.)
-
-Its sloping face stops 6.5 mm from the centre of the desk screw in that corner, so the screw's head still fits.
-
-## Friction knob
-
-The knob is the MkII knob (`source/MkII-AdjustKnob.stl`). Its outside is unchanged: 18 mm across and 34 mm tall, fluted over its top half. Only its inside changes, for the M5 bolt (`mk3_rev3.py` builds `stl/friction_knob.stl` from it):
-
-- **Pocket:** the MkII's M6 hex pocket (10.2 mm across flats) is filled, and an M5 one (8.1 mm) is cut in its place. It is still open at the top, with a lead-in at the mouth.
-- **Floor:** the 4 mm floor's 6.5 mm hole is now 5.4 mm, M5 clearance.
-
-It stands at x = −47. (Rev 1's 28 mm knob stood at x = −45, where the knob-side down-stop pad and the socket boss ran into it from about 8° up, and its rim overlapped the shoe where the shoe curves up over the drum.) The MkII knob spans 13 to 31 mm off the centre line, 2 mm clear of the pad, and it stays outside the shoe's arc at any height.
-
-An M5 × 30 hex-head bolt (ISO 4017 / DIN 933, 8 mm across flats) drops into the pocket, its head on the floor. It runs down through the spring and the shoe's front tab into an M5 nut. The nut slides into a slot in the tower from the front, at the same depth as the pillow-block caps' nuts (its top face 8.3 mm below the pivot axis), so the plastic over it is thick enough to take the spring's load. The bolt's tip ends 4.2 mm past the nut. The spring sits in a 2 mm recess in the shoe's tab and bears on the knob's underside, so it is still 6.5 mm long when fitted. Turning the knob turns the bolt; screwing it down pulls the knob onto the spring and loads it.
-
-The hex walls turn the bolt with the knob, so nothing has to be glued. A long 8 mm socket still reaches the head down the open top. The bolt isn't in the screw kits (they have only countersunk heads): buy an M5 × 30 hex-head bolt, zinc or stainless, from any hardware store.
-
-## Sensor
-
-The AS5600 module (WWZMDiB, Amazon B0CM3C8KFT, 23 × 23 mm) sits on the sensor side (−Y), in a carrier that plugs into the trunnion bore and turns with the lever. Its ~4 × 2 mm diametric magnet (in a 4.2 mm pocket, the same as the head axle's) sits on the axis in the fixed cover, about 1.0 mm from the chip. The lead runs under the board, through the carrier and up the tube to **AX1** on the HeliSR board.
-
-The module has no header, and its pads are in two columns of through-holes, 4.7 mm in from opposite edges: **VCC, OUT, GND** along one, **DIR, SCL, SDA, GPO** along the other. Solder the wires straight in from the back. The carrier's channel under the board spans both columns and the centre hole, so the module fits either way up and the DIR jumper lies in the channel too. The pad positions are measured from the product photos (±0.3 mm), so check them against yours.
-
-**With HeliSR Rev 4.0 (I²C):** four wires, **VCC, GND, SDA and SCL**, to the AX1 port (pin 1 SDA, 2 GND, 3 VCC, 4 SCL).
-- **5 V:** remove the module's 0 Ω R1. It ties VDD3V3 to VDD5V, and the 3V3 pin is rated 4 V max.
-- **DIR to VCC:** a short jumper across the back of the board, from DIR to VCC. DIR floats on this module. The chip turns with the lever and the magnet is fixed, so DIR = VCC makes the angle rise as the lever lifts.
-- **Remove R4**, the 1 kΩ from PGO (labelled GPO) to GND. PGO low selects the OUT-pin programming used with Rev 3.0; without R4 the chip's own pull-up holds it high.
-- **Pull-ups:** measure the module's SDA→VCC and SCL→VCC resistance before you fit it (see `PCB/HeliSR_Rev4.0`).
-- The range is set by the firmware over I²C, not burnt into the chip, so it can be changed at any time.
-
-**With HeliSR Rev 3.0 (analog):** three wires, **VCC, OUT and GND**, to AX1. Remove R1 and jumper DIR to VCC as above, but keep R4. The range is programmed once through the OUT pin (datasheet option B) with the board's **PROG1** button:
-1. Hold the lever on its down-stop and press PROG1 for about a second.
-2. Lift it to the 32° stop and press PROG1 again.
-
-It can't be checked beforehand: until programming is done, AX1 reads full scale whatever the lever does.
+- **Friction and fade:** gas struts have seal friction, and some are oil-damped; neither is published, so expect a little built-in drag. Their force changes about 3 % per 10 °C and fades slowly over the years: the collar or a few grams of ballast correct it.
 
 ## The carbon tube
 
+25 × 23 mm carbon fibre, 500 mm, used uncut: 470 mm plus the 12.7 mm the head's boss takes, plus the 17.3 mm in the socket. The socket runs 63.3 mm in from its mouth, to 2.7 mm from the pivot axis, so the tube's end sits 3.8 mm into the axial cable bore: notch its sides there (see [Assembly](#assembly)). The grip's top is 445 mm from the pivot, and at the 32° stop the hand rises about 9.4 in, against the real UH-1's 9.25 in. Program the sensor's range across 0–32°.
+
 - **Buy roll-wrapped, not pultruded.** Pultruded tubes have all their fibres running lengthwise and split easily when clamped or drilled. Roll-wrapped tubes have cross plies and take both.
-- **Check the fits.** The lever's socket and the head's tube bore were tuned on the 25 mm aluminium tube with the coupons. Check them with the carbon tube, and re-run the socket and bearing coupons if its outside diameter differs.
-- **Drilling and notching:** you drill the head's 5.2 mm cross hole (10 mm below the top end). Use a sharp bit and back the tube with wood, or wrap the spot with tape so it doesn't splinter.
-- **Clamping:** do the collar's two M4 clamp screws and the hose clamp up firmly, but don't crush the tube.
-
-## Setting it
-
-1. Back the friction knob right off.
-2. Let go of the grip at the bottom of the travel and near the stop.
-3. If it climbs, add ballast inside the head's box, close to its middle: about 48 g for a 45 N strut. Steel or lead weights work.
-4. Finish with the collar.
-5. Set the friction to taste.
+- **Check the fits** with the socket coupon if your tube's outside diameter differs.
+- **Drilling and notching:** use a sharp bit and back the tube with wood, or wrap the spot with tape, so it doesn't splinter.
+- **Clamping:** do the collar's two M4 clamp screws and the hose clamp up firmly, but don't crush the tube. There's no lock screw: the hose clamp holds it.
 
 ## Printing
 
-- **Frame:** prints plate-down. It carries the gusseted anchor clevis, its walls back to the stop pedestal, the pedestal itself, the two down-stop pillars, the two inside-corner gussets and the hinge-lug gusset, all built straight up from the plate. The clevis screw hole is horizontal.
-- **Lever halves:** print on their joint faces, with no supports (see [Split lever](#split-lever)).
-  - **Lower half:** the stop block and the down-stop pads stand on the bed with the joint face. The block's back face leans about 32° from vertical, within normal overhang limits.
-  - **Upper half:** the stop wedge sits on the bed at the back of the hub, with its sloping face leaning in toward the hub.
-- **Strut collar** (`strut_collar.stl`): 40 mm long, with a web tapering from the ring down to the strut's eye, solid behind the eye where the strut pushes and split into two cheeks round the tab. Stand it on the end away from the strut (the end without the boss notch), so the bore builds straight up, the web's slope is under 30° and the notch opens at the top.
-- **Friction knob** (`friction_knob.stl`): floor down, as the MkII knob printed, with the pocket open at the top.
-- **Cable cover** (`cover_cable.stl`): on its outer face (the face with the countersinks), the round spout just touching the bed. The spout is 15 mm across, the cover's full depth, so it is flush with both faces and needs no supports; the bore's lower half prints as an open channel and the notch opens upward.
-- **Caps, shoe, sensor cover and sensor carrier:** no special notes.
+- **Frame:** plate down. The brake strap's slot and bay open at the top, the grid's pyramids point up, and the front wall builds straight up.
+- **Shell:** top down. The bearing half-seats, the slot, the strap's bay and the grid's sockets all open upward. The knob's seat is on the bed, and its floor slopes at 30°: support it from the bed, in the seat only.
+- **Lever halves:** each on its joint face, trunnion up, so the trunnion prints round, axis up, like its coupon.
+  - **Opening upward:** the sensor's pocket, the counterbores and the nut pockets.
+  - **Arches:** the socket and the radial cable bore print as arches in the joint face. The dowel holes' roofs bridge 1.6 mm.
+  - **Supports:** the up-stop lugs' inner faces need a small support each. Each is a flat overhang about 40 mm² across, 11 mm above the bed, and the brake runs between the lugs, so they can't be filled. Nothing else needs support: the down-stop pads run in to the fairing.
+  - **Seam:** turn on the slicer's elephant's-foot compensation. The seam's 0.3 mm chamfer takes the rest.
+- **Lever dowels:** four, standing on end.
+- **Brake strap:** on its side, the nut's slot up. Its bending then runs along the layers. No supports.
+- **Side covers:** outer face down. The magnet's pocket and the cable's channel open upward, and the 45° ends lean out at 45°, so no supports.
+- **Knob:** underside down, the hex pocket open at the top. Reprint it if you have Rev 3's: its floor is now 11 mm up, and it has a pocket underneath for the spring.
+- **Strut collar** (`strut_collar.stl`, unchanged from Rev 3: reuse one you have): stand it on the end away from the strut, the end without the boss's notch, so the bore builds straight up, the web's slope is under 30° and the notch opens at the top.
 
 ## Assembly
 
-1. **Frame:** tap the eight M3 cover holes, in the pillow blocks and the caps, 11 mm deep. Slide an M4 nut into each of the four slots in the pillow blocks' front and back faces (the knob-side block's front one opens on the tower gusset's sloping face).
-2. **Lever:** press the four M4 nuts into the lower half's pockets, lay the USB cable and the sensor lead into the lower half, close the upper half and fit the four M4 cap screws (all M4 × 40; see [Split lever](#split-lever)). Press the bearings onto the trunnions.
-3. **Into the frame:** seat the lever's bearings in the frame and fit the caps (M4 × 20, into the slotted nuts). Fit the shoe and felt on their hinge (M4 × 20 from the sensor side, nut in the knob-side lug's pocket; snug, then thread-lock, so the shoe still swings). Slide the M5 nut into the knob tower, drop the M5 × 30 hex bolt into the knob's hex pocket, head down on its floor, and screw it down through the spring and the shoe. Fit the side covers (M3 × 25, from the M3 countersunk set). On the knob side, the cable cover goes on over the USB cable, which is already through the lever with its plug out past the cover. A 4.8 mm notch runs the length of the spout, from its bore to the face that seats on the block. Lay the cable's run out of the trunnion into the notch, push the cover onto the block and screw it down: the cable lies in the bore and the block face closes the notch. There's no plug or extra screw.
-4. **Sensor:** solder the module to the lead, fit it in its carrier, and fit the cover with the magnet (see [Sensor](#sensor)).
-5. **Tube:** don't cut it. Drill its head cross hole and notch its bottom end's sides for the cables. Slide it into the socket and tighten the hose clamp, with the head on top.
-6. **Collar:** clamp it on the tube with its notched end (the end the strut's boss sits in, toward the pivot) 52 mm out from the front face of the socket boss. The collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
-7. **Strut, collar end (the rod's):** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the knob side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
-8. **Strut, base end (the cylinder's):** with the cylinder down, hold the lever on its down-stop and push the strut in to about 119 mm. Fit the cylinder's steel tab into the anchor clevis with the other M4 × 16 from the knob side, nut in the far cheek, as at the collar end.
-9. Balance it as above. The down-stop is fixed, so there's nothing to set.
+1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
+2. **Lever:**
+   - **Dowels:** push the four dowels into one half's holes.
+   - **Cables:** poke the USB cable through the cable half's axial bore from its joint face, and the sensor lead through the sensor half's. Lay both along the radial channel.
+   - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
+   - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
+3. **Sensor:** prepare the module and solder it to the lead (see [Sensor](#sensor)), and set it in the trunnion's pocket, chip out, with a dot of hot glue.
+4. **Brake strap in:** stick the felt (16 × 51 mm) on the strap's face, and drop the M5 nut into the slot in its head. Set the strap down into the frame, its cheeks either side of the strut clevis's rib and its arm in the up-stop pad's slot. Push an M4 × 50 socket head through from the USB (+y) side: the pillow block, the web, a cheek, the rib, the other cheek, the other web, and into an M4 nut in the sensor side's hex pocket. Tighten it: the strap still swings freely on it. Let the strap lean back onto its bay's back wall.
+5. **Lever in:** lower the lever's bearings straight down into the frame's seats. The hub drops past the top of the leaning strap's felt 1.6 mm clear, and ends 3.0 mm off the felt's bottom end; the strap itself stays 2.0 mm clear. Tip the strap forward onto the hub.
+
+   ![The lever going in past the leaning brake strap](renders/rev4_brake_lever_in.png)
+
+6. **Shell on:** lower it straight down over the lever and the strap, so the grid's pyramids drop into their sockets. If the strap has leaned back, the ramp at the back of the shell's bay meets its head 8 mm before the shell is down and swings it forward. Fit the shell's four M4 × 50 socket head screws into the nuts and tighten them evenly.
+7. **Knob:** if you're using the spring, drop it into the pocket in the knob's underside. Drop the M5 × 35 bolt into the knob's hex pocket, head down. Set the knob in its seat and screw the bolt down into the strap's nut. With the shell on, the strap can lean back only 1.2°, which leaves its nut 0.8 mm off the bolt's axis, and the lead-in in the head takes up 2 mm. Then set the drag.
+8. **Strut's anchor end:** fit the gas strut's cylinder end into the anchor clevis with its M4 × 16, tightening it with a 2.5 mm hex key through the hole in the USB-side pillow block. Do this before the covers: the cable cover hides that hole.
+9. **Covers:** glue the magnet into the sensor cover's pocket, pushed to the bottom. Lay the USB cable into its groove in the USB-side pillow block and shell, push the cable cover on over it, and screw both covers down (M3 × 12).
+10. **Tube:** don't cut it. Drill the head's 5.2 mm cross hole, and file a notch in each side of the tube's bottom end, 13 mm wide (centred on its horizontal midline) and at least 4 mm deep, where the axial cable bore crosses its wall, so the cables can get in (see [The carbon tube](#the-carbon-tube)). Slide it into the socket, 63.3 mm deep, and tighten the hose clamp in its groove, with the head on top.
+11. **Collar:** clamp it on the tube with its notched end (where the strut's boss sits, toward the pivot) 52 mm out from the front face of the socket boss: the collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot.
+12. **Strut, collar end (the rod's):** fit the steel tab into the collar's clevis, up to the shoulder of its Ø8 boss, which sits in the notch at the clevis's end, with an M4 × 16 countersunk screw from the +y side and an M4 nut in the far cheek's pocket. Snug it and thread-lock it; don't clamp the tab.
+13. **Balance and drag:** let go of the grip at the bottom of the travel and near the stop. If it climbs, add ballast inside the head's box, close to its middle; then fine-tune with the collar (see [Balance](#balance)). Set the brake to taste.
 
 ## Screws
 
-Every screw and nut is from three kits and one pack: the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH): M2–M4 × 8, 12, 16, 20 and M5 × 10, 12, 16, 20, with nuts and washers) and the HIQTRADEBYJJ set-screw kit ([Amazon B0DG33R714](https://www.amazon.com/dp/B0DG33R714)). The side covers' eight M3 × 25s are the exception: they come from the NIULUNBAO M3 countersunk set ([Amazon B0BYXS4BTF](https://www.amazon.com/dp/B0BYXS4BTF): M3 × 20, 25, 30, 35 and 40, 20 of each), because the kit stops at 20 mm and the longer thread holds three times as much plastic. The lever halves' four screws are the exception to the countersunk heads: they are M4 socket head cap screws (40 and 45 mm) from the HELIFOUNER M4 × 30–50 kit ([Amazon B0CDSKK7V1](https://www.amazon.com/dp/B0CDSKK7V1), with nuts), because only a kit like that has screws long enough to hold the halves far apart. Every other head is 90° countersunk, so it sits in a countersink; there are no heat-set inserts. Each hole takes a nut in a printed pocket, or a thread you tap into the print. The renders call out every hole, with the kit hardware in red.
+All from two kits, apart from the brake's M5 bolt: the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH): M3 and M4 × 8, 12, 16, 20, with nuts) and the HELIFOUNER M4 × 30–50 socket head kit ([Amazon B0CDSKK7V1](https://www.amazon.com/dp/B0CDSKK7V1), with nuts). There are no heat-set inserts: each screw goes into a nut in a printed pocket, or a thread tapped into the print.
 
 | Where | Screw | Into | Qty |
 |---|---|---|---|
-| Lever halves | M4 × 40 socket head cap, from the top | M4 nut in a pocket in the lower half | 4 |
-| Pillow-block caps | M4 × 20 countersunk, from the top | M4 nut slid into a slot in the block's front or back face | 4 |
-| Side covers | M3 × 25 countersunk (the NIULUNBAO M3 set), from the cover's outer face | M3 thread tapped 11 mm deep in the block or cap | 8 |
-| Friction knob | **M5 × 30 hex-head bolt (bought; not in the kits)**, head on the floor of the knob's hex pocket | M5 nut slid into the knob tower from the front | 1 |
-| Shoe hinge | M4 × 20 countersunk, head in the sensor-side lug | M4 nut in the knob-side lug's pocket | 1 |
-| Strut eyes | M4 × 16 countersunk, head on the knob side | M4 nut in the far cheek's pocket | 2 |
-| Strut collar clamp | M4 × 12 countersunk, head 2 mm into the sensor-side ear | M4 nut in the other ear's pocket | 2 |
+| Lever halves | M4 × 35 socket head cap, along the pivot axis through the hub, two from each end, heads in 7.5 mm counterbores | M4 nut in a hex pocket in the other half's end face | 4 |
+| Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, under the side cover | 4 |
+| Side covers | M3 × 12 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
+| Brake | **M5 × 35 hex-head bolt**, head on the floor of the knob's hex pocket | M5 nut in the slot in the brake strap's head | 1 |
+| Brake strap's hinge | M4 × 50 socket head cap, from the +y side, head in a counterbore | M4 nut in a hex pocket on the −y side | 1 |
+| Strut eyes | M4 × 16 countersunk, head on the +y side | M4 nut in the far cheek's pocket | 2 |
+| Strut collar clamp | M4 × 12 countersunk | M4 nut in the other ear's pocket | 2 |
 
-Every screw and nut to scale, to sort them before you start (the ruler is 50 mm):
+The hinge pin is a fifth M4 × 50 from the HELIFOUNER kit.
 
-![Every screw and nut, to scale](renders/rev3_screw_sizes.png)
+Every screw and nut, to scale:
 
-![Screws from above](renders/rev3_screws_top.png)
+![Every screw and nut, to scale](renders/rev4_screw_sizes.png)
 
-![Screws from the front, under the socket](renders/rev3_screws_front.png)
+Between them, these label every screw and nut in the base:
 
-![Screws on the knob side, from behind](renders/rev3_screws_knobside.png)
+![The shell's screws, from above](renders/rev4_screws_top.png)
 
-![Screws on the sensor side](renders/rev3_screws_sensorside.png)
+![The lever's sensor end, bearing off: two heads and two nuts](renders/rev4_screws_lever_sensor.png)
 
-![The strut's anchor screw](renders/rev3_screws_strut.png)
+![The lever's cable end, bearing off: the other two heads and nuts](renders/rev4_screws_lever_cable.png)
 
-![The lever's nuts, from below](renders/rev3_screws_levernuts.png)
+![The shell's nuts, in the pillow blocks' outer faces (sensor cover off)](renders/rev4_screws_shellnuts.png)
+
+![From behind: the brake knob and its bolt](renders/rev4_screws_back.png)
+
+![The brake in section: the bolt, its nut in the strap's head, the hinge pin, the strap and the knob](renders/rev4_screws_brake.png)
+
+![The sensor side: the cover, the collar clamp, the strut's body-end nut, the hinge pin's nut, the desk screws](renders/rev4_screws_sensorside.png)
+
+![The USB side: the cover, the strut's body-end screw, the collar clamp's nuts, the brake strap's hinge pin](renders/rev4_screws_usbside.png)
+
+![The strut's anchor](renders/rev4_screws_strut.png)
 
 ## Bought parts
 
 | Part | Qty | Notes |
 |---|---|---|
-| 6006-2RS deep-groove ball bearing (30 × 55 × 13) | 2 | |
-| X AUTOHAUX 6" 45 N gas strut | 1 | pack of 2, $13.69 |
-| 25 × 23 mm carbon tube, 500 mm | 1 | roll-wrapped; used uncut. It slides into a 63.3 mm deep socket |
-| Worm-drive hose clamp, about 25–40 mm | 1 | on the socket mouth |
-| Screws and nuts | | from the two kits and the M3 set: see [Screws](#screws) |
-| Compression spring, 10 mm OD | 1 | friction knob |
+| **6808-2RS thin-section ball bearing (40 × 52 × 7)** | 2 | new for Rev 4 |
+| X AUTOHAUX 6" 45 N gas strut | 1 | [Amazon B0CY267GFY](https://www.amazon.com/dp/B0CY267GFY), two for $13.69: see [The strut](#the-strut) |
+| 25 × 23 mm carbon tube, 500 mm | 1 | roll-wrapped; used uncut |
+| Worm-drive hose clamp, about 25–40 mm | 1 | on the socket's mouth |
+| Compression spring, 10 mm OD, 10–15 mm free length | 1 | optional, for the brake knob |
+| M5 × 35 hex-head bolt | 1 | any hardware store |
+| Felt, 1.5 mm, 16 × 51 mm | 1 | on the brake strap |
 | AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | with its ~4 × 2 mm diametric magnet |
-| Ballast for the head | ~50 g | steel or lead, only if the strut lifts too much |
-| #10 × 1-1/2 in wood screws | 4 | desk mounting, not in the kits |
-
-The screw lengths, the felt and the cables are sized from the CAD. The complete list for the whole collective is in [`../BOM`](../BOM).
+| #10 × 1-1/2 in wood screws | 4 | desk mounting |
 
 ## Notes
 
-- **Built (2026-11):** the bearing seats (+0.1 on the race's outside) fitted perfectly. The races pressed onto the trunnions (+0.2 on their bore) a hair too tight. The 45 N strut lifted the lever: the anchor has since moved, so reprint the frame. Rev 4 takes these on.
-- The balance figures come from an estimate of the Huey head (368 g), on the 470 mm tube, with the carbon tube at about 0.12 g per mm. That gives a forward moment of 195 g·m. The figures include the collar and half the strut's weight, about 55 g, which hang on the tube.
-- Gas struts have seal friction, and some are oil-damped. Neither figure is published. Expect a little built-in friction, and some drag if you move the lever fast.
-- Gas strut force changes about 3 % per 10 °C and fades slowly over the years. The collar or a few grams of ballast correct it.
-- The interference check covers every pair of parts at 0°, 8°, 16°, 24°, 31.5° and 32°: the lever, tube, hose clamp, lever screws, sensor carrier and board turn about the pivot, and the collar, strut and pins are rebuilt at each angle, with the strut's tabs in both clevises. It's clean. The only overlaps are intended:
-  - the bearings' inner races pressed onto the trunnions;
-  - screws in their tapped holes;
-  - the spring's ends in their seats;
-  - the hose clamp in its groove;
-  - the felt on the shoe;
-  - the sensor wires in their channel.
-
-  The bearings' inner races also show a few mm³ against their seals at some angles. That's only the faceted meshes turning against each other.
-- At 0° both down-stop pads rest on their pillars: lowered 0.05 mm, the lever overlaps both. The lever's stop block first touches the pedestal at 32.00°, and the upper half's wedge never reaches the frame. The lever halves have no material inside the tube bore. The lever's stop block first touches the pedestal at 32.00°, and the upper half's wedge never reaches the frame. The lever halves have no material inside the tube bore.
+- **The checks:** `python mk3_rev4.py --check` runs four checks, and all are clean.
+  - **Every pair of parts** at 0°, 8°, 16°, 24°, 31.5° and 32°. The overlaps it allows are the intended ones: screws in their holes, the bearings' inner races on the trunnions, the felt on the strap, the strut's tabs in their clevises, and the hose clamp in its groove. Just past each stop, the lever meets the frame where it should: the pads on the pillars below 0°, both lugs on the up-stop pad above 32°.
+  - **The brake's clearances,** measured as distances, not overlaps: through the whole travel, the strap stays 1.5 mm off the lever, the felt 0.02 mm off the hub, and the knob 6.4 mm or more off the lever; the strap is 0.5 mm off the pad's slot either side, and 1 mm off the shell's ramp.
+  - **The assembly order:** the strap set down into the frame, leaning back; the lever lowered past it; the strap swung onto the hub; the shell lowered over both, its ramp swinging the strap forward.
+  - **The openings' clearance:** the true 3D distance from the frame's front wall and the shell's front and top walls to the lever's halves, the hose clamp and the tube, every 0.25° from 0° to 32°, then every 0.02° round each wall's closest passes. None is under 2 mm. `--openings` runs this one alone.
+- **Chamfers:** The shared chamfer step (`mk3_rev3.chamfer_edges`) once returned a valid frame with the down-stop pillars missing. `mk3_rev4.py`'s version refuses any set of chamfers that takes off more than chamfers could; the strut collar, which still uses the shared one, was checked and lost nothing.
+- **Brake feel:** untested. The felt patch is 16 × 51 mm, and the drag per newton of bolt tension is worked out for felt on PETG at μ = 0.3. Fit the spring if the knob is too touchy without it.
+- **Balance:** see [Balance](#balance). The lever is about 68 cm³ lighter than Rev 3's, mostly near the pivot, and that makes almost no difference: its load at 0° is 1.998 N·m against Rev 3's 1.996.

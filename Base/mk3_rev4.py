@@ -1,8 +1,9 @@
 """
 MkIII collective base - Rev 4: narrow, 73 mm (2.87 in) wide
 
-Rev 3 (../mk3_rev3.py) with the base cut down from 130 mm to 73 mm along the pivot axis, and the lever symmetrical about
-the tube. Everything Rev 4 doesn't change comes from Rev 3: the gas strut, its collar and anchor, the socket for the
+Rev 3 with the base cut down from 130 mm to 73 mm along the pivot axis, and the lever symmetrical about the tube.
+Everything Rev 4 doesn't change comes from Rev 3, through the shared library in this folder: mk3_rev3.py (Rev 3's
+model, imported as r) and mk3_pivot.py (Rev 1's, as r.m / m): the gas strut, its collar and anchor, the socket for the
 uncut 500 mm carbon tube, the down-stop pads and pillars, the MkII friction knob, the chamfers and the fits.
 
 Same frame as Rev 3, except that the tube's plane is now the middle: origin = pivot centre, Y = pivot axis, Z = up,
@@ -59,11 +60,10 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BASE = os.path.dirname(HERE)
-sys.path.insert(0, BASE)
+sys.path.insert(0, HERE)
 
 import cadquery as cq                                                                    # noqa: E402
-import mk3_rev3 as r                                                                     # noqa: E402  (imports Rev 1 as r.m)
+import mk3_rev3 as r                                                                     # noqa: E402  (shared library; Rev 1's as r.m)
 from mk3_pivot import V, cyl, tube, box, fuse, hexprism, rot_y                           # noqa: E402
 
 m = r.m
@@ -209,8 +209,8 @@ STOP_DEG = r.STOP_DEG
 # z -36.5 (Rev 3's frame has it too now) it balances 45 N to within 3 g at the grip over the whole travel (the strut 119 mm long at 0 deg, 140 at 32, in its
 # 102..152 mm stroke): the strut's line passes closer to the pivot, so it has less leverage. The clevis's cheeks shrink
 # to 6.5 mm round the eye (Rev 3: 8), 1.5 mm under the hub, and its back wall runs 2 mm under the hub to the pad.
-# Rev 3's strut, collar pin, pins and clevis code read these from Rev 3's module, so they're set there too (this
-# process only; Rev 3's own files don't change).
+# Rev 3's strut, collar pin, pins and clevis code read these from the shared library (mk3_rev3), so they're set there
+# too, in this process.
 STRUT_F_DESIGN = 45.0
 ANCH_X, ANCH_Z, CLEVIS_R = -9.5, -36.5, 6.5
 r.ANCH_X, r.ANCH_Z, r.CLEVIS_R, r.STRUT_F_DESIGN = ANCH_X, ANCH_Z, CLEVIS_R, STRUT_F_DESIGN
@@ -1603,7 +1603,8 @@ def balance(plot=None):
 # ================================================================ fit-test coupons for the 6808
 # Rev 3's coupon plates (Rev 1's coupon_plate: steps -0.2, 0, +0.2 on the diameter, engraved), sized for the 6808-2RS.
 # Printed and tried, 2026-11-08: the trunnion's 0 (40.1) and the seat's 0 (52.0) both fit the 6808 perfectly, so
-# TRUN_OD and BRG_SEAT_D stand. The tube socket is Rev 3's, which fit perfectly as built, so it has no coupon.
+# TRUN_OD and BRG_SEAT_D stand. The tube socket is Rev 3's, which fit perfectly as built; its coupon (Rev 1's
+# coupon_socket, 20 mm of the bore as closed rings) is still written, for a new tube or a new printer.
 def coupon_trunnion(d, h=8.0, sh=2.0):
     """the trunnion's stub on its inner-race shoulder, with the 1/2" bore, standing on the shoulder"""
     c = fuse(cyl(BRG_IR_SH / 2 - 1.1, (0, 0, 0), (0, 0, sh)), cyl((TRUN_OD + d) / 2, (0, 0, sh), (0, 0, sh + h)))
@@ -1631,7 +1632,7 @@ def export_coupons():
     out = os.path.join(HERE, "stl", "coupons")
     os.makedirs(out, exist_ok=True)
     for name, f in (("coupon_trunnion_6808", coupon_trunnion), ("coupon_bearing_seat_6808", coupon_seat),
-                    ("coupon_dowel_hole", coupon_dowel_hole)):
+                    ("coupon_dowel_hole", coupon_dowel_hole), ("coupon_tube_socket", m.coupon_socket)):
         shp = m.coupon_plate(f)
         bb = shp.BoundingBox()
         print(f"{name:26s} valid={shp.isValid()} size={bb.xlen:.0f} x {bb.ylen:.0f} x {bb.zlen:.0f}")
