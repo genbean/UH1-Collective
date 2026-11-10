@@ -1,8 +1,8 @@
 # Build Heli_Collective_Final_BOM.xlsx and Heli_Collective_DigiKey.csv: one BOM for the whole collective as it is
-# built now: the HeliSR Rev 4.0 board (AS5600s over I2C; not ordered yet), the Huey head Rev 5 (Head/Rev5/) and
-# the MkIII base Rev 4 (Base/Rev4/, not yet printed; Rev 3, in Base/, is the one built first).
+# built now: the HeliSR Rev 4.0 board (AS5600s over I2C; not ordered yet), the Huey head Rev 5 (Head/) and
+# the MkIII base Rev 4 (Base/). Earlier revisions are gone from the repo (git history has them).
 # The board's parts are read from Rev 4.0's board BOM script and checked against its board file; the cables and the
-# head switches from the frozen Rev 3.0 full BOM script (single source of truth). The Digi-Key order placed for
+# head switches from the Rev 3.0 board's order data, kept in BOM/helisr_rev30_order.py (single source of truth). The Digi-Key order placed for
 # Rev 3.0 (DK_ORDER) counts as bought: the parts Rev 4.0 shares with it are not ordered again, and the ones it
 # doesn't use are listed on the Dropped sheet. Head and base lines cite the README or CAD they come from. Lines
 # sized only from the CAD are highlighted for checking; lines covered by the two screw kits (every screw and nut in
@@ -41,17 +41,17 @@ listed = [r for line in bd["SOLDERED"] for r in bfn["expand"](line[0])]
 assert sorted(listed) == sorted(fps), sorted(set(fps) ^ set(listed))
 by_mpn = {it[4]: it for _, items in fd["ORDER"] for it in items}          # refs, qty, desc, mfr, mpn, dk, unit, notes
 
-BRD = "PCB/HeliSR_Rev4.0 board BOM (checked against the board file)"
+BRD = "PCB/HeliSR board BOM (checked against the board file)"
 NEW = "Digi-Key listing 2026-10-27"
-FULL = "PCB/HeliSR_Rev3.0/HeliSR_Rev3.0_BOM.xlsx (Digi-Key cart)"
-HEAD = "Head/Rev5/README.md and Head/Rev4/README.md, Bought"
-BASE = "Base/Rev4/README.md, Bought parts"
+FULL = "BOM/helisr_rev30_order.py (the Rev 3.0 board's Digi-Key cart)"
+HEAD = "Head/README.md, Bought"
+BASE = "Base/README.md, Bought parts"
 BASE1 = "Base/mk3_pivot.py and Base/mk3_rev3.py (the parts Rev 4 keeps)"
-CAD = "Base/Rev4/mk3_rev4.py geometry (no size in any list)"
+CAD = "Base/mk3_rev4.py geometry (no size in any list)"
 AMZ = "Amazon listing on 2026-10-22 (listing)"
 KIT = "AvrestYPT screw kit (Amazon B0FMD5TMSH)"
 SETKIT = "HIQTRADEBYJJ set screw kit (Amazon B0DG33R714)"
-SCREWS = "Head/Rev5 and Base/Rev4/mk3_rev4.py screw lists; Head/Rev5/renders and Base/Rev4/renders screw maps"
+SCREWS = "Head and Base/mk3_rev4.py screw lists; Head/renders and Base/renders screw maps"
 CHECK, INKIT, ORDERED = "check", "kit", "ordered"
 FILL = {CHECK: "FCE4D6", INKIT: "E2EFDA", ORDERED: "DDEBF7"}
 
@@ -87,8 +87,8 @@ board = [(refs, len(bfn["expand"](refs)), desc, mfr, mpn, "Digi-Key", dkpn, CHEC
 SECTIONS.append(("HeliSR Rev 4.0: the parts you solder to the bare board (Digi-Key)", board))
 SECTIONS.append(("HeliSR Rev 4.0: bare PCB and controller", [
     ("PCB", 1, "HeliSR Rev 4.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 39.3 x 33.64 mm", "OSH Park", "", "OSH Park",
-     "", 10.20, 3, "", 0, "Not ordered yet: upload PCB/HeliSR_Rev4.0/HeliSR_Rev4.0_Gerbers.zip. Priced as Rev 3.0's "
-     "order: $10.20 for three bare boards, free shipping", "PCB/HeliSR_Rev4.0/README.md; OSH Park order for Rev 3.0"),
+     "", 10.20, 3, "", 0, "Not ordered yet: upload PCB/HeliSR/HeliSR_Rev4.0_Gerbers.zip. Priced as Rev 3.0's "
+     "order: $10.20 for three bare boards, free shipping", "PCB/HeliSR/README.md; OSH Park order for Rev 3.0"),
     ("J7, J8", 1, "Pro Micro 5V/16 MHz (ATmega32U4), USB-C, with header pins", "OSOYOO", "", "Amazon", "B0B81FGBLY", 11.99, 1,
      "", 0, "Runs the HeliSR firmware (its Rev 4.0 build); plugs into the J7/J8 sockets. Comes with three rows of header "
      "pins, so no separate headers. Also sold as 3 for $21.99. Check that its 2 x 12 pins line up with J7/J8 (15.24 mm "
@@ -100,7 +100,7 @@ SECTIONS.append(("Wiring", [
     ("J11, J14", 2, "JST SR jumper, 4 positions, socket to socket (reversed), 8 in (203 mm)", "JST", "A04SR04SR30K203A",
      "Digi-Key", "455-3633-ND", 1.52, 1, "", 0, "AX1 (collective sensor) and AX4 (throttle sensor); AX2 and AX3 are spare. "
      "Cut each in half for a board-end pigtail. The plug is keyed but the wires may all be one colour: find pin 1 (SDA) "
-     "with a meter. Ports: 1 SDA, 2 GND, 3 VCC, 4 SCL", NEW + "; PCB/HeliSR_Rev4.0/README.md"),
+     "with a meter. Ports: 1 SDA, 2 GND, 3 VCC, 4 SCL", NEW + "; PCB/HeliSR/README.md"),
     ("AX1 lead", 1, "4-core cable, 28 AWG, one twisted pair, foil and braid shield, 3.61 mm OD, white, 1 m (Digi-Key cut "
      "length)", "Tensility", "30-00099", "Digi-Key", "839-30-00099-DS-ND", 3.44, 1, CHECK, 0, "Collective sensor lead: "
      "from the AS5600 in the base, through the lever's cable channels and up the 470 mm tube, spliced to an AX1 pigtail. "
@@ -112,16 +112,16 @@ SECTIONS.append(("Wiring", [
      "at the PC) through the device: laid in the lever's open channels, up the tube and in through the head. The cable "
      "cover's spout is a plain 7.5 mm bore. Splice the USB-C stub back on inside the head (red, black, green, white) "
      "and leave the shield wire unconnected. The cut costs about 15 cm of the 2 m: check the run still reaches. "
-     "Head/Rev5/check_r5.py checks the C plug (a 12 x 7 x 25 mm overmold, its end 5.4 mm into the tube) and its "
+     "Head/check_r5.py checks the C plug (a 12 x 7 x 25 mm overmold, its end 5.4 mm into the tube) and its "
      "cable into the tube: a 12 x 7 overmold up to 38 mm long fits, 14 x 8 up to 35 mm. Measure yours",
-     "Digi-Key cart 2026-10-23; Head/Rev5/README.md (collision check); Base/README.md"),
+     "Digi-Key cart 2026-10-23; Head/README.md (collision check); Base/README.md"),
 ]))
 SECTIONS.append(("Angle sensors", [
     ("AX1, AX4", 2, "AS5600 magnetic encoder module, 23 x 23 mm, with 5 x 2 mm diametric magnet", "WWZMDiB", "", "Amazon",
      "B0CM3C8KFT", 9.99, 4, "", 0, "Sold in fours. AX1: the collective, in the base, DIR to VCC. AX4: the throttle, in "
      "the head, DIR to GND. Read over I2C; the firmware sets each range, nothing is burnt. On each: remove the 0 ohm R1 "
      "and R4 (1 kOhm, PGO to GND), check for about 1 uF from VDD3V3 to GND, and measure the pull-ups (see "
-     "PCB/HeliSR_Rev4.0/README.md, AS5600 modules)", AMZ + "; PCB/HeliSR_Rev4.0/README.md"),
+     "PCB/HeliSR/README.md, AS5600 modules)", AMZ + "; PCB/HeliSR/README.md"),
 ]))
 SECTIONS.append(("Huey head: switches", [
     dk("639H/2", "IN3-IN6", notes="LDG LT EXT / RETR and SL ON / STOW. Common to GND. Price: check the cart"),
@@ -133,19 +133,19 @@ SECTIONS.append(("Huey head: switches", [
     ("IN9-IN12 (+ IN15)", 1, "8-direction stick switch with centre push, 11 x 11 mm body, 2.2 mm metal stick, THT",
      "ALPS Alpine", "RKJXM1015004", "Mouser", "688-RKJXM1015004", None, 1, "", 0, "SEARCH CONT hat Rev 4, on the "
      "SearchHat breakout board (SW1). Directions A-D to IN9-IN12 (EXT, RETR, L, R); the centre push (CTR) to the spare "
-     "IN15 if you want it. Price: check Mouser", "Head/Rev5/Hat/README.md (Rev 4); PCB/SearchHat_Rev1.0/README.md"),
+     "IN15 if you want it. Price: check Mouser", "Head/Hat/README.md; PCB/SearchHat/README.md"),
 ]))
 SECTIONS.append(("SearchHat Rev 1.0: the SEARCH CONT hat's breakout board (hat Rev 4)", [
     ("PCB", 1, "SearchHat Rev 1.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 22 x 29 mm", "OSH Park", "", "OSH Park",
-     "", 4.95, 3, "", 0, "Not ordered yet: upload PCB/SearchHat_Rev1.0/SearchHat_Rev1.0_Gerbers.zip. OSH Park's $5 per "
-     "square inch for three boards (0.99 sq in)", "PCB/SearchHat_Rev1.0/README.md"),
+     "", 4.95, 3, "", 0, "Not ordered yet: upload PCB/SearchHat/SearchHat_Rev1.0_Gerbers.zip. OSH Park's $5 per "
+     "square inch for three boards (0.99 sq in)", "PCB/SearchHat/README.md"),
     ("J1", 1, "JST SH 1.0 mm header, 6 pins, side entry, SMD", "JST", "SM06B-SRSS-TB(LF)(SN)", "Mouser", "", None, 1, "", 0,
      "On the board's back. Leave it off if you solder the wires to the J2 pads instead. Price: check Mouser (or Digi-Key "
-     "with the switch's order)", "PCB/SearchHat_Rev1.0/README.md"),
+     "with the switch's order)", "PCB/SearchHat/README.md"),
     ("J1 lead", 1, "JST SH jumper, 6 positions, socket to socket, about 150 mm", "JST", "A06SR06SR30K152A", "Mouser", "",
      None, 1, "", 0, "Cut in half: one end plugs into J1, the other's wires go to the HeliSR's J2 loom (GND, IN9-IN12, and "
      "IN15 for the centre push). Check pin 1 with a meter. Not needed if you solder to J2. Price: check Mouser",
-     "PCB/SearchHat_Rev1.0/README.md"),
+     "PCB/SearchHat/README.md"),
 ]))
 SECTIONS.append(("Huey head: hardware", [
     setkit("Tube boss", 1, "M5 x 8 set screw", "From the boss's front (lower panel off), into its printed M5 thread; the tip "
@@ -177,7 +177,7 @@ SECTIONS.append(("Huey head: hardware", [
         "Only if the gas strut lifts too much: the base balances a 45 N strut; a 50 N one needs about 42 g, the top of "
         "the range (53 N) about 68 g. Close to the middle of the box. Weigh out what you need", BASE),
 ]))
-SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
+SECTIONS.append(("MkIII base Rev 4", [
     ("Pivot", 2, "Thin-section ball bearing 6808-2RS, 40 x 52 x 7 mm, double sealed", "", "6808-2RS", "Amazon",
      "B012BIHBTQ", None, 2, CHECK, 0, "2-pack listing found 2026-11-08: price not checked, and any 6808-2RS fits (SKF "
      "61808-2RS1, VXB, WJB and others sell it). Pressed onto the 40.1 mm trunnions, in 52.0 mm seats split between the frame and the shell. "
@@ -211,10 +211,10 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
         "through the pillow block and the shell's 9 mm side wall"),
     any_("Brake", 1, "M5 x 35 hex-head bolt (ISO 4017 / DIN 933), zinc or stainless", "Not in the screw kits (they "
          "have only countersunk heads): any hardware store. Its head sits on the floor of the hex pocket in the printed "
-         "knob (Base/Rev4/stl/friction_knob.stl: the MkII knob, its floor 11 mm up), so the knob turns it; it runs down "
+         "knob (Base/stl/friction_knob.stl: the MkII knob, its floor 11 mm up), so the knob turns it; it runs down "
          "through the knob's seat in the shell's top, leaning 30 deg forward, into the M5 nut in the brake strap's head. "
          "35 mm keeps the nut's full thread with or without the optional spring",
-         "Base/Rev4/README.md, Brake", CHECK),
+         "Base/README.md, Brake", CHECK),
     kit("Brake", 1, "M5 hex nut", "Dropped into the slot in the brake strap's head from its +y side; the bolt holds it. "
         "A nyloc nut fits the slot too, if you want the knob to stay put"),
     amz("Brake (optional)", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm free length, pack of 10", "Amazon",
@@ -259,16 +259,16 @@ SECTIONS.append(("Kits, consumables and tools", [
      "order (link 2026-10-23)",
      "Amazon listing 2026-10-23 (the order)"),
     amz("Assembly", 1, "Cyanoacrylate (CA) super glue gel, 0.14 fl oz", "Loctite", "B0006HUJCQ", 3.82, "once",
-        "Magnets into their caps", "Head/Rev4/README.md; Base/README.md"),
+        "Magnets into their caps", "Head/README.md; Base/README.md"),
     amz("Assembly", 1, "Mini hot glue sticks, 0.27 in, 100 pack", "Surebonder", "B003JZII34", 5.97, "once",
         "AS5600 modules. Mini size: they fit a mini glue gun only. Skip this if you already have glue sticks for your gun",
-        "Head/Rev4/README.md; Base/README.md"),
+        "Head/README.md; Base/README.md"),
     amz("Assembly", 1, "White lithium grease, 1.5 oz tube", "Permatex", "B000HBNV58", 3.99, "once",
-        "Bearing grease (not silicone paste)", "Head/Rev4/README.md; Base/README.md"),
+        "Bearing grease (not silicone paste)", "Head/README.md; Base/README.md"),
     amz("Assembly", 1, "Silicone faucet grease, waterproof, 0.5 oz", "Danco", "B000DZFUPC", 5.68, "once",
-        "For the head's four throttle O-rings (grease them lightly before fitting)", "Head/Rev4/README.md"),
+        "For the head's four throttle O-rings (grease them lightly before fitting)", "Head/README.md"),
     amz("Assembly", 1, "Threadlocker, blue 242, 6 ml", "Loctite", "B000I1RSNS", 7.03, "once", "Removable, medium strength",
-        "Head/Rev4/README.md; Base/README.md"),
+        "Head/README.md; Base/README.md"),
     ("Assembly", 1, "Solder paste, low-temperature (Sn42/Bi58, 138 C), syringe", "Chip Quik", "NC191LT10", "Digi-Key",
      "315-NC191LT10-ND", 7.95, "once", "", 0, "For the SMD parts on the board (U1-U3, the 1206 parts, the JST headers, "
      "SW1). Needs a hot plate or hot air tool and flux; with parts on both sides, do the back first. Optional: hand-soldering works too", "Digi-Key cart 2026-10-23"),
@@ -277,9 +277,9 @@ SECTIONS.append(("Kits, consumables and tools", [
     amz("Assembly", 1, "Taps, M3 / M4 / M5 / M6 / M8, 5-piece set", "Amazon", "B0FN49CGJG", 6.49, "once",
         "M3: the base's side-cover holes (8, through the walls) and back-plate holes (6). The head's threads (M3 and "
         "up) are printed",
-        "Head/Rev5/README.md; Base/README.md"),
+        "Head/README.md; Base/README.md"),
     amz("Assembly", 1, "Drill bit, 5.2 mm HSS, 2 pcs", "Amazon", "B0FN3WV6DW", 6.99, "once",
-        "The tube's cross hole is 5.2 mm", "Head/Rev4/README.md"),
+        "The tube's cross hole is 5.2 mm", "Head/README.md"),
 ]))
 
 # Hardware, kits, consumables and tools the user supplies themselves (2026-10-23): left off the BOM
@@ -306,47 +306,48 @@ def _delivered(l):
 SECTIONS = [(t, [_delivered(l) for l in lines]) for t, lines in SECTIONS]
 
 PRINTED = [
-    ("Head", "Head/Rev5/stl/HueyHeadR5-GripBearingCoupons.stl", 1, "Flat, labels up. Optional: checks the head's 25.2 mm "
+    ("Head", "Head/stl/HueyHeadR5-GripBearingCoupons.stl", 1, "Flat, labels up. Optional: checks the head's 25.2 mm "
      "tube bore on the carbon tube (the grip now rides on O-rings)"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-ORingCoupon.stl", 1, "Upright. A slice of the grip's bore with one O-ring groove: "
+    ("Head", "Head/stl/HueyHeadR5-ORingCoupon.stl", 1, "Upright. A slice of the grip's bore with one O-ring groove: "
      "fit a greased 24 x 2 O-ring and slide it on the carbon tube before printing the grip (about 2 g)"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-SensorSeatCoupon.stl", 1, "The same way round as in the head on its rear wall. "
+    ("Head", "Head/stl/HueyHeadR5-SensorSeatCoupon.stl", 1, "The same way round as in the head on its rear wall. "
      "Optional: slide the AS5600 module through it first"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Body.stl", 1, "One piece: box, neck, faux friction knob, boss, sensor pod and "
+    ("Head", "Head/stl/HueyHeadR5-Body.stl", 1, "One piece: box, neck, faux friction knob, boss, sensor pod and "
      "trigger mount. On its rear wall, with tree supports under the neck, knob and tube bore; then ream the bore to a "
      "press fit on the tube"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-LowerPanel-Hat4-Black.stl + -WhiteText.stl", 1, "Front face down, two colours, no "
+    ("Head", "Head/stl/HueyHeadR5-LowerPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours, no "
      "supports. The SEARCH CONT hat Rev 4's panel: the hat's four bosses grow straight up off its back"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-UpperPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Trigger.stl", 1, "On either flat side"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Hat4-Cap.stl", 1, "Base down, as exported: the stick's socket opens on the bed. "
+    ("Head", "Head/stl/HueyHeadR5-UpperPanel-Black.stl + -WhiteText.stl", 1, "Front face down, two colours"),
+    ("Head", "Head/stl/HueyHeadR5-Trigger.stl", 1, "On either flat side"),
+    ("Head", "Head/stl/HueyHeadR5-Hat-Cap.stl", 1, "Base down, as exported: the stick's socket opens on the bed. "
      "Push it onto the switch's stick last"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
-    ("Head", "Head/Rev5/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
-    ("Base", "Base/Rev4/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_dowel_hole.stl", 1,
-     "Fit-test coupons: the trunnion's and the seat's 0 fitted (2026-11-08); print the dowel-hole coupon first and tune "
-     "DOWEL_CLR in mk3_rev4.py. The tube socket is Rev 3's, which fits"),
-    ("Base", "Base/Rev4/stl/frame.stl", 1, "Plate down"),
-    ("Base", "Base/Rev4/stl/shell.stl", 1, "Top down: the bearing half-seats, the slot and the brake strap's bay open "
+    ("Head", "Head/stl/HueyHeadR5-ThrottleGrip.stl", 1, "Upright, bottom end down; no supports"),
+    ("Head", "Head/stl/HueyHeadR5-FrictionCollar.stl", 1, "Bottom face down, O-ring groove up"),
+    ("Head", "Head/stl/HueyHeadR5-Pinion.stl", 1, "As exported, shoulder up; fit it shoulder down. The magnet shaft presses into its hex"),
+    ("Head", "Head/stl/HueyHeadR5-MagnetShaft.stl", 1, "Cap face down, pin up"),
+    ("Base", "Base/stl/coupons/coupon_trunnion_6808.stl, coupon_bearing_seat_6808.stl, coupon_dowel_hole.stl, "
+     "coupon_tube_socket.stl", 1,
+     "Fit-test coupons: the trunnion's and the seat's 0 fitted (2026-11-08), and the tube socket (Rev 3's) fits; print "
+     "the dowel-hole coupon first and tune DOWEL_CLR in mk3_rev4.py"),
+    ("Base", "Base/stl/frame.stl", 1, "Plate down"),
+    ("Base", "Base/stl/shell.stl", 1, "Top down: the bearing half-seats, the slot and the brake strap's bay open "
      "upward. The knob's seat is sunk into the top, on the bed, and its floor slopes 30 deg: support it from the bed, "
      "in the seat only"),
-    ("Base", "Base/Rev4/stl/lever_sensor.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
+    ("Base", "Base/stl/lever_sensor.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
      "inner face"),
-    ("Base", "Base/Rev4/stl/lever_cable.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
+    ("Base", "Base/stl/lever_cable.stl", 1, "On its joint face, trunnion up. Support only the up-stop lug's "
      "inner face"),
-    ("Base", "Base/Rev4/stl/lever_dowel.stl", 4, "Standing on end"),
-    ("Base", "Base/Rev4/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
-    ("Base", "Base/Rev4/stl/strap.stl", 1, "On its side, the nut's slot up: its bending then runs along the layers. "
+    ("Base", "Base/stl/lever_dowel.stl", 4, "Standing on end"),
+    ("Base", "Base/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, on the outer face"),
+    ("Base", "Base/stl/strap.stl", 1, "On its side, the nut's slot up: its bending then runs along the layers. "
      "No supports"),
-    ("Base", "Base/Rev4/stl/strut_collar.stl", 1, "Standing on one end. The same part as Rev 3's"),
-    ("Base", "Base/Rev4/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket, its floor 11 mm up, and a "
+    ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end. The same part as Rev 3's"),
+    ("Base", "Base/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket, its floor 11 mm up, and a "
      "pocket in its underside for the optional spring. Underside down, hex pocket open at the top"),
 ]
 DROPPED = [
     ("TE 1825910-6 tact switches for the SEARCH CONT hat (450-1650-ND)", 4, "Bought in order for the tact-switch "
-     "hats (Rev 1-3); hat Rev 4 uses the ALPS RKJXM1015004 on its own board", "Head/Rev5/Hat/README.md"),
+     "hats (Rev 1-3); hat Rev 4 uses the ALPS RKJXM1015004 on its own board", "Head/Hat/README.md"),
     ("HeliSR Rev 3.0 bare PCBs (OSH Park, 3 boards, $10.20)", 3, "Bought 2026-10-21. Rev 4.0 replaces the board: it reads "
      "the AS5600s over I2C instead of their analog output", "OSH Park order, 2026-10-21"),
     ("YAGEO RC0805FR-071KL 1 kOhm 0805 (311-1.00KCRCT-ND)", 2, "Bought in order for Rev 3.0's PROG buttons (R1, "
@@ -391,31 +392,30 @@ DROPPED = [
     ("Base Rev 3 adjustable down-stops: 2 x M4 x 16 countersunk + 4 M4 nuts", 0,
      "The down-stop is fixed at 0 deg: two pillars printed into the frame", "Base/mk3_rev3.py"),
     ("6006-2RS ball bearings, 30 x 55 x 13 (BlueStars, Amazon B09XTV8XYK)", 2, "Bought for base Rev 3. Base Rev 4 runs "
-     "on 6808-2RS thin-section bearings", "Base/README.md (Rev 3)"),
+     "on 6808-2RS thin-section bearings", "Base Rev 3 (removed; git history)"),
     ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 12: the "
-     "set is still used for the head's trigger pivot", "Base/README.md (Rev 3)"),
+     "set is still used for the head's trigger pivot", "Base Rev 3 (removed; git history)"),
     ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M4 "
-     "x 50 socket heads + M4 nuts), and its brake strap's hinge pin is an M4 x 50 socket head", "Base/README.md (Rev 3)"),
+     "x 50 socket heads + M4 nuts), and its brake strap's hinge pin is an M4 x 50 socket head", "Base Rev 3 (removed; git history)"),
     ("Base Rev 4's first brake: the sliding shoe's back plate (6 x M3 x 16 countersunk) and its M5 x 30 hex bolt", 7,
      "Replaced by the hinged brake strap (2026-11-09): no back plate, and the knob's bolt is an M5 x 35",
-     "Base/Rev4/README.md"),
+     "Base/README.md"),
     ("Base Rev 4's first shell screws: 4 x M3 x 20 countersunk + M3 nuts", 4, "The shell now takes four M4 x 50 socket "
      "head cap screws from the lever's kit, into M4 nuts slid in from the pillow blocks' sides (2026-11-08)",
-     "Base/Rev4/README.md"),
+     "Base/README.md"),
 ]
 SOURCES = [
-    ("HeliSR Rev 4.0 board", "PCB/HeliSR_Rev4.0 (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
+    ("HeliSR Rev 4.0 board", "PCB/HeliSR (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
      "Designed and checked, not ordered yet"),
-    ("HeliSR Rev 3.0 board", "PCB/HeliSR_Rev3.0", "Replaced by Rev 4.0. Bare PCB ordered from OSH Park on 2026-10-21, and "
-     "its parts in the Rev 3.0 Digi-Key order; folder frozen and read-only. Its full BOM still supplies the cables and "
+    ("HeliSR Rev 3.0 board", "BOM/helisr_rev30_order.py", "Replaced by Rev 4.0 and removed from the repo. Bare PCB ordered "
+     "from OSH Park on 2026-10-21, and its parts in the Rev 3.0 Digi-Key order; its order data still supplies the cables and "
      "head switches"),
-    ("SearchHat Rev 1.0 board", "PCB/SearchHat_Rev1.0 (tools/gen_searchhat.py)", "The SEARCH CONT hat Rev 4's breakout: "
+    ("SearchHat Rev 1.0 board", "PCB/SearchHat (tools/gen_searchhat.py)", "The SEARCH CONT hat Rev 4's breakout: "
      "designed and checked (DRC clean), not ordered yet"),
-    ("Huey head", "Head/Rev5", "Current head design: Rev 5, Rev 4 cut to the real UH-1 panels' dimensions, with printed "
-     "threads. Rev 4 (Head/Rev4), the larger one-piece head it came from, is kept as a fallback"),
-    ("MkIII base Rev 4", "Base/Rev4 (mk3_rev4.py imports Base/mk3_rev3.py and Base/mk3_pivot.py)",
+    ("Huey head", "Head", "Current head design: Rev 5, cut to the real UH-1 panels' dimensions, with printed "
+     "threads and the SEARCH CONT hat on the SearchHat board"),
+    ("MkIII base Rev 4", "Base (mk3_rev4.py, on the shared library Base/mk3_rev3.py and Base/mk3_pivot.py)",
      "Current base, 73 mm wide; its first frame, shell and lever were printed and built 2026-11-08: check the orange lines"),
-    ("MkIII base Rev 3", "Base (mk3_rev3.py)", "The base built first (2026-11). Rev 4 replaces it"),
     ("Prices", "Digi-Key cart 2026-10-19 (JST headers 2026-10-22; Rev 4.0's new parts and cables 2026-10-27); Amazon "
      "listings 2026-10-22; OSH Park order 2026-10-21",
      "Pack prices, before shipping and tariff"),
@@ -455,7 +455,7 @@ COLS = ["#", "Where", "Qty per collective", "Pack", "Packs needed", "Packs bough
 NC = len(COLS)
 setup(ws, "Heli Collective - final BOM",
       "Everything bought for one collective: the HeliSR Rev 4.0 board (the bare PCB from OSH Park, every part on it from "
-      "Digi-Key), the Huey head Rev 5 and the MkIII base Rev 4 (not yet printed). Packs bought counts what's already "
+      "Digi-Key), the Huey head Rev 5 and the MkIII base Rev 4. Packs bought counts what's already "
       "ordered, including the Digi-Key order placed for Rev 3.0: Rev 4.0 shares most of its parts. Blue line: "
       "already ordered. Green: covered by a kit or pack priced on another line. Orange: size taken from the base's CAD, not from a parts list, so check "
       "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Amazon listings "

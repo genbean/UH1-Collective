@@ -154,7 +154,7 @@ v1-06); which part on the module is R1 or R4 is from the module itself, so check
 - **Wire VCC, GND, SDA and SCL** to the port: pin 1 SDA, 2 GND, 3 VCC, 4 SCL.
 - **Check the module's own pull-ups.** The AS5600 has none of its own; the module may add some (ams suggests
   4.7 kΩ). With the module unpowered and unplugged, measure the resistance from SDA to VCC and from SCL to VCC. The
-  limit is the 6 mA in [The I²C circuit](#the-ic-circuit):
+  limit is the 6 mA in [The I²C circuit](#the-i²c-circuit):
   - **Open circuit (no reading):** no pull-ups. Fit 2.2 kΩ for the board's R1–R8 as listed.
   - **10 kΩ or 4.7 kΩ:** fine; with the board's 2.2 kΩ the bus sinks 3.3 or 3.8 mA. They also speed up the
     rising edges on a long cable. Leave them, and fit R1–R8 as listed.
