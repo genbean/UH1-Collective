@@ -183,10 +183,10 @@ free for other use.
 
 ## Firmware
 
-The HeliSR firmware in `Software/firmware/HeliSR` has a build for this board: `Software/firmware/build.ps1 -Board 4.0`,
+The HeliSR firmware in `Software/firmware/HeliSR` is built for this board by `Software/firmware/build.ps1`,
 shipped as `firmware\HeliSR_Rev4.0_16MHz.hex`. It:
 
-- reads the shift registers on pins 14 (data), 15 (clock) and A0 (load) instead of 2, 15 and 3, in Rev 3.0's bit order;
+- reads the shift registers on pins 14 (data), 15 (clock) and A0 (load), in the same bit order as Rev 3.0;
 - runs the TWI on pins 2 and 3 at 100 kHz, or 50, 25 or 10 kHz for long cables (set in HeliSR Configurator), connects
   one port's PCA9546A channel at a time and reads its AS5600's ANGLE register (address 0x36), scaled to the analog
   inputs' 0–4092. It also reads STATUS, RAW ANGLE and AGC, for the magnet checks and the Configurator's helper;
@@ -206,11 +206,7 @@ The sensor code is tested on a PC against a model of the PCA9546A and the AS5600
 Nothing of this board's firmware has run on the board itself: the shift-register pins, the I²C timing on real
 cables, the bus recovery and the sensors' behaviour all wait for one. `Software/PLAN.md` lists what's still to check.
 
-**Keep the builds apart.** Rev 3.0 firmware on a Rev 4.0 board does no harm: it drives the I²C clock line and listens
-on SDA, which only the pull-ups hold, and reads A0–A3 as analog inputs. A Rev 4.0 build on a **Rev 3.0** board would
-drive A0 and A1 against whatever is on AX4 and AX3, and pull pin 2 against U2's QH output. So every build carries a tag
-saying which board it's for, INFO reports it, and HeliSR Configurator checks the tag in a `.hex` against the connected
-firmware before it flashes, and asks before putting Rev 4.0 firmware on a Pro Micro whose board it can't tell.
+**Only this board.** The firmware is for Rev 4.0 only. Every build carries a tag saying so, INFO reports it, and HeliSR Configurator refuses a `.hex` tagged for another board and asks before flashing an untagged one or a Pro Micro whose firmware reports another board.
 
 ## Files
 
