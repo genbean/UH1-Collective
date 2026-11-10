@@ -35,12 +35,14 @@ their front and back ends bevelled 45 deg in line with the frame's corner chamfe
 
 Brake: a strap behind the hub. A rigid printed strap, 18 mm wide and 8 mm deep, lined with 1.5 mm felt, wraps the
 hub's back between the up-stop lugs, from 54 deg below the axis to 42 above (the felt from 52 to 40), down into the
-up-stop pad's slot and up under its head. Its bottom end is a knuckle on an M4 x 50
-pin through the up-stop pad, just behind the strut's clevis, in a slot 0.5 mm clear either side that keeps it 1.5 mm or
-more off the lugs; gussets run from the knuckle into the band, and from the band's top up into a solid head carrying
+up-stop pad's slot and up under its head. At the bottom an arm runs forward under the hub, through the up-stop
+pad's slot (0.5 mm clear either side, which keeps it 1.5 mm or more off the lugs), and forks into two cheeks on an
+M4 x 50 pin at x 5, z -40: through the pillow blocks, a web inside each, and the strut clevis's back block, cut down
+to a 6 mm rib there. So far forward, the strap's swing presses the felt evenly along its length, and the knob gets
+59 mm of leverage. Gussets run from the band into the arm, and from the band's top up into a solid head carrying
 an M5 nut. The knob sits in a seat sunk into the shell's top, and its M5 x 35 bolt leans forward 30 deg from vertical,
-so turning it draws the head up and forward and the strap swings about its hinge onto the hub: 41 mm of leverage
-about the hinge, where a vertical bolt would get 12. The shell is solid behind the hub, so the seat's load goes
+so turning it draws the head up and forward and the strap swings about its hinge onto the hub: 59 mm of leverage
+about the hinge, where a vertical bolt would get 31. The shell is solid behind the hub, so the seat's load goes
 straight into its walls. The knob has a pocket in its underside for an optional spring; without one it sits on the
 seat. The strap goes in before the lever and leans back onto its bay's back wall while the lever drops past it; a
 ramp in the shell's bay swings it forward onto the hub as the shell goes on, so the nut is on the bolt's axis.
@@ -281,14 +283,13 @@ GRID_A, GRID_H, GRID_LANE, GRID_CLR, GRID_EDGE = 1.2, 0.7, 0.6, 0.1, 0.5   # 2.4
 
 # ---------------------------------------------------------------- brake (all on y = 0 unless noted; angles in the XZ
 # plane are from +x, behind the axis, up positive)
-# A rigid printed strap, lined with felt, wraps the back of the hub between the up-stop lugs. Its bottom end is a
-# knuckle hinged on an M4 pin through the up-stop pad, just behind the strut's clevis; its top end is a solid head with
-# an M5 nut pressed into it. The knob sits in a seat sunk into the shell's top behind the hub, and its M5 bolt leans
-# forward KNOB_TILT from vertical: turning the knob draws the head up and forward, so the strap swings about its hinge
-# onto the hub. A vertical bolt there would pull nearly along the line from the hinge to the head (12 mm of leverage
-# about the hinge), so it would mostly stretch and bend the strap; leaning it forward 30 deg gives 41 mm, so the same
-# pull closes the strap 3.4 times as hard. 30 deg is as far as it can lean with the seat sunk into the shell's top (the
-# shell prints top down, so nothing can stand proud of it) and 2 mm or more of shell between the seat and the hub.
+# A rigid printed strap, lined with felt, wraps the back of the hub between the up-stop lugs. Its bottom end is an arm
+# forward under the hub to a hinge on an M4 pin through the strut clevis's back block; its top end is a solid head with
+# an M5 nut in it. The knob sits in a seat sunk into the shell's top behind the hub, and its M5 bolt leans forward
+# KNOB_TILT from vertical: turning the knob draws the head up and forward, so the strap swings about its hinge onto the
+# hub. Leaning it forward 30 deg puts its line 58.6 mm from the hinge (31 for a vertical bolt). 30 deg is as far as it
+# can lean with the seat sunk into the shell's top (the shell prints top down, so nothing can stand proud of it) and
+# 2 mm or more of shell between the seat and the hub.
 FELT_T = 1.5
 STRAP_HW = 9.0                                   # 18 wide: 2 mm clear of the up-stop lugs (|y| 11..21) either side
 SLOT_HW = STRAP_HW + 0.5                         # the knuckle's slot through the up-stop pad: it guides the strap, so it
@@ -301,8 +302,20 @@ STRAP_PHI = (-54.0, 42.0)                        # the band; the arm on its bott
 FELT_PHI = (-52.0, 40.0)                         # the felt, 2 deg in from each end
 HEAD_FROM = 12.0                                 # the head's gusset takes the band from here up
 FELT_HW = STRAP_HW - 1.0                         # 16 wide, clear of the strap's chamfers
-HINGE_X, HINGE_Z, KNUCKLE_R = 24.0, -38.0, 6.2   # the hinge: 4 mm of strap round its pin; the knuckle 2.8 mm behind
-                                                 # the strut clevis's back walls
+# The hinge: well forward, under the hub, its pin through the strut clevis's back block. The further forward it is,
+# the more evenly the strap's swing presses the felt (in proportion to the hinge's distance from the felt's radius
+# through it) and the more leverage the knob gets: here the bolt's line passes 58.6 mm from it. x 5 is as far forward
+# as it goes: the knuckle 2.2 mm behind the clevis's cheeks; z -40 as low, the knuckle 3.8 mm over the base plate.
+# Behind the clevis's cheeks the back block narrows to a rib RIB_HW either side of the middle, which the pin goes
+# through; the strap forks into two cheeks either side of it (the strap's middle is cut away round it), so everything
+# stays inside SLOT_HW, 1.5 mm or more off the up-stop lugs
+HINGE_X, HINGE_Z, KNUCKLE_R = 5.0, -40.0, 6.2    # the hinge; 4 mm of strap round its pin
+RIB_HW = 3.0                                     # the clevis block's rib through the hinge: 6 mm wide
+RIB_TOP = ANCH_WALL_Z                            # its top, as the clevis's back walls (2 mm under the hub)
+FORK_X = 17.5                                    # the rib, and the up-stop pad either side of the middle, end here
+# Either side of the strap, a web from each pillow block inward to SLOT_HW + 1 carries the pin too, so each of the
+# strap's cheeks runs on the pin between the rib and a web; the webs' tops are level with the rib's
+HINGE_WEB = (HINGE_X - 7.0, HINGE_X + 7.0)       # their length along x, round the pin
 HINGE_HOLE_R = 2.1                               # the knuckle on the pin's 4 mm shank: a running fit
 HINGE_HEAD_Y = 23.0                              # its pin, an M4 x 50 socket head: the head on the floor of a counterbore
                                                  # in the +y block's outer face, the nut in a hex pocket in the -y block's
@@ -321,9 +334,9 @@ BOLT_L = 35.0                                    # M5 x 35 hex bolt
 # REST_DEG onto the back wall of its bay, which is far enough for the lever's hub to drop past it. In the shell the back
 # of its bay is a ramp RAMP_CLR behind the head, parallel to the bolt: lowering the shell, the ramp meets the leaning
 # head in the last few mm and swings it forward onto the hub, so the nut ends up on the bolt's axis for the knob.
-REST_DEG = 8.0                                   # the dropping hub clears the felt's top end (40 deg up) by 1.0 mm
+REST_DEG = 8.5                                   # the dropping hub clears the felt's top end (40 deg up) by 1.5 mm
 RAMP_CLR = 1.0
-BACK_X, BACK_WALL = 56.5, 3.0                    # the frame's and shell's back face, and their wall behind the shell's
+BACK_X, BACK_WALL = 57.0, 3.0                    # the frame's and shell's back face, and their wall behind the shell's
                                                  # bay: 1 mm behind the head leaning back REST_DEG, so the shell's ramp
                                                  # can catch it
 BAY_Z0 = HINGE_Z - KNUCKLE_R - 1.5               # the floor of the slot and the frame's bay
@@ -529,7 +542,8 @@ def frame():
                   # down-stop pillar under the pad, run on into the pillow block
                   box(PAD_X[0], -BLOCK_HW + 0.5, *sorted((s * PAD_DY[0], yi + s * 0.5)), Z_PLATE - 0.1, PAD_Z)]
     pad = box(*PED_X, -(BRG_Y0 + 0.5), BRG_Y0 + 0.5, Z_PLATE - 0.1, USTOP_Z)                            # up-stop pad
-    parts += [pad, frame_back(), anchor_clevis(), *corner_gussets(), front_wall()]
+    webs = [box(*HINGE_WEB, *sorted((s * (SLOT_HW + 1.0), s * (BRG_Y0 + 0.5))), Z_PLATE - 0.1, RIB_TOP) for s in (-1, 1)]
+    parts += [pad, frame_back(), anchor_clevis(), *corner_gussets(), front_wall(), *webs]
     f = fuse(*parts)
 
     a4, t4 = m.NUT_AF[4], m.NUT_T[4]
@@ -1006,7 +1020,9 @@ def strap_outline():
     head = r._hull(blk + _arc(r0, HEAD_FROM, p1) + _arc(r1, HEAD_FROM, p1))
     knuckle = [(HINGE_X + KNUCKLE_R * math.cos(math.radians(a)), HINGE_Z + KNUCKLE_R * math.sin(math.radians(a)))
                for a in range(0, 360, 3)]
-    arm = r._hull(knuckle + _arc(r0, p0, p0 + 12.0) + _arc(r1, p0, p0 + 12.0))
+    xg = FORK_X + 1.5                                    # the arm's gusset underneath: level with the knuckle's bottom
+    zg = HINGE_Z - KNUCKLE_R + (xg - HINGE_X) * math.sin(math.radians(REST_DEG))   # as the strap leans back REST_DEG
+    arm = r._hull(knuckle + [(xg, zg)] + _arc(r0, p0, p0 + 12.0) + _arc(r1, p0, p0 + 12.0))
     return band, head, arm
 
 
@@ -1028,7 +1044,7 @@ def frame_bay_back():
                 x, z = x0 + (x1 - x0) * i / 40, z0 + (z1 - z0) * i / 40
                 if z <= 0.0 and math.hypot(x, z) >= STRAP_R0 - 0.01:
                     best = max(best, x)
-    return round(best, 2)
+    return round(best + 0.1, 2)                          # 0.1 for the sampling: the strap rests on the wall's edge
 
 
 def nut_slot():
@@ -1056,6 +1072,10 @@ def strap():
     top = [(q.x, q.z) for q in (on_bolt(T_HEAD, -80), on_bolt(T_HEAD + 80, -80), on_bolt(T_HEAD + 80, 80),
                                 on_bolt(T_HEAD, 80))]
     s = s.cut(gusset_xz(top, -20, 20))                         # the band's top end, level with the head's face
+    rc = RIB_HW + 1.5                                          # its fork round the clevis block's rib: the middle
+    zf = RIB_TOP + 1.5 + (FORK_X + 1.5 - HINGE_X) * math.sin(math.radians(REST_DEG))   # stays 1.5 mm over the rib,
+    s = s.cut(box(-20, FORK_X, -rc, rc, -60, 10))                                      # leaning back REST_DEG too
+    s = s.cut(box(-20, FORK_X + 1.5, -rc, rc, -60, zf))
     s = chamfer_edges(s.clean())
     return s.cut(cq.Solid.makeCone(4.5, 2.8, 1.7, on_bolt(T_HEAD + 0.01), -u)).clean()   # lead-in for the bolt's tip
 
@@ -1071,9 +1091,14 @@ def strap_at(shape, deg):
 
 
 def hinge_cuts():
-    """the knuckle's slot through the up-stop pad, the bay behind it, the pin's hole through the pad and both pillow
-    blocks, the pin's head's counterbore (+y) and its nut's pocket (-y)"""
-    return [box(HINGE_X - KNUCKLE_R - 1.5, PED_X[1] + 0.5, -SLOT_HW, SLOT_HW, BAY_Z0, USTOP_Z + 1),
+    """the strap's way through the frame: its arm's channel through the up-stop pad; over the strut clevis's back block,
+    room for the strap's middle; either side of the block's rib, room for the strap's cheeks (the block is cut down to
+    RIB_HW either side of the middle there); the bay behind the pad; and the pin's hole through the rib and both pillow
+    blocks, the head's counterbore (+y) and the nut's pocket (-y)"""
+    x0 = HINGE_X - KNUCKLE_R - 1.5
+    cheeks = [box(x0, FORK_X + 0.01, *sorted((s * RIB_HW, s * SLOT_HW)), BAY_Z0, RIB_TOP + 0.01) for s in (-1, 1)]
+    return [box(FORK_X, PED_X[1] + 0.5, -SLOT_HW, SLOT_HW, BAY_Z0, USTOP_Z + 1),               # the arm, through the pad
+            box(x0, FORK_X + 0.01, -SLOT_HW, SLOT_HW, RIB_TOP, USTOP_Z + 1), *cheeks,          # over and beside the rib
             box(PED_X[1], frame_bay_back(), -BAY_HW, BAY_HW, BAY_Z0, 1.0),
             cyl(m.LS_CLR_R, (HINGE_X, -BLOCK_Y1 - 1, HINGE_Z), (HINGE_X, BLOCK_Y1 + 1, HINGE_Z)),
             cyl(SHELL_CB_R, (HINGE_X, HINGE_HEAD_Y, HINGE_Z), (HINGE_X, BLOCK_Y1 + 1, HINGE_Z)),
@@ -1449,7 +1474,7 @@ def check_assembly(step=2.0):
         z = 80.0 - i * step
         hit(lever_b, V(0, 0, z), {**frame_, **rest}, z)
         near = min(near, gap({k: x.translate(V(0, 0, z)) for k, x in halves.items()}, rest))
-    print(f"  the lever goes in past the strap leaning back {REST_DEG:.0f} deg: {near:.2f} mm at the closest")
+    print(f"  the lever goes in past the strap leaning back {REST_DEG:.1f} deg: {near:.2f} mm at the closest")
     for i in range(int(REST_DEG / 0.5) + 1):
         a = REST_DEG - i * 0.5
         hit(lean_(strap_b, a), o, {**frame_, **lever_b}, a)

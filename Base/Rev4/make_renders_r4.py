@@ -128,8 +128,21 @@ def frame_top(C):
     """the frame alone from above, the brake strap's bay at the top of the picture"""
     P = {"frame": (to_mesh(v.static_parts()["frame"]), C["frame"])}
     save(title(R.render(P, (-0.3, 0.0, 1.0), up=(1, 0, 0), size=(1100, 1400), zoom=1.0)[0],
-               "Rev 4 frame from above", "The up-stop pad behind the axis, slotted for the brake strap's knuckle, the "
-               "strap's bay behind it, and the 45 deg gussets at the pillow blocks' front corners"), "rev4_frame_top.png")
+               "Rev 4 frame from above", "The up-stop pad, slotted for the brake strap's arm; the clevis's rib and the "
+               "webs that carry its hinge pin"), "rev4_frame_top.png")
+
+
+def frame_strap_top(C):
+    """the frame from above with the brake strap on its pin: its cheeks either side of the clevis's rib"""
+    S = v.static_parts()
+    P = {"frame": (to_mesh(S["frame"]), C["frame"]), "strap": (to_mesh(S["strap"]), C["strap"]),
+         "felt": (to_mesh(S["felt"]), C["felt"])}
+    for g, shp, _ in v.brake_screws():
+        if g.startswith("hinge") or g == "brake nut":
+            P[g] = (to_mesh(shp), RED)
+    save(title(R.render(P, (-0.3, 0.0, 1.0), up=(1, 0, 0), size=(1100, 1400), zoom=1.0)[0],
+               "Rev 4 frame from above, with the brake strap in", "Its cheeks either side of the clevis's rib, its pin "
+               "through the rib and the webs"), "rev4_frame_strap_top.png")
 
 
 def assembly_top(C, P0=None):
@@ -214,6 +227,7 @@ def main():
     lever_views(C)
     usb_views(C)
     frame_top(C)
+    frame_strap_top(C)
     assembly_top(C)
     P0 = scene(0.0, C, tube_to=-200.0)
     P32 = scene(v.STOP_DEG, C, tube_to=-200.0)
@@ -237,8 +251,8 @@ def main():
     # the brake and the slotted up-stop: frame, caps and covers hidden, from behind and below
     inner = ("frame", "shell", "friction_knob", "cover_sensor", "cover_cable", "hardware", "bearing_outer",
              "bearing_seal", "usb_cable", "gas_strut", "strut_pins", "strut_collar", "carbon_tube", "hose_clamp")
-    for th, P, name, sub in ((0.0, P0, "rev4_brake_lugs.png", "At 0 deg the strap's arm and knuckle sit between the two "
-                              "up-stop lugs, 2 mm clear of each; the hub between them is a plain cylinder for the felt"),
+    for th, P, name, sub in ((0.0, P0, "rev4_brake_lugs.png", "At 0 deg the strap's arm runs between the two up-stop "
+                              "lugs, 2 mm clear of each; the hub between them is a plain cylinder for the felt"),
                              (v.STOP_DEG, P32, "rev4_brake_lugs_32deg.png", "At 32 deg the lugs have swung down, "
                               "either side of the strap, onto the pad behind the axis (frame hidden)")):
         save(title(R.render(hide(P, *inner), (1.0, -0.55, -0.45), size=(1500, 1050),
@@ -407,14 +421,14 @@ def screw_views(P0):
                [np.array(hb.toTuple())]),
               ("M5 nut", "dropped into the slot in the strap's head from its +y side; the bolt holds it",
                [np.array(v.on_bolt(v.T_NUT - m.NUT_T[5] / 2).toTuple())]),
-              ("M4 x 50 socket head cap", "the strap's hinge pin: through the pillow blocks and the up-stop pad, head "
-               "on +y, nut on -y", [np.array([v.HINGE_X, 0, v.HINGE_Z])]),
-              ("Brake strap + felt (printed)", "hinged in the up-stop pad; the felt on the hub",
+              ("M4 x 50 socket head cap", "the strap's hinge pin: through the pillow blocks, the webs and the strut "
+               "clevis's rib, head on +y, nut on -y", [np.array([v.HINGE_X, 0, v.HINGE_Z])]),
+              ("Brake strap + felt (printed)", "hinged under the hub, on the clevis's rib; the felt on the hub",
                [np.array([(v.STRAP_R0 + 4) * np.cos(a), 0, (v.STRAP_R0 + 4) * np.sin(a)])]),
               ("Friction knob (printed)", "the MkII knob, in its seat; the pocket in its underside takes an optional "
                "10 mm spring", [np.array(v.on_bolt(4.0, -9.0).toTuple())])],
              (0, -1, 0), "MkIII base Rev 4 screws: the brake, in section on the tube's plane", "rev4_screws_brake.png",
-             focus=((0, 0, -50), (70, 0, 72)), zoom=1.0, parallel=True)
+             focus=((-15, 0, -50), (70, 0, 72)), zoom=1.0, parallel=True)
     labelled(P0, [("M3 x 12 countersunk  (x4)", "sensor cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(-1)),
                   ("M4 x 12 countersunk  (x2)", "strut collar clamp: heads 2 mm into the -y ear", heads_of("clamp screw")),

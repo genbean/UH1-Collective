@@ -196,7 +196,8 @@ SECTIONS.append(("MkIII base Rev 4 (not yet printed)", [
         "halves. Screw the halves up before pressing the bearings on. Shell: four M4 x 50, two each side, from the top down 13 mm "
         "counterbores in its side walls, each centred on the joint, into nuts slid into the pillow blocks from "
         "their outer faces, under the side covers. Brake strap: one M4 x 50 is its hinge "
-        "pin, through the pillow blocks and the up-stop pad, head in a counterbore on the +y side, nut in a hex pocket "
+        "pin, through the pillow blocks, the webs inside them and the strut clevis's rib, head in a counterbore on the +y "
+        "side, nut in a hex pocket "
         "on the -y side", BASE, ORDERED),
     ("Strut", 1, "Gas strut, 6 in (152.4 mm eye to eye), 45 N (sold as 9-12 lb), flat eyelet tabs", "X AUTOHAUX", "",
      "Amazon", "B0CY267GFY", 13.69, 2, "", 0, "Sold in pairs: the spare is the other half. The anchor is placed so the "

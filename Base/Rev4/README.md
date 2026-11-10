@@ -178,23 +178,25 @@ The trunnions end flush with the bearings so the cable can turn inside the lip: 
 
 ![Section on the tube's plane](renders/rev4_section_brake.png)
 
-A rigid printed strap wraps the back of the hub between the up-stop lugs, from 54° below the axis to 42° above it, and its felt from 52° below to 40° above. It's 18 mm wide and 8 mm deep, lined with 1.5 mm felt, and hinged at its bottom end in the up-stop pad, just behind the strut's clevis. At the bottom the band runs on down into the pad's slot and into the knuckle. At the top it runs on under the head, its end cut off level with the head's face, 3 mm under the bay's ceiling. The head is solid, with an M5 nut in it. The knob sits on top of the shell and draws the head up and forward, so the strap swings about its hinge and the felt clamps the hub.
+A rigid printed strap wraps the back of the hub between the up-stop lugs, from 54° below the axis to 42° above it, and its felt from 52° below to 40° above. It's 18 mm wide and 8 mm deep, lined with 1.5 mm felt. At the bottom the band turns into an arm that runs forward under the hub, through the up-stop pad's slot, to the hinge, just behind the strut's clevis. At the top it runs on under the head, its end cut off level with the head's face, 3 mm under the bay's ceiling. The head is solid, with an M5 nut in it. The knob sits on top of the shell and draws the head up and forward, so the strap swings about its hinge and the felt clamps the hub.
 
-- **The pull:** the knob's M5 × 35 bolt leans 30° forward from vertical, which gives it 41 mm of leverage about the hinge. A vertical bolt there would get 12 mm, and would mostly stretch and bend the strap instead of closing it. 30° is as far as it can lean with the seat sunk into the shell's top and 2 mm or more of shell between the seat and the hub.
-- **Gussets:** the head is one solid gusset, from the band 12° above the axis up to its top end, front and back, out to where the bolt pulls. Another runs from the band's bottom 12° down to the hinge's knuckle. Neither end is a thin tab.
-- **The hinge:** the knuckle sits in a slot through the up-stop pad, 0.5 mm clear either side. The slot guides it, so the strap stays at least 1.5 mm off each lug (2 mm when centred). The pin, an M4 × 50 socket head, goes through both pillow blocks and the pad, head in a counterbore on the USB (+y) side, nut in a hex pocket on the sensor (−y) side.
+- **The pull:** the knob's M5 × 35 bolt leans 30° forward from vertical, which gives it 59 mm of leverage about the hinge. A vertical bolt would get 31 mm (12 with the hinge where it first was, behind the hub), and would stretch and bend the strap more than close it. 30° is as far as it can lean with the seat sunk into the shell's top and 2 mm or more of shell between the seat and the hub.
+- **Gussets:** the head is one solid gusset, from the band 12° above the axis up to its top end, front and back, out to where the bolt pulls. The arm runs from the band's bottom 12° forward to the hinge, with a gusset under it down to the knuckle's bottom. Neither end is a thin tab.
+- **Where the hinge is:** under the hub, at x = 5, z = −40, just behind the strut clevis's cheeks, as far forward as it fits. The strap's swing presses each bit of felt in proportion to the hinge's distance from the felt's radius through it. With the hinge forward under the hub, that's even along the felt: its bottom end gets half the pressure of its middle, against a tenth with the hinge behind the hub, where it first was. And the knob's bolt passes further from the hinge, so it gets more leverage.
+- **The hinge:** the pin, an M4 × 50 socket head, goes through both pillow blocks, a web inside each, and the strut clevis's back block. Behind the clevis's cheeks the block is cut down to a 6 mm rib, 2 mm under the hub like the rest of it. The strap forks round the rib into two 4.5 mm cheeks, and each runs on the pin between the rib and a web, 1.5 mm clear of both. Its arm runs through the up-stop pad's slot, 0.5 mm clear either side. The slot guides it, so the strap stays at least 1.5 mm off each lug (2 mm when centred). The pin's head is in a counterbore on the USB (+y) side, and its nut in a hex pocket on the sensor (−y) side, both below the side covers.
 - **The nut:** it drops into a slot in the head from the strap's +y side. The bolt holds it there, and its pull bears it on the slot's face. A lead-in in the head's face guides the bolt's tip onto it.
 - **The knob's seat:** sunk into the shell's top, square to the bolt. There's 4 mm of shell under it, then the strap's bay.
 - **The spring, if you want one:** the knob has a 10.6 mm pocket, 7 mm deep, in its underside. Without a spring, the knob sits on its seat and pulls the strap directly. With one (10 mm OD, 10 to 15 mm free length, such as Rev 3's), the spring holds the knob off its seat and the knob sets the brake through it. The M5 × 35 keeps its full thread in the nut either way.
-- **The bay:** 22 mm wide, out to the lugs' inner faces, in the frame and the shell. In the frame, the strap leans back on its own onto the bay's back wall, at 8°: far enough for the lever's hub to drop past the felt's top end, 1.0 mm clear. In the shell, the back of the bay is a ramp parallel to the bolt, 1 mm behind the head. As the shell goes on, the ramp meets the leaning strap's head and swings it forward onto the hub, so its nut lands on the bolt's axis.
+- **The bay:** 22 mm wide, out to the lugs' inner faces, in the frame and the shell. In the frame, the strap leans back on its own onto the bay's back wall, at 8.5°: far enough for the lever's hub to drop past the felt's top end, 1.6 mm clear. In the shell, the back of the bay is a ramp parallel to the bolt, 1 mm behind the head. As the shell goes on, the ramp meets the leaning strap's head and swings it forward onto the hub, so its nut lands on the bolt's axis.
 
-**Drag:** about 9.3 N·mm per newton of bolt tension with the lever moving up, and 11.1 moving down; the strap is self-energising by about 19%. 26 N of tension gives the old shoe's 270 N·mm. The felt is 92° long, but its bottom end, close to the line from the axis to the hinge, carries little: the strap's swing hardly presses it there. The felt below 38° under the axis takes about 5% of the grip, and the felt above 22° over it about 28%. The longer patch also brings the felt's peak pressure at 400 N down from 1.1 MPa to 0.8.
+**Drag:** about 12.2 N·mm per newton of bolt tension with the lever moving up, and 18.2 moving down: the strap is self-energising by about 49%. It would lock itself only above a friction coefficient of about 1.5, and felt runs about 0.3. 18 N of tension gives the old shoe's 270 N·mm.
+- **Pressure along the felt:** it peaks 7° above the axis, and falls to half that at the felt's bottom end and 84% at its top. The felt below 38° under the axis now takes 11% of the grip (5% with the hinge behind the hub), the felt above 22° over it 20% (28%), and the middle 69%. The peak at 400 N is 1.0 MPa.
 - **With the spring:** the brake's range is spread over about 10 turns of the knob, up to the spring's 20 N or so. Past that, the knob is down on its seat and the brake firms up.
 - **Without it:** the felt is the only give, so the brake goes from free to firm within about a turn.
 
 **Strength:** checked at 400 N of bolt tension, more than a hand gets out of an 18 mm knob (about 130–210 N at 0.3–0.5 N·m).
-- **Strap:** it prints on its side, so all its bending runs along its layers (35 MPa allowed). The band peaks at 17 MPa, where it runs into the arm, the neck under the head at 21, and the arm to the hinge at 8.
-- **Hinge:** the knuckle bears 7.9 MPa on its pin. The pin carries 570 N, at 227 MPa in its 12.9 steel.
+- **Strap:** it prints on its side, so all its bending runs along its layers (35 MPa allowed). The band peaks at 18.5 MPa, the neck under the head at 21, the arm's cheeks at 20 and the arm behind them at 14.
+- **Hinge:** the pin carries 760 N. The cheeks bear 21 MPa on it. It runs between the rib and the webs, so it bends only to 79 MPa in its 12.9 steel. The rib bears 16 MPa, with 5.8 mm of rib over the pin, and the webs 4.
 - **Shell:** the 4 mm floor under the seat bends at 17.5 MPa, along its layers. The shell is solid behind the hub, out to its side walls, top and back, so the seat's load goes straight into the walls.
 
 ![At the 32° stop](renders/rev4_section_brake_32deg.png)
@@ -205,11 +207,11 @@ A rigid printed strap wraps the back of the hub between the up-stop lugs, from 5
 
 Two lugs under the back of the hub land on a pad on the frame at 32°. Each lug is 10 mm wide (|y| 11 to 21), with 22 mm between them for the brake strap.
 
-**Where the pad is:** x = 14 to 29.5, the full width between the pillow blocks, with a slot in its middle for the brake strap's knuckle. Its top is at z = −28.5, 2 mm under the hub at its front edge.
+**Where the pad is:** x = 14 to 29.5, the full width between the pillow blocks, with a slot in its middle for the brake strap's arm. Its top is at z = −28.5, 2 mm under the hub at its front edge.
 
 **Where the lugs land:** x = 15 to 24.4. They can't land further back: the further back a lug lands, the further back it swings at 0°. These come to x = 35.8 at 0°. Behind them the frame is cut away on a 39 mm radius round the axis, 1.5 mm clear of their swing.
 
-At 0°, the strap's arm and knuckle sit between the lugs, 2 mm clear of each. As the lever lifts, the lugs swing down either side of the strap onto the pad. Between them, the hub is a plain cylinder for the felt to run on.
+At 0°, the strap's arm runs between the lugs, 2 mm clear of each. As the lever lifts, the lugs swing down either side of the strap onto the pad. Between them, the hub is a plain cylinder for the felt to run on.
 
 ![At 32°, the lugs on the pad (frame and shell hidden)](renders/rev4_brake_lugs_32deg.png)
 
@@ -223,6 +225,10 @@ The plate is 63 mm wide, the pillow blocks' outer faces, and 127 mm long. The de
 
 Behind the up-stop pad, the frame is solid back to its back face and out to the [back chamfer](#the-back), except for a 39 mm radius round the axis between the pillow blocks, 1.5 mm clear of the up-stop lugs' swing, and the brake strap's bay in the middle.
 
+**The brake strap's hinge:** behind the strut clevis's cheeks, its back block is cut down to a 6 mm rib through the strap's hinge pin, between the strap's two cheeks, still running 2 mm under the hub into the up-stop pad. Inside each pillow block, a web runs in to 10.5 mm from the middle, round the pin and level with the rib, so the pin is held either side of each of the strap's cheeks. The webs end 3 mm short of the up-stop lugs' swing.
+
+![The frame from above, with the brake strap in](renders/rev4_frame_strap_top.png)
+
 Each pillow block also has a 45° gusset at its front corners, 8 mm along each wall:
 - **In front, inside:** the block's inner face to the down-stop pillar's back face, up to the pillar's top, 3 mm clear of the hub.
 - **In front, outside:** the block's front face to the pillar's outer face, up to the pillar's top.
@@ -233,7 +239,7 @@ The down-stop and strut are unchanged from Rev 3: pads on the socket boss land o
 
 ![From behind: the back chamfers and the brake knob](renders/rev4_back.png)
 
-The frame and the shell share one 45° chamfer plane each side. It runs from the pillow blocks' outer back corners to the back face, at x = 56.5 (|y| + x = 69 mm), so from behind the two read as one block. The back face is 25 mm wide. It's that far back so the shell's bay has room for the brake strap's head when the strap leans back 8°. The edges in the joint aren't chamfered, so no groove shows at the seam.
+The frame and the shell share one 45° chamfer plane each side. It runs from the pillow blocks' outer back corners to the back face, at x = 57 (|y| + x = 69 mm), so from behind the two read as one block. The back face is 24 mm wide. It's that far back so the shell's bay has room for the brake strap's head when the strap leans back 8.5°. The edges in the joint aren't chamfered, so no groove shows at the seam.
 
 ## Balance
 
@@ -285,13 +291,13 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
    - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
    - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
 3. **Sensor:** solder the module to the lead, as in Rev 3, and set it in the trunnion's pocket, chip out, with a dot of hot glue.
-4. **Brake strap in:** stick the felt (16 × 51 mm) on the strap's face, and drop the M5 nut into the slot in its head. Set the strap down into the frame with its knuckle in the up-stop pad's slot. Push an M4 × 50 socket head through from the USB (+y) side, through the pillow block, the pad and the knuckle, into an M4 nut in the sensor side's hex pocket. Tighten it: the strap still swings freely on it. Let the strap lean back onto its bay's back wall.
-5. **Lever in:** lower the lever's bearings straight down into the frame's seats. The hub drops past the top of the leaning strap's felt 1.0 mm clear, and ends 0.85 mm off the felt's bottom end; the strap itself stays 1.8 mm clear. Tip the strap forward onto the hub.
+4. **Brake strap in:** stick the felt (16 × 51 mm) on the strap's face, and drop the M5 nut into the slot in its head. Set the strap down into the frame, its cheeks either side of the strut clevis's rib and its arm in the up-stop pad's slot. Push an M4 × 50 socket head through from the USB (+y) side: the pillow block, the web, a cheek, the rib, the other cheek, the other web, and into an M4 nut in the sensor side's hex pocket. Tighten it: the strap still swings freely on it. Let the strap lean back onto its bay's back wall.
+5. **Lever in:** lower the lever's bearings straight down into the frame's seats. The hub drops past the top of the leaning strap's felt 1.6 mm clear, and ends 3.0 mm off the felt's bottom end; the strap itself stays 2.0 mm clear. Tip the strap forward onto the hub.
 
    ![The lever going in past the leaning brake strap](renders/rev4_brake_lever_in.png)
 
-6. **Shell on:** lower it straight down over the lever and the strap, so the grid's pyramids drop into their sockets. If the strap has leaned back, the ramp at the back of the shell's bay meets its head 10 mm before the shell is down and swings it forward. Fit the shell's four M4 × 50 socket head screws into the nuts and tighten them evenly.
-7. **Knob:** if you're using the spring, drop it into the pocket in the knob's underside. Drop the M5 × 35 bolt into the knob's hex pocket, head down. Set the knob in its seat and screw the bolt down into the strap's nut. With the shell on, the strap can lean back only 1.0°, which leaves its nut 0.8 mm off the bolt's axis, and the lead-in in the head takes up 2 mm. Then set the drag.
+6. **Shell on:** lower it straight down over the lever and the strap, so the grid's pyramids drop into their sockets. If the strap has leaned back, the ramp at the back of the shell's bay meets its head 8 mm before the shell is down and swings it forward. Fit the shell's four M4 × 50 socket head screws into the nuts and tighten them evenly.
+7. **Knob:** if you're using the spring, drop it into the pocket in the knob's underside. Drop the M5 × 35 bolt into the knob's hex pocket, head down. Set the knob in its seat and screw the bolt down into the strap's nut. With the shell on, the strap can lean back only 1.2°, which leaves its nut 0.8 mm off the bolt's axis, and the lead-in in the head takes up 2 mm. Then set the drag.
 8. **Covers:** glue the magnet into the sensor cover's pocket, pushed to the bottom. Lay the USB cable into its groove in the USB-side pillow block and shell, push the cable cover on over it, and screw both covers down (M3 × 12).
 9. **Strut and tube:** as Rev 3.
 
