@@ -89,7 +89,7 @@ The shell is a box over the lever: 75 mm long, 63 mm wide and 38 mm tall, from t
 
 ![The USB side: the square cover over the bearing and the shell screws' nut slots](renders/rev4_hero.png)
 
-Square plates, 5 mm thick, on the pillow blocks' and the shell's side faces: 65.5 mm tall, centred on the pivot axis, over the bearing and the shell screws' nut slots. Their ends are bevelled 45°, the back one on the plane of the frame's and shell's [back chamfer](#the-back) and the front one on the plane of the 0.8 mm chamfer on the pillow blocks' front corners, so both run on flush. Each is held by four M3 × 12 countersunk screws, where the round covers had them, into M3 threads tapped right through the block's and the shell's 9 mm walls. The strut's hex-key hole is 2 mm below the USB-side cover's bottom edge.
+Square plates, 5 mm thick, on the pillow blocks' and the shell's side faces, centred on the pivot axis, over the bearing and the shell screws' nut slots. They're bevelled 45° all round, so each reads as one with the block and shell: the back on the plane of the frame's and shell's [back chamfer](#the-back), the front on the plane of the 0.8 mm chamfer on the pillow blocks' front corners, the top on the plane of the 0.8 mm chamfer on the shell's top edge, and the bottom the top's mirror image. The inside face is 74.4 mm tall and the outside face 64.4 mm. Each is held by four M3 × 12 countersunk screws, where the round covers had them, into M3 threads tapped right through the block's and the shell's 9 mm walls. The USB side's cover hides the strut's hex-key hole, so fit the anchor screw before the covers.
 
 - **Sensor cover:** the magnet sits in a pocket in its inside face (see [Sensor](#sensor)).
 - **Cable cover:** half of the USB cable's tunnel is a channel in its inside face (see [USB cable](#usb-cable)).
@@ -114,7 +114,7 @@ The frame and the shell meet on one flat plane through the pivot axis, which als
   - **Boss at the stop:** an ellipse, the boss's own section in the front face at 32°, narrows up to the top. It meets the top slot's sides through the top wall's 3 mm.
   
   On top it carries on as one slot. At the front it follows the boss's footprint as it crosses the wall at the stop, an ellipse, and is rounded into straight sides 12.55 mm either side of the tube over the upper fairing. It ends square 3.15 mm in front of the axis, where the fairing's top passes under the wall at the stop, with corners that follow the fairing's rounds. Below the opening, a smooth round-ended slot lets the strut's cylinder through, 1.5 mm clear over the whole travel. It's cut by the cylinder swung about its anchor pin, so it has no facets.
-- **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis, 2 mm below the side cover's bottom edge. A 2.5 mm hex key goes straight in to the M4 × 16's head.
+- **Hex-key hole:** a 3.5 mm hole through the USB-side (+y) pillow block, on the strut anchor screw's axis. A 2.5 mm hex key goes straight in to the M4 × 16's head. The USB side's cover hides it, so fit the anchor screw before the covers; to reach it later, take the cable cover off.
 
 ![The front: the frame's wall carries on the shell's cut for the lever](renders/rev4_front.png)
 
@@ -298,8 +298,9 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 6. **Shell on:** lower it straight down over the lever and the strap, so the grid's pyramids drop into their sockets. If the strap has leaned back, the ramp at the back of the shell's bay meets its head 8 mm before the shell is down and swings it forward. Fit the shell's four M4 × 50 socket head screws into the nuts and tighten them evenly.
 7. **Knob:** if you're using the spring, drop it into the pocket in the knob's underside. Drop the M5 × 35 bolt into the knob's hex pocket, head down. Set the knob in its seat and screw the bolt down into the strap's nut. With the shell on, the strap can lean back only 1.2°, which leaves its nut 0.8 mm off the bolt's axis, and the lead-in in the head takes up 2 mm. Then set the drag.
-8. **Covers:** glue the magnet into the sensor cover's pocket, pushed to the bottom. Lay the USB cable into its groove in the USB-side pillow block and shell, push the cable cover on over it, and screw both covers down (M3 × 12).
-9. **Strut and tube:** as Rev 3.
+8. **Strut's anchor end:** fit the gas strut's cylinder end into the anchor clevis with its M4 × 16, tightening it with a 2.5 mm hex key through the hole in the USB-side pillow block. Do this before the covers: the cable cover hides that hole.
+9. **Covers:** glue the magnet into the sensor cover's pocket, pushed to the bottom. Lay the USB cable into its groove in the USB-side pillow block and shell, push the cable cover on over it, and screw both covers down (M3 × 12).
+10. **Tube, collar and the strut's rod end:** as Rev 3.
 
 ## Screws
 

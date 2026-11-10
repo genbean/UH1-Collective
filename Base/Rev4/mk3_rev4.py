@@ -130,14 +130,19 @@ BRG_SEAT_D = BRG_D + 0.0                         # +0.1 (perfect on Rev 3's one-
                                                  # built, 2026-11-08), so 0.1 less
 LIP_R = 23.0                                     # clears the inner race (22.0), holds the outer (24.15)
 BLOCK_HW = m.BLOCK_HW                            # 37.5, as Rev 3
-# side covers: square plates COVER_T thick on the pillow blocks' and the shell's side faces, COVER_HZ either side of the
-# axis, over the bearings and the shell screws' nut slots, and 2 mm clear of the strut's hex-key hole below them. Their
-# ends are bevelled 45 deg: the back on the plane of the frame's and shell's back chamfer (x + |y| = REAR_C), the front
-# on the plane of the 0.8 mm chamfer on the pillow blocks' front corners, so both run on flush. Four M3 x 12 countersunk
-# each, where the round covers had them, into M3 threads tapped right through the block's and the shell's 9 mm walls
-COVER_HOLE_R, COVER_T, COVER_HZ = 30.5, 5.0, 32.75
+# side covers: square plates COVER_T thick on the pillow blocks' and the shell's side faces, over the bearings and the
+# shell screws' nut slots, bevelled 45 deg all round so each reads as one with the block and shell: the back on the
+# plane of the frame's and shell's back chamfer (x + |y| = REAR_C), the front on the plane of the 0.8 mm chamfer on the
+# pillow blocks' front corners, the top on the plane of the 0.8 mm chamfer on the shell's top edge, and the bottom the
+# top's mirror image about the axis. The USB side's cover hides the strut anchor's hex-key hole, so the anchor screw
+# goes in before the covers. Four M3 x 12 countersunk each, where the round covers had them, into M3 threads tapped
+# right through the block's and the shell's 9 mm walls
+COVER_HOLE_R, COVER_T = 30.5, 5.0
 COVER_SCREW_L = 12
 COVER_FRONT_C = 0.8                              # the blocks' front corner chamfer (Rev 3's first size)
+COVER_TOP_C = 0.8                                # the shell's top-edge chamfer: the cover's inside face runs to
+                                                 # SHELL_TOP less this (37.2) either side of the axis, its outside face
+                                                 # COVER_T less
 W_HALF = BLOCK_Y1 + COVER_T                      # 36.5: overall 73 mm
 # AS5600 in the sensor trunnion's end: the board (0.915 in = 23.24 mm square, measured; 1.6 thick) in a square pocket
 # 0.15 mm clear each side, its front face level with the trunnion's end (2.5 mm deeper than at first), on two ledges
@@ -212,7 +217,7 @@ r.ANCH_X, r.ANCH_Z, r.CLEVIS_R, r.STRUT_F_DESIGN = ANCH_X, ANCH_Z, CLEVIS_R, STR
 ANCH_WALL_Z = -(HUB_R + 2.0)                     # the clevis's back wall's top, 2 mm under the hub
 STRUT_KEY_R = 1.75                               # a 3.5 mm hole through the +y pillow block on the anchor screw's axis:
                                                  # a 2.5 mm hex key (2.9 across its corners) reaches its head. It's
-                                                 # 2 mm below the side cover's bottom edge
+                                                 # under the cable cover: the anchor screw goes in before the covers
 # up-stop: two lugs under the back of the hub land on a pad behind the axis at STOP_DEG. The further back they land,
 # the further back they swing at 0 deg, toward the webs behind the pillow blocks (x = 37): with the pad at z = -28.5 and
 # the contact face ending at x = 24.4, their back corners come to x = 35.8 at 0 deg, 1.2 mm off the webs. The pad's top
@@ -953,13 +958,18 @@ def cover_seat_edge(e):
 
 
 def _cover(s):
-    """a square plate COVER_T thick on the side face (side s), COVER_HZ either side of the axis, its back bevelled on the
-    back chamfer's plane and its front on the plane of the pillow blocks' front corner chamfer; four countersunk M3s"""
+    """a square plate COVER_T thick on the side face (side s), bevelled 45 deg all round: its back on the back
+    chamfer's plane, its front on the plane of the pillow blocks' front corner chamfer, its top on the plane of the
+    shell's top-edge chamfer and its bottom the top's mirror image; four countersunk M3s"""
     y0, y1 = BLOCK_Y1, W_HALF
     xb = lambda y: REAR_C - y                                      # back bevel: x + |y| = REAR_C
     xf = lambda y: y - (REAR_C - COVER_FRONT_C)                    # front bevel: x - |y| = -(REAR_C - 0.8)
     pts = [(xf(y0), s * y0), (xb(y0), s * y0), (xb(y1), s * y1), (xf(y1), s * y1)]
-    c = cq.Workplane("XY").workplane(offset=-COVER_HZ).polyline(pts).close().extrude(2 * COVER_HZ).val()
+    hz = SHELL_TOP - COVER_TOP_C                                        # 37.2 on the inside face
+    c = cq.Workplane("XY").workplane(offset=-hz - 1).polyline(pts).close().extrude(2 * hz + 2).val()
+    zt = lambda y: hz - (y - y0)                                        # top and bottom bevels: 45 deg, mirrored
+    yz = [V(-60, s * y0, -zt(y0)), V(-60, s * y0, zt(y0)), V(-60, s * y1, zt(y1)), V(-60, s * y1, -zt(y1))]
+    c = c.intersect(cq.Solid.extrudeLinear(cq.Wire.makePolygon(yz + [yz[0]]), [], V(120, 0, 0)))
     for a in (45, 135, 225, 315):
         px, pz = m.on_circle(COVER_HOLE_R, a)
         c = c.cut(m.csk_hole(3, (px, s * y1, pz), (0, -s, 0), COVER_T + 1))
