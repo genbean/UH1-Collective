@@ -32,4 +32,4 @@ Images posted by **dcval** on 27 February 2025. dcval scaled a page of the UH-1 
 | `uh1-panel-from-manual.png` | The two panels, cropped from that page |
 | `blender-mesh.png` | dcval's Blender model of the panels, with dimensions: the lower panel 85 mm wide, 69.01 mm tall on the right and 47.03 mm on the left, its bottom edge 13 mm flat, 51.8 mm diagonal and 25 mm flat; the upper panel 55 × 41 mm, 15 mm in from each side |
 
-[Head Rev 5](../Rev5/README.md) is cut to these dimensions.
+[Head Rev 5](../README.md) is cut to these dimensions.

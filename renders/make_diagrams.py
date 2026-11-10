@@ -1,24 +1,26 @@
 """
 Exploded views, screw maps and screw-size charts for the Huey head Rev 5, drawn from HeliCollective_Assembly.glb in this
-folder (the complete collective at 0 deg: base Rev 4 in its own frame, the head's parts named "H:..."), and for the MkIII
-base Rev 3, from ../Base/renders/MkIII_Rev3_Assembly.glb. Every screw group in a GLB is split into its screws, and each
-screw is pulled out along its own axis, toward its head, in the exploded views. (Base Rev 4's exploded view and screw
-chart come from ../Base/Rev4/make_renders_r4.py, with these helpers.)
+folder (the complete collective at 0 deg: base Rev 4 in its own frame, the head's parts named "H:..."). Every screw group
+in the GLB is split into its screws, and each screw is pulled out along its own axis, toward its head, in the exploded
+views. (The base's exploded view and screw chart come from ../Base/make_renders_r4.py, with these helpers.)
 
-    python make_diagrams.py            (needs numpy, trimesh, manifold3d, pyvista and pillow)
+    python make_diagrams.py            (needs numpy, trimesh, manifold3d, pyvista and pillow, and fonttools for
+                                        ../Head/huey_head_r5.py)
 
 writes
-    ../Base/renders/rev3_exploded.png, rev3_screw_sizes.png
-    ../Head/Rev5/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png, HueyHeadR5_ScrewSizes.png,
+    ../Head/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png, HueyHeadR5_ScrewSizes.png,
     HueyHeadR5_Screws_Panels.png, HueyHeadR5_Screws_Inside.png, HueyHeadR5_Screws_Rear.png, HueyHeadR5_Screws_Collar.png,
-    HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/Rev5/stl/HueyHeadR5-Pinion.stl too),
+    HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/stl/HueyHeadR5-Pinion.stl too),
     HueyHeadR5_ToggleBoxes.png, HueyHeadR5_ToggleBoxes_Switches.png (the panels' backs),
     HueyHeadR5_Front.png, HueyHeadR5_Inside.png, HueyHeadR5_Body.png, HueyHeadR5_PocketWindow.png (assembled, on navy)
 
-Re-run it after the GLB is regenerated. Two screws the GLB leaves out are added here: the head's pull-stop seat (M2 x 8,
-STOP_SCREW and MOUNT_FACE in huey_head_r5.py) and the hat's pivot set screw (M3 x 4, Hat/hat_r5.py).
+Re-run it after the GLB is regenerated. The search hat (the lower panel with its bosses, the SearchHat board with the ALPS
+stick switch and J1, its four M2 x 8 screws and the cap) is built here from ../Head/Hat/hat4_r5.py in place of whatever
+hat the GLB carries, and one screw the GLB leaves out is added: the head's pull-stop seat (M2 x 8, STOP_SCREW and
+MOUNT_FACE in huey_head_r5.py).
 """
 import os
+import sys
 import textwrap
 import numpy as np
 import trimesh
@@ -27,9 +29,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GLB = os.path.join(HERE, "HeliCollective_Assembly.glb")
-BASE3_GLB = os.path.join(HERE, "..", "Base", "renders", "MkIII_Rev3_Assembly.glb")
-BASE_OUT = os.path.join(HERE, "..", "Base", "renders")
-HEAD_OUT = os.path.join(HERE, "..", "Head", "Rev5", "renders")
+HEAD_DIR = os.path.join(HERE, "..", "Head")
+HEAD_OUT = os.path.join(HEAD_DIR, "renders")
 
 RED = (198, 40, 40)
 INK = (20, 20, 20)
@@ -139,6 +140,27 @@ def hex_nut(af, thick, hole):
 
 
 # ---------------------------------------------------------------------------------------------------- the head
+_HAT = {}
+
+
+def hat_meshes():
+    """The search hat from ../Head/Hat/hat4_r5.py, in the head frame: {name: trimesh}. Built once."""
+    if not _HAT:
+        sys.path.insert(0, HEAD_DIR)
+        sys.path.insert(0, os.path.join(HEAD_DIR, "Hat"))
+        import huey_head_r5 as h
+        import hat4_r5
+
+        def tm(m):
+            q = h.tilt(m).to_mesh()
+            return trimesh.Trimesh(np.asarray(q.vert_properties)[:, :3].astype(float), np.asarray(q.tri_verts), process=False)
+        lp, txt = hat4_r5.lower_panel()
+        a = hat4_r5.assembly()
+        _HAT.update({"panel": tm(lp), "text": tm(txt), "cap": tm(a["cap"]), "board": tm(a["board"] + a["j1"] + a["plug"]),
+                     "switch": tm(a["switch"] + a["stick"]), "screws": tm(a["screws"])})
+    return {k: m.copy() for k, m in _HAT.items()}
+
+
 def head_items(src):
     """Every Rev 5 head part in the head frame. Returns {name: Item or [Item, ...]}."""
     H = {}
@@ -147,17 +169,26 @@ def head_items(src):
         m, col = src["H:" + n]
         return m.copy().apply_transform(TO_HEAD), col
 
-    for n in ("Body", "Lower panel", "Lower panel text", "Upper panel", "Upper panel text", "Lower toggles and STOP REL",
-              "Lower switch nuts", "Upper toggles", "Upper switch nuts", "Search hat cap", "Hat tact switches",
+    for n in ("Body", "Upper panel", "Upper panel text", "Lower toggles and STOP REL",
+              "Lower switch nuts", "Upper toggles", "Upper switch nuts",
               "HeliSR board", "Pro Micro", "JST plugs + wires", "USB plug", "AS5600 module", "AS5600 chip", "Magnet",
               "Magnet shaft", "Pinion", "Friction collar", "Throttle grip", "Trigger", "Trigger spring",
               "Starter tact switch"):
         m, col = get(n)
         H[n] = Item(n, m, col)
-    m, col = get("4-way hat: bezel, rocker plate, set screw")
-    ps = sorted(m.split(only_watertight=False), key=lambda q: -len(q.faces))
-    H["Hat bezel and rocker"] = Item("Hat bezel and rocker", ps[0], col)
-    H["hat bezel screws"] = [screw("M2 x 8", q, RED, "M2x8") for q in ps[1:]]
+    # the search hat, from the head's scripts, moved onto the GLB's lower panel (the GLB's head frame sits about 0.15 mm
+    # off the scripts' in z)
+    hat = hat_meshes()
+    glb_panel, panel_col = get("Lower panel")
+    shift = glb_panel.bounds.mean(0) - hat["panel"].bounds.mean(0)
+    for m in hat.values():
+        m.apply_translation(shift)
+    H["Lower panel"] = Item("Lower panel", hat["panel"], panel_col)
+    H["Lower panel text"] = Item("Lower panel text", hat["text"], get("Lower panel text")[1])
+    H["Search hat cap"] = Item("Search hat cap", hat["cap"], get("Search hat cap")[1])
+    H["SearchHat board"] = Item("SearchHat board", hat["board"], (31, 111, 67))
+    H["Hat stick switch"] = Item("Hat stick switch", hat["switch"], (17, 17, 17))
+    H["hat board screws"] = [screw("M2 x 8", q, RED, "M2x8") for q in pieces(hat["screws"])]
     m, col = get("O-ring")
     rings = sorted(m.split(only_watertight=False), key=lambda q: q.centroid[2])
     H["O-ring collar"], H["O-ring grip low"], H["O-ring grip high"], H["O-ring ceiling"] = (
@@ -175,12 +206,9 @@ def head_items(src):
     H["pull stop"] = screw("M3 x 4", get("Pull stop set screw M3 x 4")[0], RED, "M3x4set", out=tilt_dir((0, 1, 0)))
     H["pivot"] = screw("M3 x 25", get("Trigger pivot M3 x 25")[0], RED, "M3x25")
     # not in the GLB: the pull stop's seat, a kit M2 x 8 countersunk flush in the mount's face (MOUNT_FACE = 49) where the
-    # stop screw's tip lands (STOP_SCREW x, z = -1.28, -13.1), driven toward the front; and the hat's pivot set screw, M3 x 4
-    # in the rocker plate's centre (box frame y -2.5 .. 1.5 at SEARCH = (5.29, 43.96)), its tip on the bezel's underside
-    H["stop seat"] = place_copy(H["hat bezel screws"][0], tilt_pt(-1.28, 49.0, -13.1), tilt_dir((0, 1, 0)), "M2x8",
+    # stop screw's tip lands (STOP_SCREW x, z = -1.28, -13.1), driven toward the front
+    H["stop seat"] = place_copy(H["hat board screws"][0], tilt_pt(-1.28, 49.0, -13.1), tilt_dir((0, 1, 0)), "M2x8",
                                 "M2 x 8")
-    ps = H["pull stop"]
-    H["hat pivot"] = place_copy(ps, tilt_pt(5.29, 1.5, 43.96), tilt_dir((0, 1, 0)), "M3x4set", "M3 x 4")
     return H
 
 
@@ -191,45 +219,6 @@ def flat(H, keys=None):
             continue
         out += v if isinstance(v, list) else [v]
     return out
-
-
-# ---------------------------------------------------------------------------------------------------- the base
-def base_items(src):
-    B = {}
-    for n in ("frame", "lever_lower", "lever_upper", "cap_left", "cap_right", "cover_sensor", "cover_cable",
-              "shoe", "felt", "friction_knob", "knob_spring", "sensor_carrier", "sensor_pcb", "sensor_chip", "magnet",
-              "gas_strut", "strut_collar", "hose_clamp", "bearing_inner", "bearing_outer", "bearing_seal"):
-        m, col = src[n]
-        B[n] = Item(n, m.copy(), col)
-    for side in (-1, 1):                                   # one bearing each side
-        for n in ("bearing_inner", "bearing_outer", "bearing_seal"):
-            m = B[n].mesh
-            ps = [q for q in m.split(only_watertight=False) if np.sign(q.centroid[1]) == side]
-            B[f"{n}{side}"] = Item(n, trimesh.util.concatenate(ps), B[n].color)
-    for n in ("bearing_inner", "bearing_outer", "bearing_seal"):
-        del B[n]
-    t = annulus_z(-128.65, 128.65, 0, 0)               # the tube, cut short: x -260 .. -2.7 at (y, z) = (-9, 0)
-    t.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, (0, 1, 0)))
-    B["tube"] = Item("tube", t.apply_translation((-131.35, -9.0, 0)), src["carbon_tube"][1])
-    hw = pieces(src["hardware"][0])
-    cap_s, cover_s = [], []
-    for q in hw:
-        L = q.extents.max()
-        c = q.centroid
-        if abs(L - 25.0) < 0.5:
-            cover_s.append(screw("M3 x 25", q, RED, "M3x25"))
-        elif abs(L - 20.0) < 0.5 and q.extents[2] > 19:
-            cap_s.append(screw("M4 x 20", q, RED, "M4x20"))
-        elif abs(L - 20.0) < 0.5:
-            B["hinge screw"] = screw("M4 x 20", q, RED, "M4x20")
-        elif L > 26:
-            B["knob bolt"] = screw("M5 x 30 hex", q, RED, "M5x30hex")
-    B["cap screws"], B["cover screws"] = cap_s, cover_s
-    B["lever screws"] = [screw("M4 x 40", q, RED, "M4x40shcs") for q in pieces(src["lever_screws"][0])]
-    pins = pieces(src["strut_pins"][0])
-    B["strut screws"] = [screw("M4 x 16", q, RED, "M4x16") for q in pins if q.extents.max() > 14]
-    B["collar screws"] = [screw("M4 x 12", q, RED, "M4x12") for q in pins if q.extents.max() < 14]
-    return B
 
 
 # ---------------------------------------------------------------------------------------------------- drawing
@@ -371,7 +360,7 @@ def head_views(src):
     H = head_items(src)
     n_out = -tilt_dir((0, 1, 0))                     # out of the panels' faces
     lower = ["Lower panel", "Lower panel text", "Lower toggles and STOP REL", "Lower switch nuts", "Search hat cap",
-             "Hat bezel and rocker", "Hat tact switches"]
+             "SearchHat board", "Hat stick switch"]
     upper = ["Upper panel", "Upper panel text", "Upper toggles", "Upper switch nuts"]
     board = ["HeliSR board", "Pro Micro", "JST plugs + wires", "USB plug"]
     sensor = ["AS5600 module", "AS5600 chip"]
@@ -387,14 +376,12 @@ def head_views(src):
              [("M3 x 16 countersunk  (x4)", "upper panel: into the M3 threads printed in the box's corner columns",
                H["upper panel screws"]),
               ("M3 x 16 countersunk  (x4)", "lower panel: into the M3 threads printed in the box's corner columns",
-               H["lower panel screws"]),
-              ("M2 x 8 countersunk  (x4)", "the hat's bezel, under its cap, into 1.6 mm pilots in the carrier: tap them M2 by hand",
-               H["hat bezel screws"])],
+               H["lower panel screws"])],
              (0.25, -1.0, -0.15), (0, 0, 1), "Huey head Rev 5 screws: the panels", sub,
              os.path.join(HEAD_OUT, "HueyHeadR5_Screws_Panels.png"),
              focus=[H["Body"]], zoom=1.05)
     inside = [it for it in everything if it.name not in lower + upper and it not in H["lower panel screws"]
-              + H["upper panel screws"] + H["hat bezel screws"] + [H["hat pivot"]]]
+              + H["upper panel screws"] + H["hat board screws"]]
     labelled(inside,
              [("M5 x 8 set screw", "the tube: into the boss's printed M5 thread, its tip in the tube's 5.2 mm hole. "
                "It goes in through the hat's opening with the lower panel off", [H["tube set screw"]]),
@@ -435,9 +422,8 @@ def head_views(src):
 
     mv(lower, n_out * 120)
     pull(H["lower panel screws"], n_out * 120, 45)
-    pull(H["hat bezel screws"], n_out * 120, 22)
+    pull(H["hat board screws"], n_out * 120, 0)
     mv(["Search hat cap"], n_out * 150)
-    pull([H["hat pivot"]], n_out * 120, 0)
     mv(upper, n_out * 110)
     pull(H["upper panel screws"], n_out * 110, 45)
     mv(board, n_out * 55)
@@ -461,9 +447,9 @@ def head_views(src):
     pull([H["stop seat"]], (0, 0, 0), 12)
 
     parts = [("Upper panel", "with its two toggles and their nuts", ["Upper panel"]),
-             ("Lower panel", "with GOV, LDG LT, STOP REL and the 4-way hat's carrier, tact switches, rocker plate and "
-              "bezel", ["Lower panel"]),
-             ("Hat cap", "glued onto the rocker plate's legs last", ["Search hat cap"]),
+             ("Lower panel", "with GOV, LDG LT, STOP REL, and the SearchHat board and its ALPS stick on four M2 x 8s "
+              "behind it", ["Lower panel"]),
+             ("Hat cap", "pushed onto the stick last", ["Search hat cap"]),
              ("HeliSR board + Pro Micro", "on four 4 mm spacers on the rear wall", ["HeliSR board"]),
              ("AS5600 module", "chip down, slides into its grooves from the front", ["AS5600 module"]),
              ("Magnet shaft + magnet", "down through the web into the pinion's hex", ["Magnet shaft"]),
@@ -474,7 +460,6 @@ def head_views(src):
              ("Friction collar", "with its O-ring, groove up", ["Friction collar"]),
              ("Tube", "25 x 23 mm carbon", ["tube"])]
     screws_f = [("M3 x 16 countersunk  (x8)", "", H["lower panel screws"] + H["upper panel screws"]),
-                ("M2 x 8 countersunk  (x4)", "hat bezel", H["hat bezel screws"]),
                 ("M3 nut  (x4)", "", H["helisr nuts"]),
                 ("M5 x 8 set screw", "tube", [H["tube set screw"]]),
                 ("M4 x 12 countersunk + M4 nut", "", [H["collar screw"]])]
@@ -499,7 +484,7 @@ def head_views(src):
     return H
 
 
-PINION_STL = os.path.join(HERE, "..", "Head", "Rev5", "stl", "HueyHeadR5-Pinion.stl")
+PINION_STL = os.path.join(HEAD_DIR, "stl", "HueyHeadR5-Pinion.stl")
 PX, PY, SPIN = 5.29 + 26.0 * np.cos(np.radians(15.0)), 18.52 + 26.0 * np.sin(np.radians(15.0)), np.radians(15.0)
 
 
@@ -615,10 +600,11 @@ def head_scenes(H):
     panels = [(m("Lower panel"), BLACK), (m("Upper panel"), BLACK), (m("Lower panel text"), WHITE),
               (m("Upper panel text"), WHITE)]
     front_hw = [(m("Lower toggles and STOP REL"), GREY), (m("Upper toggles"), GREY), (m("Lower switch nuts"), GREY),
-                (m("Upper switch nuts"), GREY), (m("Search hat cap"), GREY), (m("Hat bezel and rocker"), GREY)]
+                (m("Upper switch nuts"), GREY), (m("Search hat cap"), GREY), (m("Hat stick switch"), GREY)]
     scene(body + panels + front_hw, n_out, up, os.path.join(HEAD_OUT, "HueyHeadR5_Front.png"),
           focus=[m("Lower panel"), m("Upper panel")], parallel=True, zoom=1.0)
-    inside = [(m("Lower toggles and STOP REL"), ORANGE), (m("Upper toggles"), ORANGE), (m("Hat tact switches"), YELLOW),
+    inside = [(m("Lower toggles and STOP REL"), ORANGE), (m("Upper toggles"), ORANGE), (m("SearchHat board"), YELLOW),
+              (m("Hat stick switch"), YELLOW),
               (m("HeliSR board"), GREEN), (m("Pro Micro"), BLUE), (m("AS5600 module"), PURPLE),
               (m("AS5600 chip"), PURPLE)]
     scene(body + inside, n_out + 0.35 * side + 0.3 * up, up, os.path.join(HEAD_OUT, "HueyHeadR5_Inside.png"),
@@ -627,79 +613,6 @@ def head_scenes(H):
           focus=[m("Body")], zoom=1.15)
     scene(body + [(m("Pinion"), ORANGE)], n_out, up, os.path.join(HEAD_OUT, "HueyHeadR5_PocketWindow.png"),
           focus=[m("Body")], parallel=True, zoom=1.25)
-
-
-# ---------------------------------------------------------------------------------------------------- base view
-def base_views(src):
-    B = base_items(src)
-    everything = flat(B)
-
-    def mv(keys, v):
-        for k in keys:
-            for it in (B[k] if isinstance(B[k], list) else [B[k]]):
-                it.move = np.asarray(v, float)
-
-    def pull(its, base, dist):
-        for it in its:
-            it.move = np.asarray(base, float) + it.out * dist
-
-    L = np.array([0, 0, 95.0])                         # the lever, lifted out of the pillow blocks
-    mv(["lever_lower"], L)
-    mv(["lever_upper"], L + (0, 0, 50))
-    pull(B["lever screws"], L + (0, 0, 50), 60)
-    mv(["tube"], L + (-90, 0, 0))
-    mv(["hose_clamp"], L + (-30, 0, 0))
-    mv(["strut_collar"], L + (-90, 0, 0))
-    pull(B["collar screws"], L + (-90, 0, 0), 22)
-    for s in (-1, 1):
-        mv([f"bearing_inner{s}", f"bearing_outer{s}", f"bearing_seal{s}"], L + (0, 40 * s, 0))
-    mv(["sensor_carrier"], L + (0, -75, 0))
-    mv(["sensor_pcb", "sensor_chip"], L + (0, -95, 0))
-    for c, s in (("cap_left", -1), ("cap_right", 1)):
-        mv([c], (0, 40 * s, 165))
-    for it in B["cap screws"]:
-        it.move = np.array([0, 40 * np.sign(it.head[1]), 165]) + it.out * 40
-    mv(["cover_sensor", "magnet"], (0, -150, 40))
-    mv(["cover_cable"], (0, 150, 40))
-    for it in B["cover screws"]:
-        it.move = np.array([0, 150 * np.sign(it.head[1]), 40]) + it.out * 35
-    mv(["felt"], (0, 0, 22))
-    mv(["friction_knob"], (0, 0, 32))               # under the lifted lever
-    mv(["knob_spring"], (0, 0, 16))
-    pull([B["knob bolt"]], (0, 0, 32), 0)
-    pull([B["hinge screw"]], (0, 0, 0), 40)
-    for it in B["strut screws"]:                      # the anchor's screw stays with the frame, the eye's with the collar
-        if it.head[0] > -60:
-            pull([it], (0, 0, 0), 30)
-        else:
-            pull([it], L + (-90, 0, 0), 30)
-
-    parts = [("Frame", "pillow blocks, knob tower, anchor clevis, stop pedestal, down-stop pillars", ["frame"]),
-             ("Lever, lower half", "four M4 nuts in its pockets; the cables lie in its channels", ["lever_lower"]),
-             ("Lever, upper half", "", ["lever_upper"]),
-             ("6006-2RS bearings  (x2)", "pressed onto the trunnions", ["bearing_outer-1", "bearing_outer1"]),
-             ("Pillow-block caps  (x2)", "", ["cap_left", "cap_right"]),
-             ("Sensor cover", "with the magnet", ["cover_sensor"]),
-             ("Cable cover", "goes on over the USB cable", ["cover_cable"]),
-             ("Sensor carrier + AS5600", "plugs into the trunnion's bore", ["sensor_carrier"]),
-             ("Friction knob", "the MkII knob, M5 pocket; spring under it, the M5 bolt's head on its floor", ["friction_knob"]),
-             ("Shoe + felt", "hinged on the frame's lugs", ["shoe", "felt"]),
-             ("Gas strut", "X AUTOHAUX 6 in, 45 N", ["gas_strut"]),
-             ("Strut collar", "clamped on the tube", ["strut_collar"]),
-             ("Hose clamp", "on the socket's mouth", ["hose_clamp"]),
-             ("Carbon tube", "25 x 23 mm, 500 mm (shortened here)", ["tube"])]
-    screws = [("M4 x 40 socket head cap  (x4)", "lever halves", B["lever screws"]),
-              ("M4 x 20 countersunk  (x4)", "caps", B["cap screws"]),
-              ("M3 x 25 countersunk  (x8)", "side covers", B["cover screws"]),
-              ("M5 x 30 hex bolt (bought)", "knob", [B["knob bolt"]]),
-              ("M4 x 20 countersunk", "shoe hinge", [B["hinge screw"]]),
-              ("M4 x 16 countersunk  (x2)", "strut eyes", B["strut screws"]),
-              ("M4 x 12 countersunk  (x2)", "strut collar clamp", B["collar screws"])]
-    groups = [(t, s, [B[k] for k in ks]) for t, s, ks in parts] + screws
-    labelled(everything, groups, (-0.55, -1.0, 0.75), (0, 0, 1), "MkIII base Rev 3, exploded",
-             "Printed parts in their colours, screws in red with their nuts on them. The tube is cut short.",
-             os.path.join(BASE_OUT, "rev3_exploded.png"), size=(2100, 1900), crop=True)
-    return B
 
 
 # ---------------------------------------------------------------------------------------------------- size charts
@@ -802,38 +715,18 @@ def head_chart(H):
             (screw_tile("csk", 3, 25), "M3 x 25 countersunk (bought)", 1,
              "The trigger's pivot (ISO 10642 / DIN 7991; NIULUNBAO M3 set): the kits stop at 20 mm."),
             (screw_tile("csk", 2, 8), "M2 x 8 countersunk", 5,
-             "The hat's bezel (4) and the pull stop's seat (1), into 1.6 mm pilots tapped M2 by hand."),
+             "The SearchHat board (4), from behind into the lower panel's bosses, and the pull stop's seat (1): "
+             "into 1.6 mm pilots, tapped M2 by hand."),
             (screw_tile("csk", 4, 12), "M4 x 12 countersunk", 1, "The friction collar's pinch screw."),
             (screw_tile("set", 5, 8), "M5 x 8 set screw", 1,
              "The tube, into the boss's printed thread; its tip in the tube's 5.2 mm hole."),
-            (screw_tile("set", 3, 4), "M3 x 4 set screw", 2,
-             "The trigger's pull stop and the hat's pivot (in the rocker plate's centre)."),
+            (screw_tile("set", 3, 4), "M3 x 4 set screw", 1,
+             "The trigger's pull stop, into the arm's printed thread from behind."),
             (nut_tile(5.5, 2.4, 3.0), "M3 nut", 4, "On the HeliSR board's front."),
             (nut_tile(7.0, 3.2, 4.0), "M4 nut", 1, "In the friction collar's ear.")]
     chart(rows, "Huey head Rev 5: every screw, to scale",
           "Countersunk screws and nuts: AvrestYPT kit. Set screws: HIQTRADEBYJJ kit. The M3 x 25 is bought separately.",
           os.path.join(HEAD_OUT, "HueyHeadR5_ScrewSizes.png"))
-
-
-def base_chart(B):
-    rows = [(screw_tile("shcs", 4, 40), "M4 x 40 socket head cap", 4,
-             "The lever halves, from the top, into M4 nuts in the lower half (HELIFOUNER M4 x 30-50 kit)."),
-            (screw_tile("hex", 5, 30), "M5 x 30 hex bolt (bought)", 1,
-             "The friction knob: head in the knob's hex pocket, into an M5 nut in the knob tower."),
-            (screw_tile("csk", 3, 25), "M3 x 25 countersunk", 8,
-             "The side covers, into M3 threads tapped 11 mm deep in the blocks and caps (NIULUNBAO M3 set)."),
-            (screw_tile("csk", 4, 20), "M4 x 20 countersunk", 5,
-             "The pillow-block caps (4), into nuts slid into the blocks; the shoe's hinge (1)."),
-            (screw_tile("csk", 4, 16), "M4 x 16 countersunk", 2,
-             "The strut's two eyes, into nuts in the far cheeks."),
-            (screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the "
-             "other ear."),
-            (nut_tile(7.0, 3.2, 4.0), "M4 nut", 13,
-             "Lever (4), caps (4), shoe hinge (1), strut eyes (2), collar clamp (2)."),
-            (nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the knob tower, slid in from the front.")]
-    chart(rows, "MkIII base Rev 3: every screw, to scale",
-          "Countersunk screws and nuts: AvrestYPT kit, except where named.",
-          os.path.join(BASE_OUT, "rev3_screw_sizes.png"))
 
 
 if __name__ == "__main__":
@@ -844,5 +737,3 @@ if __name__ == "__main__":
     toggle_boxes_view(head_items(src))
     head_scenes(head_items(src))
     head_chart(H)
-    B = base_views(load(BASE3_GLB))
-    base_chart(B)
