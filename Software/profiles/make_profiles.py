@@ -70,7 +70,7 @@ def axis_off(c, a):
 
 
 # ------------------------------------------------------- the UH-1 collective --
-# The Huey head (Head/Rev4, controls as in Head/README.md) on a HeliSR Rev 3.0
+# The Huey head (Head/Rev4, controls as in Head/README.md) on a HeliSR Rev 4.0
 # board, the collective's AS5600 on AX1 and the throttle's on AX4. The Rev 4
 # throttle runs from an idle stop to full open: no cutoff range.
 c = load()

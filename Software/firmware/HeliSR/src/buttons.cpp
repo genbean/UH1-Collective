@@ -5,7 +5,7 @@
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy)
   v1.7.3b1: application/Src/buttons.c, axis_to_buttons.c and encoders.c.
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026:
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026:
     - one pass over the logical buttons instead of FreeJoy's physical x logical
       double loop (64 x 64 is too slow on a 16 MHz AVR), in FreeJoy's order
       (by physical input, shifted mappings first), worked out at start-up;

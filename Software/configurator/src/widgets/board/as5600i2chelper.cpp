@@ -13,7 +13,7 @@
 #include "global.h"
 
 static const char *const AX_CONNECTOR[HSR_AX_INPUTS] = {"J11", "J12", "J13", "J14"};
-static const int AX_CHANNEL[HSR_AX_INPUTS] = {2, 1, 3, 0};     // PCA9546A channels (PCB/HeliSR_Rev4.0/README.md)
+static const int AX_CHANNEL[HSR_AX_INPUTS] = {2, 1, 3, 0};     // PCA9546A channels (PCB/HeliSR/README.md)
 static const int CLOCKS_KHZ[] = {100, 50, 25, 10};
 
 static const QString GREEN = QStringLiteral("rgb(0, 128, 0)");

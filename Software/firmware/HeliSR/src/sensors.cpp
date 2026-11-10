@@ -6,7 +6,7 @@
 
   Every AS5600 is at 0x36, so each AX port has its own channel on the PCA9546A
   I2C switch (0x70), and the firmware talks to one port at a time
-  (PCB/HeliSR_Rev4.0/README.md). One port per pass keeps a pass short: about
+  (PCB/HeliSR/README.md). One port per pass keeps a pass short: about
   170 clock periods of transfers, so 1.7 ms at 100 kHz and 17 ms at 10 kHz.
   A visit:
     1. connects the port's channel (and only it);
@@ -33,7 +33,6 @@
 */
 
 #include "shared/helisr_config.h"
-#if HSR_BOARD_REV == 40
 
 #include <Arduino.h>
 #include <avr/eeprom.h>
@@ -367,5 +366,3 @@ uint8_t sensors_set_config(const hsr_sensor_config_t *c)
 	if (cfg.i2c_khz != khz) i2c_begin(cfg.i2c_khz);
 	return HSR_OK;
 }
-
-#endif

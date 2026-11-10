@@ -153,7 +153,7 @@ public:
         return waitUntil([&] { return m_bootResult >= 0; }, 5000) && m_bootResult == 1;
     }
 
-    //! Rev 4.0: the AS5600 settings, into DeviceConfig::sensorConfig
+    //! the AS5600 settings, into DeviceConfig::sensorConfig
     bool readSensors()
     {
         m_sensorReadResult = -1;
@@ -161,7 +161,7 @@ public:
         return waitUntil([&] { return m_sensorReadResult >= 0; }, 3000) && m_sensorReadResult == 1;
     }
 
-    //! Rev 4.0: save AS5600 settings on the board; false if it refused them
+    //! save AS5600 settings on the board; false if it refused them
     bool writeSensors(const hsr_sensor_config_t &config)
     {
         m_sensorWriteResult = -1;
@@ -176,7 +176,7 @@ public:
         return waitUntil([&] { return m_sensorStatusCount >= target; }, timeoutMs);
     }
 
-    //! Rev 4.0: one full read of AX port n's sensor (SENSOR_DEBUG), into DeviceConfig::sensorDebug
+    //! one full read of AX port n's sensor (SENSOR_DEBUG), into DeviceConfig::sensorDebug
     bool sensorDebug(int port, bool clear)
     {
         if (clear) m_dev->clearSensorCounters(port);
@@ -226,12 +226,11 @@ void printInfo(const QStringList &names)
             .arg(i.stack_free).arg(i.pass_max_us).arg(i.commands).arg(i.replies_dropped));
 }
 
-// --board 3.0 / 4.0: the board the user says the Pro Micro is on (0 = not said, -1 = not a board)
+// --board 4.0: the user says the Pro Micro is on a HeliSR Rev 4.0 board (0 = not said, -1 = not that board)
 int statedBoard(const QString &text)
 {
     if (text.isEmpty()) return 0;
-    if (text == "3.0" || text == "3") return HSR_BOARD_REV30;
-    if (text == "4.0" || text == "4") return HSR_BOARD_REV40;
+    if (text == "4.0" || text == "4") return HSR_BOARD_ID;
     return -1;
 }
 
@@ -249,9 +248,7 @@ int flash(const QString &hex, Session *session, const QString &port, int stated)
     if (check.verdict != FirmwareFile::Ok) {
         out("Not flashed. " + check.message);
         if (check.verdict == FirmwareFile::Confirm) {
-            out(file.tagged ? QStringLiteral("If you're sure, say which board it's on: --board %1")
-                                  .arg(HsrBoard::revisionName(file.boardId).mid(4))
-                            : QStringLiteral("If you're sure, say which board it's on: --board 3.0 or --board 4.0"));
+            out("If you're sure it's on a HeliSR Rev 4.0 board (or on no board), say so: --board 4.0");
         }
         return 1;
     }
@@ -416,16 +413,16 @@ int Cli::run(const QStringList &args)
     if (args.contains("--help")) {
         out("HeliSR Configurator " APP_VERSION);
         out("  --info | --read <file.cfg> | --write <file.cfg> | --write-defaults | --params [s]");
-        out("  --flash <file.hex> | --flash-new <file.hex> [--port COMx] [--board 3.0|4.0] | --roundtrip   [--device <n>]");
-        out("  --sensors [s] | --sensor-roundtrip | --sensor-debug [1-4] [--clear]   (HeliSR Rev 4.0 boards)");
+        out("  --flash <file.hex> | --flash-new <file.hex> [--port COMx] [--board 4.0] | --roundtrip   [--device <n>]");
+        out("  --sensors [s] | --sensor-roundtrip | --sensor-debug [1-4] [--clear]");
         out("  --save-defaults <file.cfg> | --hex-info <file.hex>   (no device needed)");
-        out("--flash checks which board the file is for. --board says which board the Pro Micro is on, when");
-        out("its firmware doesn't (a new Pro Micro) or says another one.");
+        out("--flash checks which board the file is for, and refuses firmware for another board. --board 4.0 says");
+        out("the Pro Micro is on a HeliSR Rev 4.0 board, when the file doesn't say or the device's firmware says another.");
         return 0;
     }
     int stated = statedBoard(value("--board"));
     if (stated < 0) {
-        out("--board takes 3.0 or 4.0");
+        out("--board takes 4.0 (HeliSR Rev 4.0 is the only board)");
         return 2;
     }
     if (args.contains("--hex-info")) {
@@ -495,11 +492,9 @@ int Cli::run(const QStringList &args)
             waitUntil([] { return false; }, 250);
             const params_report_t &p = gEnv.pDeviceConfig->paramsReport;
             QString line = QStringLiteral("%1 ms  AX:").arg(t.elapsed(), 5);
-            // the board's analog sources: 0-8, and on Rev 4.0 A2 and A3 too
+            // the board's analog sources: AX1-AX4, the spare analog pins, A2 and A3
             for (int i = 0; i < HSR_ANALOG_SOURCES; ++i) {
-                if (hsr_source_exists(gEnv.pDeviceConfig->info.board_id, uint8_t(i))) {
-                    line += QStringLiteral(" %1").arg(hsr_params_analog(&p, uint8_t(i)), 4);
-                }
+                line += QStringLiteral(" %1").arg(hsr_params_analog(&p, uint8_t(i)), 4);
             }
             line += "  inputs:";
             for (int i = HSR_MAX_PHYS / 8 - 1; i >= 0; --i) {
@@ -518,7 +513,7 @@ int Cli::run(const QStringList &args)
         return roundtrip(s);
     }
     if (args.contains("--sensors") || args.contains("--sensor-roundtrip") || args.contains("--sensor-debug")) {
-        if (gEnv.pDeviceConfig->info.board_id != HSR_BOARD_REV40) {
+        if (gEnv.pDeviceConfig->info.board_id != HSR_BOARD_ID) {
             out("The device isn't a HeliSR Rev 4.0 board: it has no I2C sensors.");
             return 1;
         }

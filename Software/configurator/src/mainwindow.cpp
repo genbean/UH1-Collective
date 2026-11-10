@@ -115,7 +115,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_boardConfig, &BoardConfig::limitReached, this, &MainWindow::updateReadWriteButtons);
     // AS5600 helper measured a range
     connect(m_boardConfig, &BoardConfig::applyCalibration, this, &MainWindow::applyCalibration);
-    // Rev 4.0: the AS5600 settings live on the board, apart from the profile
+    // the AS5600 settings live on the board, apart from the profile
     connect(m_boardConfig, &BoardConfig::writeSensorConfig, this, [this](const hsr_sensor_config_t &config) {
         m_hidDeviceWorker->writeSensorConfig(config);
     });
@@ -243,11 +243,6 @@ void MainWindow::deviceInfoReceived(bool compatible)
     const hsr_info_t &info = gEnv.pDeviceConfig->info;
     m_advSettings->flasher()->deviceConnected(true, &info);
     m_deviceReady = compatible;
-    if (compatible && m_followDeviceBoard) {
-        // the pages show what this board has; a change rebuilds them once
-        m_boardConfig->setBoard(info.board_id);
-        applyBoardUpdate();
-    }
     m_boardConfig->setDeviceConnected(compatible);
     if (compatible) {
         ui->label_DeviceStatus->setStyleSheet("color: white; background-color: rgb(0, 128, 0);");
@@ -287,7 +282,6 @@ void MainWindow::getParamsPacket()
     }
     else if (timer.elapsed() > 17)    // update UI every 17ms(~60fps)
     {
-        // always: the AS5600 helper watches for PROG presses even when its page is hidden
         m_boardConfig->updateLiveData();
         if(ui->tab_LED->isVisible() == true) {
             m_ledConfig->setLedsState();
@@ -330,13 +324,6 @@ void MainWindow::applyBoardUpdate()
     m_buttonConfig->setPhysicalInputs(HsrBoard::physicalInputs(pins, a2b.constData()));
     m_axesConfig->setAvailableSources(pins);
     m_ledConfig->setPins(pins);
-}
-
-void MainWindow::showBoard(int boardId, bool followDevice)
-{
-    m_followDeviceBoard = followDevice;
-    m_boardConfig->setBoard(boardId);
-    applyBoardUpdate();
 }
 
 void MainWindow::applyCalibration(int analogSource, int rawMin, int rawMax)
@@ -625,10 +612,6 @@ void MainWindow::loadAppConfig()
     appS->beginGroup("Configs");
     m_cfgDirPath = appS->value("Path", gEnv.pAppSettings->fileName().remove("HeliSRSettings.conf") + "configs").toString();
     appS->endGroup();
-    // the board the pages showed last (before the pages are made)
-    appS->beginGroup("BoardSettings");
-    HsrBoard::setBoard(appS->value("Board", HSR_BOARD_REV30).toInt());
-    appS->endGroup();
 
     //debug tab, only for debug build
     #ifdef QT_DEBUG
@@ -663,10 +646,6 @@ void MainWindow::saveAppConfig()
     appS->beginGroup("Configs");
     appS->setValue("Path", m_cfgDirPath);
     appS->setValue("LastCfg", ui->comboBox_Configs->currentText());
-    appS->endGroup();
-    // save the board shown
-    appS->beginGroup("BoardSettings");
-    appS->setValue("Board", HsrBoard::board());
     appS->endGroup();
     qDebug()<<"done";
 }

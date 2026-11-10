@@ -20,7 +20,7 @@
 void pipeline_init(void);
 
 // One pass. sr_inputs: bit n = IN(n+1) closed; spare_buttons: bit n = spare
-// pin n pressed; analog: the board's HSR_BOARD_SOURCES analog sources
+// pin n pressed; analog: the board's HSR_ANALOG_SOURCES analog sources
 // (0-HSR_RAW_MAX); now: ms.
 void pipeline_step(uint16_t sr_inputs, uint16_t spare_buttons, const uint16_t *analog, uint16_t now);
 

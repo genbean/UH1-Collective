@@ -111,45 +111,32 @@ FirmwareFile::Check FirmwareFile::check(const Info &file, int deviceBoard, int s
         c.message = tr("This isn't a firmware file: %1.").arg(file.error);
         return c;
     }
-    QString danger = tr("Rev 4.0 firmware on a Rev 3.0 board drives pins against the board's own chips.");
-    QString fileBoard = HsrBoard::revisionName(file.boardId);
+    QString danger = tr("Firmware for another board drives pins against the board's own chips.");
+    QString ours = HsrBoard::boardName(HSR_BOARD_ID);
 
-    // the user has said which board it is: the file must be for that board
-    if (statedBoard) {
-        if (file.tagged && file.boardId != statedBoard) {
-            c.message = tr("This firmware is for the %1 board, not %2.").arg(fileBoard, HsrBoard::revisionName(statedBoard));
-            return c;
-        }
+    // a HeliSR build for another board: never
+    if (file.tagged && file.boardId != HSR_BOARD_ID) {
+        c.message = tr("This firmware is for the %1 board; this app works with the %2 board only.")
+                        .arg(HsrBoard::revisionName(file.boardId), ours);
+        return c;
+    }
+    // the user has said the Pro Micro is on this app's board
+    if (statedBoard == HSR_BOARD_ID) {
         c.verdict = Ok;
         return c;
     }
     if (file.tagged == false) {
         c.verdict = Confirm;
         c.message = tr("This .hex file doesn't say which HeliSR board it's for: it isn't HeliSR firmware, or it's older "
-                       "than the board check. %1 Flash it only if you know it suits this board.").arg(danger);
+                       "than the board check. %1 Flash it only if you know it suits the %2 board.").arg(danger, ours);
         return c;
     }
-    if (deviceBoard) {
-        if (file.boardId == deviceBoard) {
-            c.verdict = Ok;
-            return c;
-        }
+    // HeliSR Rev 4.0 firmware; a device running firmware for another board is most likely on that board
+    if (deviceBoard && deviceBoard != HSR_BOARD_ID) {
         c.verdict = Confirm;
-        c.message = tr("The device runs firmware for the %1 board, so it is most likely on a %1 board, and this firmware is "
-                       "for the %2 board.").arg(HsrBoard::revisionName(deviceBoard), fileBoard) + " ";
-        if (file.boardId == HSR_BOARD_REV40) {
-            c.message += danger + " " + tr("Flash it only if this Pro Micro is on a Rev 4.0 board (or on no board).");
-        } else {
-            c.message += tr("On a board it isn't for, its inputs won't work. Flash it only if this Pro Micro is on a %1 "
-                            "board (or on no board).").arg(fileBoard);
-        }
-        return c;
-    }
-    // a Pro Micro without HeliSR firmware: nothing says which board it's on
-    if (file.boardId == HSR_BOARD_REV40) {
-        c.verdict = Confirm;
-        c.message = tr("This firmware is for the Rev 4.0 board. %1 Flash it only if this Pro Micro is on a Rev 4.0 board "
-                       "(or on no board).").arg(danger);
+        c.message = tr("The device runs firmware for the %1 board, so it is most likely on that board, and this firmware "
+                       "is for the %2 board.").arg(HsrBoard::revisionName(deviceBoard), ours)
+                    + " " + danger + " " + tr("Flash it only if this Pro Micro is on a %1 board (or on no board).").arg(ours);
         return c;
     }
     c.verdict = Ok;

@@ -25,7 +25,7 @@ For the UH-1 collective built from this project: the Huey head ([`Head/Rev5`](..
 | Z | AX1 | Collective |
 | Rz | AX4 | Throttle: 0 at the idle stop, full at full open |
 
-Filter level 1 on both. X, Y and Rx are off, so the spare AX2 and AX3 can't add stray axes. Program both AS5600s first (see the [AS5600 guide](as5600.md)), then calibrate each axis, or use the AS5600 helper's measured range.
+Filter level 1 on both. X, Y and Rx are off, so the spare AX2 and AX3 can't add stray axes. Set both AS5600s' start and stop first (see the [AS5600 guide](as5600.md)), then calibrate each axis, or use the AS5600 helper's **Use the sensor's whole output as the calibration**.
 
 **Buttons** (game button numbers):
 

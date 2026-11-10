@@ -5,7 +5,7 @@
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy)
   v1.7.3b1: application/Src/analog.c.
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026:
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026:
     - sources are the board's 9 analog inputs (12-bit, 0-4092) and slow
       encoders; FreeJoy's SPI/I2C sensors and STM32 ADC/DMA code are gone;
     - integer maths, except the resolution step, which keeps FreeJoy's float
@@ -236,7 +236,7 @@ void axes_process(const uint16_t *analog, uint16_t now)
 		}
 
 		// Source
-		if (source >= 0 && source < HSR_BOARD_SOURCES)
+		if (source >= 0 && source < HSR_ANALOG_SOURCES)
 		{
 			int32_t v = analog[source];
 			if (a->offset_angle > 0)   // move the wrap point of a 360-degree sensor

@@ -4,9 +4,11 @@ Status, 2026-10-25: **phases 0-5 and 7 are done**; phase 6 waits for the built b
 
 2026-10-27: **HeliSR Rev 4.0 support** added, with its own firmware build: see [Rev 4.0 support](#rev-40-support). No Rev 4.0 board exists yet, so it is tested on the PC, through the app's pages, and on a bare Pro Micro.
 
+2026-11-09: **HeliSR Rev 3.0 support removed**: the firmware and the app are for Rev 4.0 only. See [Rev 3.0 removed](#rev-30-removed). The phase results below are kept as they were written, so they still describe Rev 3.0.
+
 ## Goal
 
-A general-purpose game-controller firmware and configuration app for **any Pro Micro on a HeliSR Rev 3.0 board**, in any collective, throttle, button box or panel. It isn't tied to the UH-1. Both are forked once from FreeJoy v1.7.3, published together in this project's GitHub repo under GPL-3, and never need FreeJoy's updates.
+A general-purpose game-controller firmware and configuration app for **any Pro Micro on a HeliSR board** (Rev 3.0 when this plan was written; Rev 4.0 only since 2026-11-09), in any collective, throttle, button box or panel. It isn't tied to the UH-1. Both are forked once from FreeJoy v1.7.3, published together in this project's GitHub repo under GPL-3, and never need FreeJoy's updates.
 
 - Inputs keep the board's generic names: **IN1–IN16** and **AX1–AX4**.
 - The UH-1 collective becomes just one example **profile file** that users can load.
@@ -14,15 +16,15 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
 
 ## What the hardware can and can't do
 
-**HeliSR Rev 3.0 + Pro Micro (ATmega32U4):**
+**HeliSR Rev 4.0 + Pro Micro (ATmega32U4)** (the plan was written for Rev 3.0, whose AX1–AX4 were analog inputs A3–A0 with PROG buttons for AS5600 one-time programming, and whose shift registers used the I²C pins):
 
 | Resource | Available | Notes |
 |---|---|---|
-| Digital inputs | 16 (IN1–IN16, two 74HC165s) | 10 k pull-ups, switch to GND. The chain can't be extended (U1's SER is grounded). |
-| Analog inputs | 4 (AX1–AX4 = A3–A0) | 10-bit ADC, oversampled to 12 bits. AX1 and AX4 have the PROG buttons for AS5600 one-time programming. |
-| Spare Pro Micro pins | 11, **not broken out on the board** (TX, RX, 4, 5, 6, 7, 8, 9, 10, 14, 16) | Reachable only by soldering wires to the Pro Micro's pins. Five are analog-capable (4, 6, 8, 9, 10) and four do PWM (5, 6, 9, 10). See decision 2. |
+| Digital inputs | 16 (IN1–IN16, two 74HC165s) | 10 k pull-ups, switch to GND. Load on A0, data on pin 14, clock on 15. The chain can't be extended (U1's SER is grounded). |
+| Axis inputs | 4 (AX1–AX4), AS5600s over I²C | Through a PCA9546A switch (U3, 0x70; channels 0 AX4, 1 AX2, 2 AX1, 3 AX3), its /RESET on A1. The 12-bit angle is scaled to the same 0–4092 as an analog input. A2 and A3 are two more analog sources, with no connector. |
+| Spare Pro Micro pins | 10, **not broken out on the board** (TX, RX, 4, 5, 6, 7, 8, 9, 10, 16) | Reachable only by soldering wires to the Pro Micro's pins. Five are analog-capable (4, 6, 8, 9, 10) and four do PWM (5, 6, 9, 10). See decision 2. Pin 14 keeps its spare-pin index in the settings layout but is never used. |
 | Flash / RAM / EEPROM | 28 KB / 2.5 KB / 1 KB | The real limits on the port (see Risks). |
-| I²C, SPI | Not usable | I²C pins (2, 3) drive the shift registers. SCK (15) is their clock. (Rev 4.0 moves the shift registers and reads AS5600s over I²C: [Rev 4.0 support](#rev-40-support).) |
+| I²C, SPI | I²C for the AS5600s only | Pins 2 (SDA) and 3 (SCL). JTAG is switched off at start-up (JTD), as A0 and A1 are also JTAG pins. |
 
 **Firmware features (FreeJoy's, adapted):**
 - **Buttons:** 64 logical buttons (FreeJoy has 128; the 32U4's RAM limits it). Each is fed by an input, an axis range or a shift.
@@ -47,7 +49,7 @@ A general-purpose game-controller firmware and configuration app for **any Pro M
   - a selectable USB product ID, so several boards can work on one PC;
   - settings kept in EEPROM, with a checksum and automatic defaults.
 
-**Not possible on Rev 3.0** (left out of the app): matrices, more than 16 physical inputs, I²C or SPI sensors and ADCs (including digital AS5600 reading), and fast hardware encoders. LEDs, PWM and RGB are only possible on the spare pins (decision 2).
+**Not possible on the board** (left out of the app): matrices, more than 16 physical inputs, SPI sensors and ADCs, I²C devices other than the AS5600s, and fast hardware encoders. LEDs, PWM and RGB are only possible on the spare pins (decision 2).
 
 **Other Pro Micros:** only the 5 V / 16 MHz Pro Micro is supported (decision 4, 2026-10-25). The RP2040 Pro Micro is a different chip and is out of scope, but the firmware's hardware layer is kept separate so a port stays possible.
 
@@ -404,7 +406,7 @@ The installer ships them, and the app copies them to `Documents\HeliSR\configs\e
 
 ## Rev 4.0 support
 
-2026-10-27. HeliSR Rev 4.0 (`PCB/HeliSR_Rev4.0`, designed, not ordered) reads four AS5600s over I²C through a PCA9546A switch instead of analog inputs, because the sensor cables are about 60 cm. Its shift registers' data and load lines move to pins 14 and A0. It gets its own firmware build (`build.ps1 -Board 4.0`), and the configurator supports both boards. Rev 3.0 boards behave as before.
+2026-10-27. HeliSR Rev 4.0 (`PCB/HeliSR`, designed, not ordered) reads four AS5600s over I²C through a PCA9546A switch instead of analog inputs, because the sensor cables are about 60 cm. Its shift registers' data and load lines move to pins 14 and A0. It gets its own firmware build (`build.ps1 -Board 4.0`), and the configurator supports both boards. Rev 3.0 boards behave as before.
 
 **Decisions:**
 - **One settings layout for both boards.** `dev_config_t`, its version (2) and the protocol version (1) are unchanged. So Rev 3.0's firmware, the settings saved on its boards and the profiles are untouched, and a profile works on either board. What differs is what the pins are (`hsr_spare_exists()`, `hsr_source_exists()` in `helisr_config.h`):
@@ -502,3 +504,10 @@ Tested: PC tests 416 of 416 (64 new): every register and the switch's read-back 
 - **Stack:** the counters cost exactly their 24 B; the command itself costs none. Under a heavier load than before (two app sessions polling at once for 20 s), the lowest unused stack was **64 B** with this build, with or without diagnostics reads, against **88 B** for the previous build in the same test; with one session it was 136-158 B. Nothing failed, but 64 B is thin: if a built Rev 4.0 board, with sensors answering, goes lower, the counters (6 B a port) are the first thing to cut.
 
 Not tested, waits for a Rev 4.0 board: the PCA9546A read-back through a repeated start; real ZMCO, MAGNITUDE and AGC values (the hint thresholds are guesses from the datasheet's 0-255 AGC range at 5 V); how long a full read holds a pass at each clock; the stack with the counters (24 B less RAM than the 150 B measured).
+
+## Rev 3.0 removed
+
+2026-11-09. HeliSR Rev 3.0 is no longer supported; the board's files have left the repo (`PCB/HeliSR` is Rev 4.0).
+- **Firmware:** one build, Rev 4.0's. `build.ps1` loses `-Board` (the variants are `noserial`, `serial` and `noserial-test` again), and `HSR_BOARD_REV`, `HSR_BOARD_REV30`, `HSR_BOARD_SOURCES` and the Rev 3.0 pins, analog AX inputs and `HSR_TEST_AX_PULLUPS` are gone. `hsr_spare_exists()` and `hsr_source_exists()` no longer take a board. The settings layout, the live data and the protocol are unchanged, and the build tag stays (board 0x40).
+- **Configurator:** no board choice on the Board page and none remembered; the PROG-button helper (`as5600helper.*`) is gone. A device or a `.hex` tagged for another board is refused; the flasher asks before an untagged file, or before flashing a device whose firmware says it's on another board. `--board` takes only `4.0` (on the command line, the "I'm sure" for those two cases). The bundled firmware is `HeliSR_Rev4.0_16MHz.hex` alone.
+- **Tested:** the three firmware builds; the PC tests (416 of 416); the configurator built with Qt 6.8.3, `--ui-test 200` (200 of 200), `--ui-test-file` on the 3 example profiles (unchanged), `--ui-screenshot`, `--hex-info`, and `--flash-new` refusing a file tagged 0x30, an untagged file and `--board 3.0`, each before anything was touched; `--info` and `--params` with the bare Pro Micro (Rev 4.0 firmware) connected.

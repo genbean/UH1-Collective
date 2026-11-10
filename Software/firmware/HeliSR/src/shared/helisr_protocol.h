@@ -3,7 +3,7 @@
 
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy).
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 and Rev 4.0 boards, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 
   The device has two HID interfaces:
@@ -16,8 +16,8 @@
   The device answers each command with a packet carrying the same command
   number. Status is HSR_OK or an HSR_ERR_ code.
 
-  Both boards speak protocol 1. Rev 4.0 adds the three SENSOR commands, which
-  Rev 3.0 answers with HSR_ERR_COMMAND: INFO's board_id says which to expect.
+  Protocol 1. INFO's board_id (HSR_BOARD_ID) says which board the firmware is
+  for; the SENSOR commands are the board's AS5600s.
 */
 
 #ifndef HELISR_PROTOCOL_H
@@ -53,7 +53,7 @@ enum
 	HSR_CMD_PARAMS,         // start live data for 5 s; index = part (0 or 1) -> params bytes
 	HSR_CMD_BOOTLOADER,     // data = "bootloader run" -> ack, then the bootloader starts
 
-	// Rev 4.0 only: the AS5600s on AX1-AX4
+	// the AS5600s on AX1-AX4
 	HSR_CMD_SENSOR_STATUS,  // -> hsr_sensor_status_t
 	HSR_CMD_SENSOR_CONFIG,  // index 0: read; index 1: data = hsr_sensor_config_t, saved
 	                        // and applied at once (no restart) -> hsr_sensor_config_t
@@ -105,18 +105,18 @@ typedef struct
 typedef struct
 {
 	char        magic[16];          // HSR_BUILD_MAGIC
-	uint8_t     board_id;           // HSR_BOARD_REV30 / HSR_BOARD_REV40
+	uint8_t     board_id;           // HSR_BOARD_ID
 	uint8_t     cpu_mhz;
 	uint16_t    firmware_version;   // HSR_FIRMWARE_VERSION
 } hsr_build_tag_t;
 #pragma pack(pop)
 
-/* ------------------------------------------------ Rev 4.0: AS5600 sensors --
+/* -------------------------------------------------------- AS5600 sensors --
    Each AX port has its own channel on the board's PCA9546A I2C switch, and an
    AS5600 behind it. The start and stop angles are written to each sensor's
    working (volatile) ZPOS and MPOS registers every time the firmware starts,
    from settings kept in EEPROM apart from dev_config_t: they belong to the
-   sensor's mounting, not to a profile, as Rev 3.0's burnt-in angles do. CONF
+   sensor's mounting, not to a profile. CONF
    is set to the chip's power-up 0 with them. Nothing is ever burnt into a
    chip. */
 
@@ -227,7 +227,7 @@ typedef struct
 	uint16_t    now;                            // ms
 	uint16_t    sr_inputs;                      // bit n = IN(n+1) closed
 	uint16_t    spare_buttons;                  // bit n = spare pin n pressed
-	uint16_t    analog[9];                      // raw readings of analog sources 0-8 (Rev 3.0's)
+	uint16_t    analog[9];                      // raw readings of analog sources 0-8 (9-10 read 0)
 } hsr_test_step_t;
 
 typedef struct

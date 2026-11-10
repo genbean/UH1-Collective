@@ -238,7 +238,7 @@ static void t_sensor_layout()
 	CHECK_EQ(sizeof(hsr_sensor_status_t), 42);
 	CHECK_EQ(sizeof(params_report_t), HSR_PARAMS_SIZE);
 	CHECK_EQ(offsetof(params_report_t, analog_inputs), 34);
-	CHECK_EQ(offsetof(params_report_t, phy_button_data), 52);     // where Rev 3.0's live data has it
+	CHECK_EQ(offsetof(params_report_t, phy_button_data), 52);     // where it always was
 	CHECK_EQ(offsetof(params_report_t, analog_inputs_a2a3), 69);   // after the rest
 	CHECK_EQ(HSR_CMD_SENSOR_STATUS, 9);
 	CHECK_EQ(HSR_CMD_SENSOR_CONFIG, 10);
@@ -247,10 +247,10 @@ static void t_sensor_layout()
 	CHECK(sizeof(hsr_sensor_debug_t) <= HSR_PACKET_DATA);
 	CHECK_EQ(offsetof(hsr_sensor_debug_t, conf_regs), 3);
 	CHECK_EQ(offsetof(hsr_sensor_debug_t, counters), 20);
-	CHECK(hsr_spare_exists(HSR_BOARD_REV30, 9) && !hsr_spare_exists(HSR_BOARD_REV40, 9));
-	CHECK(hsr_spare_exists(HSR_BOARD_REV40, 10) && !hsr_spare_exists(HSR_BOARD_REV40, 11));
-	CHECK(hsr_source_exists(HSR_BOARD_REV30, 8) && !hsr_source_exists(HSR_BOARD_REV30, HSR_SOURCE_A2));
-	CHECK(hsr_source_exists(HSR_BOARD_REV40, HSR_SOURCE_A3) && !hsr_source_exists(HSR_BOARD_REV40, 11));
+	CHECK(hsr_spare_exists(8) && !hsr_spare_exists(9));
+	CHECK(hsr_spare_exists(10) && !hsr_spare_exists(11));
+	CHECK(hsr_source_exists(HSR_SOURCE_A2) && hsr_source_exists(HSR_SOURCE_A3) && !hsr_source_exists(11));
+	CHECK_EQ(HSR_BOARD_ID, 0x40);
 }
 
 static void t_sensor_defaults()
@@ -718,8 +718,7 @@ static void t_sensor_debug_stuck()
 
 static void t_a2_a3_sources()
 {
-	// Not in the lockstep trace: its test steps carry sources 0-8 only, and
-	// Rev 3.0's test firmware, which replays it, has no sources 9 and 10.
+	// Not in the lockstep trace: its test steps carry sources 0-8 only.
 	FILE *trace = g_trace;
 	g_trace = NULL;
 	scenario("Rev 4.0: A2 and A3 as axis sources, and in the live data");

@@ -4,7 +4,7 @@
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy),
   application/Src/usb_endp.c.
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 and Rev 4.0 boards, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 */
 
@@ -19,9 +19,7 @@
 #include "settings.h"
 #include "usb_helisr.h"
 #include "shared/helisr_protocol.h"
-#if HSR_BOARD_REV == 40
 #include "sensors.h"
-#endif
 
 #define CONFIG_CHUNKS   ((sizeof(dev_config_t) + HSR_PACKET_DATA - 1) / HSR_PACKET_DATA)
 #define PARAMS_PARTS    ((sizeof(params_report_t) + HSR_PACKET_DATA - 1) / HSR_PACKET_DATA)
@@ -151,7 +149,6 @@ static void __attribute__((noinline)) cmd_params(uint8_t index)
 	reply(HSR_OK, (uint8_t *)&p + offset, len);
 }
 
-#if HSR_BOARD_REV == 40
 static void __attribute__((noinline)) cmd_sensor_status(void)
 {
 	hsr_sensor_status_t s;
@@ -182,7 +179,6 @@ static void __attribute__((noinline)) cmd_sensor_debug(uint8_t index, uint8_t *d
 	sensors_debug(n, index & HSR_SENSOR_DEBUG_CLEAR, (hsr_sensor_debug_t *)data);
 	reply(HSR_OK, data, sizeof(hsr_sensor_debug_t));
 }
-#endif
 
 #ifdef HSR_TEST_STEP
 // One logic pass with the PC's inputs; the inputs are read from the packet
@@ -270,7 +266,6 @@ static void handle(uint32_t now)
 		reply(HSR_ERR_COMMAND, 0, 0);
 		break;
 
-#if HSR_BOARD_REV == 40
 	case HSR_CMD_SENSOR_STATUS:
 		cmd_sensor_status();
 		break;
@@ -282,7 +277,6 @@ static void handle(uint32_t now)
 	case HSR_CMD_SENSOR_DEBUG:
 		cmd_sensor_debug(index, data);
 		break;
-#endif
 
 #ifdef HSR_TEST_STEP
 	case HSR_CMD_TEST_APPLY:

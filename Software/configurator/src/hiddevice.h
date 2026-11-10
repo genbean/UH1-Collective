@@ -78,7 +78,7 @@ private:
 
     hid_device *m_device = nullptr;
     bool m_compatible = false;
-    bool m_sensors = false;             // a Rev 4.0 board: it has the SENSOR commands
+    bool m_sensors = false;             // a compatible board: it has the SENSOR commands
     int m_selectedDevice = -1;          // guarded by m_mutex
     hsr_sensor_config_t m_sensorConfigOut = {};     // guarded by m_mutex
 

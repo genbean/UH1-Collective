@@ -3,7 +3,7 @@
 
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy).
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 
   EEPROM layout (1024 bytes):
@@ -11,7 +11,7 @@
     2-3   size of dev_config_t
     4-5   CRC-16 of the settings
     6-    dev_config_t
-    960-981    Rev 4.0 only: the AS5600 settings (sensors.cpp)
+    960-981    the AS5600 settings (sensors.cpp)
     1020-1023  unique board ID
 */
 

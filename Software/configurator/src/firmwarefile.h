@@ -5,15 +5,16 @@
 
 // What a firmware .hex file is for, read from the build tag every HeliSR build
 // carries (hsr_build_tag_t in helisr_protocol.h), and whether it may go on a
-// board. A Rev 4.0 build on a Rev 3.0 board drives pins against the board's
-// chips, so the flasher checks before it starts.
+// board. Firmware for another board drives pins against the board's chips, so
+// the flasher checks before it starts: only HeliSR Rev 4.0 firmware
+// (HSR_BOARD_ID) goes on without a question.
 namespace FirmwareFile
 {
     struct Info
     {
         bool readable = false;      // an Intel HEX file that parsed
         bool tagged = false;        // has a HeliSR build tag
-        int boardId = 0;            // HSR_BOARD_REV30 / HSR_BOARD_REV40, if tagged
+        int boardId = 0;            // the tag's board ID (HSR_BOARD_ID for this app's board), if tagged
         int cpuMhz = 0;
         int firmwareVersion = 0;
         int bytes = 0;              // of program
@@ -34,7 +35,7 @@ namespace FirmwareFile
     };
 
     //! deviceBoard: INFO's board_id of the HeliSR firmware running now, or 0 (none, or a new Pro Micro);
-    //! statedBoard: the board the user says the Pro Micro is on, or 0
+    //! statedBoard: HSR_BOARD_ID if the user says the Pro Micro is on a HeliSR Rev 4.0 board, else 0
     Check check(const Info &file, int deviceBoard, int statedBoard);
 
     //! "HeliSR firmware 1.0.0 for the Rev 4.0 board", or a note that the file doesn't say

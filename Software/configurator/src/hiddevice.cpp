@@ -15,7 +15,7 @@
 
 static const int DEVICE_SEARCH_DELAY = 1000;    // ms between device list updates
 static const int PARAMS_PERIOD = 10;            // ms between live data reads
-static const int SENSOR_PERIOD = 50;            // ms between AS5600 status reads (Rev 4.0)
+static const int SENSOR_PERIOD = 50;            // ms between AS5600 status reads
 static const int SENSOR_DEBUG_PERIOD = 250;     // ms between full reads of one AS5600, when asked:
                                                 // each holds the board's passes up for 3-30 ms
 static const ushort SETTINGS_USAGE_PAGE = 0xFF00;
@@ -115,7 +115,7 @@ void HidDevice::processData()
                     openedDevice = selected;
                     disconnectedSent = false;
                     m_compatible = compatible;
-                    m_sensors = compatible && gEnv.pDeviceConfig->info.board_id == HSR_BOARD_REV40;
+                    m_sensors = compatible;
                     infoTimer.start();
                     qDebug().nospace() << "Opened HeliSR device " << selected + 1;
                     emit deviceConnected();
@@ -273,7 +273,7 @@ bool HidDevice::readInfo()
     // and a board this app knows (a newer board needs a newer app)
     return info.protocol_version == HSR_PROTOCOL_VERSION && info.config_version == HSR_CONFIG_VERSION
            && info.config_size == sizeof(dev_config_t)
-           && (info.board_id == HSR_BOARD_REV30 || info.board_id == HSR_BOARD_REV40);
+           && info.board_id == HSR_BOARD_ID;
 }
 
 bool HidDevice::readParams()

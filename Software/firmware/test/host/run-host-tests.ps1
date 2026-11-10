@@ -1,8 +1,6 @@
 # Builds and runs the HeliSR PC tests: the firmware's own logic files,
 # compiled for the PC with stand-ins for the board, driven by scripted inputs,
-# and Rev 4.0's AS5600 code against a simulated I2C bus. The logic is the same
-# for both boards; the build is Rev 4.0's (HSR_BOARD_REV=40) so that the
-# sensor code and the A2/A3 sources are in it.
+# and the AS5600 code against a simulated I2C bus.
 #   .\run-host-tests.ps1                      run the scenario tests
 #   .\run-host-tests.ps1 -FreeJoy <path>      also compare with FreeJoy's original code
 #                                             (path to a FreeJoy source checkout)
@@ -35,7 +33,7 @@ $sources += @('settings.cpp', 'buttons.cpp', 'axes.cpp', 'leds.cpp', 'pipeline.c
 # runtime library is needed; -ftrapv covers signed + - * as well.
 $flags = @('-std=gnu++17', '-O1', '-g', '-Wall', '-Wextra', '-Wno-unused-parameter',
            '-fsanitize=undefined', '-fsanitize-trap=undefined', '-ftrapv',
-           "-I$(Join-Path $here 'stubs')", "-I$fw", '-DHSR_BOARD_REV=40', '-static')
+           "-I$(Join-Path $here 'stubs')", "-I$fw", '-static')
 
 if ($FreeJoy) {
     $fj = Join-Path $FreeJoy 'application'

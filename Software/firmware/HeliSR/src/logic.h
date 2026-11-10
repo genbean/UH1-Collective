@@ -4,7 +4,7 @@
   Part of HeliSR, based on FreeJoy (https://github.com/FreeJoy-Team/FreeJoy),
   application/Inc/common_types.h, buttons.h, analog.h, encoders.h.
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026.
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 
   Differences from FreeJoy that apply throughout:

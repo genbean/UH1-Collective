@@ -18,7 +18,7 @@ QT_END_NAMESPACE
 // the board saves the two raw angles and writes them to the sensor's ZPOS and
 // MPOS every time it starts (nothing is burnt into the chip). The helper
 // follows the raw angle between the clicks, so it knows which way the travel
-// went. Also sets the I2C clock. Replaces Rev 3.0's PROG-button helper.
+// went. Also sets the I2C clock.
 // Diagnostics (off until ticked, and only while the helper shows, as each full
 // read holds the board up for a few ms): every register of the port's sensor,
 // decoded, with its counters and hints on the magnet and the cable.

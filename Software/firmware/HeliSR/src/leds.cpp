@@ -5,7 +5,7 @@
   v1.7.3b1: application/Src/leds.c (LEDs_LogicalProcess) and periphery.c
   (PWM_SetFromAxis).
   Copyright (C) 2020  Yury Vostrenkov
-  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 3.0 board, 2026:
+  Modified for the ATmega32U4 Pro Micro and the HeliSR Rev 4.0 board, 2026:
   LEDs and PWM channels are tied to spare pins (no LED matrix, no RGB LEDs, no
   host-controlled LEDs).
   Licensed under the GNU General Public License v3 or later; see LICENSE.

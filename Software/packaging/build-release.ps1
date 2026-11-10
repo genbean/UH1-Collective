@@ -61,21 +61,18 @@ if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 New-Item -ItemType Directory -Force $stage, $output | Out-Null
 
 # --------------------------------------------------------------- firmware --
-# One build per board: a Rev 4.0 build must never go on a Rev 3.0 board, so
-# the file names say which is which (and the app checks the tag inside).
+# The HeliSR Rev 4.0 build; the file name says the board (and the app checks
+# the tag inside).
 $firmware = Join-Path $software 'firmware'
-$boards = @(@{ Board = '3.0'; Dir = 'noserial' }, @{ Board = '4.0'; Dir = 'rev40-noserial' })
 New-Item -ItemType Directory -Force (Join-Path $stage 'firmware') | Out-Null
-foreach ($b in $boards) {
-    if (-not $SkipFirmware) {
-        Step "Firmware, HeliSR Rev $($b.Board)"
-        & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $firmware 'build.ps1') -Board $b.Board
-        Check "Firmware build (Rev $($b.Board))"
-    }
-    $hex = Join-Path $firmware "build\$($b.Dir)\HeliSR.ino.hex"
-    Need $hex "Rev $($b.Board) firmware .hex (run without -SkipFirmware)"
-    Copy-Item $hex (Join-Path $stage "firmware\HeliSR_Rev$($b.Board)_16MHz.hex")
+if (-not $SkipFirmware) {
+    Step 'Firmware, HeliSR Rev 4.0'
+    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $firmware 'build.ps1')
+    Check 'Firmware build'
 }
+$hex = Join-Path $firmware 'build\noserial\HeliSR.ino.hex'
+Need $hex 'Firmware .hex (run without -SkipFirmware)'
+Copy-Item $hex (Join-Path $stage 'firmware\HeliSR_Rev4.0_16MHz.hex')
 
 # ----------------------------------------------------------- configurator --
 Step 'HeliSR Configurator'

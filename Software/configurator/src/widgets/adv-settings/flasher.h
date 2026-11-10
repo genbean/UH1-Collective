@@ -16,10 +16,9 @@ class AvrFlasher;
 
 // Firmware updates: a connected HeliSR device is restarted into its bootloader
 // over USB; a Pro Micro without HeliSR firmware gets a 1200-baud touch on its
-// serial port, or a double tap on RST. avrdude then writes the .hex. Each
-// board has its own firmware; the flasher checks which board a file is for
-// (FirmwareFile) and asks before anything that could put a Rev 4.0 build on a
-// Rev 3.0 board.
+// serial port, or a double tap on RST. avrdude then writes the .hex. The
+// flasher checks which board a file is for (FirmwareFile): it refuses firmware
+// for another board and asks before anything that might not suit the board.
 class Flasher : public QWidget
 {
     Q_OBJECT

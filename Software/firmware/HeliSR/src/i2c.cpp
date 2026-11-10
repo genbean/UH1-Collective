@@ -5,13 +5,12 @@
   Part of HeliSR. Copyright (C) 2026 HeliSR contributors.
   Licensed under the GNU General Public License v3 or later; see LICENSE.
 
-  Pins (PCB/HeliSR_Rev4.0/README.md): SDA = pin 2 (PD1), SCL = pin 3 (PD0),
+  Pins (PCB/HeliSR/README.md): SDA = pin 2 (PD1), SCL = pin 3 (PD0),
   each with a 10 k pull-up on the board; PCA9546A /RESET = A1 (PF6), with a
   10 k pull-up, so it is only ever pulled low (never driven high).
 */
 
 #include "shared/helisr_config.h"
-#if HSR_BOARD_REV == 40
 
 #include <Arduino.h>
 #include <util/twi.h>
@@ -174,5 +173,3 @@ void i2c_recover(void)
 
 	twi_on();
 }
-
-#endif

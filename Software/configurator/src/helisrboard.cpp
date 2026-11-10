@@ -8,32 +8,15 @@ namespace
     const int ANALOG_SPARE[HSR_ANALOG_SOURCES] = {-1, -1, -1, -1, 2, 4, 6, 7, 8, -1, -1};   // pins 4, 6, 8, 9, 10
     const char *const AXIS_SHORT[HSR_MAX_AXES] = {"X", "Y", "Z", "Rx", "Ry", "Rz", "S1·", "S2·"};
 
-    int g_board = HSR_BOARD_REV30;
-
     QString tr(const char *text)
     {
         return QCoreApplication::translate("HsrBoard", text);
     }
 }
 
-int HsrBoard::board()
-{
-    return g_board;
-}
-
-void HsrBoard::setBoard(int boardId)
-{
-    g_board = boardId == HSR_BOARD_REV40 ? HSR_BOARD_REV40 : HSR_BOARD_REV30;
-}
-
-bool HsrBoard::isRev40()
-{
-    return g_board == HSR_BOARD_REV40;
-}
-
 bool HsrBoard::knownBoard(int boardId)
 {
-    return boardId == HSR_BOARD_REV30 || boardId == HSR_BOARD_REV40;
+    return boardId == HSR_BOARD_ID;
 }
 
 QString HsrBoard::revisionName(int boardId)
@@ -50,7 +33,7 @@ QString HsrBoard::boardName(int boardId)
 
 bool HsrBoard::spareExists(int spareIndex)
 {
-    return spareIndex >= 0 && hsr_spare_exists(uint8_t(g_board), uint8_t(spareIndex));
+    return spareIndex >= 0 && hsr_spare_exists(uint8_t(spareIndex));
 }
 
 QString HsrBoard::spareLabel(int spareIndex)
@@ -110,7 +93,7 @@ QString HsrBoard::analogSourceName(int source)
 
 bool HsrBoard::analogSourceAvailable(int source, const pin_func_t *pins)
 {
-    if (source < 0 || hsr_source_exists(uint8_t(g_board), uint8_t(source)) == false) return false;
+    if (source < 0 || hsr_source_exists(uint8_t(source)) == false) return false;
     if (source < HSR_AX_INPUTS || source == HSR_SOURCE_A2 || source == HSR_SOURCE_A3) return true;
     int spare = spareOfAnalogSource(source);
     return spareExists(spare) && pins[spare] == PIN_AXIS_ANALOG;
