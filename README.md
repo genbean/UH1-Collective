@@ -11,6 +11,8 @@ A 3D-printed, desk-mounted collective for helicopter flight simulators, modelled
 - **Electronics:** the HeliSR board, a small PCB that carries a Pro Micro, sits in the head. It reads 16 switch inputs, and the AS5600s over I²C on four sensor ports. Only the USB cable comes out of the base.
 - **Software:** the HeliSR firmware and a Windows app, HeliSR Configurator. The app flashes the board, assigns each switch position to a game button and calibrates the axes. Both are based on FreeJoy.
 
+**Interactive exploded views** (point at any part to see what it is): [the base](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_exploded.html), [the base's lever](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_lever_exploded.html), [the head](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html), [the head from behind](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded_Rear.html).
+
 More pictures: [from the side](renders/HeliCollective_side.png) and [at the 32° stop](renders/HeliCollective_32deg.png). [`renders/HeliCollective_Assembly.glb`](renders/HeliCollective_Assembly.glb) is the whole collective in 3D; it opens in Windows 3D Viewer or any glTF viewer.
 
 ## The parts

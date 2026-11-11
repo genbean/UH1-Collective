@@ -8,13 +8,13 @@ Rev 5 grew out of head Rev 4 (no longer in the repository), which it compares it
 
 ![Rev 5's panels](renders/HueyHeadR5_Front.png)
 
-![Exploded from the front: the panels, the HeliSR board, the AS5600 module, magnet shaft and pinion, the grip and the friction collar](renders/HueyHeadR5_Exploded.png)
+[![Exploded from the front: the panels, the HeliSR board, the AS5600 module, magnet shaft and pinion, the grip and the friction collar](renders/HueyHeadR5_Exploded.png)](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html)
 
-**[Interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html)**: point at any part to see what it is ([the page](renders/HueyHeadR5_Exploded.html), to download and open locally).
+**[▶ Open the interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html)** (click the picture too): point at any part to see what it is ([the page](renders/HueyHeadR5_Exploded.html), to download and open locally).
 
-![Exploded from behind: the trigger, its spring, switch, pivot and pull stop, and the HeliSR board's screws](renders/HueyHeadR5_Exploded_Rear.png)
+[![Exploded from behind: the trigger, its spring, switch, pivot and pull stop, and the HeliSR board's screws](renders/HueyHeadR5_Exploded_Rear.png)](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded_Rear.html)
 
-**[Interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded_Rear.html)**: point at any part to see what it is ([the page](renders/HueyHeadR5_Exploded_Rear.html), to download and open locally).
+**[▶ Open the interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded_Rear.html)** (click the picture too): point at any part to see what it is ([the page](renders/HueyHeadR5_Exploded_Rear.html), to download and open locally).
 
 ## One piece
 

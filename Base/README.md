@@ -6,9 +6,9 @@ Rev 4 is Rev 3, the first base built (2026-11), cut down to **73 mm (2.87 in)** 
 
 This is the current base. Its first frame, shell and lever were printed and assembled on 2026-11-08, and the bearing coupons fitted. Since then the lever is split on the tube's plane, the brake is a hinged strap, the side covers are 5 mm square plates, the USB cable leaves toward the front, and the lever's opening is 2 mm clear. So reprint every printed part except the strut collar, and print the dowel-hole [coupon](#fit-test-coupons) before the lever.
 
-![Rev 4, exploded](renders/rev4_exploded.png)
+[![Rev 4, exploded](renders/rev4_exploded.png)](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_exploded.html)
 
-**[Interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_exploded.html)**: point at any part to see what it is ([the page](renders/rev4_exploded.html), to download and open locally).
+**[▶ Open the interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_exploded.html)** (click the picture too): point at any part to see what it is ([the page](renders/rev4_exploded.html), to download and open locally).
 
 ![Rev 4 from the front](renders/rev4_hero.png)
 
@@ -150,9 +150,9 @@ Two halves, split on the tube's plane (y = 0) rather than at the pivot axis as R
 - **Strength:** up and down at the grip, the main load, the two halves sit side by side, each carrying its share, and nothing crosses the joint. With Rev 3's split at the axis, each half alone had only about a fifth of the section's stiffness, and the joint had to carry the shear between them, about 3 N/mm at 100 N on the grip. A side load crosses the joint now instead: 20 N at the grip puts about 0.7 N/mm across it, which the dowels and the screws' clamp carry easily.
 - **Unchanged:** the outside, the bores, the fairings, the strut relief, the hose-clamp groove, the trunnions and the socket for the uncut 500 mm tube. The halves are mirror images, except the sensor's pocket in the sensor half's trunnion and the USB cable's relief in the cable half's (see [USB cable](#usb-cable)).
 
-![The lever exploded: the halves, dowels, screws and nuts](renders/rev4_lever_exploded.png)
+[![The lever exploded: the halves, dowels, screws and nuts](renders/rev4_lever_exploded.png)](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_lever_exploded.html)
 
-**[Interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_lever_exploded.html)**: point at any part to see what it is ([the page](renders/rev4_lever_exploded.html), to download and open locally).
+**[▶ Open the interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_lever_exploded.html)** (click the picture too): point at any part to see what it is ([the page](renders/rev4_lever_exploded.html), to download and open locally).
 
 **Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss, and the same one mirrored runs under it. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm.
 
