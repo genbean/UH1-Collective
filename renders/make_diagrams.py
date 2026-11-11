@@ -8,7 +8,8 @@ views. (The base's exploded view and screw chart come from ../Base/make_renders_
                                         ../Head/huey_head_r5.py)
 
 writes
-    ../Head/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png, HueyHeadR5_ScrewSizes.png,
+    ../Head/renders/HueyHeadR5_Exploded.png, HueyHeadR5_Exploded_Rear.png (and an .html of each: the same view, a popup
+    on each part, from the template hover_page.html here), HueyHeadR5_ScrewSizes.png,
     HueyHeadR5_Screws_Panels.png, HueyHeadR5_Screws_Inside.png, HueyHeadR5_Screws_Rear.png, HueyHeadR5_Screws_Collar.png,
     HueyHeadR5_Pinion.png (which way up the pinion goes, from ../Head/stl/HueyHeadR5-Pinion.stl too),
     HueyHeadR5_ToggleBoxes.png, HueyHeadR5_ToggleBoxes_Switches.png (the panels' backs),
@@ -230,10 +231,11 @@ def to_pv(m):
 BG_TOP, BG_BOT = (250, 251, 252), (228, 231, 236)
 
 
-def render(items, view, up, size=(1500, 1200), zoom=1.0, anchors=(), focus=None, crop=False):
+def render(items, view, up, size=(1500, 1200), zoom=1.0, anchors=(), focus=None, crop=False, ids=None):
     """Render items (each drawn where Item.move puts it). view: direction from the scene to the camera; focus: the items
     to frame (all of them if None); crop: trim the empty background round the parts. Returns the image and the anchors'
-    pixel positions."""
+    pixel positions; with ids (one small int per item, 0 for none), a third value too: the same view as an 8-bit map,
+    each pixel the id of the item drawn there (for the interactive pages)."""
     p = pv.Plotter(off_screen=True, window_size=size, lighting="light kit")
     p.set_background(BG_BOT, top=BG_TOP)
     for it in items:
@@ -255,6 +257,20 @@ def render(items, view, up, size=(1500, 1200), zoom=1.0, anchors=(), focus=None,
         r.WorldToDisplay()
         x, y, _ = r.GetDisplayPoint()
         px.append((x, size[1] - y))
+    idmap = None
+    if ids is not None:                               # the same camera again, each item flat in its id: no light, no AA
+        p.disable_anti_aliasing()
+        r.GradientBackgroundOff()
+        r.SetBackground(0, 0, 0)
+        for actor, k in zip(list(p.actors.values()), ids):
+            pr = actor.GetProperty()
+            pr.SetColor(k / 255.0, 0.0, 0.5)
+            pr.SetAmbient(1.0), pr.SetDiffuse(0.0), pr.SetSpecular(0.0)
+            pr.LightingOff()
+        p.render()
+        a = np.asarray(p.screenshot(return_img=True)).astype(int)
+        ok = np.abs(a[..., 2] - 128) <= 2             # anything else is the background
+        idmap = Image.fromarray(np.where(ok, a[..., 0], 0).astype(np.uint8), "L")
     p.close()
     if crop:                                          # the background is a vertical gradient: compare each row with its
         a = np.asarray(img).astype(int)               # own left edge
@@ -264,8 +280,9 @@ def render(items, view, up, size=(1500, 1200), zoom=1.0, anchors=(), focus=None,
         x0, x1 = max(xs.min() - m, 0), min(xs.max() + m, a.shape[1])
         y0, y1 = max(ys.min() - m, 0), min(ys.max() + m, a.shape[0])
         img = img.crop((x0, y0, x1, y1))
+        idmap = idmap.crop((x0, y0, x1, y1)) if idmap is not None else None
         px = [(x - x0, y - y0) for x, y in px]
-    return img, px
+    return (img, px) if ids is None else (img, px, idmap)
 
 
 def font(sz, bold=False):
@@ -342,8 +359,9 @@ def compose(img, px, labels, title, subtitle, out, side=360):
     print("wrote", os.path.relpath(out, HERE))
 
 
-def labelled(items, groups, view, up, title, subtitle, out, **kw):
-    """groups: [(title, text, [Item, ...])], anchored at each item's head (screws) or centroid (parts)."""
+def labelled(items, groups, view, up, title, subtitle, out, html=False, **kw):
+    """groups: [(title, text, [Item, ...])], anchored at each item's head (screws) or centroid (parts). html: also write
+    out's .html beside it, the same view without the callouts, each part telling what it is under the mouse."""
     anchors, labels = [], []
     for t, s, its in groups:
         idx = []
@@ -351,8 +369,60 @@ def labelled(items, groups, view, up, title, subtitle, out, **kw):
             idx.append(len(anchors))
             anchors.append(it.anchor())
         labels.append((t, s, idx))
-    img, px = render(items, view, up, anchors=anchors, **kw)
+    if not html:
+        img, px = render(items, view, up, anchors=anchors, **kw)
+        compose(img, px, labels, title, subtitle, out)
+        return
+    ids = group_ids(items, groups)
+    img, px, idmap = render(items, view, up, anchors=anchors, ids=ids, **kw)
     compose(img, px, labels, title, subtitle, out)
+    hover_page(img, idmap, groups, title, subtitle, os.path.splitext(out)[0] + ".html")
+
+
+def group_ids(items, groups):
+    """Each item's group, 1-based: the group that lists it; else the group listing an item of its name (the other dowels,
+    the screws of a set); else the group of the nearest listed item (a bearing's inner ring, a felt pad, a magnet)."""
+    own, by_name = {}, {}
+    for g, (_, _, its) in enumerate(groups, 1):
+        for it in its:
+            own.setdefault(id(it), g)
+            by_name.setdefault(it.name, g)
+    listed = [it for _, _, its in groups for it in its]
+    cen = np.array([it.moved().centroid for it in listed])
+    out = []
+    for it in items:
+        if id(it) in own:
+            out.append(own[id(it)])
+        elif it.name in by_name:
+            out.append(by_name[it.name])
+        else:
+            near = listed[int(np.argmin(np.linalg.norm(cen - it.moved().centroid, axis=1)))]
+            out.append(own[id(near)])
+    return out
+
+
+def _b64png(img):
+    import base64
+    import io
+    buf = io.BytesIO()
+    img.save(buf, "PNG", optimize=True)
+    return base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def hover_page(img, idmap, groups, title, subtitle, out):
+    """A page of its own (no network): the render, and over each part a popup with its callout's text; the list beside
+    it highlights the same parts."""
+    import html as H
+    import json
+    with open(os.path.join(HERE, "hover_page.html"), encoding="utf-8") as f:
+        page = f.read()
+    data = {"title": title, "subtitle": subtitle,
+            "groups": [{"t": " ".join(t.split()), "s": s, "hw": all(it.kind for it in its)} for t, s, its in groups],
+            "img": _b64png(img), "ids": _b64png(idmap), "w": img.size[0], "h": img.size[1]}
+    page = page.replace("{{TITLE}}", H.escape(title)).replace("{{DATA}}", json.dumps(data).replace("</", "<\\/"))
+    with open(out, "w", encoding="utf-8", newline="\n") as f:
+        f.write(page)
+    print("wrote", os.path.relpath(out, HERE))
 
 
 # ---------------------------------------------------------------------------------------------------- head views
@@ -467,7 +537,7 @@ def head_views(src):
     labelled(everything, groups, (0.75, -1.0, 0.3), (0, 0, 1), "Huey head Rev 5, exploded",
              "Printed parts in their colours, screws and nuts in red. The panels come off toward the front; the "
              "throttle slides down the tube.", os.path.join(HEAD_OUT, "HueyHeadR5_Exploded.png"), size=(1700, 1700),
-             crop=True)
+             crop=True, html=True)
     rear = [("Trigger", "slides in from behind between the lugs", ["Trigger"]),
             ("Return spring", "pen spring, about 13 mm", ["Trigger spring"]),
             ("Starter tact switch", "pushed into its pocket from behind, legs first", ["Starter tact switch"]),
@@ -480,7 +550,7 @@ def head_views(src):
     labelled(everything, groups, (-0.6, 1.0, -0.2), (0, 0, 1), "Huey head Rev 5, exploded from behind",
              "The trigger comes off backward; the HeliSR board's screws come out of the rear wall.",
              os.path.join(HEAD_OUT, "HueyHeadR5_Exploded_Rear.png"), size=(1500, 1300),
-             focus=[H["Body"], H["Trigger"], H["pivot"]], zoom=0.95)
+             focus=[H["Body"], H["Trigger"], H["pivot"]], zoom=0.95, html=True)
     return H
 
 

@@ -1,0 +1,188 @@
+<!doctype html>
+<!-- The template for make_diagrams.hover_page(): it fills in {{TITLE}} and {{DATA}} (the render, its part-id map, and
+     each group's title and text). Edit this file, not the .html pages it writes. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #16181c; --sub: #5a606b; --line: #d9dce2;
+    --accent: #c62828; --hover: #fbe9e7; --tip-bg: #16181c; --tip-ink: #ffffff; --tip-sub: #c9ccd2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171b; --panel: #1e2126; --ink: #eceef1; --sub: #a3a9b4; --line: #343841;
+      --accent: #ef5350; --hover: #3a2524; --tip-bg: #f4f5f7; --tip-ink: #16181c; --tip-sub: #4a4f58;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171b; --panel: #1e2126; --ink: #eceef1; --sub: #a3a9b4; --line: #343841;
+    --accent: #ef5350; --hover: #3a2524; --tip-bg: #f4f5f7; --tip-ink: #16181c; --tip-sub: #4a4f58;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.45 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  header { padding: 20px 24px 8px; }
+  h1 { margin: 0; font-size: 24px; }
+  header p { margin: 4px 0 0; color: var(--sub); }
+  .hint { font-size: 13px; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; padding: 12px 24px 24px;
+         align-items: start; }
+  .stage { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+           overflow: hidden; }
+  canvas { display: block; width: 100%; height: auto; cursor: default; }
+  canvas.on { cursor: pointer; }
+  aside { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 0;
+          position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--sub);
+             margin: 10px 16px 4px; }
+  aside ul { list-style: none; margin: 0; padding: 0; }
+  aside li { padding: 6px 16px; border-left: 3px solid transparent; cursor: pointer; }
+  aside li .s { display: none; color: var(--sub); font-size: 13px; }
+  aside li.on { background: var(--hover); border-left-color: var(--accent); }
+  aside li.on .s { display: block; }
+  .tip { position: fixed; pointer-events: none; max-width: 320px; padding: 9px 12px; border-radius: 6px;
+         background: var(--tip-bg); color: var(--tip-ink); box-shadow: 0 4px 16px rgba(0,0,0,.25);
+         font-size: 14px; display: none; z-index: 10; }
+  .tip b { display: block; font-size: 15px; }
+  .tip span { color: var(--tip-sub); }
+  @media (max-width: 900px) {
+    header { padding: 16px 16px 4px; }
+    main { grid-template-columns: 1fr; padding: 8px 16px 16px; }
+    aside { position: static; max-height: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title"></h1>
+  <p id="sub"></p>
+  <p class="hint">Point at a part (or tap it) to see what it is. Point at a name in the list to find its part.</p>
+</header>
+<main>
+  <div class="stage"><canvas id="view"></canvas></div>
+  <aside id="list"></aside>
+</main>
+<div class="tip" id="tip"></div>
+<script type="application/json" id="data">{{DATA}}</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  document.getElementById("title").textContent = D.title;
+  document.getElementById("sub").textContent = D.subtitle;
+  const W = D.w, H = D.h;
+  const view = document.getElementById("view"), ctx = view.getContext("2d");
+  const tip = document.getElementById("tip"), list = document.getElementById("list");
+  view.width = W; view.height = H;
+
+  // the list: parts, then screws and nuts
+  const items = [];
+  for (const [hw, name] of [[false, "Parts"], [true, "Screws and nuts"]]) {
+    const h2 = document.createElement("h2"); h2.textContent = name;
+    const ul = document.createElement("ul");
+    D.groups.forEach((g, i) => {
+      if (g.hw !== hw) return;
+      const li = document.createElement("li");
+      const t = document.createElement("div"); t.textContent = g.t;
+      const s = document.createElement("div"); s.className = "s"; s.textContent = g.s;
+      li.append(t, s);
+      li.addEventListener("mouseenter", () => show(i + 1, null));
+      li.addEventListener("mouseleave", () => show(0, null));
+      li.addEventListener("click", () => show(cur === i + 1 ? 0 : i + 1, null));
+      items[i + 1] = li;
+      ul.append(li);
+    });
+    if (ul.children.length) list.append(h2, ul);
+  }
+
+  function load(src) {
+    return new Promise((ok, bad) => { const im = new Image(); im.onload = () => ok(im); im.onerror = bad;
+                                      im.src = "data:image/png;base64," + src; });
+  }
+
+  let base, dim, ids, members, out, cur = 0;
+  Promise.all([load(D.img), load(D.ids)]).then(([im, idm]) => {
+    ctx.drawImage(im, 0, 0);
+    base = ctx.getImageData(0, 0, W, H);
+    const c2 = document.createElement("canvas"); c2.width = W; c2.height = H;
+    const x2 = c2.getContext("2d", { willReadFrequently: true });
+    x2.drawImage(idm, 0, 0);
+    const raw = x2.getImageData(0, 0, W, H).data;
+    ids = new Uint8Array(W * H);
+    members = D.groups.map(() => []); members.push([]);
+    for (let p = 0; p < W * H; p++) {
+      const k = raw[4 * p];
+      ids[p] = k;
+      if (k > 0 && k <= D.groups.length) members[k].push(p);
+    }
+    dim = new ImageData(new Uint8ClampedArray(base.data), W, H);       // everything faded toward white
+    const d = dim.data;
+    for (let j = 0; j < d.length; j += 4) {
+      d[j] += (255 - d[j]) * 0.72; d[j + 1] += (255 - d[j + 1]) * 0.72; d[j + 2] += (255 - d[j + 2]) * 0.72;
+    }
+    out = new ImageData(W, H);
+  });
+
+  function paint(g) {
+    if (!base) return;
+    if (!g) { ctx.putImageData(base, 0, 0); return; }
+    out.data.set(dim.data);
+    const o = out.data, b = base.data;
+    for (const p of members[g]) {
+      const j = 4 * p; o[j] = b[j]; o[j + 1] = b[j + 1]; o[j + 2] = b[j + 2];
+    }
+    ctx.putImageData(out, 0, 0);
+  }
+
+  function show(g, ev) {
+    if (g !== cur) {
+      if (items[cur]) items[cur].classList.remove("on");
+      if (items[g]) items[g].classList.add("on");
+      cur = g;
+      paint(g);
+    }
+    view.classList.toggle("on", g > 0);
+    if (!g || !ev) { tip.style.display = "none"; return; }
+    const G = D.groups[g - 1];
+    tip.innerHTML = "";
+    const b = document.createElement("b"); b.textContent = G.t;
+    tip.append(b);
+    if (G.s) { const s = document.createElement("span"); s.textContent = G.s; tip.append(s); }
+    tip.style.display = "block";
+    const r = tip.getBoundingClientRect(), m = 16;
+    let x = ev.clientX + m, y = ev.clientY + m;
+    if (x + r.width > innerWidth - 8) x = ev.clientX - m - r.width;
+    if (y + r.height > innerHeight - 8) y = ev.clientY - m - r.height;
+    tip.style.left = Math.max(8, x) + "px"; tip.style.top = Math.max(8, y) + "px";
+  }
+
+  // the part under the pointer; thin screws are hard to hit, so look a few pixels round it too
+  function pick(ev) {
+    if (!ids) return 0;
+    const rc = view.getBoundingClientRect();
+    const s = W / rc.width;
+    const x = Math.floor((ev.clientX - rc.left) * s), y = Math.floor((ev.clientY - rc.top) * s);
+    if (x < 0 || y < 0 || x >= W || y >= H) return 0;
+    if (ids[y * W + x]) return ids[y * W + x];
+    const R = Math.round(6 * s);
+    let best = 0, bd = Infinity;
+    for (let dy = -R; dy <= R; dy++) {
+      const yy = y + dy; if (yy < 0 || yy >= H) continue;
+      for (let dx = -R; dx <= R; dx++) {
+        const xx = x + dx; if (xx < 0 || xx >= W) continue;
+        const k = ids[yy * W + xx], dd = dx * dx + dy * dy;
+        if (k && dd < bd && dd <= R * R) { bd = dd; best = k; }
+      }
+    }
+    return best;
+  }
+
+  view.addEventListener("mousemove", ev => show(pick(ev), ev));
+  view.addEventListener("mouseleave", () => show(0, null));
+  view.addEventListener("click", ev => show(pick(ev), ev));
+})();
+</script>
+</body>
+</html>

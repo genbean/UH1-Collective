@@ -8,6 +8,8 @@ This is the current base. Its first frame, shell and lever were printed and asse
 
 ![Rev 4, exploded](renders/rev4_exploded.png)
 
+**[Interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_exploded.html)**: point at any part to see what it is ([the page](renders/rev4_exploded.html), to download and open locally).
+
 ![Rev 4 from the front](renders/rev4_hero.png)
 
 ![Rev 4 with the shell off](renders/rev4_open.png)
@@ -149,6 +151,8 @@ Two halves, split on the tube's plane (y = 0) rather than at the pivot axis as R
 - **Unchanged:** the outside, the bores, the fairings, the strut relief, the hose-clamp groove, the trunnions and the socket for the uncut 500 mm tube. The halves are mirror images, except the sensor's pocket in the sensor half's trunnion and the USB cable's relief in the cable half's (see [USB cable](#usb-cable)).
 
 ![The lever exploded: the halves, dowels, screws and nuts](renders/rev4_lever_exploded.png)
+
+**[Interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Base/renders/rev4_lever_exploded.html)**: point at any part to see what it is ([the page](renders/rev4_lever_exploded.html), to download and open locally).
 
 **Fairing:** in place of Rev 3's 8 mm top gusset, a fairing 21 mm wide runs over the socket boss, and the same one mirrored runs under it. It starts at the hose-clamp groove's back edge. Its top is one straight line from the boss's top there to the hub, tangent to the hub's circle, so it runs into the hub without a corner. Its long top edges are rounded 3 mm.
 

@@ -1,7 +1,9 @@
 """
 Renders for the MkIII base Rev 4, with the shared render helpers (make_renders_r3.py, as R), the diagram helpers in
 ../renders/make_diagrams.py, and the parts' colours (COLOURS, as the earlier revisions had them).
-    python make_renders_r4.py      -> renders/*.png (views, sections, screw maps, the exploded view and the screw chart),
+    python make_renders_r4.py      -> renders/*.png (views, sections, screw maps, the exploded views and the screw chart),
+                                      rev4_exploded.html and rev4_lever_exploded.html (the exploded views, a popup
+                                      on each part: `python make_renders_r4.py exploded` makes only these),
                                       renders/MkIII_Rev4_Assembly.glb, and the complete collective with the head:
                                       ../renders/HeliCollective_Assembly.glb, _0deg.png, _32deg.png, _side.png
 The head comes from ../Head (its STLs and its hat script), apart from its bought parts, which only the collective GLB has.
@@ -493,7 +495,7 @@ def lever_exploded(C):
               ("M4 nut  (x2)", "in hex pockets in the cable half's end face", pick("lever nut", 1))]
     d.labelled(list(I.values()) + S, groups, (-0.65, -0.75, 0.55), (0, 0, 1), "MkIII base Rev 4 lever, exploded",
                "Split on the tube's plane. Close the halves on the dowels, fit the screws, then press the bearings on",
-               os.path.join(OUT, "rev4_lever_exploded.png"), size=(1700, 1300), crop=True)
+               os.path.join(OUT, "rev4_lever_exploded.png"), size=(1700, 1300), crop=True, html=True)
 
 
 def exploded(C):
@@ -594,7 +596,7 @@ def exploded(C):
     everything = list(I.values()) + [it for g in S.values() for it in g]
     d.labelled(everything, groups, (-0.55, -1.0, 0.75), (0, 0, 1), "MkIII base Rev 4, exploded",
                "Printed parts in their colours, screws and nuts in red. The tube is cut short.",
-               os.path.join(OUT, "rev4_exploded.png"), size=(2200, 2000), crop=True)
+               os.path.join(OUT, "rev4_exploded.png"), size=(2200, 2000), crop=True, html=True)
 
 
 def screw_chart():
@@ -692,4 +694,9 @@ def collective(C):
 
 
 if __name__ == "__main__":
-    main()
+    if sys.argv[1:] == ["exploded"]:                  # only the two exploded views and their pages
+        os.makedirs(OUT, exist_ok=True)
+        lever_exploded(colours())
+        exploded(colours())
+    else:
+        main()
