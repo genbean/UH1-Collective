@@ -3,12 +3,12 @@
 # the MkIII base Rev 4 (Base/). Earlier revisions are gone from the repo (git history has them).
 # The board's parts (SOLDERED, below) are checked against its board file; the cables and the head switches come from
 # the Rev 3.0 board's Digi-Key cart (ORDER, below). The Digi-Key order placed for
-# Rev 3.0 (DK_ORDER) counts as bought: the parts Rev 4.0 shares with it are not ordered again, and the ones it
-# doesn't use are listed on the Dropped sheet. Head and base lines cite the README or CAD they come from. Lines
+# Rev 3.0 (DK_ORDER) counts as bought: the parts Rev 4.0 shares with it are not ordered again; so do the
+# Mouser orders (MOUSER_ORDER). Only parts this build uses are listed. Head and base lines cite the README or CAD they come from. Lines
 # sized only from the CAD are highlighted for checking; lines covered by the two screw kits (every screw and nut in
 # the head and base) are marked and cost nothing extra.
 # Sheets: Final BOM (everything bought: the only parts list), Printed
-# parts, Dropped (in earlier lists or carts, not used now), Sources.
+# parts, Sources.
 # usage: python tools/make_bom.py [out.xlsx]     (any Python 3 with openpyxl)
 import math, os, re, sys
 from openpyxl import Workbook
@@ -200,7 +200,7 @@ def any_(where, qty, desc, notes, source, status="", pack=1):
 SECTIONS = []
 board = [(refs, len(expand(refs)), desc, mfr, mpn, "Digi-Key", dkpn, CHECKED.get(mpn, unit), 1, "", 0, notes, BRD)
          for refs, value, fpname, desc, mfr, mpn, dkpn, unit, notes in SOLDERED]
-SECTIONS.append(("HeliSR Rev 4.0: the parts you solder to the bare board (Digi-Key)", board))
+SECTIONS.append(("HeliSR Rev 4.0: the parts you solder to the bare board", board))
 SECTIONS.append(("HeliSR Rev 4.0: bare PCB and controller", [
     ("PCB", 1, "HeliSR Rev 4.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 39.3 x 33.64 mm", "OSH Park", "", "OSH Park",
      "", 10.20, 3, "", 0, "Not ordered yet: upload PCB/HeliSR/HeliSR_Rev4.0_Gerbers.zip. Priced as Rev 3.0's "
@@ -421,6 +421,37 @@ def _delivered(l):
     return tuple(l)
 SECTIONS = [(t, [_delivered(l) for l in lines]) for t, lines in SECTIONS]
 
+# Mouser orders  (2026-11-01, invoice ) and  (2026-11-05, invoice ): the parts this
+# build uses. Keyed by the line's mfr part: (mfr part bought, Mouser part, unit USD, qty bought, description or None)
+MOUSER_ORDER = {
+    "PCA9546ADR": ("PCA9546ADR", "595-PCA9546ADR", 1.84, 1, None),
+    "RC1206FR-072K2L": ("RC1206FR-072K2L", "603-RC1206FR-072K2L", 0.025, 10, None),
+    "RC1206FR-0710KL": ("RC1206FR-0710KL", "603-RC1206FR-0710KL", 0.025, 10, None),
+    "BM04B-SRSS-TBT": ("BM04B-SRSS-TB(LF)(SN)", "306-BM04BSRSSTBLFSN", 0.53, 4, None),
+    "A04SR04SR30K203A": ("A04SR04SR30K254B", "306-A04SR04SR30K254B", 1.63, 2,
+                         "JST SR jumper, 4 positions, socket to socket, 10 in (254 mm)"),
+    "RKJXM1015004": ("RKJXM1015004", "688-RKJXM1015004", 10.07, 1, None),
+    "SM06B-SRSS-TB(LF)(SN)": ("SM06B-SRSS-TB(LF)(SN)", "306-M06BSRSSTBLFSNPP", 0.68, 1, None),
+    "A06SR06SR30K152A": ("A06SR06SR30K203A", "306-A06SR06SR30K203A", 1.85, 1,
+                         "JST SH jumper, 6 positions, socket to socket, 8 in (203 mm)"),
+}
+MOUSER = "Mouser invoices  (2026-11-03) and  (2026-11-05)"
+MOUSER_EXTRA = {"CL31B104KBCNNNC": 10}       # bought from Mouser on top of the Digi-Key order (187-CL31B104KBCNNNC)
+def _mouser(l):
+    l = list(l)
+    if l[4] in MOUSER_ORDER:
+        mpn, spn, unit, q, desc = MOUSER_ORDER[l[4]]
+        l[4], l[5], l[6], l[7], l[8], l[10], l[9] = mpn, "Mouser", spn, unit, 1, q, ORDERED
+        if desc: l[2] = desc
+        l[11] = l[11].replace(" Price: check Mouser", "").replace("Price: check Mouser", "").strip()
+        l[12] = MOUSER + "; " + l[12]
+    elif l[4] in MOUSER_EXTRA:
+        l[10] += MOUSER_EXTRA[l[4]]; l[9] = ORDERED
+        l[11] += f". {l[10]} bought: {l[10] - MOUSER_EXTRA[l[4]]} from Digi-Key, {MOUSER_EXTRA[l[4]]} from Mouser"
+        l[12] += "; " + MOUSER
+    return tuple(l)
+SECTIONS = [(t, [_mouser(l) for l in lines]) for t, lines in SECTIONS]
+
 PRINTED = [
     ("Head", "Head/stl/HueyHeadR5-GripBearingCoupons.stl", 1, "Flat, labels up. Optional: checks the head's 25.2 mm "
      "tube bore on the carbon tube (the grip now rides on O-rings)"),
@@ -460,65 +491,6 @@ PRINTED = [
     ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end. The same part as Rev 3's"),
     ("Base", "Base/stl/friction_knob.stl", 1, "The MkII knob with an M5 hex pocket, its floor 11 mm up, and a "
      "pocket in its underside for the optional spring. Underside down, hex pocket open at the top"),
-]
-DROPPED = [
-    ("TE 1825910-6 tact switches for the SEARCH CONT hat (450-1650-ND)", 4, "Bought in order for the tact-switch "
-     "hats (Rev 1-3); hat Rev 4 uses the ALPS RKJXM1015004 on its own board", "Head/Hat/README.md"),
-    ("HeliSR Rev 3.0 bare PCBs (OSH Park, 3 boards, $10.20)", 3, "Bought 2026-10-21. Rev 4.0 replaces the board: it reads "
-     "the AS5600s over I2C instead of their analog output", "OSH Park order, 2026-10-21"),
-    ("YAGEO RC0805FR-071KL 1 kOhm 0805 (311-1.00KCRCT-ND)", 2, "Bought in order for Rev 3.0's PROG buttons (R1, "
-     "R2); Rev 4.0 has none", "the Rev 3.0 Digi-Key order"),
-    ("JST BM03B-SRSS-TBT 3-pin header (455-BM03B-SRSS-TBTCT-ND)", 4, "Bought in order for Rev 3.0's analog "
-     "inputs; Rev 4.0's AX ports are 4-pin (BM04B-SRSS-TBT)", "the Rev 3.0 Digi-Key order"),
-    ("E-Switch TL1015AF160QG (EG4344CT-ND), 2 of the 3 bought", 2, "Rev 4.0 has only RST (SW1): the other two are spares",
-     "the Rev 3.0 Digi-Key order"),
-    ("JST A03SR03SR30K203A 3-pin jumpers (455-3627-ND)", 2, "Bought in order; Rev 4.0's AX ports take the 4-pin "
-     "A04SR04SR30K203A", "the Rev 3.0 Digi-Key order"),
-    ("Tensility 30-01653 3-core lead, 1 m (839-30-01653-DS-ND)", 1, "Bought in order for the analog sensor; "
-     "I2C needs four cores (Tensility 30-00099)", "the Rev 3.0 Digi-Key order"),
-    ("Glue, thread-lock, taps, drill bit, felt tape, hose clamp, 10 mm spring, #10 desk screws", 0,
-     "You supply these yourself", "User, 2026-10-23"),
-    ("Fgruh M3 and M4 socket-cap screw kits, M3 x 10 / M4 x 30 / M5 x 40 countersunk packs, M6 x 25 and M6 x 30 bolts, M6 and "
-     "M4 nyloc nuts, uxcell M5 x 5 set screws, heat-set inserts and insert tips", 0, "Every screw and nut now comes from the "
-     "AvrestYPT and set screw kits (2026-10-23): the CAD was changed to suit them", "User, 2026-10-23"),
-    ("SparkFun Pro Micro 12640 (Digi-Key 1568-12640-ND)", 1, "Replaced by the OSOYOO USB-C Pro Micro from Amazon", FULL),
-    ("Sullins PRPC012SAAN-RC male headers (Digi-Key 35-PRPC012SAAN-RC-ND)", 2, "The OSOYOO Pro Micro comes with header pins", FULL),
-    ("Assmann AK67421-2 USB A to micro-B cable", 1, "The OSOYOO Pro Micro is USB-C", FULL),
-    ("E-Switch PS1024ABLK push button (EG2011-ND)", 2, "The head removed the two lower-panel push buttons", FULL),
-    ("TT P0915N-QC20BR5K 5 k pot (987-1278-ND)", 2, "No head-knob pot any more; the throttle is read by an AS5600", FULL),
-    ("Knob for a 6 mm knurled shaft (Cliff FC7257)", 1, "Went with the head-knob pot", FULL),
-    ("TI DRV5055A4 / A2 Hall sensors, KEMET axial 100 nF", 3, "MkII base only; the MkIII base uses an AS5600", FULL),
-    ("APEM MJTP1230A / G / F tactile switches (Digi-Key 679-2429-ND, 679-2435-ND, 679-2434-ND)", 3, "The TE 1825910-6 covers "
-     "all five tactile inputs", "Digi-Key cart, 2026-10-22"),
-    ("Keystone 941 micro-B plug (Digi-Key 36-941-ND)", 1, "The Pro Micro is USB-C", "Digi-Key cart, 2026-10-22"),
-    ("Samsung CL10B104KB8WPNC 0.1 uF 0603 cap (Digi-Key 1276-6854-1-ND)", 1, "The board uses 1206 caps", "Digi-Key cart, 2026-10-22"),
-    ("Qualtek 3021017-10 USB-A to open-end cable, 10 ft (Digi-Key Q369-ND)", 1, "The Stewart A-to-C cable, cut and spliced, "
-     "replaces it", "Digi-Key cart, 2026-10-22"),
-    ("USB-C male plug (loose) and hookup wire", 1, "The plug comes on the Stewart cable; you already have hookup wire, "
-     "heat-shrink and solder", "Earlier BOM draft"),
-    ("TE 2495152-1 USB-C plug", 1, "Board-edge part with no solder cups: needs its own PCB", "User question, 2026-10-23"),
-    ("JST SR 3-pin jumpers beyond 2", 2, "The full BOM had 4 (one per AX connector); only AX1 and AX4 are wired now", FULL),
-    ("MkII collective hardware (base, head bolts, springs, magnets)", 0, "The MkII base is replaced by the MkIII Rev 3",
-     "HeliSR_Rev3.0_BOM.xlsx, sheet 2"),
-    ("25 x 1 mm aluminium tube, 358 mm", 1, "Replaced by the base's 470 mm carbon tube", "Head/README.md (before)"),
-    ("Ballast bucket, lid, ~0.95 kg ballast, 4 x M4 bucket bolts + inserts, lid M3 screws + inserts", 0,
-     "Base Rev 3 balances with the gas strut", BASE),
-    ("Quadrant stop block, thumb knob, M5 x 16 stop bolt + nut, M6 striker + insert", 0, "Base Rev 3 has a fixed 32 deg stop", BASE),
-    ("Rev 1 centre down-stop screw, nut and insert", 0, "Base Rev 3 uses two fixed down-stop pillars beside the strut", "Base/mk3_rev3.py"),
-    ("Base Rev 3 adjustable down-stops: 2 x M4 x 16 countersunk + 4 M4 nuts", 0,
-     "The down-stop is fixed at 0 deg: two pillars printed into the frame", "Base/mk3_rev3.py"),
-    ("6006-2RS ball bearings, 30 x 55 x 13 (BlueStars, Amazon B09XTV8XYK)", 2, "Bought for base Rev 3. Base Rev 4 runs "
-     "on 6808-2RS thin-section bearings", "Base Rev 3 (removed; git history)"),
-    ("Base Rev 3's M3 x 25 side-cover screws (from the M3 x 20-40 set)", 8, "Rev 4's covers take the kit's M3 x 12: the "
-     "set is still used for the head's trigger pivot", "Base Rev 3 (removed; git history)"),
-    ("Base Rev 3's cap and shoe-hinge screws: 5 x M4 x 20 countersunk + nuts", 5, "Rev 4's shell replaces the caps (M4 "
-     "x 50 socket heads + M4 nuts), and its brake strap's hinge pin is an M4 x 50 socket head", "Base Rev 3 (removed; git history)"),
-    ("Base Rev 4's first brake: the sliding shoe's back plate (6 x M3 x 16 countersunk) and its M5 x 30 hex bolt", 7,
-     "Replaced by the hinged brake strap (2026-11-09): no back plate, and the knob's bolt is an M5 x 35",
-     "Base/README.md"),
-    ("Base Rev 4's first shell screws: 4 x M3 x 20 countersunk + M3 nuts", 4, "The shell now takes four M4 x 50 socket "
-     "head cap screws from the lever's kit, into M4 nuts slid in from the pillow blocks' sides (2026-11-08)",
-     "Base/README.md"),
 ]
 SOURCES = [
     ("HeliSR Rev 4.0 board", "PCB/HeliSR (parts checked against HeliSR_Rev4.0.kicad_pcb)",
@@ -570,13 +542,12 @@ COLS = ["#", "Where", "Qty per collective", "Pack", "Packs needed", "Packs bough
         "Manufacturer", "Mfr part number", "Supplier", "Supplier part number", "Pack price", "To spend", "Notes", "Source"]
 NC = len(COLS)
 setup(ws, "Heli Collective - final BOM",
-      "Everything bought for one collective: the HeliSR Rev 4.0 board (the bare PCB from OSH Park, every part on it from "
-      "Digi-Key), the Huey head Rev 5 and the MkIII base Rev 4. Packs bought counts what's already "
-      "ordered, including the Digi-Key order placed for Rev 3.0: Rev 4.0 shares most of its parts. Blue line: "
+      "Everything bought for one collective: the HeliSR Rev 4.0 board (the bare PCB from OSH Park, its parts from "
+      "Digi-Key and Mouser), the Huey head Rev 5 and the MkIII base Rev 4. Packs bought counts what's already "
+      "ordered: the Digi-Key order placed for Rev 3.0 (Rev 4.0 shares most of its parts) and the Mouser orders of 2026-11-01 and 2026-11-05. Blue line: "
       "already ordered. Green: covered by a kit or pack priced on another line. Orange: size taken from the base's CAD, not from a parts list, so check "
-      "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Amazon listings "
-      "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. To "
-      "order the electronics, filter Supplier to Digi-Key.", NC, 58)
+      "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Mouser invoices, Amazon listings "
+      "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. ", NC, 58)
 ws["A3"] = "Collectives to build"; ws["A3"].font = F(bold=True); ws.merge_cells("A3:B3")
 ws["C3"] = 1; ws["C3"].font = F(bold=True, color="0000FF"); ws["C3"].fill = PatternFill("solid", fgColor="FFFF00")
 ws["C3"].alignment = centre; ws["C3"].border = box
@@ -618,7 +589,7 @@ ws.cell(r, 13, "Unpriced lines").font = F(bold=True)
 ws.cell(r, 14, f'=COUNTIFS(A{HR + 1}:A{last_item},">0",M{HR + 1}:M{last_item},"")').font = F(bold=True)
 r += 1
 ws.cell(r, 1, "Still to buy counts the packs to order; whole build counts every pack needed, bought or not. Both leave "
-        "out the unpriced lines: generic hardware and wire, and the hat's Mouser parts (price them in the cart).").font = F(italic=True, color="595959")
+        "out the unpriced lines: generic hardware and wire.").font = F(italic=True, color="595959")
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=NC)
 ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 
@@ -633,16 +604,6 @@ for i, (asm, f, q, note) in enumerate(PRINTED, 1):
     ws2.cell(4 + i, 1).alignment = ws2.cell(4 + i, 4).alignment = centre
 ws2.freeze_panes = "A5"
 
-ws3 = wb.create_sheet("Dropped")
-setup(ws3, "Heli Collective - dropped from earlier BOMs", "Lines in the Rev 3.0 board's full BOM, the Digi-Key cart or "
-      "earlier head and base revisions that this build doesn't use, and the Rev 3.0 parts already bought that Rev 4.0 "
-      "doesn't use. Take them out of the cart if they're still in it.", 5)
-header(ws3, ["#", "Item", "Qty", "Why", "Was in"], [4, 50, 6, 60, 40], 4)
-for i, (item, q, why, src) in enumerate(DROPPED, 1):
-    for c, v in enumerate([i, item, q or "", why, src], 1):
-        cell = ws3.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
-    ws3.cell(4 + i, 1).alignment = ws3.cell(4 + i, 3).alignment = centre
-
 ws4 = wb.create_sheet("Sources")
 setup(ws4, "Heli Collective - sources", "Where each part of this BOM comes from. Regenerate with tools/make_bom.py.", 3)
 header(ws4, ["Part", "Folder or document", "Status"], [22, 70, 60], 4)
@@ -651,5 +612,5 @@ for i, row in enumerate(SOURCES, 1):
         cell = ws4.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
 
 wb.save(OUT)
-print(f"{len(fps)} board parts checked; {n} BOM lines, {len(PRINTED)} printed-part lines, "
-      f"{len(DROPPED)} dropped; wrote {OUT}")
+print(f"{len(fps)} board parts checked; {n} BOM lines, {len(PRINTED)} printed-part lines; "
+      f"wrote {OUT}")
