@@ -217,7 +217,6 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
 | `HeliSR.pretty/`, `fp-lib-table` | Project footprint library: the TL1015AF160QG button footprint |
 | `HeliSR_Rev4.0_Gerbers.zip` | Gerbers + drill files |
 | `HeliSR_Rev4.0_Top.png`, `HeliSR_Rev4.0_Bottom_mirrored.png` | Board renders |
-| `HeliSR_Rev4.0_Board_BOM.xlsx` | The parts that go on the board, checked against the board file, plus the Pro Micro and its headers |
 | `HeliSR_Rev4.0_Input_Map.csv` | Every input → connector pin → chip pin → shift order (the same as Rev 3.0) |
 | `tools/` | The scripts that build, route, finish, check and export this board (see Rebuilding) |
 
@@ -255,8 +254,8 @@ The rules use `(severity ignore)`, because `kicad-cli` 9.x still reports `(sever
 ## Rebuilding
 
 The board is generated, autorouted and finished by scripts in `tools/`, run with KiCad 9 (its own Python, which has
-numpy and PIL) and Freerouting 2.5.0 on a Java 25 runtime. No other Python packages are needed except openpyxl for
-the BOM.
+numpy and PIL) and Freerouting 2.5.0 on a Java 25 runtime. No other Python packages are needed. The board's parts are in
+the collective's BOM, [`../../BOM`](../../BOM).
 
 1. `gen_v4.py` places the parts, sets the nets, outline and mounting holes, and exports a DSN. The placement used
    here is `rev40_params.json`.
@@ -270,8 +269,8 @@ the BOM.
 4. `verify_netlist_v4.py` checks the netlist against Rev 3.0's board and the PCA9546A datasheet's pinout, and writes
    the input map. Rev 3.0's board file and input map are kept in `tools/` for it (`HeliSR_Rev3.0_reference.kicad_pcb`,
    `HeliSR_Rev3.0_Input_Map.csv`); the rest of Rev 3.0 is gone from the repo.
-5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders, and `make_board_bom_v4.py` the board BOM
-   (it stops if the board's parts and its list disagree).
+5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders. `BOM/make_final_bom.py` then rewrites the
+   BOM (it stops if the board's parts and its list disagree).
 
 ## Checks done on this revision
 

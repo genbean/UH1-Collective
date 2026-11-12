@@ -1,17 +1,16 @@
-# Build Heli_Collective_Final_BOM.xlsx and Heli_Collective_DigiKey.csv: one BOM for the whole collective as it is
+# Build Heli_Collective_Final_BOM.xlsx, the one BOM for the whole collective as it is
 # built now: the HeliSR Rev 4.0 board (AS5600s over I2C; not ordered yet), the Huey head Rev 5 (Head/) and
 # the MkIII base Rev 4 (Base/). Earlier revisions are gone from the repo (git history has them).
-# The board's parts are read from Rev 4.0's board BOM script and checked against its board file; the cables and the
-# head switches from the Rev 3.0 board's order data, kept in BOM/helisr_rev30_order.py (single source of truth). The Digi-Key order placed for
+# The board's parts (SOLDERED, below) are checked against its board file; the cables and the head switches come from
+# the Rev 3.0 board's Digi-Key cart (ORDER, below). The Digi-Key order placed for
 # Rev 3.0 (DK_ORDER) counts as bought: the parts Rev 4.0 shares with it are not ordered again, and the ones it
 # doesn't use are listed on the Dropped sheet. Head and base lines cite the README or CAD they come from. Lines
 # sized only from the CAD are highlighted for checking; lines covered by the two screw kits (every screw and nut in
 # the head and base) are marked and cost nothing extra.
 # Sheets: Final BOM (everything bought), Digi-Key order (the electronics order, linked to the Final BOM), Printed
-# parts, Dropped (in earlier lists or carts, not used now), Sources. The CSV is what's still to order from Digi-Key
-# for one collective (lines already bought left out), for Digi-Key's cart / BOM upload.
+# parts, Dropped (in earlier lists or carts, not used now), Sources.
 # usage: python make_final_bom.py [out.xlsx]     (any Python 3 with openpyxl)
-import ast, csv, math, os, re, sys
+import math, os, re, sys
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.workbook.properties import CalcProperties
@@ -19,31 +18,148 @@ from openpyxl.workbook.properties import CalcProperties
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "Heli_Collective_Final_BOM.xlsx")
-CSV_OUT = os.path.join(os.path.dirname(OUT), "Heli_Collective_DigiKey.csv")
 R4 = os.path.join(ROOT, "PCB", "HeliSR")
-BOARD_PY, FULL_PY = os.path.join(R4, "tools", "make_board_bom_v4.py"), os.path.join(HERE, "helisr_rev30_order.py")
 BOARD_PCB = os.path.join(R4, "HeliSR_Rev4.0.kicad_pcb")
 
-# ---- pull the HeliSR data out of the frozen scripts without running them ----------------------------------------
-def module_parts(path, names=(), funcs=()):
-    tree = ast.parse(open(path, encoding="utf-8").read())
-    data, ns = {}, {"re": re}
-    for node in tree.body:
-        if isinstance(node, ast.Assign) and len(node.targets) == 1 and getattr(node.targets[0], "id", None) in names:
-            data[node.targets[0].id] = ast.literal_eval(node.value)
-        if isinstance(node, ast.FunctionDef) and node.name in funcs:
-            exec(compile(ast.Module([node], []), path, "exec"), ns)
-    return data, ns
-bd, bfn = module_parts(BOARD_PY, ("SOLDERED",), ("footprints", "expand"))
-fd, _ = module_parts(FULL_PY, ("ORDER",))
-fps = bfn["footprints"](BOARD_PCB)
-listed = [r for line in bd["SOLDERED"] for r in bfn["expand"](line[0])]
-assert sorted(listed) == sorted(fps), sorted(set(fps) ^ set(listed))
-by_mpn = {it[4]: it for _, items in fd["ORDER"] for it in items}          # refs, qty, desc, mfr, mpn, dk, unit, notes
+# ---- the HeliSR Rev 4.0 board's parts, checked against the board file: every placed part once, with the right
+# footprint and value. (refs, value, footprint, description, manufacturer, mfr part, digikey part, unit USD, notes)
+SOLDERED = [
+    ("U1, U2", "74HC165", "SOIC-16_3.9x9.9mm_P1.27mm", "Shift register, 74HC165, SOIC-16", "Texas Instruments",
+     "SN74HC165DR", "296-8250-1-ND", 0.50, "Front, under the Pro Micro: fit before the sockets"),
+    ("RN1, RN2", "10k x8 bussed", "R_Array_SIP9", "Resistor network, 8 x 10 kOhm bussed, SIP-9", "Bourns",
+     "4609X-101-103LF", "4609X-101-103LF-ND", 0.39, "Pin 1 (dot) is the common pin: it goes in the square pad. Keep upright"),
+    ("C1, C2, C4", "100nF", "C_1206_3216Metric", "Capacitor, 100 nF, 50 V, X7R, 1206", "Samsung", "CL31B104KBCNNNC",
+     "1276-1017-1-ND", 0.14, "Decoupling: C1 beside U1's VCC pin, C2 beside U2's (front); C4 beside U3's (back)"),
+    ("C3", "22uF", "C_1206_3216Metric", "Capacitor, 22 uF, 10 V, X5R, 1206", "Samsung", "CL31A226KPHNNNE",
+     "1276-1287-1-ND", 0.47, "Bulk supply capacitor, between U1 and U2"),
+    ("U3", "PCA9546A", "SOIC-16_3.9x9.9mm_P1.27mm", "I2C switch, 4 channels, with reset, SOIC-16 (narrow, D package)",
+     "Texas Instruments", "PCA9546ADR", "296-21770-1-ND", 1.82,
+     "Back. Gives each AS5600 port its own I2C channel (they all answer at 0x36). Not the wide DW package"),
+    ("R1-R8", "2.2k", "R_1206_3216Metric", "Resistor, 2.2 kOhm, 1 %, 1/4 W, 1206", "YAGEO", "RC1206FR-072K2L",
+     "311-2.20KFRCT-ND", 0.10, "Back: the ports' I2C pull-ups, a pair under each port (R1/R2 AX1, R3/R4 AX2, R5/R6 AX3, "
+     "R7/R8 AX4; the odd one SDA, the even one SCL)"),
+    ("R9-R11", "10k", "R_1206_3216Metric", "Resistor, 10 kOhm, 1 %, 1/4 W, 1206", "YAGEO", "RC1206FR-0710KL",
+     "311-10.0KFRCT-ND", 0.10, "Back: pull-ups on the Pro Micro's SDA (R9) and SCL (R10), and on U3's /RESET (R11). "
+     "Any 1 % 1206 10 kOhm resistor will do if this one is out of stock"),
+    ("SW1", "TL1015AF160QG", "SW_TL1015AF160QG", "Tactile switch, SMD, 3.9 x 2.9 mm, gull wing", "E-Switch",
+     "TL1015AF160QG", "EG4344CT-ND", 0.48, "RST, at the far end between AX4 and AX2. The four ground tabs are left unsoldered"),
+    ("J1, J2", None, "JST_SH_BM10B-SRSS-TB_1x10-1MP_P1.00mm_Vertical", "JST SR/SH header, 10-pin, 1.0 mm, SMD, top entry",
+     "JST", "BM10B-SRSS-TBT", "455-BM10B-SRSS-TBTCT-ND", 1.19,
+     "Switch inputs: J1 IN1-IN8, J2 IN9-IN16. Digi-Key estimates $0.33 tariff each on top"),
+    ("J11-J14", None, "JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical", "JST SR/SH header, 4-pin, 1.0 mm, SMD, top entry",
+     "JST", "BM04B-SRSS-TBT", "455-BM04B-SRSS-TBTCT-ND", 0.71,
+     "AS5600 ports AX1-AX4 (J11-J14): 1 SDA, 2 GND, 3 VCC, 4 SCL. Fit all four, or only the ports you use"),
+    ("J7, J8", None, "PinSocket_1x12_P2.54mm_Vertical", "Socket header, female, 1x12, 2.54 mm, through hole", "Sullins",
+     "PPTC121LFBN-RC", "S6100-ND", 0.75, "Pro Micro sockets. Fit last"),
+]
 
-BRD = "PCB/HeliSR board BOM (checked against the board file)"
+def footprints(path):
+    s = open(path, encoding="utf-8").read()
+    out, i = {}, 0
+    while (i := s.find("\n\t(footprint ", i)) >= 0:
+        d, j, q = 0, i + 1, False
+        while True:                                  # find the matching paren, skipping quoted strings
+            ch = s[j]
+            if q:
+                if ch == "\\": j += 1
+                elif ch == '"': q = False
+            elif ch == '"': q = True
+            elif ch == "(": d += 1
+            elif ch == ")":
+                d -= 1
+                if d == 0: break
+            j += 1
+        fp = s[i + 2:j + 1]; i = j                    # from "(footprint" to its closing paren
+        ref = re.search(r'\(property "Reference" "([^"]*)"', fp).group(1)
+        if "(exclude_from_bom" in fp or re.search(r"\(attr [^)]*exclude_from_bom", fp): continue
+        out[ref] = (re.match(r'\(footprint "(?:[^":]*:)?([^"]+)"', fp).group(1),
+                    re.search(r'\(property "Value" "([^"]*)"', fp).group(1))
+    return out
+def expand(refs):
+    r = []
+    for part in refs.split(", "):
+        m = re.fullmatch(r"([A-Z]+)(\d+)-[A-Z]*(\d+)", part)
+        r += [f"{m.group(1)}{k}" for k in range(int(m.group(2)), int(m.group(3)) + 1)] if m else [part]
+    return r
+fps = footprints(BOARD_PCB)
+listed = [r for line in SOLDERED for r in expand(line[0])]
+assert sorted(listed) == sorted(fps) and len(set(listed)) == len(listed), sorted(set(fps) ^ set(listed))
+for refs, value, fpname, *_ in SOLDERED:
+    for ref in expand(refs):
+        assert fps[ref][0] == fpname and (value is None or fps[ref][1] == value), (ref, fps[ref], fpname, value)
+
+# ---- the Rev 3.0 board's Digi-Key cart, the source for the cables, head switches and module lines.
+# (refs, qty, description, manufacturer, mfr part, digikey part, unit USD, notes)
+ORDER = [
+    ("Controller", [
+        ("Module", 1, "Pro Micro 5V/16 MHz, ATmega32U4", "SparkFun", "12640", "1568-12640-ND", 23.99,
+         "Runs MMJoy2"),
+        ("Module", 2, "Pin header, male, 1x12, 2.54 mm", "Sullins", "PRPC012SAAN-RC", "35-PRPC012SAAN-RC-ND", 0.24,
+         "Soldered to the Pro Micro"),
+    ]),
+    ("Board components", [
+        ("J7, J8", 2, "Socket header, female, 1x12, 2.54 mm", "Sullins", "PPTC121LFBN-RC", "S6100-ND", 0.75,
+         "Pro Micro sockets"),
+        ("U1, U2", 2, "74HC165 shift register, SOIC-16", "Texas Instruments", "SN74HC165DR", "296-8250-1-ND", 0.50,
+         "Fit before the sockets. They sit under the Pro Micro"),
+        ("RN1, RN2", 2, "Resistor network, 8 x 10 kOhm bussed, SIP-9", "Bourns", "4609X-101-103LF",
+         "4609X-101-103LF-ND", 0.39, "Pin 1 (dot) is the common pin. It goes in the square pad"),
+        ("C1, C2", 2, "Capacitor, 100 nF, 50 V, X7R, 1206", "Samsung", "CL31B104KBCNNNC", "1276-1017-1-ND", 0.14,
+         "Shift register decoupling. C3 (22 uF) lies between U1 and U2; C1 and C2 sit at the chips' outer ends"),
+        ("C3", 1, "Capacitor, 22 uF, 10 V, X5R, 1206", "Samsung", "CL31A226KPHNNNE", "1276-1287-1-ND", 0.47,
+         "Bulk supply capacitor"),
+        ("J1, J2", 2, "JST SR/SH header, 10-pin, 1.0 mm, SMD top entry", "JST", "BM10B-SRSS-TBT",
+         "455-BM10B-SRSS-TBTCT-ND", 1.19, "Switch inputs 1-8 and 9-16. Price: cart on 2026-10-22, plus $0.33 estimated tariff each"),
+        ("J11-J14", 4, "JST SR/SH header, 3-pin, 1.0 mm, SMD top entry", "JST", "BM03B-SRSS-TBT",
+         "455-BM03B-SRSS-TBTCT-ND", 0.68, "Analog inputs AX1-AX4. Price: cart on 2026-10-22, plus $0.26 estimated tariff "
+         "each. That cart had 3: enough for the three inputs the Huey head uses, one short of all four footprints"),
+        ("SW1-SW3", 3, "Tactile switch, SMD 3.9 x 2.9 mm, gull wing", "E-Switch", "TL1015AF160QG", "EG4344CT-ND", 0.48,
+         "SW1 RST, SW2 PROG1 (AX1), SW3 PROG4 (AX4). Footprint SW_TL1015AF160QG (4.15 mm pad centres). Their four ground tabs are left unsoldered"),
+        ("R1, R2", 2, "Resistor, 1 kOhm, 1 %, 1/8 W, 0805", "YAGEO", "RC0805FR-071KL", "311-1.00KCRCT-ND", 0.10,
+         "In series with the PROG buttons: each pulls its AS5600's OUT pin low through 1 k to program it"),
+    ]),
+    ("Cables", [
+        ("J1, J2", 2, "JST SR jumper, 10-pin, 10 in, 30 AWG, pin 1 to pin 1", "JST", "A10SR10SR30K254A",
+         "455-3671-ND", None, "Switch looms. Quantity and price: check the cart"),
+        ("J11-J14", 4, "JST SR jumper, 3-pin, 8 in, 30 AWG, pin 1 to pin 1", "JST", "A03SR03SR30K203A",
+         "455-3627-ND", None, "One per sensor or pot. Quantity and price: check the cart"),
+    ]),
+    ("Sensors", [
+        ("AX1 (MkII base)", 1, "Linear Hall sensor, ratiometric, TO-92, A4 (lowest sensitivity)", "Texas Instruments",
+         "DRV5055A4QLPGM", "296-DRV5055A4QLPGMCT-ND", 0.77,
+         "Only for the original MkII base. The MkIII base uses an AS5600 module (see below). Pinout VCC / GND / OUT, same as SS49E"),
+        ("AX1 (MkII base, alt)", 1, "Linear Hall sensor, ratiometric, TO-92, A2 (higher sensitivity)", "Texas Instruments",
+         "DRV5055A2QLPGM", "296-DRV5055A2QLPGMCT-ND", 1.11,
+         "Try this one if the A4 uses too little of the axis range"),
+        ("AX1 cap (MkII base)", 1, "Capacitor, 100 nF, 50 V, X7R, axial", "KEMET", "C410C104K5R5TA91707200",
+         "399-13734-1-ND", 0.77, "Solder across VCC and GND at the Hall sensor"),
+        ("AX2, AX3", 2, "Potentiometer, 5 kOhm linear, 9 mm, 6 mm knurled shaft", "TT Electronics/BI",
+         "P0915N-QC20BR5K", "987-1278-ND", 2.41, "Throttle (AX2, in the spline adaptor) and head knob (AX3)"),
+    ]),
+    ("Head switches (15 of the 16 inputs)", [
+        ("2 inputs each", 2, "Toggle switch, SPDT, ON-OFF-ON, M12 bushing, solder lug", "APEM", "639H/2",
+         "679-1223-ND", None, "LDG LT EXT / RETR and SL ON / STOW. Common to GND. Price: check the cart"),
+        ("2 inputs", 1, "Toggle switch, SPDT, (ON)-OFF-(ON), M12 bushing, solder lug", "APEM", "637H/2",
+         "679-1219-ND", None, "GOV INCR / DECR. Price: check the cart"),
+        ("1 input", 1, "Toggle switch, SPDT, ON-ON, M12 bushing, solder lug", "APEM", "636H/2",
+         "679-1217-ND", None, "LDG LT ON / OFF (one side wired). Price: check the cart"),
+        ("1 input", 1, "Push button, large, SPST-NO momentary, M12", "Same Sky", "PB4-M-BK-D-67",
+         "2223-PB4-M-BK-D-67-ND", 2.52, "STOP REL"),
+        ("1 input each", 2, "Push button, small, SPST-NO momentary, 7.2 mm cutout", "E-Switch", "PS1024ABLK",
+         "EG2011-ND", 1.66, "The two buttons on the lower panel"),
+        ("1 input each", 5, "Tactile switch, 6 x 6 mm, 5 mm high, THT", "TE Connectivity", "1825910-6",
+         "450-1650-ND", 0.13, "SEARCH CONT 4-way hat (4) and starter trigger (1)"),
+    ]),
+    ("PCB mounting", [
+        ("H1-H4", 4, "Round spacer, unthreaded, for M3, 4 mm long, 6.4 mm OD, PVC, self-retaining", "Bivar",
+         "SRS-4-4MM", "SRS-4-4MM-ND", 0.10, "Between the Huey head's rear wall and the board. Screws and nuts not in the order (see below)"),
+    ]),
+]
+by_mpn = {it[4]: it for _, items in ORDER for it in items}          # refs, qty, desc, mfr, mpn, dk, unit, notes
+
+BRD = "PCB/HeliSR/HeliSR_Rev4.0.kicad_pcb (parts checked against the board file)"
 NEW = "Digi-Key listing 2026-10-27"
-FULL = "BOM/helisr_rev30_order.py (the Rev 3.0 board's Digi-Key cart)"
+FULL = "The Rev 3.0 board's Digi-Key cart (ORDER in BOM/make_final_bom.py)"
 HEAD = "Head/README.md, Bought"
 BASE = "Base/README.md, Bought parts"
 BASE1 = "Base/mk3_pivot.py and Base/mk3_rev3.py (the parts Rev 4 keeps)"
@@ -82,8 +198,8 @@ def any_(where, qty, desc, notes, source, status="", pack=1):
     return (where, qty, desc, "", "", "any", "", None, pack, status, 0, notes, source)
 
 SECTIONS = []
-board = [(refs, len(bfn["expand"](refs)), desc, mfr, mpn, "Digi-Key", dkpn, CHECKED.get(mpn, unit), 1, "", 0, notes, BRD)
-         for refs, value, fpname, desc, mfr, mpn, dkpn, unit, notes in bd["SOLDERED"]]
+board = [(refs, len(expand(refs)), desc, mfr, mpn, "Digi-Key", dkpn, CHECKED.get(mpn, unit), 1, "", 0, notes, BRD)
+         for refs, value, fpname, desc, mfr, mpn, dkpn, unit, notes in SOLDERED]
 SECTIONS.append(("HeliSR Rev 4.0: the parts you solder to the bare board (Digi-Key)", board))
 SECTIONS.append(("HeliSR Rev 4.0: bare PCB and controller", [
     ("PCB", 1, "HeliSR Rev 4.0 bare PCB (no parts fitted), 2 layers, 1.6 mm FR4, 39.3 x 33.64 mm", "OSH Park", "", "OSH Park",
@@ -405,9 +521,9 @@ DROPPED = [
      "Base/README.md"),
 ]
 SOURCES = [
-    ("HeliSR Rev 4.0 board", "PCB/HeliSR (tools/make_board_bom_v4.py, checked against HeliSR_Rev4.0.kicad_pcb)",
+    ("HeliSR Rev 4.0 board", "PCB/HeliSR (parts checked against HeliSR_Rev4.0.kicad_pcb)",
      "Designed and checked, not ordered yet"),
-    ("HeliSR Rev 3.0 board", "BOM/helisr_rev30_order.py", "Replaced by Rev 4.0 and removed from the repo. Bare PCB ordered "
+    ("HeliSR Rev 3.0 board", "Its Digi-Key cart (ORDER in BOM/make_final_bom.py)", "Replaced by Rev 4.0 and removed from the repo. Bare PCB ordered "
      "from OSH Park on 2026-10-21, and its parts in the Rev 3.0 Digi-Key order; its order data still supplies the cables and "
      "head switches"),
     ("SearchHat Rev 1.0 board", "PCB/SearchHat (tools/gen_searchhat.py)", "The SEARCH CONT hat Rev 4's breakout: "
@@ -512,8 +628,7 @@ DCOLS = ["#", "Digi-Key part number", "Quantity", "Mfr part number", "Descriptio
          "Ext. price", "Notes"]
 setup(wd, "Heli Collective - Digi-Key order", "Every line to buy from Digi-Key. Quantities come from the Final BOM's "
       "Packs to order, so they follow the collectives to build and anything marked as bought. "
-      "Heli_Collective_DigiKey.csv holds what's still to order for one collective (part number, quantity, customer "
-      "reference; lines already bought left out), for Digi-Key's cart or BOM upload.", len(DCOLS))
+      "Upload this sheet to Digi-Key's BOM Manager to fill the cart.", len(DCOLS))
 header(wd, DCOLS, [4, 25, 9, 20, 40, 16, 10, 10, 50], 4)
 d, dk_rows = 4, []
 for (fr, where, qty, desc, mfr, mpn, sup, spn, unit, pack, bought, notes) in rows:
@@ -565,9 +680,5 @@ for i, row in enumerate(SOURCES, 1):
         cell = ws4.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
 
 wb.save(OUT)
-with open(CSV_OUT, "w", newline="", encoding="utf-8") as f:
-    w = csv.writer(f); w.writerow(["Digi-Key Part Number", "Quantity", "Customer Reference"])
-    for spn, q, where in dk_rows:
-        if q: w.writerow([spn, q, where])
 print(f"{len(fps)} board parts checked; {n} BOM lines ({len(dk_rows)} Digi-Key), {len(PRINTED)} printed-part lines, "
-      f"{len(DROPPED)} dropped; wrote {OUT} and {CSV_OUT}")
+      f"{len(DROPPED)} dropped; wrote {OUT}")
