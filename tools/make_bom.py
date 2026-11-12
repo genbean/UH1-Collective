@@ -12,7 +12,9 @@
 # usage: python tools/make_bom.py [out.xlsx]     (any Python 3 with openpyxl)
 import math, os, re, sys
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from openpyxl.formatting.rule import FormulaRule
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Protection, Side
+from openpyxl.utils import get_column_letter
 from openpyxl.workbook.properties import CalcProperties
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -530,6 +532,46 @@ def section(ws, r, title, ncol):
     ws.cell(r, 1, title).font = F(bold=True)
     for c in range(1, ncol + 1): ws.cell(r, c).fill = PatternFill("solid", fgColor=SECT); ws.cell(r, c).border = box
     ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=ncol)
+# Tick boxes: Excel's cell checkbox (Insert > Checkbox, Microsoft 365). openpyxl can't write the checkbox format, so
+# the tick cells are marked unlocked here and add_checkboxes() gives that cell format the checkbox after saving.
+# Older Excel shows the cell as TRUE / FALSE instead: type TRUE to tick a line.
+def tick(cell):
+    cell.value = False; cell.alignment = Alignment(horizontal="center", vertical="top")
+    cell.protection = Protection(locked=False)
+def strike_when_ticked(ws, r0, r1, ncol):
+    ws.conditional_formatting.add(f"A{r0}:{get_column_letter(ncol)}{r1}", FormulaRule(
+        formula=[f"$A{r0}=TRUE"], stopIfTrue=False, font=Font(strike=True, color="808080")))
+def add_checkboxes(path):
+    import shutil, zipfile
+    FPB = "http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag"
+    bag = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+           f'<FeaturePropertyBags xmlns="{FPB}"><bag type="Checkbox"/><bag type="XFControls"><bagId k="CellControl">0'
+           '</bagId></bag><bag type="XFComplement"><bagId k="XFControls">1</bagId></bag><bag type="XFComplements" '
+           'extRef="XFComplementsMapperExtRef"><a k="MappedFeaturePropertyBags"><bagId>2</bagId></a></bag>'
+           '</FeaturePropertyBags>')
+    ext = (f'<extLst><ext uri="{{C7286773-470A-42A8-94C5-96B5CB345126}}" xmlns:xfpb="{FPB}">'
+           '<xfpb:xfComplement i="0"/></ext></extLst>')
+    tmp = path + ".tmp"
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == "xl/styles.xml":
+                t = data.decode("utf-8")
+                xfs = re.search(r"<cellXfs.*?</cellXfs>", t, re.S).group(0)
+                new, k = re.subn(r'(<protection locked="0"[^>]*/>)\s*(</xf>)', lambda m: m.group(1) + ext + m.group(2), xfs)
+                assert k >= 1, "no tick-box cell format found"
+                data = t.replace(xfs, new).encode("utf-8")
+            elif item.filename == "xl/_rels/workbook.xml.rels":
+                data = data.decode("utf-8").replace("</Relationships>", '<Relationship Id="rIdFpb1" Type="http://schemas.'
+                    'microsoft.com/office/2022/11/relationships/FeaturePropertyBag" Target="featurePropertyBag/'
+                    'featurePropertyBag.xml"/></Relationships>').encode("utf-8")
+            elif item.filename == "[Content_Types].xml":
+                data = data.decode("utf-8").replace("</Types>", '<Override PartName="/xl/featurePropertyBag/'
+                    'featurePropertyBag.xml" ContentType="application/vnd.ms-excel.featurepropertybag+xml"/></Types>'
+                    ).encode("utf-8")
+            zout.writestr(item, data)
+        zout.writestr("xl/featurePropertyBag/featurePropertyBag.xml", bag)
+    shutil.move(tmp, path)
 def link(cell, supplier, spn):
     url = {"Digi-Key": "https://www.digikey.com/en/products/result?keywords=", "Amazon": "https://www.amazon.com/dp/",
            "OSH Park": "https://oshpark.com/", "Mouser": "https://www.mouser.com/c/?q="}.get(supplier)
@@ -537,8 +579,9 @@ def link(cell, supplier, spn):
 
 wb = Workbook(); wb.calculation = CalcProperties(fullCalcOnLoad=True)
 ws = wb.active; ws.title = "Final BOM"
-COLS = ["#", "Where", "Qty per collective", "Pack", "Packs needed", "Packs bought", "Packs to order", "Description",
-        "Manufacturer", "Mfr part number", "Supplier", "Supplier part number", "Pack price", "To spend", "Notes", "Source"]
+COLS = ["Done", "#", "Where", "Qty per collective", "Pack", "Packs needed", "Packs bought", "Packs to order",
+        "Description", "Manufacturer", "Mfr part number", "Supplier", "Supplier part number", "Pack price", "To spend",
+        "Notes", "Source"]
 NC = len(COLS)
 setup(ws, "Heli Collective - final BOM",
       "Everything bought for one collective: the HeliSR Rev 4.0 board (the bare PCB from OSH Park, its parts from "
@@ -546,61 +589,67 @@ setup(ws, "Heli Collective - final BOM",
       "ordered: the Digi-Key order placed for Rev 3.0 (Rev 4.0 shares most of its parts) and the Mouser orders of 2026-11-01 and 2026-11-05. Blue line: "
       "already ordered. Green: covered by a kit or pack priced on another line. Orange: size taken from the base's CAD, not from a parts list, so check "
       "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Mouser invoices, Amazon listings "
-      "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. ", NC, 58)
-ws["A3"] = "Collectives to build"; ws["A3"].font = F(bold=True); ws.merge_cells("A3:B3")
-ws["C3"] = 1; ws["C3"].font = F(bold=True, color="0000FF"); ws["C3"].fill = PatternFill("solid", fgColor="FFFF00")
-ws["C3"].alignment = centre; ws["C3"].border = box
-ws["D3"] = ("Edit the yellow cells: collectives to build here, and Packs bought for anything you already have. Packs "
+      "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. Tick Done to strike a line "
+      "through.", NC, 58)
+ws["A3"] = "Collectives to build"; ws["A3"].font = F(bold=True); ws.merge_cells("A3:C3")
+ws["D3"] = 1; ws["D3"].font = F(bold=True, color="0000FF"); ws["D3"].fill = PatternFill("solid", fgColor="FFFF00")
+ws["D3"].alignment = centre; ws["D3"].border = box
+ws["E3"] = ("Edit the yellow cells: collectives to build here, and Packs bought for anything you already have. Packs "
             "round up; lines marked once are one per order, however many you build.")
-ws["D3"].font = F(italic=True, color="595959"); ws.merge_cells(start_row=3, start_column=4, end_row=3, end_column=NC)
-HR = 5; header(ws, COLS, [4, 15, 9, 6, 8, 8, 8, 36, 13, 16, 9, 21, 9, 10, 46, 28], HR)
+ws["E3"].font = F(italic=True, color="595959"); ws.merge_cells(start_row=3, start_column=5, end_row=3, end_column=NC)
+HR = 5; header(ws, COLS, [6, 4, 15, 9, 6, 8, 8, 8, 36, 13, 16, 9, 21, 9, 10, 46, 28], HR)
 r, n, subtotals, rows = HR, 0, [], []
 for title, lines in SECTIONS:
     r += 1; section(ws, r, title, NC); first = r + 1
     for where, qty, desc, mfr, mpn, sup, spn, unit, pack, status, bought, notes, source in lines:
         r += 1; n += 1
-        need = f"=IF($C$3>0,C{r},0)" if pack == "once" else f"=ROUNDUP(C{r}*$C$3/D{r},0)"   # once: one per order
-        vals = [n, where, qty, "once" if pack == "once" else pack, need, bought, f"=MAX(0,E{r}-F{r})", desc, mfr, mpn, sup, spn,
-                unit, f'=IF(M{r}="","",G{r}*M{r})', ("CHECK: " if status == CHECK else "") + notes, source]
+        need = f"=IF($D$3>0,D{r},0)" if pack == "once" else f"=ROUNDUP(D{r}*$D$3/E{r},0)"   # once: one per order
+        vals = [False, n, where, qty, "once" if pack == "once" else pack, need, bought, f"=MAX(0,F{r}-G{r})", desc, mfr,
+                mpn, sup, spn, unit, f'=IF(N{r}="","",H{r}*N{r})', ("CHECK: " if status == CHECK else "") + notes, source]
         for c, v in enumerate(vals, 1):
             cell = ws.cell(r, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
             if status in FILL: cell.fill = PatternFill("solid", fgColor=FILL[status])
-        for c in (1, 3, 4, 5, 6, 7): ws.cell(r, c).alignment = centre
-        ws.cell(r, 6).font = F(color="0000FF")
-        if status not in FILL: ws.cell(r, 6).fill = PatternFill("solid", fgColor="FFFFCC")
-        for c in (13, 14): ws.cell(r, c).number_format = USD
-        link(ws.cell(r, 12), sup, spn)
+        for c in (1, 2, 4, 5, 6, 7, 8): ws.cell(r, c).alignment = centre
+        tick(ws.cell(r, 1))
+        ws.cell(r, 7).font = F(color="0000FF")
+        if status not in FILL: ws.cell(r, 7).fill = PatternFill("solid", fgColor="FFFFCC")
+        for c in (14, 15): ws.cell(r, c).number_format = USD
+        link(ws.cell(r, 13), sup, spn)
         rows.append((r, where, qty, desc, mfr, mpn, sup, spn, unit, pack, bought, notes))
     r += 1
-    ws.cell(r, 13, "Subtotal").font = F(bold=True)
-    ws.cell(r, 14, f"=SUM(N{first}:N{r - 1})").font = F(bold=True); ws.cell(r, 14).number_format = USD
+    ws.cell(r, 14, "Subtotal").font = F(bold=True)
+    ws.cell(r, 15, f"=SUM(O{first}:O{r - 1})").font = F(bold=True); ws.cell(r, 15).number_format = USD
     subtotals.append(r)
 last_item = r
+strike_when_ticked(ws, HR + 1, last_item, NC)
 r += 2
-ws.cell(r, 13, "Still to buy").font = F(bold=True)
-ws.cell(r, 14, "=" + "+".join(f"N{s}" for s in subtotals)).font = F(bold=True); ws.cell(r, 14).number_format = USD
+ws.cell(r, 14, "Still to buy").font = F(bold=True)
+ws.cell(r, 15, "=" + "+".join(f"O{s}" for s in subtotals)).font = F(bold=True); ws.cell(r, 15).number_format = USD
 r += 1
-ws.cell(r, 13, "Whole build").font = F(bold=True)
-ws.cell(r, 14, f"=SUMPRODUCT(E{HR + 1}:E{last_item},M{HR + 1}:M{last_item})").font = F(bold=True)
-ws.cell(r, 14).number_format = USD
+ws.cell(r, 14, "Whole build").font = F(bold=True)
+ws.cell(r, 15, f"=SUMPRODUCT(F{HR + 1}:F{last_item},N{HR + 1}:N{last_item})").font = F(bold=True)
+ws.cell(r, 15).number_format = USD
 r += 1
-ws.cell(r, 13, "Unpriced lines").font = F(bold=True)
-ws.cell(r, 14, f'=COUNTIFS(A{HR + 1}:A{last_item},">0",M{HR + 1}:M{last_item},"")').font = F(bold=True)
+ws.cell(r, 14, "Unpriced lines").font = F(bold=True)
+ws.cell(r, 15, f'=COUNTIFS(B{HR + 1}:B{last_item},">0",N{HR + 1}:N{last_item},"")').font = F(bold=True)
 r += 1
 ws.cell(r, 1, "Still to buy counts the packs to order; whole build counts every pack needed, bought or not. Both leave "
         "out the unpriced lines: generic hardware and wire.").font = F(italic=True, color="595959")
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=NC)
-ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
+ws.freeze_panes = f"D{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 
 ws2 = wb.create_sheet("Printed parts")
 setup(ws2, "Heli Collective - printed parts", "The print set for the Huey head Rev 5 and the MkIII base Rev 4, with the "
-      "orientation each README gives. Print the coupons first. Paths are from the repository root.", 5)
-header(ws2, ["#", "Assembly", "File", "Qty", "Print"], [4, 10, 70, 6, 70], 4)
+      "orientation each README gives. Print the coupons first. Paths are from the repository root. Tick Done to "
+      "strike a line through.", 6)
+header(ws2, ["Done", "#", "Assembly", "File", "Qty", "Print"], [6, 4, 10, 70, 6, 70], 4)
 for i, (asm, f, q, note) in enumerate(PRINTED, 1):
-    for c, v in enumerate([i, asm, f, q, note], 1):
+    for c, v in enumerate([False, i, asm, f, q, note], 1):
         cell = ws2.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
         if note.startswith("CHECK"): cell.fill = PatternFill("solid", fgColor=FILL[CHECK])
-    ws2.cell(4 + i, 1).alignment = ws2.cell(4 + i, 4).alignment = centre
+    ws2.cell(4 + i, 2).alignment = ws2.cell(4 + i, 5).alignment = centre
+    tick(ws2.cell(4 + i, 1))
+strike_when_ticked(ws2, 5, 4 + len(PRINTED), 6)
 ws2.freeze_panes = "A5"
 
 ws4 = wb.create_sheet("Sources")
@@ -611,5 +660,6 @@ for i, row in enumerate(SOURCES, 1):
         cell = ws4.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
 
 wb.save(OUT)
+add_checkboxes(OUT)
 print(f"{len(fps)} board parts checked; {n} BOM lines, {len(PRINTED)} printed-part lines; "
       f"wrote {OUT}")
