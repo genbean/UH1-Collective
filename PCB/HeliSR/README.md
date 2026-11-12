@@ -17,8 +17,8 @@ ports are built the same, so any port takes a short or a long cable.
 |---|---|
 | Board size | 39.3 × 33.64 mm (1.55 × 1.32 in), as Rev 3.0, with the same four M3 holes. 2 layers, 1.6 mm FR4 |
 | Parts | Connectors, the button, the Pro Micro sockets and Rev 3.0's parts on the **front**; the I²C switch, its capacitor and all the resistors on the **back**. Every resistor and capacitor is **1206**, for hand soldering |
-| Switch inputs | 16, on two 10-pin JST SR/SH 1.0 mm connectors (BM10B-SRSS-TBT, SMD), wired exactly as on Rev 3.0 |
-| AS5600 ports | 4, each on its own 4-pin JST SR/SH 1.0 mm connector (BM04B-SRSS-TBT, SMD): **1 SDA, 2 GND, 3 VCC, 4 SCL** |
+| Switch inputs | 16, on two 10-pin JST SR/SH 1.0 mm connectors (BM10B-SRSS-TB, SMD), wired exactly as on Rev 3.0 |
+| AS5600 ports | 4, each on its own 4-pin JST SR/SH 1.0 mm connector (BM04B-SRSS-G-TB, SMD): **1 SDA, 2 GND, 3 VCC, 4 SCL** |
 | I²C switch | PCA9546A (TI PCA9546ADR, SOIC-16 narrow), address 0x70, with its /RESET on a Pro Micro pin |
 | Pull-ups | 2.2 kΩ on SDA and SCL of each port (R1–R8); 10 kΩ on the Pro Micro's SDA and SCL (R9, R10) and on /RESET (R11) |
 | Button | **RST** (SW1, E-Switch TL1015AF160QG). The PROG buttons are gone: over I²C the firmware sets each sensor's range itself |

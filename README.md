@@ -25,18 +25,18 @@ Each folder has its own README with the details: how it works, printing, the par
 | [`Head/`](Head/README.md) | **Huey head, Rev 5.** The switch box in one print, cut to the real UH-1 panels' dimensions, with the throttle grip and its gears, the throttle's AS5600, the starter trigger and the search light hat, and a collision check (`check_r5.py`). STLs and scripts. The BOM lists it. |
 | [`PCB/HeliSR/`](PCB/HeliSR/README.md) | **HeliSR Rev 4.0 board.** Sixteen switch inputs, and four I²C ports for the AS5600s, through a PCA9546A switch, in place of the analog inputs. KiCad files, Gerbers, connector pinouts, how to prepare the AS5600 modules, and the assembly order. |
 | [`PCB/SearchHat/`](PCB/SearchHat/README.md) | **SearchHat Rev 1.0: the SEARCH CONT hat's breakout board.** An ALPS RKJXM1015004 8-direction stick switch on a 22 × 29 mm board that screws to the lower panel's back, with a JST SH socket or wire pads. KiCad files, Gerbers, the pinout and how to build it. |
-| [`BOM/`](BOM) | **The bill of materials for the whole collective:** [`Heli_Collective_Final_BOM.xlsx`](BOM/Heli_Collective_Final_BOM.xlsx) (one parts list, plus sheets for the printed parts and sources), the only BOM in the repo. [`tools/make_bom.py`](tools/make_bom.py) rewrites it (and checks the board's parts against the board file). It lists the Rev 4.0 board, and counts the Digi-Key order placed for Rev 3.0 and the Mouser orders of November 2026 as bought. |
+| [`BOM/`](BOM) | **The bill of materials for the whole collective:** [`Heli_Collective_BOM.xlsx`](BOM/Heli_Collective_BOM.xlsx): every part to buy, with part numbers, where it goes, where to buy it, how many and the price, and a sheet of the printed parts. [`tools/make_bom.py`](tools/make_bom.py) rewrites it (and checks the board's parts against the board file). |
 | [`Software/`](Software/README.md) | **HeliSR firmware and HeliSR Configurator**, with their documentation in [`Software/docs/`](Software/docs) and example profiles, including one for this collective. |
 | [`renders/`](renders) | Pictures and a 3D model of the complete collective: head Rev 5 on base Rev 4. [`Base/make_renders_r4.py`](Base/make_renders_r4.py) builds them, and base Rev 4's renders, exploded view and screw chart. [`make_diagrams.py`](renders/make_diagrams.py) draws the head's exploded views, screw maps and screw chart from that model. |
 
 ## What you need
 
-The full list, with quantities, part numbers, links and prices, is the [BOM spreadsheet](BOM/Heli_Collective_Final_BOM.xlsx). In outline:
+The full list, with quantities, part numbers, links and prices, is the [BOM spreadsheet](BOM/Heli_Collective_BOM.xlsx). In outline:
 
 **Electronics**
 - The HeliSR Rev 4.0 PCB: send [`HeliSR_Rev4.0_Gerbers.zip`](PCB/HeliSR/HeliSR_Rev4.0_Gerbers.zip) to any PCB maker (2 layers, 39.3 × 33.6 mm).
 - The SearchHat Rev 1.0 PCB, for the SEARCH CONT hat: send [`SearchHat_Rev1.0_Gerbers.zip`](PCB/SearchHat/SearchHat_Rev1.0_Gerbers.zip) the same way (2 layers, 22 × 29 mm). Its ALPS switch and JST socket are in the BOM.
-- The parts that solder onto it: all bought (Digi-Key's Rev 3.0 order and the Mouser orders); the BOM's Packs to order column shows anything still needed.
+- The parts that solder onto it, all from Mouser: the BOM lists them with their board positions.
 - A **5 V / 16 MHz Pro Micro** (ATmega32U4). This build uses a USB-C clone; the 3.3 V / 8 MHz version isn't supported.
 - Two AS5600 magnetic angle sensor modules, with their magnets.
 - JST SR 1.0 mm cables for the board, a 4-core lead for the base's sensor (SDA, GND, VCC, SCL), and a USB-A to USB-C cable. The USB cable runs up through the base and the tube and is spliced inside the head; the BOM's notes explain how.
@@ -51,7 +51,6 @@ The full list, with quantities, part numbers, links and prices, is the [BOM spre
 **Screws, consumables and tools**
 - Nearly every screw and nut comes from two Amazon kits, a countersunk screw kit and a set-screw kit. The lever's four M4 socket head screws come from an M4 × 30–50 kit, the brake's M5 × 30 hex bolt from any hardware store, and the head's trigger pivot is an M3 × 25 from a separate set. The BOM and each part's README list them.
 - Grease for the bearings and the O-rings, CA glue, hot glue and blue thread-locker; M2, M3, M4 and M5 taps, and 4 mm and 5.2 mm drills for the tube; a soldering iron that can handle 1.0 mm pitch SMD parts.
-- The spreadsheet's main sheet leaves out a few things it expects you to supply yourself: a 25–40 mm hose clamp, 1.5 mm felt tape, a 10 mm compression spring, four #10 × 1-1/2 in wood screws for the desk, and the glues, thread-locker, taps and drill. Its Dropped sheet names them.
 
 **Printing and a PC**
 - An FDM printer with about 180 mm of build height. The tallest part, the throttle grip, is 173 mm printed upright. The head's panel labels are white, printed in a second filament for the first three layers (an AMS, or a filament change).
@@ -62,7 +61,7 @@ The full list, with quantities, part numbers, links and prices, is the [BOM spre
 
 Each step points to the README that covers it.
 
-1. **Order the parts** from the [BOM](BOM/Heli_Collective_Final_BOM.xlsx), and the PCBs from the Gerbers.
+1. **Order the parts** from the [BOM](BOM/Heli_Collective_BOM.xlsx), and the PCBs from the Gerbers.
 2. **Print the fit-test coupons first**, with the filament and settings you'll use, and try them on your carbon tube, bearings, sensor modules and printed lever dowels: [the base's coupons](Base/README.md#fit-test-coupons) (the 6808 bearing fits, the lever's dowel holes and the tube socket), and the head's O-ring and sensor seat coupons (printed as in [Head, Printing](Head/README.md#printing)). If a fit is off, change its setting in the script and rebuild the STLs.
 3. **Build the HeliSR board** ([assembly order](PCB/HeliSR/README.md#assembly-order)) and fit the Pro Micro.
 4. **Flash and test it** with HeliSR Configurator: the [quick start](Software/docs/quick-start.md) goes from a bare Pro Micro to a working controller. Check every input now, before it goes into the head. The app picks the HeliSR firmware for you.

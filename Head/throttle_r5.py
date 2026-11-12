@@ -311,7 +311,7 @@ def pinion_phase(sign=1.0):
     return (h.SPIN + 180.0 + sign * (h.SPIN % pg) * k - pp / 2) % pp
 
 
-HEX_CLEAR = -0.03                # pinion hex hole over SHAFT_HEX (the shaft's hex is SHAFT_HEX - 0.05). The user's fit tests
+HEX_CLEAR = -0.03                # pinion hex hole over SHAFT_HEX (the shaft's hex is SHAFT_HEX - 0.05). Fit tests
                                  # 2026-10-23: the 4.45 shaft is loose in a 4.6 hole and still slightly loose in 4.5
 
 

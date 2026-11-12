@@ -172,7 +172,7 @@ Taken as is, that doesn't fit: about 29 KB of flash and about 3.3 KB of RAM. The
 
 ### Tested on a bare Pro Micro, 2026-10-24
 
-The board was the user's OSOYOO USB-C clone. It came with a factory sketch enumerating as an Arduino Micro (2341:8037), and its bootloader enumerates as 2341:0037. There was no HeliSR board, so the inputs were floating. The tools are in `firmware/test/`:
+The test board was an OSOYOO USB-C clone. It came with a factory sketch enumerating as an Arduino Micro (2341:8037), and its bootloader enumerates as 2341:0037. There was no HeliSR board, so the inputs were floating. The tools are in `firmware/test/`:
 - `hsr-usb-test.ps1` talks to the settings channel and the joystick through Windows' own HID and joystick APIs.
 - `hsr-flash-via-bootloader.ps1` flashes the way the configurator will.
 

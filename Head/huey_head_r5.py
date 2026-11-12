@@ -1,6 +1,6 @@
 # UH-1 "Huey" collective switch box, Rev 5: Rev 4 (no longer in the repository) with the box and both panels cut to the real UH-1 panel
 # dimensions the user measured (lower panel 85 mm wide, 69.01 / 47.03 mm tall; upper panel 55 x 41 mm), the switches
-# re-placed after the user's drawing, and every part checked for collisions by check_r5.py.
+# re-placed after a drawing of the real panels, and every part checked for collisions by check_r5.py.
 #
 # The lower box follows the real lower panel all the way round, diagonal bottom edge included, 55 mm deep, with the
 # upper box on top. The 25 mm tube runs up through the throttle grip into a short round neck, and an M5
@@ -11,7 +11,7 @@
 # and HIQTRADEBYJJ set screws (B0DG33R714). Panels 8 x M3 x 12 countersunk into tapped pilots; HeliSR 4 x M3 x 12
 # countersunk + nuts; tube 1 x M5 x 8 set screw; trigger pull stop 1 x M3 x 4 set
 # screw; friction collar (throttle_r5.py) 1 x M4 x 12 countersunk + nut. The trigger pivot is 1 x M3 x 25 countersunk,
-# bought separately (the user's choice; the kits stop at 20 mm).
+# bought separately (the kits stop at 20 mm).
 #
 # What Rev 4 changed: Rev 3's head (tube centred across the box, faux friction knob, raked starter trigger) in ONE
 # piece again. The box, the neck with its friction knob, the tube boss, the tube's set screw, the grip's thrust face,
@@ -259,7 +259,7 @@ def arrow(x0, x1, z, w=0.6, head=2.2):
 
 # ---------------------------------------------------------------- switch cutouts (datasheet + CLR)
 def toggle_cut(x, z):
-    """APEM 600H toggle (679-1217/1219/1223-ND), M12 x 0.75 bushing: 12.2 mm round. The body (about 14.65 x 29.7 mm, long
+    """APEM 600H toggle (639H/2, 637NH/2, 636H/2), M12 x 0.75 bushing: 12.2 mm round. The body (about 14.65 x 29.7 mm, long
     side vertical) sets the lever to throw up and down."""
     return circle(12.2 + CLR, x, z)
 
@@ -341,7 +341,7 @@ def toggle_box(x, z, y0, opening, columns):
         ring -= circle(7.2, cx, cz)
     return prism(ring, y0 - 0.01, y0 + TOGGLE_BOX_H)
 
-# Switch positions (u, v from the panel's top left), after the user's drawing of the real UH-1 panels, with the user's
+# Switch positions (u, v from the panel's top left), after a drawing of the real UH-1 panels, with these
 # rules: each panel's two toggles are mirror images about its centre line (the same height, the same distance from each
 # side), and the search hat is centred between the lower two: across the panel and at their height. The lower toggles are 14.4 mm in from the sides (the
 # drawing's 13.4 and 15.4, averaged). The upper ones are 15.7 mm in, the drawing's LDG LT ON: any closer to the side and
@@ -455,7 +455,7 @@ def arc_text(s, h, cx, cz, r, top=True, gap=0.15):
 
 
 # Every label belongs to one switch and is placed by its offset from that switch's centre (du across, dv down, mm),
-# so it moves with the switch. The layout is the real head's (the user's photo): GOV stacked, INCR, and RPM stacked
+# so it moves with the switch. The layout is the real head's (from photos): GOV stacked, INCR, and RPM stacked
 # across the top over the GOV toggle, DECR under it; LDG LT and EXT over the other toggle, OFF stacked down its outer
 # side, RETR under it (the two toggles' rows mirror each other); SEARCH CONT and EXT over the hat, a double-headed
 # arrow under it, from side to side, and RETR below; STOP and REL stacked left of the ENGINE IDLE ring.
@@ -740,7 +740,7 @@ PIN_DEPTH = 4.0                  # bearing hole depth, below the pinion pocket
 # bend is in the open; the hole is one straight push, and a drill bit goes the whole way. (Straight up behind the switch there's no room: the neck's bore is
 # in front and the trigger's tail behind.)
 TRIG_X = (-15.5 + DX, 4.5 + DX)       # the lugs' outer faces, 20 mm apart; the pivot is an M3 x 25 countersunk from the
-PIVOT_L = 25.0                        # left lug, threaded 8 mm into the right one (bought separately: the user's choice)
+PIVOT_L = 25.0                        # left lug, threaded 8 mm into the right one (bought separately)
 LUG, TRIG_CLR = 3.0, 0.3              # the left lug's thickness and the right lug's pivot length; the trigger's clearance
 MOUNT_X1 = TRIG_X[1] + 7.1            # but the right lug carries on to here, round the leads' hole
 PIVOT = (51.0, -1.5)                  # as far back as leaves 2.3 mm of lug behind the hole

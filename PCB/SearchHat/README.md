@@ -43,7 +43,7 @@ The pin order isn't GND first. On J1 the signals follow the order their switch p
 - **J1:** "1" and "6" mark its ends on the back. Up the long edges, "J1: 1R 2GND 3RETR" and "J1: 4CTR 5EXT 6L". Seen from behind, pin 1 is on the right.
 - **J2:** each pad's name is under it, on both sides.
 
-**The lead:** cut a 6-pin JST SH jumper (A06SR06SR30K152A) in half, as for the HeliSR's ports. Plug one end into J1 and splice its wires into the HeliSR's J2 loom as in the table. Check pin 1 with a meter: cut jumpers come in both "same side" and "reversed" versions. Or leave J1 off and solder five or six wires to J2.
+**The lead:** cut a 6-pin JST SH jumper (A06SR06SR30K203A) in half, as for the HeliSR's ports. Plug one end into J1 and splice its wires into the HeliSR's J2 loom as in the table. Check pin 1 with a meter: cut jumpers come in both "same side" and "reversed" versions. Or leave J1 off and solder five or six wires to J2.
 
 ## Building it
 

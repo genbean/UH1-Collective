@@ -52,7 +52,7 @@ Positions are from the drawing, measured from each panel's top-left corner (u ac
 | SL ON / STOW toggle (upper) | 11.2, 19.1 | 15.7, 20.5 | The LDG LT ON toggle's 15.7 mm from its side, mirrored. Nearer the side, its body hits the corner screws' columns: the bodies are 29.7 mm tall, the box is 36 mm inside, and a column fills each corner. Centred up and down the 41 mm panel, so the box round it gets 2 mm walls at the top too |
 | LDG LT ON / OFF toggle (upper) | 39.3, 19.1 | 39.3, 20.5 | Centred up and down, as SL |
 
-The labels are laid out as on the real head (the user's photo). Each one belongs to its switch, at a fixed offset from it, so it moves with the switch (`*_LABELS` in `huey_head_r5.py`):
+The labels are laid out as on the real head (from photos of a real head). Each one belongs to its switch, at a fixed offset from it, so it moves with the switch (`*_LABELS` in `huey_head_r5.py`):
 - **GOV toggle:** GOV stacked, INCR, and RPM stacked, in a row across the top over the switch; DECR under it.
 - **LDG LT toggle:** LDG LT and EXT over it, in line with GOV's row; OFF stacked down its outer side; RETR under it, level with DECR.
 - **Search hat:** SEARCH CONT and EXT over its 28 mm cap; a double-headed arrow under it, from side to side; RETR below.
@@ -153,7 +153,7 @@ The only bend in the route is in the open, where the leads turn from the groove 
 
 | Panel | Control | Part | HeliSR input |
 |---|---|---|---|
-| Lower | GOV RPM INCR / DECR | APEM 637H/2 toggle, (ON)-OFF-(ON) | IN1 / IN2 |
+| Lower | GOV RPM INCR / DECR | APEM 637NH/2 toggle, (ON)-OFF-(ON) | IN1 / IN2 |
 | Lower | LDG LT EXT / OFF / RETR | APEM 639H/2 toggle, ON-OFF-ON | IN3 / IN4 |
 | Lower | SEARCH CONT EXT / RETR / L / R | ALPS RKJXM1015004 8-way stick on the SearchHat board ([`Hat/README.md`](Hat/README.md)); a diagonal joins its two neighbours | IN9 – IN12 |
 | Lower | SEARCH CONT centre push (optional) | the same switch | IN15 |
@@ -332,14 +332,14 @@ The list for the whole collective, with part numbers and prices for the board, h
 | 25 × 23 mm carbon tube, **500 mm** | 1 | The MkIII base's tube ([`../Base`](../Base)). Use it whole, uncut, and drill a 5.2 mm hole through its **front wall only**, 10 mm below its top end, for the set screw's tip |
 | Screws and nuts | | See [Screws](#screws) |
 | O-ring, 24 mm ID × 2 mm (28 mm OD), nitrile (FOCMKEAS, [Amazon B0BWWBTL4N](https://www.amazon.com/dp/B0BWWBTL4N), 50 for $6.89) | 4 | Two in the grip's bore, one in the friction collar, one in the ceiling's groove. See [The grip floats on O-rings](#the-grip-floats-on-o-rings) |
-| Bivar SRS-4-4MM spacers (Digi-Key SRS-4-4MM-ND) | 4 | Between the rear wall and the HeliSR board |
+| Bivar SRS-4-4MM spacers (Mouser 749-SRS-4-4MM) | 4 | Between the rear wall and the HeliSR board |
 | Pen spring, up to 4 mm across | 1 | The trigger return (cut to about 13 mm) |
 | AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | The throttle's; its ~4 × 2 mm magnet goes in the shaft's cap |
-| APEM 639H/2 toggle, ON-OFF-ON (Digi-Key 679-1223-ND) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
-| APEM 637H/2 toggle, (ON)-OFF-(ON) (679-1219-ND) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
-| APEM 636H/2 toggle, ON-ON (679-1217-ND) | 1 | LDG LT ON (IN7) |
-| Same Sky PB4-M-BK-D-67 push button (2223-PB4-M-BK-D-67-ND) | 1 | STOP REL (IN13) |
-| TE 1825910-6 tact switch, 6 × 6 mm (450-1650-ND) | 1 | Starter trigger (IN14) |
+| APEM 639H/2 toggle, ON-OFF-ON (Mouser 642-639H2) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
+| APEM 637NH/2 toggle, (ON)-OFF-(ON) (Mouser 642-637NH2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
+| APEM 636H/2 toggle, ON-ON (Mouser 642-636H2) | 1 | LDG LT ON (IN7) |
+| Same Sky PB4-M-BK-D-67 push button (Mouser 179-PB4-M-BK-D-67) | 1 | STOP REL (IN13) |
+| TE 1825910-6 tact switch, 6 × 6 mm (Mouser 650-1825910-6) | 1 | Starter trigger (IN14) |
 | ALPS RKJXM1015004 8-way stick switch (Mouser 688-RKJXM1015004) | 1 | SEARCH CONT hat (IN9–IN12, centre push IN15) |
 | SearchHat Rev 1.0 board, JST SM06B-SRSS-TB and a 6-pin JST SH lead | 1 | [`../PCB/SearchHat`](../PCB/SearchHat/README.md); see [`Hat/README.md`](Hat/README.md) |
 | HeliSR Rev 4.0 board with its Pro Micro and JST cables | 1 | [`../PCB/HeliSR`](../PCB/HeliSR/README.md); the throttle module goes on AX4 (J14) |
