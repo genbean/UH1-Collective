@@ -161,7 +161,7 @@ def leads_hole(body):
     return bad
 
 
-# The carbon tube and the two cables that come up it into the head (Base/README.md, BOM/make_final_bom.py)
+# The carbon tube and the two cables that come up it into the head (Base/README.md, BOM/Heli_Collective_Final_BOM.xlsx)
 TUBE_OD, TUBE_ID = 25.0, 23.0
 USB_OD = 4.5                     # the Stewart SC-2CAK020M's diameter isn't published; USB 2.0 cables run 3.5-4.5 mm
 AX1_OD = 3.61                    # the base sensor's 4-core lead

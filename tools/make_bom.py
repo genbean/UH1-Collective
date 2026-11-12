@@ -9,7 +9,7 @@
 # the head and base) are marked and cost nothing extra.
 # Sheets: Final BOM (everything bought: the only parts list), Printed
 # parts, Dropped (in earlier lists or carts, not used now), Sources.
-# usage: python make_final_bom.py [out.xlsx]     (any Python 3 with openpyxl)
+# usage: python tools/make_bom.py [out.xlsx]     (any Python 3 with openpyxl)
 import math, os, re, sys
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -17,7 +17,7 @@ from openpyxl.workbook.properties import CalcProperties
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "Heli_Collective_Final_BOM.xlsx")
+OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "BOM", "Heli_Collective_Final_BOM.xlsx")
 R4 = os.path.join(ROOT, "PCB", "HeliSR")
 BOARD_PCB = os.path.join(R4, "HeliSR_Rev4.0.kicad_pcb")
 
@@ -159,7 +159,7 @@ by_mpn = {it[4]: it for _, items in ORDER for it in items}          # refs, qty,
 
 BRD = "PCB/HeliSR/HeliSR_Rev4.0.kicad_pcb (parts checked against the board file)"
 NEW = "Digi-Key listing 2026-10-27"
-FULL = "The Rev 3.0 board's Digi-Key cart (ORDER in BOM/make_final_bom.py)"
+FULL = "The Rev 3.0 board's Digi-Key cart (ORDER in tools/make_bom.py)"
 HEAD = "Head/README.md, Bought"
 BASE = "Base/README.md, Bought parts"
 BASE1 = "Base/mk3_pivot.py and Base/mk3_rev3.py (the parts Rev 4 keeps)"
@@ -523,7 +523,7 @@ DROPPED = [
 SOURCES = [
     ("HeliSR Rev 4.0 board", "PCB/HeliSR (parts checked against HeliSR_Rev4.0.kicad_pcb)",
      "Designed and checked, not ordered yet"),
-    ("HeliSR Rev 3.0 board", "Its Digi-Key cart (ORDER in BOM/make_final_bom.py)", "Replaced by Rev 4.0 and removed from the repo. Bare PCB ordered "
+    ("HeliSR Rev 3.0 board", "Its Digi-Key cart (ORDER in tools/make_bom.py)", "Replaced by Rev 4.0 and removed from the repo. Bare PCB ordered "
      "from OSH Park on 2026-10-21, and its parts in the Rev 3.0 Digi-Key order; its order data still supplies the cables and "
      "head switches"),
     ("SearchHat Rev 1.0 board", "PCB/SearchHat (tools/gen_searchhat.py)", "The SEARCH CONT hat Rev 4's breakout: "
@@ -644,7 +644,7 @@ for i, (item, q, why, src) in enumerate(DROPPED, 1):
     ws3.cell(4 + i, 1).alignment = ws3.cell(4 + i, 3).alignment = centre
 
 ws4 = wb.create_sheet("Sources")
-setup(ws4, "Heli Collective - sources", "Where each part of this BOM comes from. Regenerate with BOM/make_final_bom.py.", 3)
+setup(ws4, "Heli Collective - sources", "Where each part of this BOM comes from. Regenerate with tools/make_bom.py.", 3)
 header(ws4, ["Part", "Folder or document", "Status"], [22, 70, 60], 4)
 for i, row in enumerate(SOURCES, 1):
     for c, v in enumerate(row, 1):
