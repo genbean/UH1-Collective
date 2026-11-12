@@ -217,12 +217,11 @@ SECTIONS.append(("Wiring", [
      "Digi-Key", "455-3633-ND", 1.52, 1, "", 0, "AX1 (collective sensor) and AX4 (throttle sensor); AX2 and AX3 are spare. "
      "Cut each in half for a board-end pigtail. The plug is keyed but the wires may all be one colour: find pin 1 (SDA) "
      "with a meter. Ports: 1 SDA, 2 GND, 3 VCC, 4 SCL", NEW + "; PCB/HeliSR/README.md"),
-    ("AX1 lead", 1, "4-core cable, 28 AWG, one twisted pair, foil and braid shield, 3.61 mm OD, white, 1 m (Digi-Key cut "
-     "length)", "Tensility", "30-00099", "Digi-Key", "839-30-00099-DS-ND", 3.44, 1, CHECK, 0, "Collective sensor lead: "
-     "from the AS5600 in the base, through the lever's cable channels and up the 470 mm tube, spliced to an AX1 pigtail. "
-     "SDA and GND on the twisted pair, VCC and SCL on the other two; the shield to GND at the board end only. Length is an "
-     "estimate: measure your run; Digi-Key sells it by the metre (145 m in stock 2026-10-27; the black 30-00088 was out "
-     "of stock)", NEW + "; Base/README.md (the 4-core sensor lead)"),
+    ("AX1 lead", 1, "Ribbon cable, flat, 4 conductors, 24 AWG", "KYOCERA AVX", "902220736004000", "Mouser",
+     "581-902220736004000", 3.35, 1, ORDERED, 1, "Collective sensor lead: from the AS5600 in the base, through the "
+     "lever's cable channels and up the 470 mm tube, spliced to an AX1 pigtail. Keep the port's order across the ribbon "
+     "(SDA, GND, VCC, SCL), so GND and VCC sit between SDA and SCL. Check it reaches and lies flat in the channels",
+     "Mouser invoice  (2026-11-03); Base/README.md (the 4-core sensor lead)"),
     ("USB", 1, "USB 2.0 cable, USB-A plug to USB-C plug, 2 m (6.56 ft)", "Stewart Connector", "SC-2CAK020M", "Digi-Key",
      "380-SC-2CAK020M-ND", 7.33, 1, "", 0, "Cut it about 15 cm from the USB-C plug. Feed the long piece (USB-A end stays "
      "at the PC) through the device: laid in the lever's open channels, up the tube and in through the head. The cable "
