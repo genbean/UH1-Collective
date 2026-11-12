@@ -4,41 +4,28 @@
 > the board, but neither has run on one yet. See [Firmware](#firmware).
 
 A small carrier board for the collective's switch box: a **SparkFun Pro Micro 5V/16 MHz** with **16 switch
-inputs** read through two 74HC165 shift registers, as on Rev 3.0, and **four I²C ports for AS5600 magnetic angle
-sensors**, replacing Rev 3.0's four analog inputs.
+inputs** read through two 74HC165 shift registers, and **four I²C ports for AS5600 magnetic angle
+sensors**.
 
-Rev 3.0 read each AS5600's analog output, and programmed its angle range once and for all with the PROG buttons.
-An analog output picks up noise on a long cable. Rev 4.0 reads the angle digitally over I²C instead. Every AS5600
+The board reads each AS5600's angle digitally over I²C, which doesn't pick up noise on a long cable the way an
+analog output does. Every AS5600
 has the same I²C address (0x36), so a **PCA9546A I²C switch** on the back of the board gives each port its own
 channel, and the firmware talks to one sensor at a time. Each port has its own 2.2 kΩ pull-ups, and all four
 ports are built the same, so any port takes a short or a long cable.
 
 | | |
 |---|---|
-| Board size | 39.3 × 33.64 mm (1.55 × 1.32 in), as Rev 3.0, with the same four M3 holes. 2 layers, 1.6 mm FR4 |
-| Parts | Connectors, the button, the Pro Micro sockets and Rev 3.0's parts on the **front**; the I²C switch, its capacitor and all the resistors on the **back**. Every resistor and capacitor is **1206**, for hand soldering |
-| Switch inputs | 16, on two 10-pin JST SR/SH 1.0 mm connectors (BM10B-SRSS-TB, SMD), wired exactly as on Rev 3.0 |
+| Board size | 39.3 × 33.64 mm (1.55 × 1.32 in), with four M3 holes. 2 layers, 1.6 mm FR4 |
+| Parts | Connectors, the button, the Pro Micro sockets, the shift registers and their parts on the **front**; the I²C switch, its capacitor and all the resistors on the **back**. Every resistor and capacitor is **1206**, for hand soldering |
+| Switch inputs | 16, on two 10-pin JST SR/SH 1.0 mm connectors (BM10B-SRSS-TB, SMD) |
 | AS5600 ports | 4, each on its own 4-pin JST SR/SH 1.0 mm connector (BM04B-SRSS-G-TB, SMD): **1 SDA, 2 GND, 3 VCC, 4 SCL** |
 | I²C switch | PCA9546A (TI PCA9546ADR, SOIC-16 narrow), address 0x70, with its /RESET on a Pro Micro pin |
 | Pull-ups | 2.2 kΩ on SDA and SCL of each port (R1–R8); 10 kΩ on the Pro Micro's SDA and SCL (R9, R10) and on /RESET (R11) |
-| Button | **RST** (SW1, E-Switch TL1015AF160QG). The PROG buttons are gone: over I²C the firmware sets each sensor's range itself |
+| Button | **RST** (SW1, E-Switch TL1015AF160QG). No PROG buttons: over I²C the firmware sets each sensor's range itself |
 | Ground | Both layers poured with ground and stitched together (see [Checks](#checks-done-on-this-revision)) |
-| Fab specs | Rev 3.0's cheap-fab rules: 0.2 mm clearance, 0.2 mm signal and 0.3 mm VCC/GND tracks, 0.6/0.3 mm vias, holes at least 0.6 mm apart |
+| Fab specs | Cheap-fab rules: 0.2 mm clearance, 0.2 mm signal and 0.3 mm VCC/GND tracks, 0.6/0.3 mm vias, holes at least 0.6 mm apart |
 
-## What changed from Rev 3.0
-
-| | Rev 3.0 | Rev 4.0 |
-|---|---|---|
-| AX1–AX4 | 3-pin analog inputs (VCC, signal, GND) | 4-pin I²C ports (SDA, GND, VCC, SCL), each on its own PCA9546A channel |
-| Pro Micro pins 2, 3 | Shift-register data and latch | I²C SDA and SCL (the ATmega32U4's TWI pins) |
-| Shift registers | Data on pin 2, latch on pin 3, clock on pin 15 | Data on pin **14**, latch on **A0**, clock on pin 15 (unchanged) |
-| A0–A3 | AX4–AX1 | A0 latch, A1 the PCA9546A's /RESET; **A2 and A3 are spare** |
-| Buttons | RST, PROG1, PROG4 (and R1, R2) | RST only |
-| Far end | The three buttons | AX4, RST, AX2 |
-| Back | Nothing | U3 (PCA9546A), C4, R1–R11 |
-| Inputs | | Unchanged: J1, J2, U1, U2, RN1, RN2 and C1–C3 are on the same nets as Rev 3.0, so IN1–IN16 come out of the chain in the same order ([`HeliSR_Rev4.0_Input_Map.csv`](HeliSR_Rev4.0_Input_Map.csv)) |
-
-Pots and Hall sensors can't go on the AX ports any more. The Pro Micro still has analog-capable pins free (A2, A3,
+Pots and Hall sensors can't go on the AX ports. The Pro Micro still has analog-capable pins free (A2, A3,
 4, 6, 8, 9, 10); using one means soldering a wire to the Pro Micro.
 
 ## Layout
@@ -46,8 +33,8 @@ Pots and Hall sensors can't go on the AX ports any more. The Pro Micro still has
 Viewed from the top, with the USB end on the left:
 
 - **Pro Micro** on two 12-pin sockets, its USB end at the left edge: pins 13–24 (J8) along the top, pins 1–12
-  (J7) along the bottom, as on Rev 3.0.
-- **Under it**, as on Rev 3.0: RN1, then C1 | U1 | C3 | U2 | C2, then RN2.
+  (J7) along the bottom.
+- **Under it**: RN1, then C1 | U1 | C3 | U2 | C2, then RN2.
 - **Top edge:** J1 (inputs 1-8), AX3 (J13).
 - **Bottom edge:** J2 (inputs 9-16), AX1 (J11).
 - **Far end (right):** AX4 (J14, top), RST (SW1, middle), AX2 (J12, bottom).
@@ -57,24 +44,23 @@ Viewed from the top, with the USB end on the left:
 Every connector's pins face the board's middle. The JST plugs go in from the top and the cables leave upwards.
 
 Mounting hole centres, in mm from the board's top-left corner (USB end left, J1 up): (3.2, 3.2), (36.1, 3.2),
-(3.2, 30.44) and (36.1, 30.44), as on Rev 3.0.
+(3.2, 30.44) and (36.1, 30.44).
 
 ## In the Huey head
 
-Rev 4.0 has Rev 3.0's outline, holes and Pro Micro position, so it goes in the same place in head Rev 4 and Rev 5,
-on the same spacers and screws. The parts on its front are the same JST SH height as Rev 3.0's (head Rev 5's
+It fits head Rev 4 and Rev 5 on their spacers and screws. The parts on its front are JST SH height (head Rev 5's
 `check_r5.py` takes them as 4.5 mm); the parts on its back (1.75 mm at most) sit in the 4 mm gap the spacers leave
 behind the board.
 
-Two things differ:
-- **AX4 and AX2 are at the far end**, where the buttons were: the top of the board in the head, just below the upper
+Two things to allow for:
+- **AX4 and AX2 are at the far end**: the top of the board in the head, just below the upper
   box's toggles. Their plugs go in from the front, like the others. Leave the wires room to turn there.
-- **The throttle's AS5600 needs four wires** instead of three, and so does the collective's, which runs up the tube
-  from the MkIII base (`Base`). Check the wire channels take the extra wire.
+- **The throttle's AS5600 needs four wires**, and so does the collective's, which runs up the tube
+  from the MkIII base (`Base`). Check the wire channels take four wires.
 
 ## Connectors
 
-**J1 (inputs 1-8) and J2 (inputs 9-16)**: 10-pin JST SR/SH 1.0 mm, pinned as on Rev 1.x–3.0, so the same looms fit.
+**J1 (inputs 1-8) and J2 (inputs 9-16)**: 10-pin JST SR/SH 1.0 mm.
 
 | Pin | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -139,7 +125,7 @@ For the common WWZMDiB module (23 × 23 mm, Amazon B0CM3C8KFT), running on the P
 The R numbers in this list are the module's, not the board's. The pin facts are from the AS5600 datasheet (ams
 v1-06); which part on the module is R1 or R4 is from the module itself, so check yours.
 
-- **Remove the module's R1**, the 0 Ω link between VDD5V and VDD3V3, as for Rev 3.0: it puts 5 V on the chip's
+- **Remove the module's R1**, the 0 Ω link between VDD5V and VDD3V3: it puts 5 V on the chip's
   3.3 V pin, whose absolute maximum is 4.0 V. The two pins are tied together only when the chip runs on 3.3 V.
 - **Check there is about 1 µF from VDD3V3 to GND.** On 5 V, VDD3V3 is the output of the chip's internal regulator,
   and the datasheet asks for a 1 µF low-ESR ceramic there. A module built to run on 3.3 V through R1 may have only
@@ -147,8 +133,8 @@ v1-06); which part on the module is R1 or R4 is from the module itself, so check
 - **Wire DIR** to GND or VCC (it floats on this module, and the chip has no pull on it). Over I²C it still sets
   which way the angle rises (GND = clockwise, seen from the chip's top face); the firmware can invert an axis
   either way.
-- **Remove the module's R4**, the 1 kΩ from PGO (GPO on the module) to GND. Rev 3.0 kept it, because PGO low
-  selects the OUT-pin programming the PROG buttons used. In that mode, pulling OUT to GND for 100 ms twice burns the
+- **Remove the module's R4**, the 1 kΩ from PGO (GPO on the module) to GND. With it fitted PGO is low, which
+  selects OUT-pin programming. In that mode, pulling OUT to GND for 100 ms twice burns the
   range into the chip for good, which can be done only once; a stray short on OUT could do it by accident. Without
   R4 the chip's internal pull-up holds PGO high and OUT is just an output. Leave OUT unconnected.
 - **Wire VCC, GND, SDA and SCL** to the port: pin 1 SDA, 2 GND, 3 VCC, 4 SCL.
@@ -186,7 +172,7 @@ free for other use.
 The HeliSR firmware in `Software/firmware/HeliSR` is built for this board by `Software/firmware/build.ps1`,
 shipped as `firmware\HeliSR_Rev4.0_16MHz.hex`. It:
 
-- reads the shift registers on pins 14 (data), 15 (clock) and A0 (load), in the same bit order as Rev 3.0;
+- reads the shift registers on pins 14 (data), 15 (clock) and A0 (load);
 - runs the TWI on pins 2 and 3 at 100 kHz, or 50, 25 or 10 kHz for long cables (set in HeliSR Configurator), connects
   one port's PCA9546A channel at a time and reads its AS5600's ANGLE register (address 0x36), scaled to the analog
   inputs' 0–4092. It also reads STATUS, RAW ANGLE and AGC, for the magnet checks and the Configurator's helper;
@@ -196,7 +182,7 @@ shipped as `firmware\HeliSR_Rev4.0_16MHz.hex`. It:
   anything;
 - maps channels 2, 1, 3, 0 to AX1–AX4 as above. A stuck bus is freed by pulling A1 low (never driving it high), clocking
   out a half-sent byte and sending a STOP; a port that stuck it is left alone for 250 ms;
-- treats A2 and A3 as spare analog pins (axis sources 9 and 10) instead of AX2 and AX1, and leaves pin 14 out of the
+- treats A2 and A3 as spare analog pins (axis sources 9 and 10), and leaves pin 14 out of the
   spare pins;
 - sets the JTD bit in MCUCR at start-up (written twice, as the ATmega32U4 requires). A0 and A1 are also the JTAG
   pins TDI and TDO (PF7, PF6); SparkFun ships the Pro Micro with JTAG off in its fuses (high fuse 0xD8), but a clone
@@ -217,7 +203,7 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
 | `HeliSR.pretty/`, `fp-lib-table` | Project footprint library: the TL1015AF160QG button footprint |
 | `HeliSR_Rev4.0_Gerbers.zip` | Gerbers + drill files |
 | `HeliSR_Rev4.0_Top.png`, `HeliSR_Rev4.0_Bottom_mirrored.png` | Board renders |
-| `HeliSR_Rev4.0_Input_Map.csv` | Every input → connector pin → chip pin → shift order (the same as Rev 3.0) |
+| `HeliSR_Rev4.0_Input_Map.csv` | Every input → connector pin → chip pin → shift order |
 | `tools/` | The scripts that build, route, finish, check and export this board (see Rebuilding) |
 
 ## Assembly order
@@ -231,15 +217,15 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
 
 ## Pro Micro RP2040 compatibility
 
-As on Rev 3.0, every pin the board uses is also there on the **SparkFun Pro Micro RP2040**, whose VCC pin is 3.3 V:
+Every pin the board uses is also there on the **SparkFun Pro Micro RP2040**, whose VCC pin is 3.3 V:
 its pins 2 and 3 (GPIO2, GPIO3) can be the RP2040's I2C1 SDA and SCL, and the pull-ups then go to 3.3 V, which suits an AS5600 module
 run in its 3.3 V mode (R1 left fitted). There is no RP2040 build of the HeliSR firmware. Not tried.
 
 ## DRC rules
 
-`HeliSR_Rev4.0.kicad_dru` covers the intentional overlaps, each rule naming the exact footprint pairs, as on Rev 3.0:
+`HeliSR_Rev4.0.kicad_dru` covers the intentional overlaps, each rule naming the exact footprint pairs:
 
-- Parts nested under the Pro Micro (resistor networks, shift registers and caps between the sockets), as on Rev 3.0.
+- Parts nested under the Pro Micro (resistor networks, shift registers and caps between the sockets).
 - The connector rows: the courtyards of J1 and AX3 (J13), and of J2 and AX1 (J11), overlap; the housings don't.
 - The M3 holes: their courtyards (6.9 mm across) overlap J1, J2 and the far-end ports AX4 (J14) and AX2 (J12). Every
   pad, track and via is at least 3.5 mm from each hole centre, clear of the M3 nut's corners (3.18 mm) on the front
@@ -266,9 +252,8 @@ the collective's BOM, [`../../BOM`](../../BOM).
 3. `finish_all_v4.py` widens the router's neck-downs, pours GND on both layers, adds GND stitching vias
    (`stitch_v4.py`), writes the DRC rules and title block (`finish_v4.py`), places the silk labels on both sides
    (`silk_fix_v4.py`), and DRCs the result.
-4. `verify_netlist_v4.py` checks the netlist against Rev 3.0's board and the PCA9546A datasheet's pinout, and writes
-   the input map. Rev 3.0's board file and input map are kept in `tools/` for it (`HeliSR_Rev3.0_reference.kicad_pcb`,
-   `HeliSR_Rev3.0_Input_Map.csv`); the rest of Rev 3.0 is gone from the repo.
+4. `verify_netlist_v4.py` checks the netlist against the reference board and input map kept in `tools/` for it, and
+   against the PCA9546A datasheet's pinout, and writes the input map.
 5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders. `tools/make_bom.py` (at the repo root) then rewrites the
    BOM (it stops if the board's parts and its list disagree).
 
@@ -276,7 +261,7 @@ the collective's BOM, [`../../BOM`](../../BOM).
 
 - **KiCad 9 DRC:** 0 violations and 0 unconnected items at every severity (with `HeliSR_Rev4.0.kicad_dru`).
 - **Netlist:** checked pad by pad by `verify_netlist_v4.py`. J1, J2, U1, U2, RN1, RN2, C1–C3 and SW1 are on the
-  same nets as in the ordered Rev 3.0 board, so the inputs and their shift order are unchanged. U3's pins match the
+  same nets as in the reference board, so the inputs and their shift order are unchanged. U3's pins match the
   PCA9546A datasheet (TI SCPS148I): A0 1, A1 2, /RESET 3, SD0–SC1 4–7, GND 8, SD2–SC3 9–12, A2 13, SCL 14, SDA 15,
   VCC 16. Every port, pull-up and Pro Micro pin is as listed above, and every net joins at least two pads.
 - **Clearance:** the cheap-fab rules above. All copper is at least 0.5 mm from the edge, and every track and via at
@@ -285,7 +270,7 @@ the collective's BOM, [`../../BOM`](../../BOM).
 - **Routing:** 998 mm of track, 78 vias: 44 from the router and 34 GND stitching vias. The I²C lines from U3 to the
   ports are 6–29 mm long.
 - **Decoupling:** C4's VCC pad is 2.65 mm from U3's VCC pin (centre to centre); C1's is 1.8 mm from U1's and C2's
-  2.7 mm from U2's, as on Rev 3.0.
+  2.7 mm from U2's.
 - **Silkscreen:** every label is 1.0 mm tall with a 0.16 mm stroke, outside every courtyard on its side, and at least
   0.5 mm from the next label. The front names the connectors (J1, J2, AX1–AX4), RST, USB and the front parts; the
   back names U3, C4, R1–R11 and the board.
