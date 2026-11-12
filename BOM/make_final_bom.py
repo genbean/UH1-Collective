@@ -7,7 +7,7 @@
 # doesn't use are listed on the Dropped sheet. Head and base lines cite the README or CAD they come from. Lines
 # sized only from the CAD are highlighted for checking; lines covered by the two screw kits (every screw and nut in
 # the head and base) are marked and cost nothing extra.
-# Sheets: Final BOM (everything bought), Digi-Key order (the electronics order, linked to the Final BOM), Printed
+# Sheets: Final BOM (everything bought: the only parts list), Printed
 # parts, Dropped (in earlier lists or carts, not used now), Sources.
 # usage: python make_final_bom.py [out.xlsx]     (any Python 3 with openpyxl)
 import math, os, re, sys
@@ -575,8 +575,8 @@ setup(ws, "Heli Collective - final BOM",
       "ordered, including the Digi-Key order placed for Rev 3.0: Rev 4.0 shares most of its parts. Blue line: "
       "already ordered. Green: covered by a kit or pack priced on another line. Orange: size taken from the base's CAD, not from a parts list, so check "
       "before ordering. Prices are pack prices: Digi-Key cart (2026-10-23), Amazon listings "
-      "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. The "
-      "Digi-Key order sheet lists the electronics to order from Digi-Key.", NC, 58)
+      "(2026-10-22 and 2026-10-23) and the OSH Park order, before shipping and tariff. To "
+      "order the electronics, filter Supplier to Digi-Key.", NC, 58)
 ws["A3"] = "Collectives to build"; ws["A3"].font = F(bold=True); ws.merge_cells("A3:B3")
 ws["C3"] = 1; ws["C3"].font = F(bold=True, color="0000FF"); ws["C3"].fill = PatternFill("solid", fgColor="FFFF00")
 ws["C3"].alignment = centre; ws["C3"].border = box
@@ -622,35 +622,6 @@ ws.cell(r, 1, "Still to buy counts the packs to order; whole build counts every 
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=NC)
 ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 
-# Digi-Key order: every Digi-Key line, its quantity linked to the Final BOM
-wd = wb.create_sheet("Digi-Key order")
-DCOLS = ["#", "Digi-Key part number", "Quantity", "Mfr part number", "Description", "Customer reference", "Unit price",
-         "Ext. price", "Notes"]
-setup(wd, "Heli Collective - Digi-Key order", "Every line to buy from Digi-Key. Quantities come from the Final BOM's "
-      "Packs to order, so they follow the collectives to build and anything marked as bought. "
-      "Upload this sheet to Digi-Key's BOM Manager to fill the cart.", len(DCOLS))
-header(wd, DCOLS, [4, 25, 9, 20, 40, 16, 10, 10, 50], 4)
-d, dk_rows = 4, []
-for (fr, where, qty, desc, mfr, mpn, sup, spn, unit, pack, bought, notes) in rows:
-    if sup != "Digi-Key": continue
-    d += 1
-    vals = [d - 4, spn, f"='Final BOM'!G{fr}", mpn, desc, where, f"='Final BOM'!M{fr}",
-            f"=IF('Final BOM'!M{fr}=\"\",\"\",C{d}*G{d})", notes]
-    for c, v in enumerate(vals, 1):
-        cell = wd.cell(d, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
-    for c in (1, 3): wd.cell(d, c).alignment = centre
-    for c in (7, 8): wd.cell(d, c).number_format = USD
-    link(wd.cell(d, 2), sup, spn)
-    dk_rows.append((spn, max(0, (1 if pack == "once" else math.ceil(qty / pack)) - bought), where))
-d += 1
-wd.cell(d, 7, "Total").font = F(bold=True)
-wd.cell(d, 8, f"=SUM(H5:H{d - 1})").font = F(bold=True); wd.cell(d, 8).number_format = USD
-wd.cell(d + 1, 1, f"All {d - 5} Digi-Key lines are priced (checked 2026-10-23; Rev 4.0's new parts 2026-10-27), before "
-        "shipping and tariff.").font = F(
-    italic=True, color="595959")
-wd.merge_cells(start_row=d + 1, start_column=1, end_row=d + 1, end_column=len(DCOLS))
-wd.freeze_panes = "A5"
-
 ws2 = wb.create_sheet("Printed parts")
 setup(ws2, "Heli Collective - printed parts", "The print set for the Huey head Rev 5 and the MkIII base Rev 4, with the "
       "orientation each README gives. Print the coupons first. Paths are from the repository root.", 5)
@@ -680,5 +651,5 @@ for i, row in enumerate(SOURCES, 1):
         cell = ws4.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
 
 wb.save(OUT)
-print(f"{len(fps)} board parts checked; {n} BOM lines ({len(dk_rows)} Digi-Key), {len(PRINTED)} printed-part lines, "
+print(f"{len(fps)} board parts checked; {n} BOM lines, {len(PRINTED)} printed-part lines, "
       f"{len(DROPPED)} dropped; wrote {OUT}")
