@@ -44,7 +44,7 @@ d, m = R.d, R.m
 OUT = os.path.join(HERE, "renders")
 RED = (214, 48, 39)
 DOWEL = (236, 190, 62)
-HW = ("hardware", "lever_screws", "strut_pins")
+HW = ("hardware", "lever_screws", "tube_lock", "sensor_screws", "strut_pins")
 SUB = ("Screws in red. Countersunk screws and nuts: AvrestYPT kit (the lever halves and the shell: HELIFOUNER M4 x 30-50 socket head "
        "cap kit and its nuts). Brake bolt: M5 x 35 hex head.")
 
@@ -63,7 +63,8 @@ COLOURS = {
     "cover_sensor": (63, 120, 194), "cover_cable": (63, 120, 194), "strut_collar": (232, 118, 44),
     "bearing_inner": (141, 148, 156), "bearing_outer": (141, 148, 156), "bearing_seal": (32, 34, 36),
     "carbon_tube": (58, 61, 66), "gas_strut": (43, 46, 51), "hose_clamp": (213, 217, 221),
-    "hardware": (74, 79, 86), "lever_screws": (74, 79, 86), "strut_pins": (74, 79, 86), "knob_spring": (184, 190, 197),
+    "hardware": (74, 79, 86), "lever_screws": (74, 79, 86), "tube_lock": (74, 79, 86),
+    "sensor_screws": (74, 79, 86), "strut_pins": (74, 79, 86), "knob_spring": (184, 190, 197),
     "magnet": (154, 163, 173), "sensor_pcb": (91, 47, 145), "sensor_chip": (17, 17, 17),
     "sensor_wires": (200, 60, 160), "usb_cable": (24, 25, 27),
 }
@@ -177,6 +178,38 @@ def back_view(C, P0=None):
                "its seat in the shell's top, leaning 30 deg forward"), "rev4_back.png")
 
 
+def tube_lock_views(C):
+    """the tube lock: the lever with the tube in, from the head's side (-y, the left) and the nut's side (+y), front and
+    below"""
+    ls, lc = v.lever_halves(0.0)
+    P = {"lever_sensor": (to_mesh(ls), C["lever_sensor"]), "lever_cable": (to_mesh(lc), C["lever_cable"]),
+         "carbon_tube": (to_mesh(v.carbon_tube(60.0)), C["carbon_tube"]), "tube_lock": (to_mesh(v.tube_lock()), RED)}
+    imgs = [R.render(P, view, size=(1000, 850), focus=((-80, -25, -32), (5, 25, 32)), zoom=1.0)[0]
+            for view in ((-0.45, -1.0, -0.35), (-0.45, 1.0, -0.35))]
+    both = Image.new("RGB", (2000, 850), (255, 255, 255))
+    for k, im in enumerate(imgs):
+        both.paste(im, (1000 * k, 0))
+    save(title(both, "Rev 4 tube lock",
+               "M4 x 35 through the tube's centre line, in bosses over the down-stop pads: head on the left, the side "
+               "on show (left picture), nut on the right, against the seat (right picture), both 0.5 mm under the faces"), "rev4_tube_lock.png")
+
+
+def collar_views(C):
+    """the strut collar on the tube with the strut's end, from the left (heads) and the right (nuts), below"""
+    P = {"strut_collar": (to_mesh(v.strut_collar()), C["strut_collar"]),
+         "pins": (to_mesh(fuse(*[s for n, s, _ in v.strut_screws() if not n.startswith("anchor")])), RED),
+         "tube": (to_mesh(v.carbon_tube(170.0).cut(v.box(-120, 0, -20, 20, -20, 20))), C["carbon_tube"]),
+         "strut": (to_mesh(v.moved(v.r.strut(0.0)).intersect(v.box(-175, -90, -20, 20, -60, 0))), C["gas_strut"])}
+    imgs = [R.render(P, view, size=(1000, 850), focus=((-165, -20, -36), (-112, 20, 20)), zoom=1.0)[0]
+            for view in ((-0.3, -1.0, -0.35), (-0.3, 1.0, -0.6))]
+    both = Image.new("RGB", (2000, 850), (255, 255, 255))
+    for k, im in enumerate(imgs):
+        both.paste(im, (1000 * k, 0))
+    save(title(both, "Rev 4 strut collar", "Split along the bottom: two M4 x 16 countersunk close the cheeks, the strut "
+               "screw and one in front of it. Heads on the left (left picture), nuts on the right (right picture)"),
+         "rev4_strut_collar.png")
+
+
 def lever_views(C):
     """the lever alone: from the side, the fairings over and under the socket boss running into the hub; and from the
     front and above"""
@@ -191,6 +224,11 @@ def lever_views(C):
                "Rev 4 lever from the front and below",
                "The down-stop pads run in to the lower fairing, so each half prints with nothing hanging under them"),
          "rev4_lever_under.png")
+    save(title(R.render({"lever_sensor": P["lever_sensor"]}, (0.15, -1.0, 0.25), size=(1200, 1000),
+                        focus=((-15, -32, -15), (15, -20, 15)), zoom=1.0)[0], "Rev 4 sensor pocket",
+               "Four M2 posts for the AS5600 module, each joined to a ledge, 1.6 mm pilots"), "rev4_sensor_pocket.png")
+    tube_lock_views(C)
+    collar_views(C)
     lever_exploded(C)
     P32 = scene(v.STOP_DEG, C, tube_to=-120.0)
     keep = ("lever_sensor", "lever_cable", "lever_screws", "lever_dowel", "gas_strut", "strut_pins", "carbon_tube",
@@ -345,18 +383,11 @@ def screws_and_nuts():
                                                        (x, sh * (v.JS_SEAT + r.CAP_K), z)),
                                                    cyl(2.0, (x, -sh * v.JS_TIP, z), (x, sh * v.JS_SEAT, z))), (0, sh, 0)),
               ("lever nut", v.hex_xz(x, z, 7.0, -sh * v.JS_NUT[0], -sh * v.JS_NUT[1]), (0, -sh, 0))]
-    aw = (r.ROD_TAB_T + 0.6) / 2 + r.CLEVIS_T                                     # Rev 3's pins(), on the middle
-    cw = (r.BODY_TAB_T + 0.6) / 2 + r.CHEEK_T
-    dd, ro = r.COLLAR_D, r.COLLAR_BORE + r.COLLAR_WALL
-    xm = -dd + (r.COLLAR_W - 2 * r.COLLAR_BACK) / 2
-    H += [("anchor screw", m.csk_screw(4, (v.ANCH_X, aw, v.ANCH_Z), (0, -1, 0), 16), (0, 1, 0)),
-          ("anchor nut", m.nut(4, (v.ANCH_X, -aw + 3.4, v.ANCH_Z), (0, -1, 0)), (0, -1, 0)),
-          ("eye screw", m.csk_screw(4, (-dd, cw, -r.COLLAR_E), (0, -1, 0), 16), (0, 1, 0)),
-          ("eye nut", m.nut(4, (-dd, -cw + 2.5, -r.COLLAR_E), (0, -1, 0)), (0, -1, 0))]
-    for sx in (-1, 1):
-        xc = xm + sx * r.CLAMP_PITCH / 2
-        H += [("clamp screw", m.csk_screw(4, (xc, -5, ro + 3), (0, 1, 0), 12), (0, -1, 0)),
-              ("clamp nut", m.nut(4, (xc, 3.8, ro + 3), (0, 1, 0)), (0, 1, 0))]
+    H += v.strut_screws()                                                          # anchor, the collar's eye and clamp
+    scr, nut = v.tube_lock_parts()
+    H += [("tube lock screw", scr, (0, v.TL_HEAD, 0)), ("tube lock nut", nut, (0, -v.TL_HEAD, 0))]
+    for x, z in v.AS_HOLES:
+        H.append(("sensor screw", m.csk_screw(2, (x, -v.AS_HEAD_TOP, z), (0, 1, 0), v.AS_SCREW_L), (0, -1, 0)))
     return H
 
 
@@ -429,16 +460,18 @@ def screw_views(P0):
              focus=((-15, 0, -50), (70, 0, 72)), zoom=1.0, parallel=True)
     labelled(P0, [("M3 x 12 countersunk  (x4)", "sensor cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(-1)),
-                  ("M4 x 12 countersunk  (x2)", "strut collar clamp: heads 2 mm into the -y ear", heads_of("clamp screw")),
-                  ("M4 nut", "strut, collar end (rod): in the collar's -y cheek", heads_of("eye nut")),
+                  ("M4 x 16 countersunk  (x2)", "strut collar: the strut's eye and the clamp screw in front of it, into "
+                   "nuts in the +y cheek", heads_of("eye screw") + heads_of("clamp screw")),
+                  ("M4 x 35 socket head cap", "tube lock: across the lever and the tube, head in the -y boss",
+                   heads_of("tube lock screw")),
                   ("M4 nut", "the brake strap's hinge pin: in the pillow block's hex pocket", heads_of("hinge nut")),
                   ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting: not in the kits", desk)],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
     labelled(P0, [("M3 x 12 countersunk  (x4)", "cable cover: into M3 threads tapped through the pillow block and the "
                    "shell's side wall", covers(1)),
-                  ("M4 x 16 countersunk", "strut, collar end (rod): head on +y, nut in the -y cheek", heads_of("eye screw")),
-                  ("M4 nut  (x2)", "strut collar clamp: in the +y ear's pockets", heads_of("clamp nut")),
+                  ("M4 nut  (x2)", "strut collar: in the +y cheek's hex pockets", heads_of("eye nut") + heads_of("clamp nut")),
+                  ("M4 nut", "tube lock: in the +y boss's hex pocket", heads_of("tube lock nut")),
                   ("Hex-key hole (3.5 mm)", "through the pillow block, on the strut anchor's M4 x 16: a 2.5 mm key reaches "
                    "its head", [np.array([v.ANCH_X, v.BLOCK_Y1, v.ANCH_Z])]),
                   ("M4 x 50 socket head cap", "the brake strap's hinge pin, its head in a counterbore in the pillow "
@@ -534,6 +567,9 @@ def exploded(C):
         pull("lever nut", L + (0, s * G, 0), 16, lambda it, s=s: it.out[1] * s > 0)
         mv([f"bearing_outer{s}", f"bearing_inner{s}", f"bearing_seal{s}"], L + (0, 85 * s, 0))
     mv(["sensor_pcb", "sensor_chip"], L + (0, -125, 0))
+    pull("sensor screw", L + (0, -125, 0), 14)
+    pull("tube lock screw", L + (0, -G, 0), 30)
+    pull("tube lock nut", L + (0, G, 0), 16)
     mv(["tube"], L + (-95, 0, 0))
     mv(["hose_clamp"], L + (-30, 0, 0))
     mv(["strut_collar"], L + (-95, 0, 0))
@@ -589,9 +625,11 @@ def exploded(C):
               ("M5 x 35 + M5 nut", "the brake: a hex bolt, head in the knob, nut in the strap's head",
                S["brake bolt"] + S["brake nut"]),
               ("M4 x 50 + M4 nut", "the brake strap's hinge pin, socket head", S["hinge screw"] + S["hinge nut"]),
-              ("M4 x 16 + M4 nut  (x2)", "strut eyes, countersunk",
-               S["anchor screw"] + S["anchor nut"] + S["eye screw"] + S["eye nut"]),
-              ("M4 x 12 + M4 nut  (x2)", "strut collar clamp, countersunk", S["clamp screw"] + S["clamp nut"])]
+              ("M4 x 16 + M4 nut  (x3)", "strut eyes (2) and the collar's front clamp screw (1), countersunk",
+               S["anchor screw"] + S["anchor nut"] + S["eye screw"] + S["eye nut"] + S["clamp screw"] + S["clamp nut"]),
+              ("M4 x 35 + M4 nut", "tube lock: socket head, across the lever and the tube", S["tube lock screw"]
+               + S["tube lock nut"]),
+              ("M2 x 8  (x4)", "the AS5600 board, countersunk, into the pocket's posts", S["sensor screw"])]
     groups = [(t, s_, [I[k] for k in ks]) for t, s_, ks in parts] + screws
     everything = list(I.values()) + [it for g in S.values() for it in g]
     d.labelled(everything, groups, (-0.55, -1.0, 0.75), (0, 0, 1), "MkIII base Rev 4, exploded",
@@ -600,9 +638,9 @@ def exploded(C):
 
 
 def screw_chart():
-    rows = [(d.screw_tile("shcs", 4, v.JS_SCREW_L), f"M4 x {v.JS_SCREW_L} socket head cap", 4,
-             "The lever halves: along the pivot axis through the hub, behind the bearings, into M4 nuts in the other "
-             "half; two heads and two nuts in each half (HELIFOUNER M4 x 30-50 kit)."),
+    rows = [(d.screw_tile("shcs", 4, v.JS_SCREW_L), f"M4 x {v.JS_SCREW_L} socket head cap", 5,
+             "The lever halves (4): along the pivot axis through the hub, behind the bearings, into M4 nuts in the "
+             "other half (HELIFOUNER M4 x 30-50 kit). The tube lock (1): across the lever and the tube."),
             (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 5,
              "The shell (4), from the top, each centred on the joint, into M4 nuts slid into the pillow blocks from "
              "the sides; the brake strap's hinge pin (1), through the pillow blocks and the up-stop pad."),
@@ -611,10 +649,12 @@ def screw_chart():
              "head."),
             (d.screw_tile("csk", 3, 12), "M3 x 12 countersunk", 8,
              "The side covers, into threads tapped through the blocks and the shell."),
-            (d.screw_tile("csk", 4, 16), "M4 x 16 countersunk", 2, "The strut's two eyes, into nuts in the far cheeks."),
-            (d.screw_tile("csk", 4, 12), "M4 x 12 countersunk", 2, "The strut collar's clamp, into nuts in the other ear."),
+            (d.screw_tile("csk", 4, 16), "M4 x 16 countersunk", 3,
+             "The strut's two eyes, and the collar's front clamp screw, into nuts in the far cheeks."),
+            (d.screw_tile("csk", 2, 8), "M2 x 8 countersunk", 4,
+             "The AS5600 board, into 1.6 mm pilots in the sensor pocket's posts."),
             (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 13,
-             "Lever (4), shell (4), strut eyes (2), collar clamp (2), the strap's hinge pin (1)."),
+             "Lever (4), tube lock (1), shell (4), strut eyes (2), collar clamp (1), the strap's hinge pin (1)."),
             (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the slot in the brake strap's head.")]
     d.chart(rows, "MkIII base Rev 4: every screw, to scale",
             "Countersunk screws and nuts: AvrestYPT kit. Socket head screws (lever, shell, hinge pin): HELIFOUNER kit. Brake bolt: M5 x 35. "

@@ -155,6 +155,17 @@ BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and f
 CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top (31.0)
 MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (32.0)
 POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (24.4)
+# The board is screwed down: four M2 x 8 countersunk (AvrestYPT kit) through the module's four corner holes (the user
+# measured them 0.64 in apart along the pad columns' edges, x here, and 0.63 in across, z), into 1.6 mm pilots (tap M2
+# by hand, or let the screw cut it) in round posts that stand up from the pocket's floor to the board's back, each
+# joined to the nearest ledge. The posts stay 0.5 mm off the pad columns' ends. The heads sit on the board's face, about
+# 0.6 mm proud of it, 1.4 mm short of the cover
+AS_HOLES = [(sx * 0.64 * 25.4 / 2, sz * 0.63 * 25.4 / 2) for sx in (-1, 1) for sz in (-1, 1)]   # (x, z): +-8.13, +-8.0
+AS_POST_R, AS_PILOT_D, AS_SCREW_L = 2.0, 1.6, 8.0
+AS_HEAD_TOP = TRUN_OUT + 0.6                     # |y| 30.1: the head's top
+m.CSK.setdefault(2, (4.1, 2.2))                  # M2 countersunk: a 3.8 mm head (csk_screw draws it 0.3 under this)
+AS_HOLE_D = 2.4                                  # the module's holes (reference)
+AS_PILOT_END = AS_HEAD_TOP - AS_SCREW_L - 0.5    # |y| 21.6: 0.5 past the tip
 # USB cable: along the axis, then an 18 mm bend (about 4x its 4.6 mm across) toward the front, then straight forward at
 # USB_Y in a round tunnel USB_TUNNEL_R round, half in the pillow block's outer face (frame and shell) and half in the
 # cable cover, out through the cover's front bevel. It leaves 1.1 mm of block to the shell screw's hole and 1.2 mm of
@@ -203,6 +214,22 @@ FAIR_HW, FAIR_R = 10.5, 3.0
 # boss. The pad's inner face would print as a flat overhang once the lever's split on y = 0; this way pad and fairing
 # are one piece, with nothing hanging
 PAD_FILL_Y = FAIR_HW - FAIR_R
+# The tube lock: one M4 x 35 socket head cap screw (the joint screws' kit) straight across the lever and through the
+# carbon tube's centre line, so the tube can't pull out or turn. At x TL_X, mid-pad: the down-stop pads are built up
+# into bosses, the pads' own footprint carried on up to TL_TOP above the axis (the user's design). The head sits in a
+# counterbore in the -y boss's face (the pilot's left, the side on show), the nut in a hex pocket in the +y boss's face
+# (the right, against the seat), both TL_RECESS under the 20 mm
+# faces; the screw's tip comes level with the nut's outer face. 2.8 mm of boss between the head and the tube's bore,
+# 3.6 under the nut, 2.8 over the nut's corners. The bosses swing up through the shell's front wall, so its reliefs
+# for the pads run on up past them (OPEN_EAR). It runs through both halves, so it also ties them together in front.
+# Drill the tube through the holes with the lever assembled on it, the tube home.
+TL_X, TL_Z, TL_TOP = (r.PAD_X[0] + r.PAD_X[1]) / 2, 0.0, 7.0   # (-46, 0); the bosses' tops: any higher and they
+                                                                # come under 2 mm off the shell's top wall at the stop
+TL_FACE, TL_RECESS, TL_SCREW_L = r.PAD_DY[1], 0.5, 35
+TL_HEAD = -1                                                 # the head's side: -y, the left as the pilot sits
+TL_SEAT = TL_FACE - TL_RECESS - r.CAP_K                      # |y| 15.5: the head's seat
+TL_NUT = (TL_FACE - TL_RECESS - r.LS_NUT_T, TL_FACE - TL_RECESS)   # |y| 16.3..19.5 on the far side
+TL_TIP = TL_SCREW_L - TL_SEAT                                # |y| 19.5: level with the nut's outer face
 STOP_DEG = r.STOP_DEG
 # The gas strut's anchor. Rev 3's first, at x -12, z -40.5, balanced a 40 N strut, the bottom of the range the 45 N strut
 # is sold as; the 45 N strut as bought lifted the lever (about +50..+70 g at the grip). Moved up and back to x -9.5,
@@ -260,8 +287,10 @@ OPEN_PAD = PAD_DY[1] + SWEEP_CLR                 # 22.05
 OPEN_FAIR = FAIR_HW + SWEEP_CLR                  # 12.55
 OPEN_ELL_Z, OPEN_ELL_B = 23.4, 23.75             # BLOCK_HW tan 32 = 23.4; (18 + 2.05) / cos 32 = 23.65, and 0.1 for the
                                                  # boss's top rising in front of the face
-OPEN_EAR = (6.4, 15.0, 23.8, 2.25, 4.0, 1.0)     # the reliefs: leave the boss's side at z, reach OPEN_PAD at z, leave it at
-                                                 # z, top corner's radius; the fillets at the bottom and top
+OPEN_EAR = (6.4, 15.0, 33.8, 2.25, 4.0, 1.0)     # the reliefs: leave the boss's side at z, reach OPEN_PAD at z, leave it at
+                                                 # z, top corner's radius; the fillets at the bottom and top. They run up
+                                                 # to 33.8 (23.8 before the tube lock's bosses): the bosses' tops pass
+                                                 # through the wall up to z 31.6
 OPEN_TAB_R = 3.0                                 # where the fairing's tab meets the boss's circle
 TOP_ELL = (-52.0, 33.55, 19.45)                  # the boss's footprint: centre x, half length, half width (fitted to the
                                                  # 3D clearance through the wall: the boss crosses it at 32 deg)
@@ -378,6 +407,25 @@ def sensor_pocket():
     return seat.fuse(behind)
 
 
+def sensor_posts():
+    """the AS5600's four screw posts in the pocket, from its floor to the board's back, each a round post with a web out
+    to the nearest ledge (the recess behind the board runs the pocket's full width in x; the ledges are its top and
+    bottom edges)"""
+    zl = BOARD / 2 + BOARD_CLR - LEDGE                              # the ledges' inner edge
+    y0, y1 = -BOARD_Y[0], -POCKET_FLOOR + 0.01
+    out = []
+    for x, z in AS_HOLES:
+        sz = 1 if z > 0 else -1
+        out += [cyl(AS_POST_R, (x, y0, z), (x, y1, z)),
+                box(x - AS_POST_R, x + AS_POST_R, y0, y1, *sorted((z, sz * (zl + 0.2))))]
+    return out
+
+
+def sensor_screws(theta=0.0):
+    """the AS5600's four M2 x 8 countersunk (reference), heads on the board's face"""
+    return rot_y(fuse(*[m.csk_screw(2, (x, -AS_HEAD_TOP, z), (0, 1, 0), AS_SCREW_L) for x, z in AS_HOLES]), theta)
+
+
 def lever(pocket=True):
     """the whole lever, unsplit; pocket=False leaves out the sensor's pocket (the rest is symmetrical about y = 0)"""
     core = rot_y(cyl(HUB_R, (0, -HUB_HW, 0), (0, HUB_HW, 0)), 135)      # seam away from the split, the stop and the track
@@ -385,7 +433,8 @@ def lever(pocket=True):
     shoulders = [cyl(BRG_IR_SH / 2 - 1.1, (0, s * HUB_HW, 0), (0, s * BRG_Y0, 0)) for s in (-1, 1)]
     trunnions = [cyl(TRUN_OD / 2, (0, s * BRG_Y0, 0), (0, s * TRUN_OUT, 0)) for s in (-1, 1)]
     gusset = fuse(fairing(1), fairing(-1))
-    pads = [box(*PAD_X, *sorted((s * PAD_FILL_Y, s * PAD_DY[1])), PAD_Z, 0) for s in (-1, 1)]   # filled in to the fairing
+    pads = [box(*PAD_X, *sorted((s * PAD_FILL_Y, s * PAD_DY[1])), PAD_Z, TL_TOP) for s in (-1, 1)]   # filled in to the
+                                                                        # fairing, and up into the tube lock's bosses
     h = fuse(core, boss, gusset, *shoulders, *trunnions, *pads, *up_stop_lugs())
     cuts = [cyl(m.SOCK_BORE_R, (-m.SOCK_BOTTOM, 0, 0), (-m.SOCK_MOUTH - 1, 0, 0)),               # tube socket
             tube(m.SOCK_BOSS_R + 1, m.SOCK_BOSS_R - 1.2, (-54, 0, 0), (-63, 0, 0)),               # hose-clamp groove
@@ -419,7 +468,31 @@ def lever_joint_cuts():
                  hex_xz(x, z, m.NUT_AF[4], -sh * JS_NUT[0], -sh * out),                                  # nut pocket
                  cyl(rd, (x, -DOWEL_DEPTH, z), (x, DOWEL_DEPTH, z))]                                     # dowel holes
         cuts += [cq.Solid.makeCone(rd + DOWEL_LEAD, rd, DOWEL_LEAD, V(x, 0, z), V(0, sy, 0)) for sy in (-1, 1)]
-    return cuts
+    return cuts + tube_lock_cuts()
+
+
+def tube_lock_cuts():
+    """the tube lock's counterbore in the head's boss (TL_HEAD's side), its clearance hole right across, and its nut's
+    pocket in the other boss"""
+    s, out = TL_HEAD, TL_FACE + 1.0
+    return [cyl(JS_CB_R, (TL_X, s * TL_SEAT, TL_Z), (TL_X, s * out, TL_Z)),
+            cyl(m.LS_CLR_R, (TL_X, s * (TL_SEAT + 0.01), TL_Z), (TL_X, -s * (TL_NUT[0] + 0.01), TL_Z)),
+            hex_xz(TL_X, TL_Z, m.NUT_AF[4], -s * TL_NUT[0], -s * out)]
+
+
+def tube_lock_parts():
+    """(screw, nut) of the tube lock at 0 deg (reference): the head on its seat, the nut pulled up to its pocket's floor"""
+    x, z, s = TL_X, TL_Z, TL_HEAD
+    screw = fuse(cyl(r.CAP_D / 2, (x, s * TL_SEAT, z), (x, s * (TL_SEAT + r.CAP_K), z)),
+                 cyl(2.0, (x, s * TL_SEAT, z), (x, -s * TL_TIP, z)))
+    nut = hex_xz(x, z, 7.0, -s * TL_NUT[0], -s * TL_NUT[1]).cut(
+        cyl(2.0, (x, -s * (TL_NUT[0] - 1), z), (x, -s * (TL_NUT[1] + 1), z)))
+    return screw, nut
+
+
+def tube_lock(theta=0.0):
+    """the tube lock's M4 x 35 and nut (reference)"""
+    return rot_y(fuse(*tube_lock_parts()), theta)
 
 
 def lever_screws(theta=0.0):
@@ -471,6 +544,10 @@ def lever_halves(theta=0.0):
         in_pocket = lambda e: (lambda b: b.ymax < -POCKET_FLOOR + 0.1 and max(abs(b.xmin), abs(b.xmax), abs(b.zmin),
                                                                              abs(b.zmax)) < k)(e.BoundingBox())
         sensor = chamfer_edges(sensor, exclude=lambda e: not in_pocket(e))
+        sensor = fuse(sensor, *sensor_posts())
+        for x, z in AS_HOLES:
+            sensor = sensor.cut(cyl(AS_PILOT_D / 2, (x, -BOARD_Y[1] - 1, z), (x, -AS_PILOT_END, z)))
+        sensor = sensor.clean()
         cable = cable.cut(usb_relief()).clean()
         in_relief = lambda e: (lambda b: b.ymin > POCKET_FLOOR and b.xmax < -2.0 and b.xmin > -16.0 and b.zmin > -10.0
                                          and b.zmax < 5.0)(e.BoundingBox())
@@ -1218,6 +1295,8 @@ def sensor_board():
     px = h - m.AS5600_PAD_X
     pins = fuse(*[cyl(0.5, (sx * px, -BOARD_Y[0] + 2.5, z), (sx * px, -BOARD_Y[0] - 1.0, z))
                   for sx in (-1, 1) for z in (-m.AS5600_PAD_PITCH, m.AS5600_PAD_PITCH)])
+    for x, z in AS_HOLES:
+        pcb = pcb.cut(cyl(AS_HOLE_D / 2, (x, -BOARD_Y[1] - 1, z), (x, -BOARD_Y[0] + 1, z)))
     return pcb.fuse(pins).clean(), chip
 
 
@@ -1273,16 +1352,22 @@ def usb_cable(theta=0.0, x0=-190.0):
     """down the tube and along the axis, turning with the lever; then the bend and the run out through the cover, fixed"""
     s45 = math.sin(math.radians(45))
     rr, yk = 5.0, USB_Y - USB_BEND_R
-    inside = (cq.Workplane("XY").moveTo(x0, 0).lineTo(-rr, 0).threePointArc((-rr + rr * s45, rr - rr * s45), (0, rr))
-              .lineTo(0, yk).wire().val())
-    return fuse(rot_y(m.sweep_circle(USB_R, inside, (x0, 0, 0), (1, 0, 0)), theta),
+    # in the tube it lies over the tube lock (y 3, z 5: 2.7 mm over the screw, clear of the sensor wires), easing on to
+    # the axis before the radial bore
+    a, b = V(-34.0, 3.0, 5.0), V(-24.0, 0.0, 0.0)
+    edges = [cq.Edge.makeLine(V(x0, 3.0, 5.0), a), cq.Edge.makeSpline([a, b], tangents=[V(1, 0, 0), V(1, 0, 0)]),
+             cq.Edge.makeLine(b, V(-rr, 0, 0)),
+             cq.Edge.makeThreePointArc(V(-rr, 0, 0), V(-rr + rr * s45, rr - rr * s45, 0), V(0, rr, 0)),
+             cq.Edge.makeLine(V(0, rr, 0), V(0, yk, 0))]
+    inside = cq.Wire.assembleEdges(edges)
+    return fuse(rot_y(m.sweep_circle(USB_R, inside, (x0, 3.0, 5.0), (1, 0, 0)), theta),
                 m.sweep_circle(USB_R, usb_path(), (0, yk, 0), (0, 1, 0)))
 
 
 def sensor_wires():
     """from the board's back, along the axis, into the tube beside the USB cable"""
-    pts = [V(6.8, -BOARD_Y[0] + 1.5, 3.0), V(0, -POCKET_FLOOR - 0.5, 4.0), V(0, -6, 4.0), V(-6, -2, 4.0),
-           V(-190, -2, 4.0)]
+    pts = [V(6.8, -BOARD_Y[0] + 1.5, 3.0), V(0, -POCKET_FLOOR - 0.5, 4.0), V(0, -6, 4.0), V(-6, -3, 4.0),
+           V(-190, -3, 4.0)]
     return m.sweep_circle(1.6, cq.Wire.makePolygon(pts), pts[0], (pts[1] - pts[0]).normalized())
 
 
@@ -1314,7 +1399,7 @@ def hardware():
 
 
 # ================================================================ build + export
-TURNS = ("lever_sensor", "lever_cable", "lever_screws", "lever_dowel", "carbon_tube", "hose_clamp", "sensor_pcb",
+TURNS = ("lever_sensor", "lever_cable", "lever_screws", "tube_lock", "sensor_screws", "lever_dowel", "carbon_tube", "hose_clamp", "sensor_pcb",
          "sensor_chip", "bearing_inner", "sensor_wires")
 PRINTED = ["frame", "shell", "lever_sensor", "lever_cable", "lever_dowel", "strap", "cover_sensor", "cover_cable",
            "strut_collar", "friction_knob"]
@@ -1324,11 +1409,73 @@ _STATIC = {}
 _COLLAR = []
 
 
+# The strut collar: split along the bottom, nothing on top (the user's design). The slit runs from the bore straight down
+# through the web between the cheeks, so the cheeks are the clamp's jaws. Two M4 x 16 countersunk screws close them:
+# the strut's own screw through the eye, and a second in front of it (away from the strut) through the web under the
+# bore. Heads on the left (-y, the side on show), nuts on the right (+y), in hex pockets. The strut's tab sits in a
+# slot COLLAR_TAB_GAP wide: tightening closes the cheeks by about 1.35 mm at the eye (the bore's 0.3 mm of clearance,
+# levered out from the ring's top, where it flexes), so the slot starts that much wider than the tab and still leaves it
+# 0.15 mm a side once the collar's clamped: the strut still turns on its screw.
+COLLAR_SLIT = 2.0
+COLLAR_TAB_GAP = r.BODY_TAB_T + 0.3 + 1.35       # 5.6
+COLLAR_CW = COLLAR_TAB_GAP / 2 + r.CHEEK_T       # 7.8: the cheeks' outer faces, +-y
+COLLAR_CLAMP = (-r.COLLAR_D - 14.0, -19.3)       # (x, z) the front clamp screw: 2.3 mm of web over and under its head
+COLLAR_SCREW_L = 16
+
+
+def collar_screw_sites():
+    """(x, z) of the collar's two screws: the strut's eye, then the front clamp screw"""
+    return [(-r.COLLAR_D, -r.COLLAR_E), COLLAR_CLAMP]
+
+
+def _collar():
+    d, e, cw = r.COLLAR_D, r.COLLAR_E, COLLAR_CW
+    x0, x1 = -d - r.COLLAR_BACK, -d + r.COLLAR_W - r.COLLAR_BACK
+    ro = r.COLLAR_BORE + r.COLLAR_WALL
+    re = r.BODY_TAB_W / 2 + 3.5                                          # the eye's radius round the screw
+    hull = r._hull([(x0, -ro + 2), (x1, -ro + 2)] + [(-d + re * math.cos(a * math.pi / 18),
+                                                      -e + re * math.sin(a * math.pi / 18)) for a in range(36)])
+    c = fuse(cyl(ro, (x0, 0, 0), (x1, 0, 0)), gusset_xz(hull, -cw, cw))
+    g = COLLAR_TAB_GAP
+    cuts = [cyl(r.COLLAR_BORE, (x0 - 1, 0, 0), (x1 + 1, 0, 0)),
+            box(x0 - 1, x1 + 1, -COLLAR_SLIT / 2, COLLAR_SLIT / 2, -e - 20, 0),                 # the slit, all the way down
+            box(-d - r.BODY_TAB_W / 2 - 1.2, x1 + 1, -g / 2, g / 2, -e - r.BODY_TAB_W / 2 - 4, -ro + 0.5),   # tab slot
+            # the strut's boss is wider than its tab: the cheeks stop short of it on the strut's side, BOSS_CLR round it
+            box(-d + r.BODY_BOSS_AT - r.BOSS_CLR, x1 + 1, -cw - 1, cw + 1, -e - r.BODY_TAB_W / 2 - 6,
+                -e + r.BODY_BOSS_D / 2 + r.BOSS_CLR + 0.3)]
+    for x, z in collar_screw_sites():
+        cuts += [cyl(r.PIN_R, (x, -cw - 1, z), (x, cw + 1, z)),                                 # M4 clearance
+                 m.csk_hole(4, (x, -cw, z), (0, 1, 0), 1),                                      # head on -y
+                 hexprism(7.2, (x, cw - 2.5, z), (x, cw + 1, z))]                               # nut 2.5 deep on +y
+    for k in cuts:
+        c = c.cut(k)
+    return c.clean()
+
+
 def strut_collar(theta=0.0):
-    """Rev 3's collar, unchanged (chamfered as Rev 3 prints it), on the middle"""
+    """the collar, chamfered as the shared library chamfers it"""
     if not _COLLAR:
-        _COLLAR.append(moved(r.chamfer_edges(r._collar())))
+        _COLLAR.append(r.chamfer_edges(_collar()))
     return rot_y(_COLLAR[0], theta)
+
+
+def strut_screws():
+    """[(name, shape, outward)] for the strut's screws and nuts at 0 deg: the anchor's M4 x 16 and nut, and the collar's
+    two M4 x 16 and nuts (the eye's, then the front clamp's)"""
+    aw = (r.ROD_TAB_T + 0.6) / 2 + r.CLEVIS_T
+    out = [("anchor screw", m.csk_screw(4, (ANCH_X, aw, ANCH_Z), (0, -1, 0), 16), (0, 1, 0)),
+           ("anchor nut", m.nut(4, (ANCH_X, -aw + 3.4, ANCH_Z), (0, -1, 0)), (0, -1, 0))]
+    for (x, z), g in zip(collar_screw_sites(), ("eye", "clamp")):
+        out += [(f"{g} screw", m.csk_screw(4, (x, -COLLAR_CW, z), (0, 1, 0), COLLAR_SCREW_L), (0, -1, 0)),
+                (f"{g} nut", m.nut(4, (x, COLLAR_CW - 2.5, z), (0, 1, 0)), (0, 1, 0))]
+    return out
+
+
+def strut_pins(theta=0.0):
+    """the strut's screws and nuts (reference): the anchor's fixed, the collar's turning with the lever"""
+    S = strut_screws()
+    return fuse(fuse(*[s for n, s, _ in S if n.startswith("anchor")]),
+                rot_y(fuse(*[s for n, s, _ in S if not n.startswith("anchor")]), theta))
 
 
 def static_parts():
@@ -1351,8 +1498,8 @@ def build(theta=0.0):
     P.update({"lever_sensor": ls, "lever_cable": lc, "lever_dowel": lever_dowels(theta), "strut_collar": strut_collar(theta),
               "bearing_inner": rot_y(fuse(*[bearing(s)[1] for s in (-1, 1)]), theta),
               "carbon_tube": rot_y(carbon_tube(), theta), "hose_clamp": rot_y(moved(m.hose_clamp()), theta),
-              "gas_strut": moved(r.strut(theta)), "strut_pins": moved(r.pins(theta)),
-              "lever_screws": lever_screws(theta), "sensor_wires": rot_y(sensor_wires(), theta),
+              "gas_strut": moved(r.strut(theta)), "strut_pins": strut_pins(theta),
+              "lever_screws": lever_screws(theta), "tube_lock": tube_lock(theta), "sensor_screws": sensor_screws(theta), "sensor_wires": rot_y(sensor_wires(), theta),
               "usb_cable": usb_cable(theta),
               "sensor_pcb": rot_y(pcb, theta), "sensor_chip": rot_y(chip, theta)})
     return P
@@ -1367,7 +1514,10 @@ ALLOWED = {("bearing_inner", "lever_cable"), ("bearing_inner", "lever_sensor"), 
            ("frame", "strut_pins"), ("gas_strut", "strut_pins"), ("strut_collar", "strut_pins"),
            ("lever_cable", "lever_screws"), ("lever_screws", "lever_sensor"), ("carbon_tube", "hose_clamp"),
            ("hose_clamp", "lever_cable"), ("hose_clamp", "lever_sensor"), ("carbon_tube", "strut_collar"),
-           ("cover_sensor", "magnet"), ("sensor_pcb", "sensor_wires"), ("frame", "gas_strut")}
+           ("cover_sensor", "magnet"), ("sensor_pcb", "sensor_wires"), ("frame", "gas_strut"),
+           ("carbon_tube", "tube_lock"),                       # the tube lock goes through the drilled tube
+           ("lever_sensor", "sensor_screws"), ("sensor_pcb", "sensor_screws")}   # M2s cut their thread; heads on the
+                                                                                   # board's hole edges
 # Parts that share a curved face (the races in their seats, the seal between them): the mesh boolean finds a sliver
 # where the two faces' facets don't line up (2.3 mm3 for an outer race in its seat, up to 2.7 for an inner race against
 # its seal). Up to this much is that sliver; more would be a real interference.
