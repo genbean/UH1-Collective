@@ -13,7 +13,7 @@
 import math, os, re, sys
 from openpyxl import Workbook
 from openpyxl.formatting.rule import FormulaRule
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Protection, Side
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook.properties import CalcProperties
 
@@ -532,45 +532,65 @@ def section(ws, r, title, ncol):
     ws.cell(r, 1, title).font = F(bold=True)
     for c in range(1, ncol + 1): ws.cell(r, c).fill = PatternFill("solid", fgColor=SECT); ws.cell(r, c).border = box
     ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=ncol)
-# Tick boxes: Excel's cell checkbox (Insert > Checkbox, Microsoft 365). openpyxl can't write the checkbox format, so
-# the tick cells are marked unlocked here and add_checkboxes() gives that cell format the checkbox after saving.
-# Older Excel shows the cell as TRUE / FALSE instead: type TRUE to tick a line.
-def tick(cell):
-    cell.value = False; cell.alignment = Alignment(horizontal="center", vertical="top")
-    cell.protection = Protection(locked=False)
+# Tick boxes: classic form checkboxes (VML, the kind Excel 2007 wrote), which OpenOffice, LibreOffice and every Excel
+# open. openpyxl can't write them, so tick() notes each one and add_checkboxes() adds them after saving. Each box is
+# linked to a hidden cell past the last column (TRUE when ticked); a conditional format strikes the line through.
+TICKS = {}                                                     # sheet title -> [(row, linked cell)]
+def tick(ws, r, ncol):
+    col = get_column_letter(ncol + 1)
+    ws.cell(r, ncol + 1, False); ws.column_dimensions[col].hidden = True
+    TICKS.setdefault(ws.title, []).append((r, f"'{ws.title}'!${col}${r}"))
 def strike_when_ticked(ws, r0, r1, ncol):
+    col = get_column_letter(ncol + 1)
     ws.conditional_formatting.add(f"A{r0}:{get_column_letter(ncol)}{r1}", FormulaRule(
-        formula=[f"$A{r0}=TRUE"], stopIfTrue=False, font=Font(strike=True, color="808080")))
-def add_checkboxes(path):
+        formula=[f"${col}{r0}=TRUE"], stopIfTrue=False, font=Font(strike=True, color="808080")))
+def add_checkboxes(path, sheetnames):
     import shutil, zipfile
-    FPB = "http://schemas.microsoft.com/office/spreadsheetml/2022/featurepropertybag"
-    bag = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
-           f'<FeaturePropertyBags xmlns="{FPB}"><bag type="Checkbox"/><bag type="XFControls"><bagId k="CellControl">0'
-           '</bagId></bag><bag type="XFComplement"><bagId k="XFControls">1</bagId></bag><bag type="XFComplements" '
-           'extRef="XFComplementsMapperExtRef"><a k="MappedFeaturePropertyBags"><bagId>2</bagId></a></bag>'
-           '</FeaturePropertyBags>')
-    ext = (f'<extLst><ext uri="{{C7286773-470A-42A8-94C5-96B5CB345126}}" xmlns:xfpb="{FPB}">'
-           '<xfpb:xfComplement i="0"/></ext></extLst>')
+    REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+    def vml(k, ticks):
+        out = ['<xml xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" '
+               'xmlns:x="urn:schemas-microsoft-com:office:excel">',
+               f'<o:shapelayout v:ext="edit"><o:idmap v:ext="edit" data="{k}"/></o:shapelayout>',
+               '<v:shapetype id="_x0000_t201" coordsize="21600,21600" o:spt="201" path="m,l,21600r21600,l21600,xe">'
+               '<v:stroke joinstyle="miter"/><v:path shadowok="f" o:extrusionok="f" strokeok="f" fillok="f" '
+               'o:connecttype="rect"/><o:lock v:ext="edit" shapetype="t"/></v:shapetype>']
+        for j, (r, ref) in enumerate(ticks):
+            out.append(f'<v:shape id="_x0000_s{k * 1024 + 1 + j}" type="#_x0000_t201" style="position:absolute;'
+                       'margin-left:0;margin-top:0;width:24pt;height:14pt;z-index:1;visibility:visible" filled="f" '
+                       'fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">'
+                       '<v:textbox style="mso-direction-alt:auto" o:singleclick="f"><div style="text-align:left"></div>'
+                       '</v:textbox><x:ClientData ObjectType="Checkbox">'
+                       f'<x:Anchor>0, 12, {r - 1}, 2, 0, 36, {r - 1}, 19</x:Anchor><x:SizeWithCells/><x:AutoFill>False</x:AutoFill>'
+                       '<x:AutoLine>False</x:AutoLine><x:TextVAlign>Top</x:TextVAlign>'
+                       f'<x:FmlaLink>{ref}</x:FmlaLink><x:NoThreeD/></x:ClientData></v:shape>')
+        out.append("</xml>")
+        return "\n".join(out)
+    sheets = {f"xl/worksheets/sheet{i + 1}.xml": (i + 1, TICKS[t]) for i, t in enumerate(sheetnames) if t in TICKS}
     tmp = path + ".tmp"
     with zipfile.ZipFile(path) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zout:
+        names = zin.namelist()
         for item in zin.infolist():
             data = zin.read(item.filename)
-            if item.filename == "xl/styles.xml":
-                t = data.decode("utf-8")
-                xfs = re.search(r"<cellXfs.*?</cellXfs>", t, re.S).group(0)
-                new, k = re.subn(r'(<protection locked="0"[^>]*/>)\s*(</xf>)', lambda m: m.group(1) + ext + m.group(2), xfs)
-                assert k >= 1, "no tick-box cell format found"
-                data = t.replace(xfs, new).encode("utf-8")
-            elif item.filename == "xl/_rels/workbook.xml.rels":
-                data = data.decode("utf-8").replace("</Relationships>", '<Relationship Id="rIdFpb1" Type="http://schemas.'
-                    'microsoft.com/office/2022/11/relationships/FeaturePropertyBag" Target="featurePropertyBag/'
-                    'featurePropertyBag.xml"/></Relationships>').encode("utf-8")
+            if item.filename in sheets:
+                data = data.decode("utf-8").replace("</worksheet>", f'<legacyDrawing xmlns:r="{REL}" r:id="rIdTick"/>'
+                                                    "</worksheet>").encode("utf-8")
             elif item.filename == "[Content_Types].xml":
-                data = data.decode("utf-8").replace("</Types>", '<Override PartName="/xl/featurePropertyBag/'
-                    'featurePropertyBag.xml" ContentType="application/vnd.ms-excel.featurepropertybag+xml"/></Types>'
-                    ).encode("utf-8")
+                data = data.decode("utf-8").replace("</Types>", '<Default Extension="vml" ContentType="application/'
+                                                    'vnd.openxmlformats-officedocument.vmlDrawing"/></Types>').encode("utf-8")
+            elif item.filename.startswith("xl/worksheets/_rels/"):
+                continue                                       # rewritten below
             zout.writestr(item, data)
-        zout.writestr("xl/featurePropertyBag/featurePropertyBag.xml", bag)
+        for sheet, (k, ticks) in sheets.items():
+            zout.writestr(f"xl/drawings/vmlDrawing{k}.vml", vml(k, ticks))
+            rels = sheet.replace("worksheets/", "worksheets/_rels/") + ".rels"
+            t = (zin.read(rels).decode("utf-8") if rels in names else
+                 f'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.'
+                 'openxmlformats.org/package/2006/relationships"></Relationships>')
+            zout.writestr(rels, t.replace("</Relationships>", f'<Relationship Id="rIdTick" Type="{REL}/vmlDrawing" '
+                                          f'Target="../drawings/vmlDrawing{k}.vml"/></Relationships>'))
+        for rels in names:
+            if rels.startswith("xl/worksheets/_rels/") and rels.replace("_rels/", "")[:-5] not in sheets:
+                zout.writestr(rels, zin.read(rels))
     shutil.move(tmp, path)
 def link(cell, supplier, spn):
     url = {"Digi-Key": "https://www.digikey.com/en/products/result?keywords=", "Amazon": "https://www.amazon.com/dp/",
@@ -604,13 +624,13 @@ for title, lines in SECTIONS:
     for where, qty, desc, mfr, mpn, sup, spn, unit, pack, status, bought, notes, source in lines:
         r += 1; n += 1
         need = f"=IF($D$3>0,D{r},0)" if pack == "once" else f"=ROUNDUP(D{r}*$D$3/E{r},0)"   # once: one per order
-        vals = [False, n, where, qty, "once" if pack == "once" else pack, need, bought, f"=MAX(0,F{r}-G{r})", desc, mfr,
+        vals = ["", n, where, qty, "once" if pack == "once" else pack, need, bought, f"=MAX(0,F{r}-G{r})", desc, mfr,
                 mpn, sup, spn, unit, f'=IF(N{r}="","",H{r}*N{r})', ("CHECK: " if status == CHECK else "") + notes, source]
         for c, v in enumerate(vals, 1):
             cell = ws.cell(r, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
             if status in FILL: cell.fill = PatternFill("solid", fgColor=FILL[status])
         for c in (1, 2, 4, 5, 6, 7, 8): ws.cell(r, c).alignment = centre
-        tick(ws.cell(r, 1))
+        tick(ws, r, NC)
         ws.cell(r, 7).font = F(color="0000FF")
         if status not in FILL: ws.cell(r, 7).fill = PatternFill("solid", fgColor="FFFFCC")
         for c in (14, 15): ws.cell(r, c).number_format = USD
@@ -644,11 +664,11 @@ setup(ws2, "Heli Collective - printed parts", "The print set for the Huey head R
       "strike a line through.", 6)
 header(ws2, ["Done", "#", "Assembly", "File", "Qty", "Print"], [6, 4, 10, 70, 6, 70], 4)
 for i, (asm, f, q, note) in enumerate(PRINTED, 1):
-    for c, v in enumerate([False, i, asm, f, q, note], 1):
+    for c, v in enumerate(["", i, asm, f, q, note], 1):
         cell = ws2.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
         if note.startswith("CHECK"): cell.fill = PatternFill("solid", fgColor=FILL[CHECK])
     ws2.cell(4 + i, 2).alignment = ws2.cell(4 + i, 5).alignment = centre
-    tick(ws2.cell(4 + i, 1))
+    tick(ws2, 4 + i, 6)
 strike_when_ticked(ws2, 5, 4 + len(PRINTED), 6)
 ws2.freeze_panes = "A5"
 
@@ -660,6 +680,6 @@ for i, row in enumerate(SOURCES, 1):
         cell = ws4.cell(4 + i, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
 
 wb.save(OUT)
-add_checkboxes(OUT)
+add_checkboxes(OUT, wb.sheetnames)
 print(f"{len(fps)} board parts checked; {n} BOM lines, {len(PRINTED)} printed-part lines; "
       f"wrote {OUT}")
