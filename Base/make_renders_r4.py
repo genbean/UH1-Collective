@@ -220,9 +220,8 @@ def drill_guide_views(C):
     both = Image.new("RGB", (2000, 900), (255, 255, 255))
     for k, im in enumerate(imgs):
         both.paste(im, (1000 * k, 0))
-    save(title(both, "Tube drill guide", "Over the tube's lever end, the tube's end against its closed end. Its drilling "
-               "faces are 42.5 mm from the tube's axis, like the head's sides: 30 mm of guide to the tube. Windows mark "
-               "the cable notches"), "rev4_drill_guide.png")
+    save(title(both, "Tube drill guide", "Over the tube's lever end, the tube's end against its closed end. 50.8 mm "
+               "square: 1/2 in of wall, and of guide, either side of the tube"), "rev4_drill_guide.png")
 
 
 def lever_views(C):

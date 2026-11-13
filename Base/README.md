@@ -342,11 +342,10 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 `drill_guide.stl` is a one-piece block that slides over the tube's lever end, the tube's end against its closed end, and guides a 4.5 mm bit for the tube lock's hole. The lever's own holes are never drilled.
 
 - **Depth:** the hole is 43.3 mm from the tube's end, where the lever's bolt crosses it (the tube's end sits 2.7 mm from the pivot axis, the bolt 46 mm).
-- **Square to the head:** the guide's two drilling faces are 42.5 mm from the tube's axis, the same as the head's side walls. Fit the head on the far end first (drill the tube's 5.2 mm cross hole for the head's set screw and pin it), lay it on its side on a flat table, and lay the guide on its matching face on the same table: the tube is then level, and the hole is square to the head. Check both sit flat before drilling.
-- **Guide length:** each guide hole is 30 mm long before it reaches the tube.
-- **Drilling:** drill straight down from the top face through the near wall. Turn the whole tube over, head and guide onto their other sides, and drill the other wall the same way. A standard jobber bit reaches; each side needs about 32 mm.
-- **Cable notches:** a 13 × 4 mm window in each drilling face, at the closed end, is in line with the hole. Mark the notches through the windows, take the guide off, and file them.
-- **Holding it:** an M4 × 12 countersunk screw in the tapped hole in one wide face holds the guide on the tube. Snug it, with a turn of tape on the tube under it.
+- **Size:** 50.8 mm square, 56.3 mm long: 1/2 in of wall all round the tube, so each drill hole is guided 1/2 in before it reaches the tube. Solid but for the tube's bore and the two drill holes.
+- **Square to the head:** fit the head on the far end first (drill the tube's 5.2 mm cross hole for the head's set screw and pin it). Turn the guide on the tube until its square faces line up with the head's faces, then drill.
+- **Drilling:** drill straight down through one guide hole and the near wall, then turn the tube over and drill the other side the same way, each side about 26 mm of bit.
+- **Cable notches:** after drilling, file a notch in each side of the tube's end, in line with the holes.
 
 ![The tube drill guide](renders/rev4_drill_guide.png)
 
@@ -363,7 +362,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 - **Brake strap:** on its side, the nut's slot up. Its bending then runs along the layers. No supports.
 - **Side covers:** outer face down. The magnet's pocket and the cable's channel open upward, and the 45° ends lean out at 45°, so no supports.
 - **Knob:** underside down, the hex pocket open at the top. Reprint it if you have Rev 3's: its floor is now 11 mm up, and it has a pocket underneath for the spring.
-- **Drill guide** (`drill_guide.stl`, a tool, print once): stand it on its closed end, so the bore builds straight up and the guide holes are round. Tap its clamp hole M4.
+- **Drill guide** (`drill_guide.stl`, a tool, print once): stand it on its closed end, so the bore builds straight up.
 - **Strut collar** (`strut_collar.stl`): stand it on the end away from the strut, the end without the boss's notch, so the bore builds straight up, the web's slope is under 30° and the notch opens at the top.
 
 ## Assembly
@@ -371,7 +370,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
 2. **Lever:**
    - **Dowels:** push the four dowels into one half's holes.
-   - **Drill the tube for the lock first,** with the drill guide, the head fitted on the far end, and mark and file the cable notches (see [Drilling the tube](#drilling-the-tube-the-drill-guide)). Don't drill through the lever.
+   - **Drill the tube for the lock first,** with the drill guide, the head fitted on the far end, then file the cable notches (see [Drilling the tube](#drilling-the-tube-the-drill-guide)). Don't drill through the lever.
    - **Cables:** poke the USB cable through the cable half's axial bore from its joint face, and the sensor lead through the sensor half's. Lay both along the radial channel.
    - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
    - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
