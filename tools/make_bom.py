@@ -171,12 +171,11 @@ SECTIONS = [
     ("Supplies and tools", [
         part("Board", 1, "Solder paste, low temperature (Sn42/Bi57.6/Ag0.4), 15 g syringe", "Chip Quik", "SMDLTLFP",
              "Mouser", "910-SMDLTLFP", [(1, 15.95)], 0, "Optional: the board can be hand soldered"),
-        part("Bearings", 1, "White lithium grease, 1.5 oz", "Permatex", "", "Amazon", "B000HBNV58", [(1, 3.99)]),
-        part("O-rings", 1, "Silicone grease, 0.5 oz", "Danco", "", "Amazon", "B000DZFUPC", [(1, 5.68)]),
-        part("Magnets", 1, "Super glue gel, 0.14 fl oz", "Loctite", "", "Amazon", "B0006HUJCQ", [(1, 3.82)]),
-        part("AS5600 modules", 1, "Mini hot glue sticks, 100 pack", "Surebonder", "", "Amazon", "B003JZII34",
-             [(1, 5.97)], 0, "For a mini glue gun"),
-        part("Screws", 1, "Threadlocker, blue 242, 6 ml", "Loctite", "", "Amazon", "B000I1RSNS", [(1, 7.03)]),
+        part("Bearings", 1, "White lithium grease", "", "", "Local", "", None),
+        part("O-rings", 1, "Silicone grease", "", "", "Local", "", None),
+        part("Magnets", 1, "Super glue (cyanoacrylate) gel", "", "", "Local", "", None),
+        part("AS5600 modules", 1, "Hot glue", "", "", "Local", "", None, 0),
+        part("Screws", 1, "Threadlocker, blue (medium strength)", "", "", "Local", "", None),
     ]),
 ]
 
