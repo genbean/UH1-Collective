@@ -151,6 +151,7 @@ SECTIONS = [
         kit("Strut eyes", 2, "M4 x 16 countersunk screw + M4 nut"),
         kit("Strut collar clamp", 1, "M4 x 16 countersunk screw + M4 nut", "In front of the strut's eye screw, which clamps too"),
         kit("Side covers", 8, "M3 x 12 countersunk screw"),
+        kit("Drill guide", 1, "M4 x 12 countersunk screw", "Clamps the guide on the tube; tap its hole M4"),
         kit("AS5600 module (lever)", 4, "M2 x 8 countersunk screw", "Self-tapping into the sensor pocket's posts"),
         part("Desk mounting", 4, "#10 x 1-1/2 in pan head wood screw, pack of 50", "", "", "Amazon", "B0F43RY9S6",
              [(1, 8.29)], 0, "", pack=50),
@@ -197,6 +198,7 @@ PRINTED = [
     ("Base", "Base/stl/cover_cable.stl, cover_sensor.stl", 1, "One each, outer face down"),
     ("Base", "Base/stl/strap.stl", 1, "On its side, nut slot up, no supports"),
     ("Base", "Base/stl/strut_collar.stl", 1, "Standing on one end"),
+    ("Base", "Base/stl/drill_guide.stl", 1, "A tool for drilling the tube: standing on its closed end"),
     ("Base", "Base/stl/friction_knob.stl", 1, "Underside down"),
 ]
 

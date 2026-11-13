@@ -335,7 +335,20 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 - **Buy roll-wrapped, not pultruded.** Pultruded tubes have all their fibres running lengthwise and split easily when clamped or drilled. Roll-wrapped tubes have cross plies and take both.
 - **Check the fits** with the socket coupon if your tube's outside diameter differs.
 - **Drilling and notching:** use a sharp bit and back the tube with wood, or wrap the spot with tape, so it doesn't splinter.
-- **Clamping:** do the collar's two screws and the hose clamp up firmly, but don't crush the tube. The tube lock, an M4 × 35 across the lever through the tube's centre line, stops it pulling out or turning; drill the tube for it with the lever as the jig (see [Assembly](#assembly)).
+- **Clamping:** do the collar's two screws and the hose clamp up firmly, but don't crush the tube. The tube lock, an M4 × 35 across the lever through the tube's centre line, stops it pulling out or turning. Drill the tube for it with the drill guide, never through the lever (see below).
+
+### Drilling the tube: the drill guide
+
+`drill_guide.stl` is a one-piece block that slides over the tube's lever end, the tube's end against its closed end, and guides a 4.5 mm bit for the tube lock's hole. The lever's own holes are never drilled.
+
+- **Depth:** the hole is 43.3 mm from the tube's end, where the lever's bolt crosses it (the tube's end sits 2.7 mm from the pivot axis, the bolt 46 mm).
+- **Square to the head:** the guide's two drilling faces are 42.5 mm from the tube's axis, the same as the head's side walls. Fit the head on the far end first (drill the tube's 5.2 mm cross hole for the head's set screw and pin it), lay it on its side on a flat table, and lay the guide on its matching face on the same table: the tube is then level, and the hole is square to the head. Check both sit flat before drilling.
+- **Guide length:** each guide hole is 30 mm long before it reaches the tube.
+- **Drilling:** drill straight down from the top face through the near wall. Turn the whole tube over, head and guide onto their other sides, and drill the other wall the same way. A standard jobber bit reaches; each side needs about 32 mm.
+- **Cable notches:** a 13 × 4 mm window in each drilling face, at the closed end, is in line with the hole. Mark the notches through the windows, take the guide off, and file them.
+- **Holding it:** an M4 × 12 countersunk screw in the tapped hole in one wide face holds the guide on the tube. Snug it, with a turn of tape on the tube under it.
+
+![The tube drill guide](renders/rev4_drill_guide.png)
 
 ## Printing
 
@@ -350,6 +363,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 - **Brake strap:** on its side, the nut's slot up. Its bending then runs along the layers. No supports.
 - **Side covers:** outer face down. The magnet's pocket and the cable's channel open upward, and the 45° ends lean out at 45°, so no supports.
 - **Knob:** underside down, the hex pocket open at the top. Reprint it if you have Rev 3's: its floor is now 11 mm up, and it has a pocket underneath for the spring.
+- **Drill guide** (`drill_guide.stl`, a tool, print once): stand it on its closed end, so the bore builds straight up and the guide holes are round. Tap its clamp hole M4.
 - **Strut collar** (`strut_collar.stl`): stand it on the end away from the strut, the end without the boss's notch, so the bore builds straight up, the web's slope is under 30° and the notch opens at the top.
 
 ## Assembly
@@ -357,7 +371,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 1. **Frame and shell:** tap the eight cover-screw holes M3, four in the pillow blocks and four in the shell's side walls. The pilot holes go right through the 9 mm walls. Slide an M4 nut into each of the four slots in the blocks' outer faces, two per side, and push it home over the screw hole.
 2. **Lever:**
    - **Dowels:** push the four dowels into one half's holes.
-   - **Drill the tube for the lock, before any cables go in:** notch the tube's end first (step 10). Close the halves on the dowels and screw them up, slide the tube into the socket, 63.3 mm, right home, with the notches level, and drill it 4.5 mm through the tube lock's holes in the down-stop pads, from the counterbore's side, square to the boss's face, straight through the tube's middle. Pull the tube out and take the halves apart again.
+   - **Drill the tube for the lock first,** with the drill guide, the head fitted on the far end, and mark and file the cable notches (see [Drilling the tube](#drilling-the-tube-the-drill-guide)). Don't drill through the lever.
    - **Cables:** poke the USB cable through the cable half's axial bore from its joint face, and the sensor lead through the sensor half's. Lay both along the radial channel.
    - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
    - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
@@ -371,7 +385,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 7. **Knob:** if you're using the spring, drop it into the pocket in the knob's underside. Drop the M5 × 35 bolt into the knob's hex pocket, head down. Set the knob in its seat and screw the bolt down into the strap's nut. With the shell on, the strap can lean back only 1.2°, which leaves its nut 0.8 mm off the bolt's axis, and the lead-in in the head takes up 2 mm. Then set the drag.
 8. **Strut's anchor end:** fit the gas strut's cylinder end into the anchor clevis with its M4 × 16, tightening it with a 2.5 mm hex key through the hole in the USB-side pillow block. Do this before the covers: the cable cover hides that hole.
 9. **Covers:** glue the magnet into the sensor cover's pocket, pushed to the bottom. Lay the USB cable into its groove in the USB-side pillow block and shell, push the cable cover on over it, and screw both covers down (M3 × 12).
-10. **Tube:** don't cut it. Drill the head's 5.2 mm cross hole, and file a notch in each side of the tube's bottom end, 13 mm wide (centred on its horizontal midline) and at least 4 mm deep, where the axial cable bore crosses its wall, so the cables can get in (see [The carbon tube](#the-carbon-tube)). Slide it into the socket, 63.3 mm deep, and tighten the hose clamp in its groove, with the head on top. Push the cables to one side of the tube's centre line, drop an M4 nut into the hex pocket in the right (USB, +y) boss, and push the tube lock's M4 × 35 through from the left (sensor, −y) boss, past the cables. Snug it into the nut; don't crush the tube.
+10. **Tube:** don't cut it. It's drilled for the tube lock and notched at its bottom end, the notches 13 mm wide and at least 4 mm deep, in line with the hole, where the axial cable bore crosses its wall, so the cables can get in (see [Drilling the tube](#drilling-the-tube-the-drill-guide)). Slide it into the socket, 63.3 mm deep, and tighten the hose clamp in its groove, with the head on top. Push the cables to one side of the tube's centre line, drop an M4 nut into the hex pocket in the right (USB, +y) boss, and push the tube lock's M4 × 35 through from the left (sensor, −y) boss, past the cables. Snug it into the nut; don't crush the tube.
 11. **Collar:** slide it onto the tube with its notched end (where the strut's boss sits, toward the pivot) 52 mm out from the front face of the socket boss: the collar is 40 mm long and the strut's eye is 10 mm in from that end, so the eye is 128 mm from the pivot. Its split is underneath.
 12. **Strut, collar end (the rod's), and the clamp:** fit the steel tab into the slot between the collar's cheeks, up to the shoulder of its Ø8 boss, which sits in the notch at the cheeks' end. Drop M4 nuts into the two hex pockets in the right (+y) cheek. Push the two M4 × 16 countersunk screws in from the left (−y) cheek: one through the strut's eye, one in front of it. Tighten both evenly until the collar grips the tube; they close the cheeks onto it. The slot is wide enough that the tab still turns freely on its screw once the collar's tight: check it does. If the tab binds before the collar grips, your tube is undersized; stop and wrap it with a turn of tape. Thread-lock both.
 13. **Balance and drag:** let go of the grip at the bottom of the travel and near the stop. If it climbs, add ballast inside the head's box, close to its middle; then fine-tune with the collar (see [Balance](#balance)). Set the brake to taste.

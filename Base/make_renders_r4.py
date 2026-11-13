@@ -210,6 +210,21 @@ def collar_views(C):
          "rev4_strut_collar.png")
 
 
+def drill_guide_views(C):
+    """the tube drill guide on the tube's end, in its own frame, from above and from the drilling face"""
+    g = v.drill_guide()
+    t = v.tube(m.TUBE_OD / 2, m.TUBE_ID / 2, (0, 0, v.GUIDE_END_T), (0, 0, 110.0))
+    P = {"guide": (to_mesh(g), (232, 118, 44)), "tube": (to_mesh(t), C["carbon_tube"])}
+    imgs = [R.render(P, view, size=(1000, 900), up=(0, 0, 1), zoom=1.0)[0]
+            for view in ((1.0, -0.6, 0.5), (1.0, 0.0, 0.0))]
+    both = Image.new("RGB", (2000, 900), (255, 255, 255))
+    for k, im in enumerate(imgs):
+        both.paste(im, (1000 * k, 0))
+    save(title(both, "Tube drill guide", "Over the tube's lever end, the tube's end against its closed end. Its drilling "
+               "faces are 42.5 mm from the tube's axis, like the head's sides: 30 mm of guide to the tube. Windows mark "
+               "the cable notches"), "rev4_drill_guide.png")
+
+
 def lever_views(C):
     """the lever alone: from the side, the fairings over and under the socket boss running into the hub; and from the
     front and above"""
@@ -229,6 +244,7 @@ def lever_views(C):
                "Four M2 posts for the AS5600 module, each joined to a ledge, 1.6 mm pilots"), "rev4_sensor_pocket.png")
     tube_lock_views(C)
     collar_views(C)
+    drill_guide_views(C)
     lever_exploded(C)
     P32 = scene(v.STOP_DEG, C, tube_to=-120.0)
     keep = ("lever_sensor", "lever_cable", "lever_screws", "lever_dowel", "gas_strut", "strut_pins", "carbon_tube",

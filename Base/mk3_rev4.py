@@ -1685,8 +1685,50 @@ def check_brake(angles=None):
     print("  (the strap touches the hardware where the nut bears on its slot's face)")
 
 
+# ================================================================ tube drill guide
+# A one-piece block that slides over the tube's lever end, its closed end against the tube's end, and guides the drill
+# for the tube lock's hole, so the lever's own holes are never drilled. Its own frame, as it prints: standing on its
+# closed end, the tube's axis up z, the drill's axis along x. Its two drilling faces (normal to x) are GUIDE_HW from
+# the tube's axis, the same as the head's side walls (42.5 mm either side, from ../Head's body): lay the head on its
+# side and the guide on the matching face on one flat table and the tube is held level and square, the hole in line
+# with the head. Drill straight down from the top face, turn the whole tube over onto the other side, and drill again:
+# each hole is guided its whole length to the tube, GUIDE_HW - the tube's radius (30 mm, more than 1/2 in). Windows
+# in both drilling faces at the closed end show where the cable notches go (13 x 4 mm, in line with the hole): mark
+# them through the windows. An M4 screw in a tapped hole in one narrow face holds the guide on the tube.
+GUIDE_HW = 42.5                                  # the head body's side walls from the tube's axis (42.49 and 42.51)
+GUIDE_TW = 20.0                                  # the narrow faces from the axis: 7.3 mm of wall
+GUIDE_END_T = 5.0                                # the closed end
+GUIDE_HOLE_AT = TL_X + m.SOCK_BOTTOM             # the hole from the tube's end: -43.3 (46 from the pivot, 2.7 to the end)
+GUIDE_PAST = 14.0                                # sleeve beyond the hole
+GUIDE_DRILL_D = 4.6                              # for a 4.5 mm bit (FDM holes print a little small)
+GUIDE_NOTCH = (13.0, 4.0)                        # the cable notches: wide, deep
+GUIDE_CLAMP_AT = 18.0                            # the clamp screw from the tube's end
+GUIDE_CH = 1.0
+
+
+def drill_guide():
+    zh = GUIDE_END_T - GUIDE_HOLE_AT                                     # the hole's height
+    top = zh + GUIDE_PAST
+    g = box(-GUIDE_HW, GUIDE_HW, -GUIDE_TW, GUIDE_TW, 0, top)
+    g = g.chamfer(GUIDE_CH, None, g.Edges())
+    w, dn = GUIDE_NOTCH
+    zc = GUIDE_END_T + GUIDE_CLAMP_AT
+    cuts = [cyl(m.SOCK_BORE_R, (0, 0, GUIDE_END_T), (0, 0, top + 1)),            # the tube's bore, as the lever's socket
+            cyl(6.0, (0, 0, -1), (0, 0, GUIDE_END_T + 1)),                       # see the tube's end is home
+            cyl(GUIDE_DRILL_D / 2, (-GUIDE_HW - 1, 0, zh), (GUIDE_HW + 1, 0, zh)),  # the drill's guide, both sides
+            box(-GUIDE_HW - 1, GUIDE_HW + 1, -w / 2, w / 2, GUIDE_END_T, GUIDE_END_T + dn),   # notch windows
+            cyl(m.TAP[4] / 2, (0, GUIDE_TW + 1, zc), (0, 0, zc))]                # M4 tapped: the clamp screw
+    for c in cuts:
+        g = g.cut(c)
+    return g.clean()
+
+
 def export():
     P = build(0.0)
+    guide = drill_guide()
+    print(f"{'drill_guide':16s} valid={guide.isValid()} vol={guide.Volume():9.1f}  (a tool: print once)")
+    cq.exporters.export(cq.Workplane().add(guide), os.path.join(HERE, "stl", "drill_guide.stl"), tolerance=0.04,
+                        angularTolerance=0.12)
     one = {"lever_dowel": lever_dowel()}                       # one, standing as it prints: print four
     for name in PRINTED:
         shp = one.get(name, P[name])
