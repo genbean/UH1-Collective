@@ -61,8 +61,11 @@ BOARD = [
      part("J11-J14", 4, "JST SH header, 4 pins, 1.0 mm, SMD, top entry", "JST", "BM04B-SRSS-G-TB(LF)(SN)", "Mouser",
           "306-4BSRSSGTBLP", [(1, 0.63), (10, 0.546)], 0.30, "Sensor ports AX1-AX4: 1 SDA, 2 GND, 3 VCC, 4 SCL")),
     (("J7, J8", None, "PinSocket_1x12_P2.54mm_Vertical"),
-     part("J7, J8", 2, "Socket header, female, 1 x 12, 2.54 mm, through hole", "Harwin", "M20-7821246", "Mouser",
-          "855-M20-7821246", [(1, 1.63), (10, 1.33)], 0.30, "Pro Micro sockets: solder last")),
+     part("J7, J8", 2, "Low-profile pin header set, 2.54 mm, 1 x 40: 5 male (platinum-plated pins) + 5 female (tin), "
+          "pack of 5 pairs", "DIYhz", "", "Amazon", "", [(1, 9.99)], 0,
+          "Cut two 12-pin sockets for J7/J8 and two 12-pin rows for the Pro Micro, in place of the pins it comes with: "
+          "standard headers stand too tall for the USB cable. Solder the sockets last", pack=2,
+          url="https://www.amazon.com/s?k=DIYhz+5Pair+1x40+2.54mm+Header+Pt+Male+Sn+Female")),
 ]
 
 SECTIONS = [
@@ -70,7 +73,7 @@ SECTIONS = [
         part("PCB", 1, "HeliSR Rev 4.0 bare PCB, 2 layers, 1.6 mm, 39.3 x 33.6 mm (OSH Park makes 3)", "", "", "OSH Park",
              "", [(1, 10.20)], 0, "Upload PCB/HeliSR/HeliSR_Rev4.0_Gerbers.zip"),
         part("J7, J8", 1, "Pro Micro 5 V / 16 MHz (ATmega32U4), USB-C, with header pins", "OSOYOO", "", "Amazon",
-             "B0B81FGBLY", [(1, 11.99)], 0, "Plugs into J7/J8; runs the HeliSR firmware"),
+             "B0B81FGBLY", [(1, 11.99)], 0, "Plugs into J7/J8; runs the HeliSR firmware. Fit the low-profile pins, not its own"),
     ]),
     ("SearchHat Rev 1.0 board (SEARCH CONT hat)", [
         part("SW1", 1, "8-direction stick switch with centre push", "ALPS Alpine", "RKJXM1015004", "Mouser",

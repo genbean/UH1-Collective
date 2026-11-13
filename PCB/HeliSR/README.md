@@ -213,7 +213,7 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
 2. On the front, **U1, U2**, then the 1206 caps **C1, C2, C3**.
 3. **RN1, RN2**. The dot (pin 1) goes in the square pad.
 4. The JST headers and the RST button.
-5. The two Pro Micro sockets last.
+5. The two Pro Micro sockets last. Use low-profile headers for the sockets and for the Pro Micro's pins (the BOM lists a set): standard ones stand too tall for the USB cable in the head.
 
 ## Pro Micro RP2040 compatibility
 
