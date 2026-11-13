@@ -69,7 +69,7 @@ The lower panel's top two screws are 4 mm in from their corners (Rev 4: 4.5 mm),
 |---|---|
 | **Upper box** | Set back 5 mm instead of 10, so the upper toggles' 26 mm bodies end 2 mm in front of the HeliSR's Pro Micro. |
 | **Upper panel screws** | In the four corners, as in Rev 4, on columns that run back to the rear wall either side of the HeliSR board. The toggles are spaced to clear them. |
-| **Panel screws** | All eight are **M3 × 16 countersunk** (kit; an M3 × 20 fits too), in the same 6.4 mm columns, threaded M3 20 mm deep from the panel's back (`PANEL_THREAD`) and solid behind that. |
+| **Panel screws** | All eight are **M3 × 16 countersunk** (an M3 × 20 fits too), in the same 6.4 mm columns, threaded M3 20 mm deep from the panel's back (`PANEL_THREAD`) and solid behind that. |
 | **Printed threads** | Every hole a screw of M3 or larger threads into is printed with its ISO metric thread, opened 0.15 mm for FDM (`thread_cut`), so nothing needs tapping: the panel columns (M3), the tube's set screw (M5), the trigger pivot in the right lug and the pull stop in the trigger's arm (M3). The M2 holes (the SearchHat board's bosses, the pull stop's seat) are 1.6 mm pilots: the screw cuts its own thread, or tap them M2 by hand. The HeliSR's four M3 screws go through clearance holes into nuts. |
 | **No air behind the neck** | The head prints on its rear wall, so any air between the neck block and that wall would print on supports, which are weaker than infill. Every piece of the neck block (the boss, the AS5600 pod, the flare, the neck and the tube's column) is carried straight back to the rear wall and capped again at its own top, square to the tube, and only then are the switches' room, the AS5600's way in, the pinion pocket's window and the leads' hole cut out of it. The USB cable goes into the tube through the 20 mm round opening in the column's lip, which is the tube's stop. |
 | **HeliSR board** | The upper box is 38.5 mm tall inside, which is less than the board's 39.3 mm. The board's USB end sits 1.4 mm down in the wire slot through the floor. It is still centred across the upper box. |
@@ -298,17 +298,17 @@ STOP REL has no recess round it: its nut sits on the panel's plug. Behind the pl
 
 ## Screws
 
-Every screw and nut but one is from two kits: the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH): M2–M4 × 8, 12, 16, 20 and M5 × 10, 12, 16, 20, with nuts) and the HIQTRADEBYJJ set-screw kit ([Amazon B0DG33R714](https://www.amazon.com/dp/B0DG33R714)). The exception is the trigger's pivot, an **M3 × 25 countersunk hex-socket screw (ISO 10642 / DIN 7991), bought separately**: the kits stop at 20 mm. The NIULUNBAO M3 countersunk set ([Amazon B0BYXS4BTF](https://www.amazon.com/dp/B0BYXS4BTF): M3 × 20–40) has it. Every M3 and M5 hole a screw threads into is printed with its thread; only the M2 holes are pilots.
+Every screw and nut is from [MonsterBolts](https://monsterbolts.com/), in packs of 10: black-oxide 12.9 countersunk hex-socket screws (ISO 10642 / DIN 7991), black 14.9 set screws, M2 × 8 Phillips flat heads (DIN 965) and plain DIN 934 nuts. The [BOM](../BOM) lists each pack. Every M3 and M5 hole a screw threads into is printed with its thread; only the M2 holes are pilots.
 
 | Where | Screw | Into | Qty |
 |---|---|---|---|
 | Lower and upper panels | M3 × 16 countersunk | the M3 thread printed in each corner column | 8 |
 | HeliSR board | M3 × 12 countersunk, from outside the rear wall | through a 4 mm spacer and the board, M3 nut on the board's front | 4 |
 | Tube | M5 × 8 set screw, from the boss's front | the boss's printed M5 thread; the tip goes into the tube's front hole | 1 |
-| Trigger pivot | M3 × 25 countersunk (bought), from the left lug's countersink | through the trigger, 8 mm into the right lug's printed thread | 1 |
+| Trigger pivot | M3 × 25 countersunk, from the left lug's countersink | through the trigger, 8 mm into the right lug's printed thread | 1 |
 | Trigger pull stop | M3 × 4 set screw, from behind the trigger's arm | the arm's printed M3 thread; its tip meets the seat below (see [Setting the stop](#starter-trigger)) | 1 |
-| Pull stop seat | M2 × 8 countersunk, head flush with the mount's face under the spring pocket | a 1.6 mm pilot (8.5 mm deep) behind a 90° countersink, tapped M2 by hand | 1 |
-| SearchHat board | M2 × 8 countersunk, from behind through the board | the four bosses on the lower panel's back: 1.6 mm pilots, the screw cuts its thread | 4 |
+| Pull stop seat | M2 × 8 Phillips flat head, head flush with the mount's face under the spring pocket | a 1.6 mm pilot (8.5 mm deep) behind a 90° countersink, tapped M2 by hand | 1 |
+| SearchHat board | M2 × 8 Phillips flat head, from behind through the board | the four bosses on the lower panel's back: 1.6 mm pilots, the screw cuts its thread | 4 |
 | Friction collar | M4 × 12 countersunk, head 2 mm into one ear | M4 nut in the other ear's pocket | 1 |
 
 Every screw and nut to scale (the ruler is 50 mm):
@@ -325,7 +325,7 @@ Every screw and nut to scale (the ruler is 50 mm):
 
 ## Bought
 
-The list for the whole collective, with part numbers and prices for the board, head and base, is in [`../BOM`](../BOM). Every screw and nut is from the two kits above, apart from the trigger's M3 × 25 countersunk pivot.
+The list for the whole collective, with part numbers and prices for the board, head and base, is in [`../BOM`](../BOM).
 
 | Item | Qty | Notes |
 |---|---|---|

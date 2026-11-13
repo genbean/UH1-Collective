@@ -49,7 +49,7 @@ The full list, with quantities, part numbers, links and prices, is the [BOM spre
 - Two 6808-2RS thin-section ball bearings (40 × 52 × 7 mm), a 6 in (152 mm), 45 N gas strut with eyelet ends, and a 25 × 23 mm roll-wrapped carbon tube, 500 mm long, used whole.
 
 **Screws, consumables and tools**
-- Nearly every screw and nut comes from two Amazon kits, a countersunk screw kit and a set-screw kit. The lever's four M4 socket head screws come from an M4 × 30–50 kit, the brake's M5 × 30 hex bolt from any hardware store, and the head's trigger pivot is an M3 × 25 from a separate set. The BOM and each part's README list them.
+- Every screw and nut comes from MonsterBolts in packs of 10, about $23 in all: black-oxide hex socket screws, M2 Phillips flat heads, a stainless M5 hex bolt and plain steel nuts. The BOM and each part's README list them.
 - Grease for the bearings and the O-rings, CA glue, hot glue and blue thread-locker; M2, M3, M4 and M5 taps, and 4 mm and 5.2 mm drills for the tube; a soldering iron that can handle 1.0 mm pitch SMD parts.
 
 **Printing and a PC**

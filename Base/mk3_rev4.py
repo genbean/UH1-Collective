@@ -155,7 +155,7 @@ BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and f
 CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top (31.0)
 MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (32.0)
 POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (24.4)
-# The board is screwed down: four M2 x 8 countersunk (AvrestYPT kit) through the module's four corner holes (the user
+# The board is screwed down: four M2 x 8 flat heads through the module's four corner holes (the user
 # measured them 0.64 in apart along the pad columns' edges, x here, and 0.63 in across, z), into 1.6 mm pilots (tap M2
 # by hand, or let the screw cut it) in round posts that stand up from the pocket's floor to the board's back, each
 # joined to the nearest ledge. The posts stay 0.5 mm off the pad columns' ends. The heads sit on the board's face, about
@@ -177,7 +177,7 @@ USB_R, USB_TUNNEL_R, USB_CLR = 2.3, 2.5, 0.5
 # ---------------------------------------------------------------- lever
 # Split on the tube's plane (y = 0), not at the pivot axis as Rev 3: two halves, lever_sensor (-y) and lever_cable (+y),
 # each printed on its joint face with its trunnion up, so each trunnion is one round piece, printed the way the trunnion
-# coupon was. Four M4 x 35 socket head cap screws (HELIFOUNER kit) run along the pivot axis through the hub, on a JS_R
+# coupon was. Four M4 x 35 socket head cap screws run along the pivot axis through the hub, on a JS_R
 # circle at +-JS_DEG from fore-aft, behind the bearings: heads in counterbores and nuts in hex pockets in the hub's end
 # faces, diagonally, so each half has two heads and two nuts. A head seats JS_CB_D under the end face; the screw's tip
 # stands 1 mm past its nut, 3 mm inside the far end face. Between the shoulder (r 20.9) and the hub's surface (r 30):
@@ -296,7 +296,7 @@ TOP_ELL = (-52.0, 33.55, 19.45)                  # the boss's footprint: centre 
                                                  # 3D clearance through the wall: the boss crosses it at 32 deg)
 TOP_ELL_R = 8.0                                  # where it meets the straight sides
 TOP_END_X, TOP_END_A = -3.15, 13.3              # the slot's square end; its corners' length along x
-# the shell to the frame: four M4 x 50 socket head cap screws (the lever's HELIFOUNER kit), two each side, from the top
+# the shell to the frame: four M4 x 50 socket head cap screws, two each side, from the top
 # down the middle of the shell's side walls, centred on the joint: the head's seat 25 mm above it, at the floor of a
 # 13 mm counterbore, the tip 25 mm below. Each goes into an M4 nut slid into the pillow block from its outer face, just
 # under the side cover's rim, its pocket 1 mm short of the tip. The nut sits flats-in: its inner flat stops it turning

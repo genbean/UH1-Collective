@@ -15,7 +15,7 @@
 # magnet 1.0 mm under the AS5600 module's chip (cap 0.5 mm taller than the first print).
 #
 # Below the grip, a split friction collar clamps to the tube. The O-ring in its top face presses the grip up against the
-# ceiling's O-ring: slide it up for more friction and tighten its M4 x 12 countersunk pinch screw (screw kit).
+# ceiling's O-ring: slide it up for more friction and tighten its M4 x 12 countersunk pinch screw.
 #
 # Needs cadquery, numpy, trimesh and manifold3d. usage: throttle_r5.py <MkII-Grip-bore-relieved-25mm.stl> <out dir>
 import os

@@ -151,10 +151,8 @@ MAGNET_D, MAGNET_H = 4.0, 2.0    # diametric magnet supplied with the module (ab
 MAGNET_POCKET = 4.2              # the cover's magnet pocket, the same as the head axle's. LOCKED IN: 4.2 fits the magnet, printed 2026-10-24 (4.0 was too small)
 BALLAST_L = 42.0                 # fixed ballast depth against the far wall, ~0.95 kg at 6.8 g/cm3 (README)
 
-# Fasteners: every screw and nut is from the two kits the user has. AvrestYPT (Amazon B0FMD5TMSH): countersunk
-# hex-socket screws with 90 degree heads (DIN 7991 / ISO 10642), M3 and M4 x 8, 12, 16, 20 and M5 x 10, 12, 16, 20,
-# with M3-M5 hex nuts and washers. HIQTRADEBYJJ (Amazon B0DG33R714): set screws, M3 x 3-6, M4 x 4-6, M5 x 5 and 8,
-# M6 x 6 and 10, M8 x 8. No heat-set inserts: nuts in pockets, or M3 / M4 threads tapped into the print.
+# Fasteners: countersunk hex-socket screws with 90 degree heads (DIN 7991 / ISO 10642), DIN 934 hex nuts and
+# socket set screws (the BOM lists them). No heat-set inserts: nuts in pockets, or M3 / M4 threads tapped into the print.
 CSK = {3: (6.9, 3.4), 4: (8.6, 4.4), 5: (10.6, 5.5)}   # M size: countersink across at the surface (the heads sit just
                                                         # below flush), clearance hole
 NUT_AF = {3: 5.7, 4: 7.2, 5: 8.2}                       # nut pockets across flats (the nuts are 5.5, 7 and 8)

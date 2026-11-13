@@ -117,7 +117,7 @@ The edges against the block and shell aren't chamfered, so no groove shows at th
 
 The frame and the shell meet on one flat plane through the pivot axis, which also splits the bearing seats.
 
-- **Screws:** four M4 × 50 socket head cap screws from the lever's HELIFOUNER kit, two per side, 30.5 mm either side of the axis, down the middle of the shell's 9 mm side walls (y = ±27). Each is centred on the joint: its head seats 25 mm above it, at the floor of a 13 mm counterbore, and its tip is 25 mm below. Each goes into an M4 nut slid into a slot in the pillow block's outer face, about 21–24 mm under the joint. The slots open on the blocks' outer faces, under the side covers. The nut sits flats-in: its inner flat stops it turning when you tighten the screw. The counterbore leaves 0.9 mm of shell either side, and the nut's slot leaves 0.9 mm of block to its inside face.
+- **Screws:** four M4 × 50 socket head cap screws, two per side, 30.5 mm either side of the axis, down the middle of the shell's 9 mm side walls (y = ±27). Each is centred on the joint: its head seats 25 mm above it, at the floor of a 13 mm counterbore, and its tip is 25 mm below. Each goes into an M4 nut slid into a slot in the pillow block's outer face, about 21–24 mm under the joint. The slots open on the blocks' outer faces, under the side covers. The nut sits flats-in: its inner flat stops it turning when you tighten the screw. The counterbore leaves 0.9 mm of shell either side, and the nut's slot leaves 0.9 mm of block to its inside face.
 - **Diamond knurl:** the whole face the frame and the shell share is knurled.
   - **Shape:** square pyramids 2.4 mm across their corners and 0.7 mm tall with flat tops, on a diamond grid with 0.6 mm flat lanes. They stand on the frame's half and fit into sockets in the shell's half, 0.1 mm clear on their 45° flanks and 0.2 mm deeper than the pyramids. The flat faces still close on each other, so the bearing seats close, and the knurl stops the shell sliding fore and aft or sideways as the screws pull it down.
   - **Coverage:** it runs over every land, in front of the bearings and behind them, and on across the solid frame behind the pillow blocks. It stops 0.5 mm short of every edge and hole: pyramids at its edge are cut off square, and any piece smaller than a third of a pyramid is left out. The grid is the same mirror image either side of the tube, and fore and aft on the pillow blocks.
@@ -391,7 +391,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 ## Screws
 
-All from two kits, apart from the brake's M5 bolt: the AvrestYPT countersunk kit ([Amazon B0FMD5TMSH](https://www.amazon.com/dp/B0FMD5TMSH): M2 × 8, and M3 and M4 × 8, 12, 16, 20, with nuts) and the HELIFOUNER M4 × 30–50 socket head kit ([Amazon B0CDSKK7V1](https://www.amazon.com/dp/B0CDSKK7V1), with nuts). There are no heat-set inserts: each screw goes into a nut in a printed pocket, or a thread tapped into the print.
+All from [MonsterBolts](https://monsterbolts.com/), in packs of 10: black-oxide 12.9 hex socket screws, the M2s Phillips flat heads (DIN 965), the M5 bolt stainless, and plain DIN 934 nuts. The [BOM](../BOM) lists each pack. There are no heat-set inserts: each screw goes into a nut in a printed pocket, or a thread tapped into the print.
 
 | Where | Screw | Into | Qty |
 |---|---|---|---|
@@ -399,13 +399,13 @@ All from two kits, apart from the brake's M5 bolt: the AvrestYPT countersunk kit
 | Tube lock | M4 × 35 socket head cap, across the lever through the bosses over the down-stop pads and the tube's centre line, head in a 7.5 mm counterbore on the left (−y) side, 0.5 mm under the face | M4 nut in a hex pocket in the right (+y) boss, 0.5 mm under the face | 1 |
 | Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, under the side cover | 4 |
 | Side covers | M3 × 12 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
-| AS5600 module | M2 × 8 countersunk, through the module's corner holes | 1.6 mm pilot in a post in the sensor pocket, tapped M2 or self-tapped | 4 |
+| AS5600 module | M2 × 8 Phillips flat head (DIN 965), through the module's corner holes | 1.6 mm pilot in a post in the sensor pocket, tapped M2 or self-tapped | 4 |
 | Brake | **M5 × 35 hex-head bolt**, head on the floor of the knob's hex pocket | M5 nut in the slot in the brake strap's head | 1 |
 | Brake strap's hinge | M4 × 50 socket head cap, from the +y side, head in a counterbore | M4 nut in a hex pocket on the −y side | 1 |
 | Strut eyes | M4 × 16 countersunk: the anchor's head on the +y side, the collar's on the left (−y), where it also clamps the collar | M4 nut in the far cheek's pocket | 2 |
 | Strut collar clamp | M4 × 16 countersunk, from the left (−y) cheek, in front of the strut's eye screw, which clamps too | M4 nut in a hex pocket in the right (+y) cheek | 1 |
 
-The hinge pin is a fifth M4 × 50 from the HELIFOUNER kit.
+The hinge pin is a fifth M4 × 50.
 
 Every screw and nut, to scale:
 
@@ -440,7 +440,7 @@ Between them, these label every screw and nut in the base:
 | 25 × 23 mm carbon tube, 500 mm | 1 | roll-wrapped; used uncut |
 | Worm-drive hose clamp, about 25–40 mm | 1 | on the socket's mouth |
 | Compression spring, 10 mm OD, 10–15 mm free length | 1 | optional, for the brake knob |
-| M5 × 35 hex-head bolt | 1 | any hardware store |
+| M5 × 35 hex-head bolt | 1 | stainless, from MonsterBolts with the screws |
 | Felt, 1.5 mm, 16 × 51 mm | 1 | on the brake strap |
 | AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | with its ~4 × 2 mm diametric magnet |
 | #10 × 1-1/2 in wood screws | 4 | desk mounting |

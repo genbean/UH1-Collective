@@ -7,11 +7,9 @@
 # set screw in the boss's front pins it through a hole in the tube. The grip turns on the tube; a 32-tooth gear on its
 # top drives a 20-tooth pinion beside the boss, which turns the AS5600's magnet under the module.
 #
-# Screws: all but one are from the two kits the user has, AvrestYPT countersunk M2-M5 (Amazon B0FMD5TMSH, with nuts)
-# and HIQTRADEBYJJ set screws (B0DG33R714). Panels 8 x M3 x 12 countersunk into tapped pilots; HeliSR 4 x M3 x 12
+# Screws (the BOM lists them): countersunk hex socket, M2 Phillips flat heads, set screws and DIN 934 nuts. Panels 8 x M3 x 12 countersunk into tapped pilots; HeliSR 4 x M3 x 12
 # countersunk + nuts; tube 1 x M5 x 8 set screw; trigger pull stop 1 x M3 x 4 set
-# screw; friction collar (throttle_r5.py) 1 x M4 x 12 countersunk + nut. The trigger pivot is 1 x M3 x 25 countersunk,
-# bought separately (the kits stop at 20 mm).
+# screw; friction collar (throttle_r5.py) 1 x M4 x 12 countersunk + nut. The trigger pivot is 1 x M3 x 25 countersunk.
 #
 # What Rev 4 changed: Rev 3's head (tube centred across the box, faux friction knob, raked starter trigger) in ONE
 # piece again. The box, the neck with its friction knob, the tube boss, the tube's set screw, the grip's thrust face,
@@ -694,7 +692,7 @@ BOLT_Z = TUBE_END - 10.0         # the tube's set screw (drill the tube 5.2 mm a
 SCREW_ANGLE = 0.0                # the set screw points this many degrees left of straight ahead: 0, straight ahead, as
                                  # in Rev 4. The hat's recess opens in front of its hole, so it goes in through the hat's
                                  # opening with the lower panel off; its thread is all in solid boss
-GRUB_L = 8.0                     # M5 x 8 set screw (set-screw kit) in an M5 thread tapped in the boss's front
+GRUB_L = 8.0                     # M5 x 8 set screw in an M5 thread tapped in the boss's front
 GRUB_TIP = TY - TUBE_OD / 2 + 0.9   # its tip, through the tube's front wall, 0.1 short of the wall's inside
 # The pinion fills its 6 mm pocket to 0.2 mm off the floor and the ceiling, so it has 0.4 mm of end play (it had 1.2),
 # and goes in shoulder down: a plain shoulder under its teeth clears the grip's neck (throttle script). The O-rings hold the grip

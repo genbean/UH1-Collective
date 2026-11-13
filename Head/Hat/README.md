@@ -41,7 +41,7 @@ To buy:
 - **ALPS RKJXM1015004** (Mouser 688-RKJXM1015004).
 - **The SearchHat Rev 1.0 board**: `PCB/SearchHat/SearchHat_Rev1.0_Gerbers.zip`. Its own README covers building it.
 - **JST SM06B-SRSS-TB** for J1, and a 6-pin JST SH jumper to cut in half for the lead. Or leave J1 off and solder the wires to the board's J2 pads.
-- **4 × M2 × 8 countersunk** (the AvrestYPT kit).
+- **4 × M2 × 8 Phillips flat head** (DIN 965, black oxide).
 
 Wiring: the same inputs as the head's earlier tact-switch hats, so the profiles don't change. The centre push is extra.
 

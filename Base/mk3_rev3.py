@@ -39,10 +39,10 @@ the clevis around its eye needs the rest.
 Bought parts that Rev 1 doesn't have (no bucket, lid, ballast, stop block, thumb knob, M5 stop bolt or striker):
     1 x X AUTOHAUX 6" 45 N gas strut (the pack has 2);  25 x 23 mm carbon tube, 500 mm uncut
 
-Screws and nuts: all from the two kits (mk3_pivot.py, Fasteners). Countersunk (AvrestYPT kit) unless marked:
-    lever halves      4 x M4 x 40 socket head cap (HELIFOUNER M4 x 30-50 kit) + 4 M4 nuts in the lower half's pockets
+Screws and nuts (mk3_pivot.py, Fasteners). Countersunk unless marked:
+    lever halves      4 x M4 x 40 socket head cap + 4 M4 nuts in the lower half's pockets
     pillow-block caps 4 x M4 x 20 + 4 M4 nuts, slid in fore and aft from the blocks' front and back faces
-    side covers       8 x M3 x 25 (the NIULUNBAO M3 set) from the covers' outer faces, into M3 threads tapped 11 mm deep
+    side covers       8 x M3 x 25 from the covers' outer faces, into M3 threads tapped 11 mm deep
                       in the blocks and caps
     friction knob     1 x M5 x 30 hex-head bolt (bought: the kits have no hex heads), its head in the MkII knob's hex
                       pocket, + 1 M5 nut slid into the knob tower
@@ -615,7 +615,7 @@ def chamfer_edges(shape, sizes=CHAMFERS, chunk=8, exclude=None):
     return shape
 
 
-# the four lever screws: M4 socket head cap screws from the HELIFOUNER kit (M4 x 30/35/40/45/50, with nuts). Each head sits at
+# the four lever screws: M4 socket head cap screws with nuts. Each head sits at
 # the top of its counterbore, flush with the hub's surface at the counterbore's lowest edge, and each nut in a pocket open to
 # the underside, so the seats are as far apart as the lever allows. The kit length is the longest whose tip stays inside the
 # lever's outline, and the nut's open face sits level with the hub's surface at its far flat (hex corners along y, flats

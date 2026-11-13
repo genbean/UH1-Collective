@@ -45,8 +45,8 @@ OUT = os.path.join(HERE, "renders")
 RED = (214, 48, 39)
 DOWEL = (236, 190, 62)
 HW = ("hardware", "lever_screws", "tube_lock", "sensor_screws", "strut_pins")
-SUB = ("Screws in red. Countersunk screws and nuts: AvrestYPT kit (the lever halves and the shell: HELIFOUNER M4 x 30-50 socket head "
-       "cap kit and its nuts). Brake bolt: M5 x 35 hex head.")
+SUB = ("Screws in red. Black-oxide hex socket screws and DIN 934 nuts from MonsterBolts; the M2s are Phillips flat heads. "
+       "Brake bolt: M5 x 35 hex head, stainless.")
 
 
 def to_mesh(shape):
@@ -426,7 +426,7 @@ def screw_views(P0):
     desk = [np.array([x, y, v.Z_PLATE]) for x, y in v.DESK]
     bare = hide(P0, "carbon_tube", "strut_collar", "gas_strut", "strut_pins", "hose_clamp", "usb_cable", "sensor_wires")
     labelled(P0, [("M4 x 50 socket head cap  (x4)", "the shell, from the top, heads down 13 mm counterbores, each "
-                   "centred on the joint, into M4 nuts slid into the pillow blocks from the sides (HELIFOUNER kit)",
+                   "centred on the joint, into M4 nuts slid into the pillow blocks from the sides",
                    heads_of("shell screw"))],
              (0.45, 0.3, 1.0), "MkIII base Rev 4 screws: the shell, from above", "rev4_screws_top.png",
              focus=((-60, -45, -58), (100, 45, 40)), zoom=1.0)
@@ -439,7 +439,7 @@ def screw_views(P0):
         for x, z, sh in v.JOINT_SCREWS:                             # one label each: no leaders crossing the hub
             if sh == s:
                 groups.append((f"M4 x {v.JS_SCREW_L} socket head cap", f"{where(x, z)}: head in a 7.5 mm counterbore "
-                               f"5 mm deep, along the pivot axis into a nut in the {other[s]} half (HELIFOUNER kit)",
+                               f"5 mm deep, along the pivot axis into a nut in the {other[s]} half",
                                [np.array([x, s * (v.JS_SEAT + v.r.CAP_K), z])]))
             else:
                 groups.append(("M4 nut", f"{where(x, z)}: in a hex pocket, a flat toward the axis, for the "
@@ -480,7 +480,7 @@ def screw_views(P0):
                   ("M4 x 35 socket head cap", "tube lock: across the lever and the tube, head in the -y boss",
                    heads_of("tube lock screw")),
                   ("M4 nut", "the brake strap's hinge pin: in the pillow block's hex pocket", heads_of("hinge nut")),
-                  ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting: not in the kits", desk)],
+                  ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting", desk)],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
     labelled(P0, [("M3 x 12 countersunk  (x4)", "cable cover: into M3 threads tapped through the pillow block and the "
@@ -536,7 +536,7 @@ def lever_exploded(C):
                "into one half's holes, round the screws, then close the other half on them",
                [I["dowel0"], I["dowel2"]]),
               (f"M4 x {v.JS_SCREW_L} socket head cap  (x2)", "from the sensor half's end, front-top and back-bottom, "
-               "into nuts in the cable half (HELIFOUNER kit)", pick("lever screw", -1)),
+               "into nuts in the cable half", pick("lever screw", -1)),
               (f"M4 x {v.JS_SCREW_L} socket head cap  (x2)", "from the cable half's end, front-bottom and back-top, "
                "into nuts in the sensor half", pick("lever screw", 1)),
               ("M4 nut  (x2)", "in hex pockets in the sensor half's end face", pick("lever nut", -1)),
@@ -655,7 +655,7 @@ def exploded(C):
 def screw_chart():
     rows = [(d.screw_tile("shcs", 4, v.JS_SCREW_L), f"M4 x {v.JS_SCREW_L} socket head cap", 5,
              "The lever halves (4): along the pivot axis through the hub, behind the bearings, into M4 nuts in the "
-             "other half (HELIFOUNER M4 x 30-50 kit). The tube lock (1): across the lever and the tube."),
+             "other half. The tube lock (1): across the lever and the tube."),
             (d.screw_tile("shcs", 4, 50), "M4 x 50 socket head cap", 5,
              "The shell (4), from the top, each centred on the joint, into M4 nuts slid into the pillow blocks from "
              "the sides; the brake strap's hinge pin (1), through the pillow blocks and the up-stop pad."),
@@ -672,7 +672,7 @@ def screw_chart():
              "Lever (4), tube lock (1), shell (4), strut eyes (2), collar clamp (1), the strap's hinge pin (1)."),
             (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the slot in the brake strap's head.")]
     d.chart(rows, "MkIII base Rev 4: every screw, to scale",
-            "Countersunk screws and nuts: AvrestYPT kit. Socket head screws (lever, shell, hinge pin): HELIFOUNER kit. Brake bolt: M5 x 35. "
+            "All from MonsterBolts: black-oxide 12.9 hex socket screws, M2 Phillips flat heads, DIN 934 nuts. Brake bolt: M5 x 35 stainless. "
             "Not shown: four #10 wood screws for the desk.", os.path.join(OUT, "rev4_screw_sizes.png"))
 
 

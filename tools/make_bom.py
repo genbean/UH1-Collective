@@ -14,19 +14,19 @@ from openpyxl.workbook.properties import CalcProperties
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "BOM", "Heli_Collective_BOM.xlsx")
 BOARD_PCB = os.path.join(ROOT, "PCB", "HeliSR", "HeliSR_Rev4.0.kicad_pcb")
-CHECKED = "2026-11-11"
+CHECKED = "2026-11-13"
 
 # ---- parts ------------------------------------------------------------------------------------------------------
 # part(where, qty used, description, manufacturer, mfr part, supplier, supplier part, price breaks, tariff, notes)
 # Price breaks: [(qty, unit price)]. For Amazon and OSH Park the unit is the pack or order the listing sells (named in
 # the description); pack says how many pieces it holds.
-def part(where, qty, desc, mfr, mpn, sup, spn, breaks, tariff=0.0, notes="", pack=1):
+def part(where, qty, desc, mfr, mpn, sup, spn, breaks, tariff=0.0, notes="", pack=1, url=None):
     return dict(where=where, qty=qty, desc=desc, mfr=mfr, mpn=mpn, sup=sup, spn=spn, breaks=breaks, tariff=tariff,
-                notes=notes, pack=pack)
-def kit(where, qty, desc, notes=""):
-    return part(where, qty, desc, "", "", "Screw kit", "", None, notes=notes)
-def setkit(where, qty, desc, notes=""):
-    return part(where, qty, desc, "", "", "Set screw kit", "", None, notes=notes)
+                notes=notes, pack=pack, url=url)
+def mb(where, qty, desc, handle, variant, sku, price, notes=""):
+    """a MonsterBolts pack of 10"""
+    return part(where, qty, desc, "", "", "MonsterBolts", sku, [(1, price)], 0, notes, pack=10,
+                url=f"https://monsterbolts.com/products/{handle}?variant={variant}")
 
 # HeliSR Rev 4.0: (refs, value, footprint) as in the board file, then what to buy
 BOARD = [
@@ -114,15 +114,6 @@ SECTIONS = [
     ("Huey head: hardware", [
         part("HeliSR board", 4, "Spacer, M3, 4 mm, PVC", "Bivar", "SRS-4-4MM", "Mouser", "749-SRS-4-4MM",
              [(1, 0.10), (10, 0.059)], 0.15, "Between the rear wall and the board"),
-        kit("HeliSR board", 4, "M3 x 12 countersunk screw + M3 nut"),
-        kit("Panels", 8, "M3 x 16 countersunk screw", "4 per panel"),
-        kit("SearchHat board", 4, "M2 x 8 countersunk screw", "Self-tapping into the lower panel's bosses"),
-        kit("Friction collar", 1, "M4 x 12 countersunk screw + M4 nut"),
-        kit("Trigger pull stop seat", 1, "M2 x 8 countersunk screw"),
-        setkit("Tube boss", 1, "M5 x 8 set screw", "Pins the tube in the head"),
-        setkit("Trigger pull stop", 1, "M3 x 4 set screw"),
-        part("Trigger pivot", 1, "M3 countersunk screws, M3 x 20 to 40 assortment, 100 pcs", "", "", "Amazon",
-             "B0BYXS4BTF", [(1, 9.99)], 0, "Uses one M3 x 25"),
         part("Throttle grip", 4, "O-ring, 24 mm ID x 2 mm, nitrile, pack of 50", "FOCMKEAS", "", "Amazon", "B0BWWBTL4N",
              [(1, 6.89)], 0, "Grease lightly with silicone grease", pack=50),
         part("Trigger", 1, "Pen spring, 4 mm OD x 50 mm, pack of 10", "uxcell", "", "Amazon", "B0GCZGNBYH",
@@ -137,29 +128,47 @@ SECTIONS = [
              "Amazon", "B0CFFT1B31", [(1, 27.49)], 0, "Used whole, uncut", pack=2),
         part("Strut", 1, "Gas strut, 6 in eye to eye, 45 N, pack of 2", "X AUTOHAUX", "", "Amazon", "B0CY267GFY",
              [(1, 13.69)], 0, "Cylinder end on the anchor", pack=2),
-        part("Lever, tube lock, shell, brake hinge", 10, "M4 socket head screws, M4 x 30 to 50, with nuts (200 pcs)",
-             "HELIFOUNER", "", "Amazon", "B0CDSKK7V1", [(1, 9.99)], 0,
-             "Uses 5 x M4 x 35 and 5 x M4 x 50, with 10 nuts"),
         part("Socket mouth", 1, "Hose clamp, worm drive, 25-40 mm, pack of 25", "MISPIRE", "", "Amazon", "B0F8QWCFWR",
              [(1, 18.99)], 0, "", pack=25),
-        part("Brake", 1, "M5 x 35 hex-head bolt", "", "", "Hardware store", "", None, 0, "Not in the kits"),
-        kit("Brake", 1, "M5 nut"),
         part("Brake (optional)", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm long, pack of 10", "", "",
              "Amazon", "B09FF6VQ55", [(1, 11.10)], 0, "Softens the brake knob", pack=10),
         part("Brake strap", 1, "Felt tape, self-adhesive, 1.5 mm, 3/4 in x 50 ft", "FindTape", "", "Amazon",
              "B077TCDNYT", [(1, 24.98)], 0, "Cut 51 x 16 mm"),
-        kit("Strut eyes", 2, "M4 x 16 countersunk screw + M4 nut"),
-        kit("Strut collar clamp", 1, "M4 x 16 countersunk screw + M4 nut", "In front of the strut's eye screw, which clamps too"),
-        kit("Side covers", 8, "M3 x 12 countersunk screw"),
-        kit("AS5600 module (lever)", 4, "M2 x 8 countersunk screw", "Self-tapping into the sensor pocket's posts"),
         part("Desk mounting", 4, "#10 x 1-1/2 in pan head wood screw, pack of 50", "", "", "Amazon", "B0F43RY9S6",
              [(1, 8.29)], 0, "", pack=50),
     ]),
-    ("Screw kits, supplies and tools", [
-        part("Screw kit", 1, "Countersunk hex socket screw kit, M2-M5, with nuts (1715 pcs)", "AvrestYPT", "", "Amazon",
-             "B0FMD5TMSH", [(1, 17.99)], 0, "Every countersunk screw and nut marked Screw kit"),
-        part("Set screw kit", 1, "Set screw kit, M3-M8 (500 pcs)", "HIQTRADEBYJJ", "", "Amazon", "B0DG33R714",
-             [(1, 8.96)], 0, "Both set screws"),
+    ("Screws and nuts (MonsterBolts, packs of 10)", [
+        mb("SearchHat board (4), trigger pull stop seat (1), AS5600 in the lever (4)", 9,
+           "M2 x 8 flat head machine screw, Phillips (DIN 965), black oxide", "mach-phil-flat-blk-m2", 21222469795923,
+           "Mach + Flat - B/O M02 x 008.0010", 1.01, "Phillips: no small pack of M2 countersunk with a hex or star drive"),
+        mb("HeliSR board (4), base side covers (8)", 12, "M3 x 12 flat head socket cap screw, 12.9, black oxide",
+           "socket-flat-b12-9-m3", 36254218188, "FHCS - B12.9 M03 x 012.0010", 1.46),
+        mb("Head panels (8)", 8, "M3 x 16 flat head socket cap screw, 12.9, black oxide", "socket-flat-b12-9-m3",
+           36254218444, "FHCS - B12.9 M03 x 016.0010", 1.53),
+        mb("Trigger pivot (1)", 1, "M3 x 25 flat head socket cap screw, 12.9, black oxide", "socket-flat-b12-9-m3",
+           36254218700, "FHCS - B12.9 M03 x 025(PT).0010", 2.36),
+        mb("Friction collar (1)", 1, "M4 x 12 flat head socket cap screw, 12.9, black oxide", "socket-flat-b12-9-m4",
+           36289629452, "FHCS - B12.9 M04 x 012.0010", 1.33),
+        mb("Strut eyes (2), strut collar clamp (1)", 3, "M4 x 16 flat head socket cap screw, 12.9, black oxide",
+           "socket-flat-b12-9-m4", 36289629580, "FHCS - B12.9 M04 x 016.0010", 1.29),
+        mb("Lever, tube lock, shell, brake hinge", 5, "M4 x 35 socket head cap screw, 12.9, black oxide",
+           "socket-cap-b12-9-m4", 35989100940, "SHCS - B12.9 M04 x 035(PT).0010", 1.99),
+        mb("Lever, tube lock, shell, brake hinge", 5, "M4 x 50 socket head cap screw, 12.9, black oxide",
+           "socket-cap-b12-9-m4", 35989101196, "SHCS - B12.9 M04 x 050(PT).0010", 2.79),
+        mb("Brake knob (1)", 1, "M5 x 35 hex cap bolt, full thread, A2 stainless", "hex-bolt-a2-m5", 36455646284,
+           "Hex Cap - SA2 M05 x 035.0010", 2.82, "Stainless: not sold in black"),
+        mb("Tube boss (1)", 1, "M5 x 8 socket set screw, cup point, 14.9, black oxide", "socket-set-cup-b14-9-m5",
+           36353852300, "Set - B14.9 M05 x 008.0010", 0.96, "Pins the tube in the head"),
+        mb("Trigger pull stop (1)", 1, "M3 x 4 socket set screw, cup point, 14.9, black oxide", "socket-set-cup-b14-9-m3",
+           36345375372, "Set - B14.9 M03 x 004.0010", 1.02),
+        mb("HeliSR board (4)", 4, "M3 hex nut, DIN 934, class 10 steel", "nuts-din934-b10-9", 40341891317843,
+           "Nuts - D934 B10 M03.0010", 0.80),
+        mb("Friction collar (1), strut eyes (2), strut collar clamp (1), M4 socket head screws (10)", 14,
+           "M4 hex nut, DIN 934, class 10 steel", "nuts-din934-b10-9", 27845486837843, "Nuts - D934 B10 M04.0010", 0.64),
+        mb("Brake strap (1)", 1, "M5 hex nut, DIN 934, class 10 steel", "nuts-din934-b10-9", 27845486968915,
+           "Nuts - D934 B10 M05.0010", 0.69),
+    ]),
+    ("Supplies and tools", [
         part("Board", 1, "Solder paste, low temperature (Sn42/Bi57.6/Ag0.4), 15 g syringe", "Chip Quik", "SMDLTLFP",
              "Mouser", "910-SMDLTLFP", [(1, 15.95)], 0, "Optional: the board can be hand soldered"),
         part("Bearings", 1, "White lithium grease, 1.5 oz", "Permatex", "", "Amazon", "B000HBNV58", [(1, 3.99)]),
@@ -336,10 +345,9 @@ COLS = ["Done", "Where", "Qty used", "Part", "Manufacturer", "Mfr part number", 
         "Buy", "Unit price", "Tariff", "Total", "Notes"]
 NC = len(COLS)
 title(ws, "Heli Collective - bill of materials",
-      f"Everything to buy for one collective. Prices checked {CHECKED}, USD, before shipping; Amazon and OSH Park prices "
-      "are per pack or order. Buy is the cheapest quantity (10 can cost less than 8). Tariff is Mouser's estimate for "
-      "US delivery; Total includes it. Screws marked Screw kit or Set screw kit come from those kits. Tick Done to "
-      "strike a line through.", NC)
+      f"Everything to buy for one collective. Prices checked {CHECKED}, USD, before shipping; Amazon, MonsterBolts and OSH Park "
+      "prices are per pack or order (Buy counts packs). Buy is the cheapest quantity (10 can cost less than 8). Tariff is Mouser's estimate for "
+      "US delivery; Total includes it. Tick Done to strike a line through.", NC)
 HR = 4; header(ws, COLS, [6, 18, 7, 44, 15, 22, 13, 22, 6, 9, 7, 10, 40], HR)
 r, first_item = HR, HR + 1
 for sec, items in SECTIONS:
@@ -354,9 +362,9 @@ for sec, items in SECTIONS:
             cell = ws.cell(r, c, v); cell.font = F(); cell.alignment = wrap; cell.border = box
         for c in (1, 3, 9, 11): ws.cell(r, c).alignment = centre
         ws.cell(r, 10).number_format = USD3; ws.cell(r, 12).number_format = USD; ws.cell(r, 11).number_format = PCT
-        url = LINKS.get(p["sup"])
+        url = p["url"] or (LINKS.get(p["sup"], "") + p["spn"] if p["sup"] in LINKS else None)
         if url and (p["spn"] or p["sup"] == "OSH Park"):
-            cell = ws.cell(r, 8 if p["spn"] else 7); cell.hyperlink = url + p["spn"]
+            cell = ws.cell(r, 8 if p["spn"] else 7); cell.hyperlink = url
             cell.font = F(color="0563C1", underline="single")
         tick(ws, r, NC)
 last = r
@@ -364,7 +372,7 @@ strike_when_ticked(ws, first_item, last, NC)
 r += 2
 ws.cell(r, 11, "Total").font = F(bold=True)
 ws.cell(r, 12, f"=SUM(L{first_item}:L{last})").font = F(bold=True); ws.cell(r, 12).number_format = USD
-ws.cell(r, 1, "The 6808 bearings and the M5 bolt are unpriced: buy them anywhere.").font = F(italic=True, color="595959")
+ws.cell(r, 1, "The 6808 bearings are unpriced: any 6808-2RS fits.").font = F(italic=True, color="595959")
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=9)
 ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 

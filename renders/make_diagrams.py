@@ -206,7 +206,7 @@ def head_items(src):
     H["tube set screw"] = screw("M5 x 8", get("Tube set screw M5 x 8")[0], RED, "M5x8set", out=(0, -1, 0))
     H["pull stop"] = screw("M3 x 4", get("Pull stop set screw M3 x 4")[0], RED, "M3x4set", out=tilt_dir((0, 1, 0)))
     H["pivot"] = screw("M3 x 25", get("Trigger pivot M3 x 25")[0], RED, "M3x25")
-    # not in the GLB: the pull stop's seat, a kit M2 x 8 countersunk flush in the mount's face (MOUNT_FACE = 49) where the
+    # not in the GLB: the pull stop's seat, an M2 x 8 flat head flush in the mount's face (MOUNT_FACE = 49) where the
     # stop screw's tip lands (STOP_SCREW x, z = -1.28, -13.1), driven toward the front
     H["stop seat"] = place_copy(H["hat board screws"][0], tilt_pt(-1.28, 49.0, -13.1), tilt_dir((0, 1, 0)), "M2x8",
                                 "M2 x 8")
@@ -441,7 +441,7 @@ def head_views(src):
     everything = flat(H)
 
     # -------- screw maps, assembled
-    sub = "Screws in red. Countersunk screws, set screws and nuts: AvrestYPT and set-screw kits; the trigger's M3 x 25 is bought."
+    sub = "Screws in red. Black-oxide countersunk and set screws, M2 Phillips flat heads and DIN 934 nuts, all from MonsterBolts."
     labelled(everything,
              [("M3 x 16 countersunk  (x4)", "upper panel: into the M3 threads printed in the box's corner columns",
                H["upper panel screws"]),
@@ -783,7 +783,7 @@ def head_chart(H):
             (screw_tile("csk", 3, 12), "M3 x 12 countersunk", 4,
              "The HeliSR board, from outside the rear wall, through the spacers and the board."),
             (screw_tile("csk", 3, 25), "M3 x 25 countersunk (bought)", 1,
-             "The trigger's pivot (ISO 10642 / DIN 7991; NIULUNBAO M3 set): the kits stop at 20 mm."),
+             "The trigger's pivot (ISO 10642 / DIN 7991)."),
             (screw_tile("csk", 2, 8), "M2 x 8 countersunk", 5,
              "The SearchHat board (4), from behind into the lower panel's bosses, and the pull stop's seat (1): "
              "into 1.6 mm pilots, tapped M2 by hand."),
@@ -795,7 +795,7 @@ def head_chart(H):
             (nut_tile(5.5, 2.4, 3.0), "M3 nut", 4, "On the HeliSR board's front."),
             (nut_tile(7.0, 3.2, 4.0), "M4 nut", 1, "In the friction collar's ear.")]
     chart(rows, "Huey head Rev 5: every screw, to scale",
-          "Countersunk screws and nuts: AvrestYPT kit. Set screws: HIQTRADEBYJJ kit. The M3 x 25 is bought separately.",
+          "All from MonsterBolts in packs of 10: black-oxide 12.9 countersunk, 14.9 set screws, M2 Phillips flat heads, DIN 934 nuts.",
           os.path.join(HEAD_OUT, "HueyHeadR5_ScrewSizes.png"))
 
 
