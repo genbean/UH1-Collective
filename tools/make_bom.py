@@ -177,10 +177,6 @@ SECTIONS = [
         part("AS5600 modules", 1, "Mini hot glue sticks, 100 pack", "Surebonder", "", "Amazon", "B003JZII34",
              [(1, 5.97)], 0, "For a mini glue gun"),
         part("Screws", 1, "Threadlocker, blue 242, 6 ml", "Loctite", "", "Amazon", "B000I1RSNS", [(1, 7.03)]),
-        part("Base", 1, "Tap set, M3 / M4 / M5 / M6 / M8", "", "", "Amazon", "B0FN49CGJG", [(1, 6.49)], 0,
-             "M3: the side cover holes"),
-        part("Tube", 1, "Drill bit, 5.2 mm HSS, 2 pcs", "", "", "Amazon", "B0FN3WV6DW", [(1, 6.99)], 0,
-             "The tube's cross hole"),
     ]),
 ]
 
