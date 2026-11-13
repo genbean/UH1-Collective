@@ -257,7 +257,7 @@ def arrow(x0, x1, z, w=0.6, head=2.2):
 
 # ---------------------------------------------------------------- switch cutouts (datasheet + CLR)
 def toggle_cut(x, z):
-    """APEM 600H toggle (639H/2, 637NH/2, 636H/2), M12 x 0.75 bushing: 12.2 mm round. The body (about 14.65 x 29.7 mm, long
+    """APEM 600H toggle (639H/2, 637H/2, 636H/2), M12 x 0.75 bushing: 12.2 mm round. The body (about 14.65 x 29.7 mm, long
     side vertical) sets the lever to throw up and down."""
     return circle(12.2 + CLR, x, z)
 

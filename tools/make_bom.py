@@ -104,8 +104,9 @@ SECTIONS = [
     ("Huey head: switches", [
         part("IN3-IN6", 2, "Toggle switch, SPDT, ON-OFF-ON, M12 bushing", "APEM", "639H/2", "Mouser", "642-639H2",
              [(1, 7.86), (10, 6.87)], 0, "LDG LT EXT / RETR, SL ON / STOW"),
-        part("IN1, IN2", 1, "Toggle switch, SPDT, (ON)-OFF-(ON), M12 bushing, sealed", "APEM", "637NH/2", "Mouser",
-             "642-637NH2", [(1, 16.27), (10, 15.06)], 0, "GOV RPM INCR / DECR"),
+        part("IN1, IN2", 1, "Toggle switch, SPDT, (ON)-OFF-(ON), M12 bushing", "APEM", "637H/2", "Mouser",
+             "642-637H2", [(1, 8.02), (10, 6.93)], 0,
+             "GOV RPM INCR / DECR. Back-ordered at Mouser on 2026-11-13; Digi-Key stocks it (679-1219-ND)"),
         part("IN7", 1, "Toggle switch, ON-ON, M12 bushing", "APEM", "636H/2", "Mouser", "642-636H2",
              [(1, 7.55), (10, 6.52)], 0, "LDG LT ON"),
         part("IN13", 1, "Push button, 12 mm, SPST-NO momentary, black", "Same Sky", "PB4-M-BK-D-67", "Mouser",

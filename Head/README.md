@@ -153,7 +153,7 @@ The only bend in the route is in the open, where the leads turn from the groove 
 
 | Panel | Control | Part | HeliSR input |
 |---|---|---|---|
-| Lower | GOV RPM INCR / DECR | APEM 637NH/2 toggle, (ON)-OFF-(ON) | IN1 / IN2 |
+| Lower | GOV RPM INCR / DECR | APEM 637H/2 toggle, (ON)-OFF-(ON) | IN1 / IN2 |
 | Lower | LDG LT EXT / OFF / RETR | APEM 639H/2 toggle, ON-OFF-ON | IN3 / IN4 |
 | Lower | SEARCH CONT EXT / RETR / L / R | ALPS RKJXM1015004 8-way stick on the SearchHat board ([`Hat/README.md`](Hat/README.md)); a diagonal joins its two neighbours | IN9 – IN12 |
 | Lower | SEARCH CONT centre push (optional) | the same switch | IN15 |
@@ -336,7 +336,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | Pen spring, up to 4 mm across | 1 | The trigger return (cut to about 13 mm) |
 | AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | The throttle's; its ~4 × 2 mm magnet goes in the shaft's cap |
 | APEM 639H/2 toggle, ON-OFF-ON (Mouser 642-639H2) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
-| APEM 637NH/2 toggle, (ON)-OFF-(ON) (Mouser 642-637NH2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
+| APEM 637H/2 toggle, (ON)-OFF-(ON) (Mouser 642-637H2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
 | APEM 636H/2 toggle, ON-ON (Mouser 642-636H2) | 1 | LDG LT ON (IN7) |
 | Same Sky PB4-M-BK-D-67 push button (Mouser 179-PB4-M-BK-D-67) | 1 | STOP REL (IN13) |
 | TE 1825910-6 tact switch, 6 × 6 mm (Mouser 650-1825910-6) | 1 | Starter trigger (IN14) |
