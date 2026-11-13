@@ -73,6 +73,8 @@ SECTIONS = [
              "", [(1, 10.20)], 0, "Upload PCB/HeliSR/HeliSR_Rev4.0_Gerbers.zip"),
         part("J7, J8", 1, "Pro Micro 5 V / 16 MHz (ATmega32U4), USB-C, with header pins", "OSOYOO", "", "Amazon",
              "B0B81FGBLY", [(1, 11.99)], 0, "Plugs into J7/J8; runs the HeliSR firmware. Fit the low-profile pins, not its own"),
+        part("Solder paste", 1, "Solder paste, low temperature (Sn42/Bi57.6/Ag0.4), 15 g syringe", "Chip Quik", "SMDLTLFP",
+             "Mouser", "910-SMDLTLFP", [(1, 15.95)], 0, "Optional: the board can be hand soldered"),
     ]),
     ("SearchHat Rev 1.0 board (SEARCH CONT hat)", [
         part("SW1", 1, "8-direction stick switch with centre push", "ALPS Alpine", "RKJXM1015004", "Mouser",
@@ -169,8 +171,6 @@ SECTIONS = [
            "Nuts - D934 B10 M05.0010", 0.69),
     ]),
     ("Supplies and tools", [
-        part("Board", 1, "Solder paste, low temperature (Sn42/Bi57.6/Ag0.4), 15 g syringe", "Chip Quik", "SMDLTLFP",
-             "Mouser", "910-SMDLTLFP", [(1, 15.95)], 0, "Optional: the board can be hand soldered"),
         part("Bearings", 1, "White lithium grease", "", "", "Local", "", None),
         part("O-rings", 1, "Silicone grease", "", "", "Local", "", None),
         part("Magnets", 1, "Super glue (cyanoacrylate) gel", "", "", "Local", "", None),
