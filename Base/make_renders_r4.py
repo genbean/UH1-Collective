@@ -423,7 +423,6 @@ def screw_views(P0):
                         (m.on_circle(v.COVER_HOLE_R, a) for a in (45, 135, 225, 315))]
     zn = v.CAP_NUT_Z - m.NUT_T[4] / 2
     side_nuts = [np.array([x, -v.BLOCK_Y1, zn]) for x in (-v.CAP_BOLT_X, v.CAP_BOLT_X)]   # the slots' mouths, -y
-    desk = [np.array([x, y, v.Z_PLATE]) for x, y in v.DESK]
     bare = hide(P0, "carbon_tube", "strut_collar", "gas_strut", "strut_pins", "hose_clamp", "usb_cable", "sensor_wires")
     labelled(P0, [("M4 x 50 socket head cap  (x4)", "the shell, from the top, heads down 13 mm counterbores, each "
                    "centred on the joint, into M4 nuts slid into the pillow blocks from the sides",
@@ -479,8 +478,7 @@ def screw_views(P0):
                    "nuts in the +y cheek", heads_of("eye screw") + heads_of("clamp screw")),
                   ("M4 x 35 socket head cap", "tube lock: across the lever and the tube, head in the -y boss",
                    heads_of("tube lock screw")),
-                  ("M4 nut", "the brake strap's hinge pin: in the pillow block's hex pocket", heads_of("hinge nut")),
-                  ("#10 x 1-1/2 in wood screw  (x4)", "desk mounting", desk)],
+                  ("M4 nut", "the brake strap's hinge pin: in the pillow block's hex pocket", heads_of("hinge nut"))],
              (-0.3, -1.0, 0.4), "MkIII base Rev 4 screws: sensor (-y) side", "rev4_screws_sensorside.png",
              focus=((-150, -50, -58), (100, 50, 40)), zoom=1.05)
     labelled(P0, [("M3 x 12 countersunk  (x4)", "cable cover: into M3 threads tapped through the pillow block and the "
@@ -672,8 +670,8 @@ def screw_chart():
              "Lever (4), tube lock (1), shell (4), strut eyes (2), collar clamp (1), the strap's hinge pin (1)."),
             (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the slot in the brake strap's head.")]
     d.chart(rows, "MkIII base Rev 4: every screw, to scale",
-            "All from MonsterBolts: black-oxide 12.9 hex socket screws, M2 Phillips flat heads, DIN 934 nuts. Brake bolt: M5 x 35 stainless. "
-            "Not shown: four #10 wood screws for the desk.", os.path.join(OUT, "rev4_screw_sizes.png"))
+            "All from MonsterBolts: black-oxide 12.9 hex socket screws, M2 Phillips flat heads, DIN 934 nuts. Brake bolt: M5 x 35 stainless.",
+            os.path.join(OUT, "rev4_screw_sizes.png"))
 
 
 # ---------------------------------------------------------------------------------------------------- the collective

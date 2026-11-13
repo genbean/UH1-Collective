@@ -264,7 +264,7 @@ The anchor clevis's back wall runs level, at the cheeks' top, into the pad's fro
 
 ![The frame from above](renders/rev4_frame_top.png)
 
-The plate is 63 mm wide, the pillow blocks' outer faces, and 127 mm long. The desk screws are 24 mm either side of the middle, past the blocks' ends and the down-stop pillars.
+The plate is 63 mm wide, the pillow blocks' outer faces, and 127 mm long. Its four desk-mounting holes are 24 mm either side of the middle, past the blocks' ends and the down-stop pillars.
 
 Behind the up-stop pad, the frame is solid back to its back face and out to the [back chamfer](#the-back), except for a 39 mm radius round the axis between the pillow blocks, 1.5 mm clear of the up-stop lugs' swing, and the brake strap's bay in the middle.
 
@@ -425,7 +425,7 @@ Between them, these label every screw and nut in the base:
 
 ![The brake in section: the bolt, its nut in the strap's head, the hinge pin, the strap and the knob](renders/rev4_screws_brake.png)
 
-![The sensor side: the cover, the collar's two screws, the tube lock's head, the hinge pin's nut, the desk screws](renders/rev4_screws_sensorside.png)
+![The sensor side: the cover, the collar's two screws, the tube lock's head, the hinge pin's nut](renders/rev4_screws_sensorside.png)
 
 ![The USB side: the cover, the collar's two nuts, the tube lock's nut, the brake strap's hinge pin](renders/rev4_screws_usbside.png)
 

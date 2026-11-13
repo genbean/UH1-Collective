@@ -125,8 +125,8 @@ SECTIONS = [
              [(1, 5.99)], 0, "Only if a stronger strut lifts the lever"),
     ]),
     ("MkIII base Rev 4", [
-        part("Pivot", 2, "Ball bearing 6808-2RS, 40 x 52 x 7 mm, pack of 2", "", "6808-2RS", "Amazon", "B012BIHBTQ",
-             None, 0, "Any 6808-2RS fits; price varies", pack=2),
+        part("Pivot", 2, "Ball bearing 6808-2RS, 40 x 52 x 7 mm, double sealed, pack of 2", "HARFINGTON", "6808-2RS",
+             "Amazon", "B0CGM4BY2K", [(1, 8.99)], 0, "Any 6808-2RS fits", pack=2),
         part("Tube", 1, "Carbon fibre tube, wrapped, 25 mm OD x 23 mm ID x 500 mm, pack of 2", "MECCANIXITY", "",
              "Amazon", "B0CFFT1B31", [(1, 27.49)], 0, "Used whole, uncut", pack=2),
         part("Strut", 1, "Gas strut, 6 in eye to eye, 45 N, pack of 2", "X AUTOHAUX", "", "Amazon", "B0CY267GFY",
@@ -372,7 +372,7 @@ strike_when_ticked(ws, first_item, last, NC)
 r += 2
 ws.cell(r, 11, "Total").font = F(bold=True)
 ws.cell(r, 12, f"=SUM(L{first_item}:L{last})").font = F(bold=True); ws.cell(r, 12).number_format = USD
-ws.cell(r, 1, "Unpriced: the 6808 bearings (any 6808-2RS fits) and the Local lines, from a hardware store.").font = F(italic=True, color="595959")
+ws.cell(r, 1, "The Local lines are unpriced: buy them at a hardware store.").font = F(italic=True, color="595959")
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=9)
 ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 
