@@ -62,10 +62,9 @@ BOARD = [
           "306-4BSRSSGTBLP", [(1, 0.63), (10, 0.546)], 0.30, "Sensor ports AX1-AX4: 1 SDA, 2 GND, 3 VCC, 4 SCL")),
     (("J7, J8", None, "PinSocket_1x12_P2.54mm_Vertical"),
      part("J7, J8", 2, "Low-profile pin header set, 2.54 mm, 1 x 40: 5 male (platinum-plated pins) + 5 female (tin), "
-          "pack of 5 pairs", "DIYhz", "", "Amazon", "", [(1, 9.99)], 0,
+          "pack of 5 pairs", "DIYhz", "", "Amazon", "B07BS126FK", [(1, 9.99)], 0,
           "Cut two 12-pin sockets for J7/J8 and two 12-pin rows for the Pro Micro, in place of the pins it comes with: "
-          "standard headers stand too tall for the USB cable. Solder the sockets last", pack=2,
-          url="https://www.amazon.com/s?k=DIYhz+5Pair+1x40+2.54mm+Header+Pt+Male+Sn+Female")),
+          "standard headers stand too tall for the USB cable. Solder the sockets last", pack=2)),
 ]
 
 SECTIONS = [
