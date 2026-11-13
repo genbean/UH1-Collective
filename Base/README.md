@@ -443,7 +443,6 @@ Between them, these label every screw and nut in the base:
 | M5 × 35 hex-head bolt | 1 | stainless, from MonsterBolts with the screws |
 | Felt, 1.5 mm, 16 × 51 mm | 1 | on the brake strap |
 | AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | with its ~4 × 2 mm diametric magnet |
-| #10 × 1-1/2 in wood screws | 4 | desk mounting |
 
 ## Notes
 

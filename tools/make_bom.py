@@ -131,14 +131,11 @@ SECTIONS = [
              "Amazon", "B0CFFT1B31", [(1, 27.49)], 0, "Used whole, uncut", pack=2),
         part("Strut", 1, "Gas strut, 6 in eye to eye, 45 N, pack of 2", "X AUTOHAUX", "", "Amazon", "B0CY267GFY",
              [(1, 13.69)], 0, "Cylinder end on the anchor", pack=2),
-        part("Socket mouth", 1, "Hose clamp, worm drive, 25-40 mm, pack of 25", "MISPIRE", "", "Amazon", "B0F8QWCFWR",
-             [(1, 18.99)], 0, "", pack=25),
-        part("Brake (optional)", 1, "Compression spring, 10 mm OD, 1.0 mm wire, 15 mm long, pack of 10", "", "",
-             "Amazon", "B09FF6VQ55", [(1, 11.10)], 0, "Softens the brake knob", pack=10),
-        part("Brake strap", 1, "Felt tape, self-adhesive, 1.5 mm, 3/4 in x 50 ft", "FindTape", "", "Amazon",
-             "B077TCDNYT", [(1, 24.98)], 0, "Cut 51 x 16 mm"),
-        part("Desk mounting", 4, "#10 x 1-1/2 in pan head wood screw, pack of 50", "", "", "Amazon", "B0F43RY9S6",
-             [(1, 8.29)], 0, "", pack=50),
+        part("Socket mouth", 1, "Hose clamp, worm drive, 25-40 mm", "", "", "Local", "", None, 0, ""),
+        part("Brake (optional)", 1, "Compression spring, up to 10 mm OD, 0.8-1.0 mm wire, 10-15 mm long", "", "",
+             "Local", "", None, 0, "Softens the brake knob"),
+        part("Brake strap", 1, "Felt, self-adhesive, 1.5 mm thick, at least 51 x 16 mm", "", "", "Local", "", None, 0,
+             "Cut 51 x 16 mm"),
     ]),
     ("Screws and nuts (MonsterBolts, packs of 10)", [
         mb("SearchHat board (4), trigger pull stop seat (1), AS5600 in the lever (4)", 9,
@@ -375,7 +372,7 @@ strike_when_ticked(ws, first_item, last, NC)
 r += 2
 ws.cell(r, 11, "Total").font = F(bold=True)
 ws.cell(r, 12, f"=SUM(L{first_item}:L{last})").font = F(bold=True); ws.cell(r, 12).number_format = USD
-ws.cell(r, 1, "The 6808 bearings are unpriced: any 6808-2RS fits.").font = F(italic=True, color="595959")
+ws.cell(r, 1, "Unpriced: the 6808 bearings (any 6808-2RS fits) and the Local lines, from a hardware store.").font = F(italic=True, color="595959")
 ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=9)
 ws.freeze_panes = f"C{HR + 1}"; ws.print_title_rows = f"{HR}:{HR}"
 
