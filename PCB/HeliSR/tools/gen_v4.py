@@ -4,7 +4,7 @@
 # 3 = SCL) drive it; the shift-register lines move off them to pins 14 (data), 15 (clock) and A0 (load), and A1
 # drives the switch's /RESET.
 #   Front: the Rev 3.0 parts under the Pro Micro; along each long side a 10-pin input header and one 4-pin port
-#   (top: J1, AX3; bottom: J2, AX1); across the far end AX4 (J1 side), RST, AX2 (J2 side).
+#   (top: J1, AX3; bottom: J2, AX1); across the far end AX4 (J1 side), AX2 (J2 side); RST between AX1 and the corner.
 #   Back: U3 with its decoupling cap and upstream pull-ups, and under each port its own pair of 2.2k pull-ups.
 #   All the back resistors and C4 are 1206, like the front caps, for hand soldering.
 #   Ports (JST SH 4-pin): 1 SDA, 2 GND, 3 VCC, 4 SCL.
@@ -148,11 +148,13 @@ for ax, f in PORTS.items():                   # every pin toward the board's mid
     d = lambda q: math.hypot(q[0] - L / 2, q[1] - W / 2)
     assert max(d(q) for q in sig) < d(mp[0]), ax
 
-# ---- RST button: far end, between AX4 and AX2 ----------------------------------------------------------------------
+# ---- RST button: C&K PTS810 on the front, between AX1 (J11) and the corner hole H4 -----------------------------------
+# Four pads, 1-1 and 2-2 joined inside: the whole body is soldered down. Upright, pads 1 (RST) on the J11 side.
+# (The board in this folder was routed with a TL1015AF at the far end and moved here by rst_pts810_v4.py.)
 lib = os.path.join(os.path.dirname(os.path.abspath(out)), "HeliSR.pretty")
-SW1 = pcbnew.FootprintLoad(lib, "SW_TL1015AF160QG")
-SW1.SetReference("SW1"); SW1.SetValue("TL1015AF160QG"); b.Add(SW1)
-SW1.SetPosition(V(XE + 0.3, CY)); SW1.SetOrientationDegrees(90)
+SW1 = pcbnew.FootprintLoad(lib, "SW_SPST_PTS810")
+SW1.SetReference("SW1"); SW1.SetValue("PTS810 SJM 250 SMTR LFS"); b.Add(SW1)
+SW1.SetPosition(V(29.8, 29.5)); SW1.SetOrientationDegrees(90)
 connect(SW1, 1, "RST"); connect(SW1, 2, "GND")
 
 # ---- back: the PCA9546A I2C switch --------------------------------------------------------------------------------

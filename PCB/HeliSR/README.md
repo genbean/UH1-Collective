@@ -1,7 +1,7 @@
 # HeliSR Rev 4.0 – Pro Micro + I²C collective board (Huey head)
 
-> **Designed, not ordered, not built.** The HeliSR firmware has a Rev 4.0 build and HeliSR Configurator supports
-> the board, but neither has run on one yet. See [Firmware](#firmware).
+> **One board built, not working yet** (see [Checks](#checks-done-on-this-revision)): its AX4 clock line is shorted
+> to ground. Since then the RST button has moved and changed to a PTS810. See [Firmware](#firmware).
 
 A small carrier board for the collective's switch box: a **SparkFun Pro Micro 5V/16 MHz** with **16 switch
 inputs** read through two 74HC165 shift registers, and **four I²C ports for AS5600 magnetic angle
@@ -21,7 +21,7 @@ ports are built the same, so any port takes a short or a long cable.
 | AS5600 ports | 4, each on its own 4-pin JST SR/SH 1.0 mm connector (BM04B-SRSS-G-TB, SMD): **1 SDA, 2 GND, 3 VCC, 4 SCL** |
 | I²C switch | PCA9546A (TI PCA9546ADR, SOIC-16 narrow), address 0x70, with its /RESET on a Pro Micro pin |
 | Pull-ups | 2.2 kΩ on SDA and SCL of each port (R1–R8); 10 kΩ on the Pro Micro's SDA and SCL (R9, R10) and on /RESET (R11) |
-| Button | **RST** (SW1, E-Switch TL1015AF160QG). No PROG buttons: over I²C the firmware sets each sensor's range itself |
+| Button | **RST** (SW1, C&K PTS810 SJM 250 SMTR LFS: 4.2 × 3.2 mm, four pads, all soldered). No PROG buttons: over I²C the firmware sets each sensor's range itself |
 | Ground | Both layers poured with ground and stitched together (see [Checks](#checks-done-on-this-revision)) |
 | Fab specs | Cheap-fab rules: 0.2 mm clearance, 0.2 mm signal and 0.3 mm VCC/GND tracks, 0.6/0.3 mm vias, holes at least 0.6 mm apart |
 
@@ -36,8 +36,8 @@ Viewed from the top, with the USB end on the left:
   (J7) along the bottom.
 - **Under it**: RN1, then C1 | U1 | C3 | U2 | C2, then RN2.
 - **Top edge:** J1 (inputs 1-8), AX3 (J13).
-- **Bottom edge:** J2 (inputs 9-16), AX1 (J11).
-- **Far end (right):** AX4 (J14, top), RST (SW1, middle), AX2 (J12, bottom).
+- **Bottom edge:** J2 (inputs 9-16), AX1 (J11), then RST (SW1) between AX1 and the bottom-right hole.
+- **Far end (right):** AX4 (J14, top), AX2 (J12, bottom).
 - **Back:** U3 under the far half of the Pro Micro with C4 beside its VCC pin, R9 and R10 beside its SDA and SCL,
   R11 beside its /RESET; under each port, that port's pair of pull-ups.
 
@@ -200,7 +200,7 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
 |---|---|
 | `HeliSR_Rev4.0.kicad_pcb` / `.kicad_pro` | KiCad 9 board |
 | `HeliSR_Rev4.0.kicad_dru` | Custom DRC rules for the intentional overlaps (see below) |
-| `HeliSR.pretty/`, `fp-lib-table` | Project footprint library: the TL1015AF160QG button footprint |
+| `HeliSR.pretty/`, `fp-lib-table` | Project footprint library: the RST button's footprint (KiCad's `SW_SPST_PTS810`, copied so the board doesn't depend on the KiCad version) |
 | `HeliSR_Rev4.0_Gerbers.zip` | Gerbers + drill files |
 | `HeliSR_Rev4.0_Top.png`, `HeliSR_Rev4.0_Bottom_mirrored.png` | Board renders |
 | `HeliSR_Rev4.0_Input_Map.csv` | Every input → connector pin → chip pin → shift order |
@@ -212,7 +212,7 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
    **C4** and **R1–R11** (all 1206). R1–R8 are all 2.2 kΩ; R9–R11 10 kΩ.
 2. On the front, **U1, U2**, then the 1206 caps **C1, C2, C3**.
 3. **RN1, RN2**. The dot (pin 1) goes in the square pad.
-4. The JST headers and the RST button.
+4. The JST headers and the RST button: solder all four of its pads.
 5. The two Pro Micro sockets last. Use low-profile headers for the sockets and for the Pro Micro's pins (the BOM lists a set): standard ones stand too tall for the USB cable in the head.
 
 ## Pro Micro RP2040 compatibility
@@ -230,8 +230,6 @@ run in its 3.3 V mode (R1 left fitted). There is no RP2040 build of the HeliSR f
 - The M3 holes: their courtyards (6.9 mm across) overlap J1, J2 and the far-end ports AX4 (J14) and AX2 (J12). Every
   pad, track and via is at least 3.5 mm from each hole centre, clear of the M3 nut's corners (3.18 mm) on the front
   and the 6.4 mm spacer on the back.
-- The far end: RST's courtyard overlaps the AX4 and AX2 ports' by up to 0.3 mm; the switch body and the JST housings
-  are about 1.4 mm apart.
 - Library silkscreen outlines that touch where parts nest.
 
 The rules use `(severity ignore)`, because `kicad-cli` 9.x still reports `(severity exclusion)` rules as errors
@@ -252,6 +250,10 @@ the collective's BOM, [`../../BOM`](../../BOM).
 3. `finish_all_v4.py` widens the router's neck-downs, pours GND on both layers, adds GND stitching vias
    (`stitch_v4.py`), writes the DRC rules and title block (`finish_v4.py`), places the silk labels on both sides
    (`silk_fix_v4.py`), and DRCs the result.
+   The board here was routed with the RST button (a TL1015AF) at the far end. `rst_pts810_v4.py` then moved it, once:
+   it put a PTS810 between AX1 and the bottom-right hole, where the RST track already ran on the back, cut that track
+   there with two vias, removed its run to the far end, moved the RST and J7 labels and refilled the pours.
+   `gen_v4.py` now places the PTS810 there itself, so a fresh rebuild doesn't need that step.
 4. `verify_netlist_v4.py` checks the netlist against the reference board and input map kept in `tools/` for it, and
    against the PCA9546A datasheet's pinout, and writes the input map.
 5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders. `tools/make_bom.py` (at the repo root) then rewrites the
@@ -267,12 +269,17 @@ the collective's BOM, [`../../BOM`](../../BOM).
 - **Clearance:** the cheap-fab rules above. All copper is at least 0.5 mm from the edge, and every track and via at
   least 3.7 mm from a hole centre (every pad 4.1 mm). No neck-downs: every signal track is 0.2 mm and every VCC/GND
   track 0.3 mm.
-- **Routing:** 998 mm of track, 78 vias: 44 from the router and 34 GND stitching vias. The I²C lines from U3 to the
-  ports are 6–29 mm long.
+- **Routing:** 983 mm of track, 79 vias: 45 routed (two of them RST's, beside the button) and 34 GND stitching vias.
+  The I²C lines from U3 to the ports are 6–29 mm long.
+- **RST button:** nothing under the PTS810 but its own pads and a GND track; the two RST vias beside it touch its
+  outline by 0.1 mm at the RST pads' side. Every via is tented.
 - **Decoupling:** C4's VCC pad is 2.65 mm from U3's VCC pin (centre to centre); C1's is 1.8 mm from U1's and C2's
   2.7 mm from U2's.
 - **Silkscreen:** every label is 1.0 mm tall with a 0.16 mm stroke, outside every courtyard on its side, and at least
   0.5 mm from the next label. The front names the connectors (J1, J2, AX1–AX4), RST, USB and the front parts; the
   back names U3, C4, R1–R11 and the board.
-- **Not checked:** nothing has been built. The I²C circuit and the cable lengths are as calculated in the
-  I²C section above, not measured.
+- **First board (2026-11-14),** built with the earlier layout (a TL1015AF at the far end): the PCA9546A answers and
+  reads back every channel setting, IN1–IN16 read open, and AX1–AX3 are clean. AX4's SCL reads tied to GND, and still
+  did with that switch removed: not found yet. That switch's metal frame sat over an AX4_SCL via and its frame tabs had
+  no pads, which is why it was replaced. `../../Software/firmware/BoardTest` is the sketch that tests the lines.
+- **Not checked:** the I²C circuit and the cable lengths are as calculated in the I²C section above, not measured.

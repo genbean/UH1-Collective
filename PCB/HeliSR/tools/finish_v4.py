@@ -81,7 +81,7 @@ if stage == "pour":
     # ---- starting positions for the silk labels (silk_fix_v4.py moves them to clear spots afterwards)
     CY, rx, YT, YB, XE, P = LY["CY"], LY["row_x"], LY["YT"], LY["YB"], LY["XE"], LY["parts"]
     FRONT = [("J1", rx[0], YT + 3.4), ("J2", rx[0], YB - 3.4), ("AX3", rx[1], YT + 3.4), ("AX1", rx[1], YB - 3.4),
-             ("AX4", XE - 3.4, P["J14"][1]), ("AX2", XE - 3.4, P["J12"][1]), ("RST", XE - 3.4, CY),
+             ("AX4", XE - 3.4, P["J14"][1]), ("AX2", XE - 3.4, P["J12"][1]), ("RST", P["SW1"][0] - 2.8, P["SW1"][1]),
              ("J8", rx[1] + 4.2, LY["Y_J8"] - 2.4), ("J7", rx[1] + 4.2, LY["Y_J7"] + 2.4), ("USB", 1.9, CY),
              ("U1", P["U1"][0], CY), ("U2", P["U2"][0], CY), ("RN1", P["RN1"][0] + 24.1, CY - 5),
              ("RN2", P["RN2"][0] + 24.1, CY + 5), ("C1", P["C1"][0] + 1.9, CY - 2.82), ("C2", P["C2"][0], CY - 2.6),
@@ -136,7 +136,6 @@ elif stage == "final":
     FIELD = [("J1", "J13"), ("J2", "J11")]
     SILK = [("J7", "RN2"), ("J8", "RN1"), ("U1", "C1")]
     HOLES = [("H1", "J1"), ("H2", "J14"), ("H3", "J2"), ("H4", "J12")]
-    END = [("SW1", "J14"), ("SW1", "J12")]
     open(os.path.join(outdir, NAME + ".kicad_dru"), "w").write(f"""(version 1)
 
 # Known, intentional DRC hits on this board. Each rule names the exact footprints it covers, so the same check
@@ -168,13 +167,6 @@ elif stage == "final":
   (constraint courtyard_clearance)
   (severity ignore)
   (condition "{pairs(REF, HOLES)}"))
-
-# The far end: RST (SW1) between the AX4 and AX2 ports. Their courtyards overlap by up to 0.3 mm; the switch body
-# and the JST housings are about 1.4 mm apart, and their pads are still checked by the clearance rules.
-(rule "Far end: courtyards"
-  (constraint courtyard_clearance)
-  (severity ignore)
-  (condition "{pairs(REF, END)}"))
 
 # Library footprint outlines that touch where parts nest (socket vs resistor network, SOIC vs C1).
 (rule "Nested parts: silkscreen"
