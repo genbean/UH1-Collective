@@ -1,7 +1,7 @@
 # HeliSR Rev 4.0 – Pro Micro + I²C collective board (Huey head)
 
-> **One board built, not working yet** (see [Checks](#checks-done-on-this-revision)): its AX4 clock line is shorted
-> to ground. Since then the RST button has moved and changed to a PTS810. See [Firmware](#firmware).
+> **One board built** (see [Checks](#checks-done-on-this-revision)); its I²C lines test clean, but no sensor has
+> been read on it yet. Since then the RST button has moved and changed to a PTS810. See [Firmware](#firmware).
 
 A small carrier board for the collective's switch box: a **SparkFun Pro Micro 5V/16 MHz** with **16 switch
 inputs** read through two 74HC165 shift registers, and **four I²C ports for AS5600 magnetic angle
@@ -279,7 +279,9 @@ the collective's BOM, [`../../BOM`](../../BOM).
   0.5 mm from the next label. The front names the connectors (J1, J2, AX1–AX4), RST, USB and the front parts; the
   back names U3, C4, R1–R11 and the board.
 - **First board (2026-11-14),** built with the earlier layout (a TL1015AF at the far end): the PCA9546A answers and
-  reads back every channel setting, IN1–IN16 read open, and AX1–AX3 are clean. AX4's SCL reads tied to GND, and still
-  did with that switch removed: not found yet. That switch's metal frame sat over an AX4_SCL via and its frame tabs had
-  no pads, which is why it was replaced. `../../Software/firmware/BoardTest` is the sketch that tests the lines.
+  reads back every channel setting, IN1–IN16 read open, and AX1–AX3 were clean. AX4's SCL read tied to GND, and still
+  did with that switch removed; with J14 and R11 taken off, every pad cleaned and the parts refitted, it cleared, and
+  the line test then passed for every port and every pair of ports. That switch's metal frame sat over an AX4_SCL via
+  and its frame tabs had no pads, which is why it was replaced anyway. `../../Software/firmware/BoardTest` is the
+  sketch that tests the lines.
 - **Not checked:** the I²C circuit and the cable lengths are as calculated in the I²C section above, not measured.
