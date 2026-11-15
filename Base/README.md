@@ -179,31 +179,20 @@ Two halves, split on the tube's plane (y = 0) rather than at the pivot axis as R
 
 ## Sensor
 
-The AS5600 module (WWZMDiB) sits in a square pocket in the sensor trunnion's end, chip facing out, its front face level with the trunnion's end, which is flush with the bearing's outer face. There's no carrier.
+The AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) sits in a square pocket in the sensor trunnion's end, chip facing out, its front face level with the trunnion's end, which is flush with the bearing's outer face. There's no carrier.
 
-- **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, as measured, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges, clear of both pad columns.
-- **Behind the board:** 3.5 mm of space for the wires soldered in from the back and the DIR jumper. It opens into the axial bore, which takes the lead to the tube.
-- **Orientation:** set it in with the pad columns vertical. It fits either way up.
-- **Holding it:** four M2 × 8 countersunk screws through the module's corner holes (16.26 mm apart along the pad columns, 16.0 mm across them, as measured). They thread into 1.6 mm pilots in four round posts that stand up from the floor behind the board to its back, each joined to the nearest ledge. Tap the pilots M2 by hand, or let the screws cut their own thread. The posts stay 0.5 mm clear of the pad columns' ends, and the heads sit about 0.6 mm proud of the board, 1.4 mm short of the cover.
+- **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges.
+- **Behind the board:** 3.5 mm of space, opening into the 13 mm axial bore. The board's socket and the lead's plug sit in the bore, and the lead runs on down it to the tube.
+- **Orientation:** any way round.
+- **Holding it:** four M2 × 8 countersunk screws through the board's corner holes, which are on a 16.0 mm square. The posts are 16.26 mm apart across and 16.0 mm up and down (the module the pocket was drawn for, as measured); the board's 2.4 mm holes take the difference. They thread into 1.6 mm pilots in four round posts that stand up from the floor behind the board to its back, each joined to the nearest ledge. Tap the pilots M2 by hand, or let the screws cut their own thread. The heads sit about 0.6 mm proud of the board, 1.4 mm short of the cover.
 
   ![The sensor pocket's four M2 posts](renders/rev4_sensor_pocket.png)
 
-The chip stands inside the bearing's retaining lip. The magnet (the module's own diametric magnet, about 4 × 2 mm) sits in a 4.2 mm pocket in the sensor cover's inside face, the same as the head axle's, its face 0.5 mm below the cover's and 1.0 mm off the chip. The lead runs from the back of the board through the axial bore and up the tube to **AX1** on the HeliSR board.
+The chip stands inside the bearing's retaining lip. The magnet (a diametric magnet from an AS5600 module pack, about 4 × 2 mm) sits in a 4.2 mm pocket in the sensor cover's inside face, the same as the head axle's, its face 0.5 mm below the cover's and 1.0 mm off the chip. The lead runs from the back of the board through the axial bore and up the tube to **AX1** on the HeliSR board.
 
-**Wiring:** the module (WWZMDiB, Amazon B0CM3C8KFT) has no header. Its pads are two columns of through-holes, 4.7 mm in from opposite edges: **VCC, OUT, GND** along one, **DIR, SCL, SDA, GPO** along the other. Solder the wires straight in from the back; the space behind the board takes them and the DIR jumper. The pad positions are measured from the product photos (±0.3 mm), so check them against yours.
+**The lead:** a 1:N JST SR jumper (A04SR04SR30K254B) cut in half, with the 4-wire ribbon spliced between the halves, each wire to the wire in the same position, so it stays 1:N. One plug goes on the sensor board, the other on AX1. The board needs nothing else: see its README.
 
-**With HeliSR Rev 4.0 (I²C):** four wires, **VCC, GND, SDA and SCL**, to the AX1 port (pin 1 SDA, 2 GND, 3 VCC, 4 SCL).
-- **5 V:** remove the module's 0 Ω R1. It ties VDD3V3 to VDD5V, and the 3V3 pin is rated 4 V max.
-- **DIR to VCC:** a short jumper across the back of the board, from DIR to VCC. DIR floats on this module. The chip turns with the lever and the magnet is fixed, so DIR = VCC makes the angle rise as the lever lifts.
-- **Remove R4**, the 1 kΩ from PGO (labelled GPO) to GND. PGO low selects the OUT-pin programming used with Rev 3.0; without R4 the chip's own pull-up holds it high.
-- **Pull-ups:** measure the module's SDA→VCC and SCL→VCC resistance before you fit it (see the HeliSR Rev 4.0 board's README, AS5600 modules).
-- The range is set by the firmware over I²C, not burnt into the chip, so it can be changed at any time.
-
-**With HeliSR Rev 3.0 (analog):** three wires, **VCC, OUT and GND**, to AX1. Remove R1 and jumper DIR to VCC as above, but keep R4. The range is programmed once through the OUT pin (datasheet option B) with the board's **PROG1** button:
-1. Hold the lever on its down-stop and press PROG1 for about a second.
-2. Lift it to the 32° stop and press PROG1 again.
-
-It can't be checked beforehand: until programming is done, AX1 reads full scale whatever the lever does.
+**The range:** the chip turns with the lever and the magnet is fixed, and the board's DIR is tied to GND, so the angle falls as the lever lifts. When you set the range, the helper sets it the other way round; tick **Inverted** on the collective's axis ([AS5600 guide](../Software/docs/as5600.md)). The firmware writes the range over I²C at every start, so it can be changed at any time.
 
 ## USB cable
 
@@ -374,7 +363,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
    - **Cables:** poke the USB cable through the cable half's axial bore from its joint face, and the sensor lead through the sensor half's. Lay both along the radial channel.
    - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
    - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
-3. **Sensor:** prepare the module and solder it to the lead (see [Sensor](#sensor)), and set it in the trunnion's pocket, chip out, pad columns vertical. Screw it down with four M2 × 8 countersunk screws, snug, not tight: the posts are plastic.
+3. **Sensor:** plug the lead into the back of the AS5600 sensor board (see [Sensor](#sensor)), and set the board in the trunnion's pocket, chip out, the plug going down the bore. Screw it down with four M2 × 8 countersunk screws, snug, not tight: the posts are plastic.
 4. **Brake strap in:** stick the felt (16 × 51 mm) on the strap's face, and drop the M5 nut into the slot in its head. Set the strap down into the frame, its cheeks either side of the strut clevis's rib and its arm in the up-stop pad's slot. Push an M4 × 50 socket head through from the USB (+y) side: the pillow block, the web, a cheek, the rib, the other cheek, the other web, and into an M4 nut in the sensor side's hex pocket. Tighten it: the strap still swings freely on it. Let the strap lean back onto its bay's back wall.
 5. **Lever in:** lower the lever's bearings straight down into the frame's seats. The hub drops past the top of the leaning strap's felt 1.6 mm clear, and ends 3.0 mm off the felt's bottom end; the strap itself stays 2.0 mm clear. Tip the strap forward onto the hub.
 
@@ -399,7 +388,7 @@ All from [MonsterBolts](https://monsterbolts.com/), in packs of 10: black-oxide 
 | Tube lock | M4 × 35 socket head cap, across the lever through the bosses over the down-stop pads and the tube's centre line, head in a 7.5 mm counterbore on the left (−y) side, 0.5 mm under the face | M4 nut in a hex pocket in the right (+y) boss, 0.5 mm under the face | 1 |
 | Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, under the side cover | 4 |
 | Side covers | M3 × 12 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
-| AS5600 module | M2 × 8 Phillips flat head (DIN 965), through the module's corner holes | 1.6 mm pilot in a post in the sensor pocket, tapped M2 or self-tapped | 4 |
+| AS5600 sensor board | M2 × 8 Phillips flat head (DIN 965), through the board's corner holes | 1.6 mm pilot in a post in the sensor pocket, tapped M2 or self-tapped | 4 |
 | Brake | **M5 × 35 hex-head bolt**, head on the floor of the knob's hex pocket | M5 nut in the slot in the brake strap's head | 1 |
 | Brake strap's hinge | M4 × 50 socket head cap, from the +y side, head in a counterbore | M4 nut in a hex pocket on the −y side | 1 |
 | Strut eyes | M4 × 16 countersunk: the anchor's head on the +y side, the collar's on the left (−y), where it also clamps the collar | M4 nut in the far cheek's pocket | 2 |
@@ -442,7 +431,7 @@ Between them, these label every screw and nut in the base:
 | Compression spring, 10 mm OD, 10–15 mm free length | 1 | optional, for the brake knob |
 | M5 × 35 hex-head bolt | 1 | stainless, from MonsterBolts with the screws |
 | Felt, 1.5 mm, 16 × 51 mm | 1 | on the brake strap |
-| AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | with its ~4 × 2 mm diametric magnet |
+| AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K254B) | 1 | with a ~4 × 2 mm diametric magnet from an AS5600 module pack |
 
 ## Notes
 

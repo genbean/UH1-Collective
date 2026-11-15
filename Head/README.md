@@ -161,16 +161,16 @@ The only bend in the route is in the open, where the leads turn from the groove 
 | Upper | SL ON / OFF / STOW | APEM 639H/2 toggle, ON-OFF-ON | IN5 / IN6 |
 | Upper | LDG LT ON / OFF | APEM 636H/2 toggle, ON-ON | IN7 |
 | Behind the grip | Starter trigger | TE 1825910-6 tact switch in the trigger mount | IN14 |
-| Throttle | Twist grip | AS5600 module | AX4 |
-| Base | Collective | AS5600 module in the MkIII base | AX1 |
+| Throttle | Twist grip | AS5600 sensor board | AX4 |
+| Base | Collective | AS5600 sensor board in the MkIII base | AX1 |
 
 IN8, IN16, AX2 and AX3 are spare, and IN15 too if the hat's centre push isn't wired.
 
 ### Wiring and programming
 
-The throttle AS5600 goes on **AX4 (J14)** of the HeliSR Rev 4.0 board ([`PCB/HeliSR`](../PCB/HeliSR/README.md)), with **DIR to GND**. The module's pads are in two columns of through-holes on opposite edges: **VCC, OUT, GND** along one, **DIR, SCL, SDA, GPO** along the other. The pod is open above the whole board between its side rails, so wires from either column, and the DIR jumper across the back, go straight up and out of the top.
+The throttle's AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) goes on **AX4 (J14)** of the HeliSR Rev 4.0 board ([`PCB/HeliSR`](../PCB/HeliSR/README.md)), through one whole 1:N JST SR jumper (A04SR04SR30K254B). Its socket is in the middle of its back, which faces up into the pod's open top, so the plug goes straight in from above and the lead runs up out of the pod. The sensor board needs nothing else.
 
-It takes four wires, **VCC, GND, SDA and SCL**, to the AX4 port (pin 1 SDA, 2 GND, 3 VCC, 4 SCL). Remove the module's R4 (1 kΩ from GPO to GND) so the chip isn't in its OUT-pin programming mode, and measure its SDA and SCL pull-ups first (see the board's README). The firmware sets the idle and full-open angles over I²C; nothing is burnt into the chip.
+The firmware sets the idle and full-open angles over I²C; nothing is burnt into the chip. The angle rises from idle to full open, so the axis isn't inverted.
 
 ### The grip floats on O-rings
 
@@ -334,7 +334,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | O-ring, 24 mm ID × 2 mm (28 mm OD), nitrile (FOCMKEAS, [Amazon B0BWWBTL4N](https://www.amazon.com/dp/B0BWWBTL4N), 50 for $6.89) | 4 | Two in the grip's bore, one in the friction collar, one in the ceiling's groove. See [The grip floats on O-rings](#the-grip-floats-on-o-rings) |
 | Bivar SRS-4-4MM spacers (Mouser 749-SRS-4-4MM) | 4 | Between the rear wall and the HeliSR board |
 | Pen spring, up to 4 mm across | 1 | The trigger return (cut to about 13 mm) |
-| AS5600 module (WWZMDiB, Amazon B0CM3C8KFT) | 1 | The throttle's; its ~4 × 2 mm magnet goes in the shaft's cap |
+| AS5600 sensor board ([`../PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K254B) | 1 | The throttle's; a ~4 × 2 mm diametric magnet from an AS5600 module pack goes in the shaft's cap |
 | APEM 639H/2 toggle, ON-OFF-ON (Mouser 642-639H2) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
 | APEM 637H/2 toggle, (ON)-OFF-(ON) (Mouser 642-637H2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
 | APEM 636H/2 toggle, ON-ON (Mouser 642-636H2) | 1 | LDG LT ON (IN7) |
@@ -343,7 +343,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | ALPS RKJXM1015004 8-way stick switch (Mouser 688-RKJXM1015004) | 1 | SEARCH CONT hat (IN9–IN12, centre push IN15) |
 | SearchHat Rev 1.0 board, JST SM06B-SRSS-TB and a 6-pin JST SH lead | 1 | [`../PCB/SearchHat`](../PCB/SearchHat/README.md); see [`Hat/README.md`](Hat/README.md) |
 | HeliSR Rev 4.0 board with its Pro Micro and JST cables | 1 | [`../PCB/HeliSR`](../PCB/HeliSR/README.md); the throttle module goes on AX4 (J14) |
-| Hot glue | a dab | Holds the AS5600 module at the front of its grooves, and the starter switch in its pocket |
+| Hot glue | a dab | Holds the AS5600 sensor board at the front of its grooves, and the starter switch in its pocket |
 | Ballast, steel or lead | ~50 g | Only if the base's gas strut lifts too much |
 
 ## Assembly
@@ -359,10 +359,10 @@ With the lower panel off, everything inside the box goes in through its open fro
    1. Glue the magnet into its cap.
    2. Bring the shaft in through the front, over the pod.
    3. Lower it through the pod's open middle and the web. Its pin goes into the bearing hole below the pinion, and its hex slides into the pinion (a 0.15 mm clearance; a drop of glue or a wrap of tape takes up play).
-4. **AS5600 module:**
-   1. Remove the 0 Ω R1 and R4, tie DIR to GND with a jumper across the back of the board, and solder the four wires in from the back: VCC, GND, SDA and SCL (see [Wiring and programming](#wiring-and-programming)).
-   2. Slide it chip-down into its grooves from the front of the pod, one pad column on the front edge and the other at the back, until it stops.
-   3. Put a dab of hot glue at the front, and lead the wires up out of the top.
+4. **AS5600 sensor board:**
+   1. Slide it chip-down into its grooves from the front of the pod until it stops. It goes in any way round.
+   2. Put a dab of hot glue at the front.
+   3. Plug the 1:N jumper into the socket on its back from above, and lead it up out of the top (see [Wiring and programming](#wiring-and-programming)).
 5. **Throttle stops:** nothing to fit. The grip's lug runs between the groove's two end walls, which are the idle and full-open stops.
 6. **Starter trigger** (the mount is open at the back until the trigger goes on):
    1. Solder a 26–28 AWG lead, about 25 cm long, to the tips of two diagonally opposite legs of the tact switch. Diagonal legs are always the switched pair: 1 and 4, or 2 and 3, on TE's drawing. Leave the other two legs as they are.
