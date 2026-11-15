@@ -63,7 +63,7 @@ Per board. The AS5600 and the magnet come off a WWZMDiB module: lift the chip of
 | U1 | AS5600, SOIC-8 | AS5600-ASOM | | From a module |
 | C1 | 100 nF, 50 V, X7R, 1206 | Samsung CL31B104KBCNNNC | 187-CL31B104KBCNNNC | The HeliSR's C1/C2/C4 part, 0.85 mm thick |
 | C2 | 1 µF, 16 V, X7R, 1206, low profile | Walsin 1206B105J160CT | 791-1206B105J160CT | 1.15 mm thick. Any 1 µF X7R 1206, 10 V or more, no taller than 1.25 mm will do |
-| J1 | JST SH header, 4 pins, 1.0 mm, top entry | BM04B-SRSS-G-TB(LF)(SN) | 306-4BSRSSGTBLP | The HeliSR's AX port part. The tin-plated BM04B-SRSS-TB fits too but was backordered to mid-2027 |
+| J1 | JST SH header, 4 pins, 1.0 mm, top entry | BM04B-SRSS-G-TB(LF)(SN) | 306-4BSRSSGTBLP | The HeliSR's AX port part (tin-plated, like every stock SH header). BM04B-SRSS-TB fits too but was backordered to mid-2027 |
 | | JST SR jumper, 4 positions, 10 in, **1:N** | A04SR04SR30K254B | 306-A04SR04SR30K254B | One per sensor |
 | | Bare PCB, 2 layers, 1.6 mm, 23.24 mm square | | | Upload `AS5600_Rev1.0_Gerbers.zip` to a board maker (OSH Park makes 3) |
 
