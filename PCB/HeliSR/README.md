@@ -118,35 +118,12 @@ Pro Micro "A1" ─────┴── R11 10k ── VCC   ──── SDA/SC
   550 pF). Typical 4-core cable is 50–150 pF per metre, so a metre or more is within it. With 2.2 kΩ and 200 pF
   the rise time is about 0.4 µs, well inside 100 kHz's 1 µs.
 
-## AS5600 modules
+## AS5600 sensors
 
-For the common WWZMDiB module (23 × 23 mm, Amazon B0CM3C8KFT), running on the Pro Micro's 5 V:
-
-The R numbers in this list are the module's, not the board's. The pin facts are from the AS5600 datasheet (ams
-v1-06); which part on the module is R1 or R4 is from the module itself, so check yours.
-
-- **Remove the module's R1**, the 0 Ω link between VDD5V and VDD3V3: it puts 5 V on the chip's
-  3.3 V pin, whose absolute maximum is 4.0 V. The two pins are tied together only when the chip runs on 3.3 V.
-- **Check there is about 1 µF from VDD3V3 to GND.** On 5 V, VDD3V3 is the output of the chip's internal regulator,
-  and the datasheet asks for a 1 µF low-ESR ceramic there. A module built to run on 3.3 V through R1 may have only
-  100 nF on that pin, or nothing. If so, add a 1 µF ceramic between VDD3V3 and GND.
-- **Wire DIR** to GND or VCC (it floats on this module, and the chip has no pull on it). Over I²C it still sets
-  which way the angle rises (GND = clockwise, seen from the chip's top face); the firmware can invert an axis
-  either way.
-- **Remove the module's R4**, the 1 kΩ from PGO (GPO on the module) to GND. With it fitted PGO is low, which
-  selects OUT-pin programming. In that mode, pulling OUT to GND for 100 ms twice burns the
-  range into the chip for good, which can be done only once; a stray short on OUT could do it by accident. Without
-  R4 the chip's internal pull-up holds PGO high and OUT is just an output. Leave OUT unconnected.
-- **Wire VCC, GND, SDA and SCL** to the port: pin 1 SDA, 2 GND, 3 VCC, 4 SCL.
-- **Check the module's own pull-ups.** The AS5600 has none of its own; the module may add some (ams suggests
-  4.7 kΩ). With the module unpowered and unplugged, measure the resistance from SDA to VCC and from SCL to VCC. The
-  limit is the 6 mA in [The I²C circuit](#the-i²c-circuit):
-  - **Open circuit (no reading):** no pull-ups. Fit 2.2 kΩ for the board's R1–R8 as listed.
-  - **10 kΩ or 4.7 kΩ:** fine; with the board's 2.2 kΩ the bus sinks 3.3 or 3.8 mA. They also speed up the
-    rising edges on a long cable. Leave them, and fit R1–R8 as listed.
-  - **Under 2 kΩ:** too strong together with 2.2 kΩ. Remove the module's two pull-ups.
-  - Check also that the module's pull-ups go to VCC, not to the chip's 3.3 V pin; if they read open to VCC but
-    about the same value to VDD3V3, remove them, as they'd push current from the 5 V bus into the chip's regulator.
+Use the AS5600 sensor board, [`../AS5600`](../AS5600/README.md): an AS5600 wired for 5 V as its datasheet asks,
+with no pull-ups of its own, on a board the size of the WWZMDiB module it replaces. It plugs into any AX port with a
+**1:N** JST SR jumper (A04SR04SR30K254B); its connector's pins are in the port's order turned end for end to suit
+that cable. Nothing on it needs removing, measuring or jumpering.
 
 Nothing is burnt into the chip: the firmware writes each sensor's start and stop angles (ZPOS, MPOS) to its
 working registers every time it starts, so the range can be changed as often as you like.
