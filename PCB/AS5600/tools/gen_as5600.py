@@ -105,50 +105,53 @@ for i, (hx, hy) in enumerate(HOLES):
     h = place("MountingHole", "MountingHole_2.2mm_M2", f"H{i + 1}", hx, hy, 0, "M2")
     for p in h.Pads(): p.SetDrillSize(pcbnew.VECTOR2I(MM(HOLE_D), MM(HOLE_D))); p.SetSize(pcbnew.VECTOR2I(MM(HOLE_D), MM(HOLE_D)))
 
-# ---- tracks -----------------------------------------------------------------------------------------------------
-VCC_VIA = (-3.2, -3.4)                                                    # between U1 and C1, left of J1's mounting pad
-track([P[1], xy(pad(C1, 1)[0])], "VCC", PWR_W)
-track([(P[1][0], VCC_VIA[1]), VCC_VIA], "VCC", PWR_W)
-via(*VCC_VIA, "VCC")
-track([P[2], C2_TOP], "VDD3V3", PWR_W)
-track([P[4], (C2_BOT[0], P[4][1])], "GND", PWR_W)                         # pin 4 into C2's ground pad
-track([C2_BOT, (C2_BOT[0], C2_BOT[1] + 1.5)], "GND", PWR_W); via(C2_BOT[0], C2_BOT[1] + 1.5, "GND")
-c1g = xy(pad(C1, 2)[0])
-track([c1g, (c1g[0] + 1.45, c1g[1])], "GND", PWR_W); via(c1g[0] + 1.45, c1g[1], "GND")
-track([P[8], (P[8][0], -3.4)], "GND", SIG_W); via(P[8][0], -3.4, "GND")  # DIR to GND
-SCL_VIA, SDA_VIA = (4.4, P[7][1]), (4.4, P[6][1])
-track([P[7], SCL_VIA], "SCL"); via(*SCL_VIA, "SCL")
-track([P[6], SDA_VIA], "SDA"); via(*SDA_VIA, "SDA")
+# ---- tracks and test pads -------------------------------------------------------------------------------------------
+# Vias only where a net has to change sides (SCL, SDA, VCC to J1 on the back) and four to tie the two ground pours
+# together, each at least 1 mm clear of every other via, pad and courtyard, and none under a part
+# (verify_as5600.py checks). Everything else stays on the front: U1's ground pins (4, and 8 = DIR), C1, C2 and the GND
+# pad join the front pour directly.
+# Test pads: one row across the front under U1, TP_PITCH apart, labelled underneath (bare 1.0 mm pads, nothing to
+# fit). OUT is the AS5600's analog / PWM output, otherwise unused. The row sits high enough that the end pads'
+# courtyards clear the bottom holes'.
 BK = pcbnew.B_Cu
-track([SCL_VIA, (SCL_VIA[0] - abs(JP[1][1] - SCL_VIA[1]), JP[1][1]), JP[1]], "SCL", SIG_W, BK)
-track([SDA_VIA, (SDA_VIA[0] - abs(JP[4][1] - SDA_VIA[1]), JP[4][1]), JP[4]], "SDA", SIG_W, BK)
-track([VCC_VIA, (VCC_VIA[0], JP[2][1]), JP[2]], "VCC", PWR_W, BK)          # down, then across between the mounting pads
-for x, y in ((-6.0, -6.0), (6.0, -6.0), (8.5, 4.3), (-8.5, 4.3), (-8.0, -2.0), (7.5, 2.8)):   # ground stitching
-    via(x, y, "GND")
-
-# ---- test pads: one row across the front under U1, 2.54 mm apart, labelled underneath (bare 1.0 mm pads, nothing
-# to fit). OUT is the AS5600's analog / PWM output, otherwise unused. The row sits high enough that the end pads'
-# courtyards clear the bottom holes'. 3V3 runs down the left on the front; OUT and 5V come down on the back (U1's
-# left pins and C2 box them in on the front) and up through a via over their pads; SDA and SCL run down the right.
 TP_Y, TP_PITCH = 4.85, 2.6
-ORDER = [("3V3", "VDD3V3"), ("OUT", "OUT"), ("GND", "GND"), ("5V", "VCC"), ("SDA", "SDA"), ("SCL", "SCL")]
+ORDER = [("5V", "VCC"), ("3V3", "VDD3V3"), ("OUT", "OUT"), ("GND", "GND"), ("SDA", "SDA"), ("SCL", "SCL")]
 TP = {label: (name, ((i - 2.5) * TP_PITCH, TP_Y)) for i, (label, name) in enumerate(ORDER)}
 for i, (label, (name, (x, y))) in enumerate(TP.items()):
     f = place("TestPoint", "TestPoint_Pad_D1.0mm", f"TP{i + 1}", x, y, 0, label)
     connect(f, 1, name)
 connect(U1, 3, "OUT")
-x3, xo, xg, x5, xd, xc = (TP[k][1][0] for k, _ in ORDER)
-X_LEFT = -6.6                                                             # 3V3's run, left of C2
-track([C2_TOP, (X_LEFT, C2_TOP[1]), (X_LEFT, TP_Y - 0.6), (x3, TP_Y)], "VDD3V3", PWR_W)
-OUT_UP, OUT_DOWN = (-4.0, 0.84), (-4.0, 3.6)                              # OUT's vias: by pin 3, and over its pad
-track([P[3], (-3.6, P[3][1]), OUT_UP], "OUT"); via(*OUT_UP, "OUT")
-track([OUT_UP, OUT_DOWN], "OUT", SIG_W, BK); via(*OUT_DOWN, "OUT")
-track([OUT_DOWN, (xo, TP_Y)], "OUT")
-V5 = (x5, 3.9)                                                            # 5V: on from VCC's back run, under J1's
-track([(VCC_VIA[0], JP[2][1]), (VCC_VIA[0], 3.3), (-2.6, V5[1]), V5], "VCC", PWR_W, BK)    # lower mounting pad
-via(*V5, "VCC"); track([V5, (x5, TP_Y)], "VCC", PWR_W)
-track([SDA_VIA, (SDA_VIA[0], TP_Y - 0.6), (xd, TP_Y)], "SDA")
-track([SCL_VIA, (5.5, SCL_VIA[1]), (xc, SCL_VIA[1] + (xc - 5.5)), (xc, TP_Y)], "SCL")
+x5, x3, xo, xg, xd, xc = (TP[k][1][0] for k, _ in ORDER)
+UP = TP_Y - 0.65                                                          # where each run turns into its test pad
+
+# VCC: pin 1 up to C1, out along the top to the left edge, and down past C2 to the 5V pad. It goes through to the back
+# at VCC_VIA, and across to J1 pin 2 between J1's mounting pads.
+X_VCC = -8.5
+VCC_VIA = (X_VCC, -1.5)
+c1v = xy(pad(C1, 1)[0])
+track([P[1], c1v, (X_VCC + 0.5, c1v[1]), (X_VCC, c1v[1] + 0.5), (X_VCC, UP), (x5, TP_Y)], "VCC", PWR_W)
+via(*VCC_VIA, "VCC")
+track([VCC_VIA, (VCC_VIA[0] + 1.0, JP[2][1]), JP[2]], "VCC", PWR_W, BK)
+# VDD3V3: pin 2 to C2, and down the gap between U1's left pins and C2 to the 3V3 pad
+X3 = -3.875
+track([P[2], C2_TOP], "VDD3V3", PWR_W)
+track([(X3, P[2][1]), (X3, UP), (x3, TP_Y)], "VDD3V3")
+# OUT: from pin 3 in under U1's body, out between pins 4 and 5, down to the OUT pad
+XO = -0.6
+track([P[3], (XO, P[3][1]), (XO, UP), (xo, TP_Y)], "OUT")
+track([P[4], (P[4][0], P[4][1] + 1.6)], "GND", PWR_W)                    # pin 4 straight down into the front pour
+# SCL, SDA: out to the right, through to the back clear of U1, and on the back to J1 pins 1 and 4; on the front down
+# to their pads, SCL round the outside of SDA
+SCL_VIA, SDA_VIA = (5.6, -1.0), (5.6, 1.0)
+track([P[7], (4.6, P[7][1]), (4.95, SCL_VIA[1]), SCL_VIA], "SCL"); via(*SCL_VIA, "SCL")
+track([P[6], (4.6, P[6][1]), (4.95, SDA_VIA[1]), SDA_VIA], "SDA"); via(*SDA_VIA, "SDA")
+track([SCL_VIA, (SCL_VIA[0] - 0.5, JP[1][1]), JP[1]], "SCL", SIG_W, BK)
+track([SDA_VIA, (SDA_VIA[0] - 0.5, JP[4][1]), JP[4]], "SDA", SIG_W, BK)
+X_SCL = 7.0
+track([SCL_VIA, (X_SCL, SCL_VIA[1]), (X_SCL, UP), (xc, TP_Y)], "SCL")
+track([SDA_VIA, (SDA_VIA[0], UP), (xd, TP_Y)], "SDA")
+for x, y in ((0.0, -10.3), (9.5, -1.0), (-10.0, 1.5), (0.0, 9.0)):        # the two ground pours tied together
+    via(x, y, "GND")
 
 # ---- ground pours, both sides -------------------------------------------------------------------------------------
 for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
@@ -171,8 +174,8 @@ text("AS5600 Rev 1.0", 0, -8.7)
 for label, (_, (x, y)) in TP.items():                                    # each test pad's name, under it
     text(label, x, y + 1.4)
 text("UH1-Collective", 0, -7.0, back=True)
-for n, sig in J1_PIN.items():                                             # on the back, past the SDA/SCL vias
-    text(f"{n} {sig}", JP[n][0] + 5.9, JP[n][1], back=True, size=0.8)
+for n, sig in J1_PIN.items():                                             # on the back, level with each pin, on the
+    text(f"{n} {sig}", JP[n][0] - 5.9, JP[n][1], back=True, size=0.8)    # mounting pads' side (vias on the other)
 text("1:N SR CABLE", 0, 6.4, back=True)
 text("TO HeliSR AX PORT", 0, 7.6, back=True, size=0.8)
 

@@ -92,6 +92,7 @@ DIR is tied to GND, so the angle rises clockwise as seen from the chip's face. T
 ## Checks done
 
 - **KiCad DRC:** 0 violations, 0 unconnected (0.2 mm clearance, 0.25 mm signal and 0.4 mm power tracks, 0.6 / 0.3 mm vias).
+- **Vias:** seven, only where a net has to change sides (SCL, SDA and VCC to J1) and four to tie the ground pours together. Each is at least 1 mm clear, edge to edge, of every other via, every pad and every part's courtyard on both sides, and none is under a part. `tools/verify_as5600.py` checks this on every build.
 - **Netlist:** `tools/verify_as5600.py` checks every pad, the test pads included, against tables written out by hand from the AS5600 datasheet and the HeliSR port's pinout through a 1:N cable, not from the generator. It also checks the outline (23.24 mm), the holes, U1 and J1 on the centre, and C1, C2 within 7 mm of it.
 
 ## Rebuilding

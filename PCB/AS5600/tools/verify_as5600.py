@@ -62,7 +62,30 @@ holes = sorted((round(mm(p.GetPosition().x) - cx, 3), round(mm(p.GetPosition().y
                for f in b.GetFootprints() if f.GetReference().startswith("H") for p in f.Pads())
 want_holes = sorted((sx * 8.0, sy * 8.0, 2.4) for sx in (-1, 1) for sy in (-1, 1))      # a 16 mm square
 if holes != want_holes: bad.append(f"holes {holes}")
-print(f"{len(P)} pads checked")
+# vias: each at least VIA_GAP clear (edge to edge) of every other via, every pad on either side and every part's
+# courtyard on either side, and none inside a courtyard (under a part). Pads and courtyards are taken as their
+# bounding boxes, which errs on the safe side for round ones.
+VIA_GAP = 1.0
+def gap(x, y, r, bb):
+    dx = max(mm(bb.GetX()) - x, 0, x - mm(bb.GetRight())); dy = max(mm(bb.GetY()) - y, 0, y - mm(bb.GetBottom()))
+    return (dx * dx + dy * dy) ** 0.5 - r
+vias = [t for t in b.GetTracks() if t.GetClass() == "PCB_VIA"]
+boxes = []
+for f in b.GetFootprints():
+    for side in (pcbnew.F_CrtYd, pcbnew.B_CrtYd):
+        c = f.GetCourtyard(side).BBox()
+        if c.GetWidth() > 0: boxes.append((f"{f.GetReference()} courtyard", c))
+    for p in f.Pads(): boxes.append((f"{f.GetReference()} pad {p.GetNumber()}", p.GetBoundingBox()))
+for i, v in enumerate(vias):
+    x, y, r = mm(v.GetPosition().x), mm(v.GetPosition().y), mm(v.GetWidth(pcbnew.F_Cu)) / 2
+    for w in vias[i + 1:]:
+        d = ((x - mm(w.GetPosition().x)) ** 2 + (y - mm(w.GetPosition().y)) ** 2) ** 0.5 - r - mm(w.GetWidth(pcbnew.F_Cu)) / 2
+        if d < VIA_GAP: bad.append(f"vias at ({x - cx:.2f}, {y - cy:.2f}) and ({mm(w.GetPosition().x) - cx:.2f}, "
+                                   f"{mm(w.GetPosition().y) - cy:.2f}) {d:.2f} mm apart")
+    for what, bb in boxes:
+        d = gap(x, y, r, bb)
+        if d < VIA_GAP: bad.append(f"via at ({x - cx:.2f}, {y - cy:.2f}) {d:.2f} mm from {what}")
+print(f"{len(P)} pads and {len(vias)} vias checked")
 if bad:
     print("\n".join(bad)); raise SystemExit(f"{len(bad)} errors")
 print("netlist and placement OK")
