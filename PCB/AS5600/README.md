@@ -27,7 +27,10 @@ The AS5600 runs in 5 V mode, wired as its datasheet asks (ams v1-06, page 3, Pin
 
 There are no pull-ups on this board: each HeliSR port has its own 2.2 kΩ pair.
 
-**Test pads** on the front, bare 1.0 mm pads labelled on the silkscreen, for a meter or a scope probe: **5V**, **GND** and **3V3** (the chip's regulator, about 3.3 V when it's running) along the top, **SCL** and **SDA** on the right, and **OUT** on the left (the AS5600's analog output, a voltage that follows the angle, unless something sets it to PWM). Nothing is burnt into the chip; the HeliSR writes the start and stop angles every time it starts.
+**Test pads:** one row across the front under the chip, bare 1.0 mm pads 2.6 mm apart, labelled underneath, for a meter or a scope probe. Left to right:
+- **3V3:** the chip's own regulator output. The board runs on 5 V; this reads about 3.3 V when the chip is powered and working.
+- **OUT:** the AS5600's analog output, a voltage that follows the angle, unless something sets it to PWM.
+- **GND**, **5V**, **SDA**, **SCL**. Nothing is burnt into the chip; the HeliSR writes the start and stop angles every time it starts.
 
 ## Connector and cable
 
