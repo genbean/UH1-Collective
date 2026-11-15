@@ -6,11 +6,17 @@
 import json, math, sys
 import numpy as np
 import pcbnew
+try:                                           # KiCad's internal checks (wx asserts) log instead of opening a dialog
+    import wx; wx.DisableAsserts()
+except Exception:
+    pass
 from PIL import Image, ImageDraw
 
 src, dst = sys.argv[1:3]
 TARGET = float(sys.argv[3]) if len(sys.argv) > 3 else 5.0
-VIA_R, MARGIN, H2H, PAD_CLR, STEP = 0.30, 0.05, 0.60, 0.15, 0.1
+# PAD_CLR: copper gap to every pad; H2H: hole gap to every other hole and via (0.9 = 0.6 mm of copper between vias).
+# Both wide, and no via under any part's courtyard: solder paste runs along a part's underside onto a nearby via.
+VIA_R, MARGIN, H2H, PAD_CLR, STEP = 0.30, 0.05, 0.90, 0.45, 0.1
 RES = 0.05
 MM, mm = pcbnew.FromMM, pcbnew.ToMM
 ERR = MM(0.002)
@@ -63,9 +69,17 @@ for f in b.GetFootprints():
                 for o in item_outlines(p, lay): dp.polygon(o, fill=1, outline=1)
         if p.GetDrillSize().x > 0:
             holes.append((mm(p.GetPosition().x), mm(p.GetPosition().y), mm(p.GetDrillSize().x) / 2, p.GetNetname()))
-    if f.GetReference().startswith("SW"):             # the switches' ground tabs rest on their courtyards
-        f.BuildCourtyardCaches()
-        for o in outlines(f.GetCourtyard(pcbnew.F_CrtYd)): dp.polygon(o, fill=1, outline=1)
+    smd = not all(p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH for p in f.Pads())
+    if smd and not f.GetReference().startswith("H"):  # every SMD part, either side: no via under its courtyard
+        cs = [g.GetBoundingBox() for g in f.GraphicalItems() if g.GetLayer() in (pcbnew.F_CrtYd, pcbnew.B_CrtYd)]
+        if cs:                                        # its bounding box, as gen_v4.py's rule areas
+            dp.rectangle([*px(min(mm(r.GetLeft()) for r in cs), min(mm(r.GetTop()) for r in cs)),
+                          *px(max(mm(r.GetRight()) for r in cs), max(mm(r.GetBottom()) for r in cs))], fill=1)
+ko = Image.new("1", (NX, NY), 0); dk = ImageDraw.Draw(ko)          # via-free rule areas (no vias near pads)
+for z in b.Zones():
+    if z.GetIsRuleArea() and z.GetDoNotAllowVias():
+        for o in outlines(z.Outline()): dk.polygon(o, fill=1, outline=1)
+ok &= box_sum(np.asarray(ko, dtype=bool), int(math.ceil((VIA_R + MARGIN) / RES))) == 0
 vias = [(mm(v.GetPosition().x), mm(v.GetPosition().y), mm(v.GetDrillValue()) / 2, v.GetNetname())
         for v in b.GetTracks() if v.GetClass() == "PCB_VIA"]
 ok &= box_sum(np.asarray(pads, dtype=bool), int(math.ceil((VIA_R + PAD_CLR) / RES))) == 0
@@ -106,6 +120,6 @@ while True:
     x, y, k = float(cx[i]), float(cy[i]), (int(ckey[i, 0]), int(ckey[i, 1]))
     chosen.append((round(x, 2), round(y, 2)))
     update(x, y, k)
-    alive &= np.hypot(cx - x, cy - y) >= 2 * 0.15 + H2H + 0.3      # vias keep hole-to-hole among themselves
+    alive &= np.hypot(cx - x, cy - y) >= 2 * 0.15 + H2H + 0.05     # vias keep hole-to-hole among themselves
 print(len(chosen), "vias chosen:", chosen)
 json.dump([list(c) for c in chosen], open(dst, "w"))
