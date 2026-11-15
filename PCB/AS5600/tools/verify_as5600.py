@@ -20,9 +20,17 @@ def want(ref, num, name):
     got = P.get((ref, str(num)))
     if got != {name}: bad.append(f"{ref} pad {num}: {got}, want {name!r}")
 
-# AS5600 SOIC-8: 1 VDD5V, 2 VDD3V3, 3 OUT, 4 GND, 5 PGO, 6 SDA, 7 SCL, 8 DIR
-for n, name in {1: "VCC", 2: "VDD3V3", 3: "", 4: "GND", 5: "", 6: "SDA", 7: "SCL", 8: "GND"}.items():
+# AS5600 SOIC-8: 1 VDD5V, 2 VDD3V3, 3 OUT (to its test pad only), 4 GND, 5 PGO, 6 SDA, 7 SCL, 8 DIR
+for n, name in {1: "VCC", 2: "VDD3V3", 3: "OUT", 4: "GND", 5: "", 6: "SDA", 7: "SCL", 8: "GND"}.items():
     want("U1", n, name)
+# test pads on the front, by value (their label)
+tp = {f.GetValue(): f for f in b.GetFootprints() if f.GetReference().startswith("TP")}
+for label, name in {"5V": "VCC", "GND": "GND", "3V3": "VDD3V3", "SCL": "SCL", "SDA": "SDA", "OUT": "OUT"}.items():
+    f = tp.get(label)
+    if f is None: bad.append(f"no test pad {label}"); continue
+    want(f.GetReference(), 1, name)
+    if f.IsFlipped(): bad.append(f"test pad {label} on the back")
+if len(tp) != 6: bad.append(f"{len(tp)} test pads, want 6")
 # HeliSR AX port: 1 SDA, 2 GND, 3 VCC, 4 SCL; the A04SR04SR30K254B jumper is 1:N, so the far end sees pin n as 5 - n
 port = {1: "SDA", 2: "GND", 3: "VCC", 4: "SCL"}
 for n in range(1, 5): want("J1", n, port[5 - n])

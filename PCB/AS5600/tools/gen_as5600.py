@@ -123,8 +123,25 @@ BK = pcbnew.B_Cu
 track([SCL_VIA, (SCL_VIA[0] - abs(JP[1][1] - SCL_VIA[1]), JP[1][1]), JP[1]], "SCL", SIG_W, BK)
 track([SDA_VIA, (SDA_VIA[0] - abs(JP[4][1] - SDA_VIA[1]), JP[4][1]), JP[4]], "SDA", SIG_W, BK)
 track([VCC_VIA, (VCC_VIA[0], JP[2][1]), JP[2]], "VCC", PWR_W, BK)          # down, then across between the mounting pads
-for x, y in ((-6.0, -6.0), (6.0, -6.0), (6.0, 5.0), (-1.0, 4.6), (-7.5, 0.0), (7.5, 2.8)):   # ground stitching
+for x, y in ((-6.0, -6.0), (6.0, -6.0), (6.0, 5.0), (-1.0, 4.6), (-8.0, -2.0), (7.5, 2.8)):   # ground stitching
     via(x, y, "GND")
+
+# ---- test pads on the front (bare 1.0 mm pads, nothing to fit): 5V, GND, 3V3 along the top, SCL and SDA on the
+# right by their vias, OUT on the left (the AS5600's analog / PWM output, otherwise unused). 3V3 sits in from the
+# corner hole's courtyard ------------------------------------------------------------------------------------------
+TP_Y = -7.3
+TP = {"5V": ("VCC", (P[1][0], TP_Y)), "GND": ("GND", (c1g[0], TP_Y)), "3V3": ("VDD3V3", (-4.6, TP_Y)),
+      "SCL": ("SCL", (6.6, -1.4)), "SDA": ("SDA", (6.6, 1.4)), "OUT": ("OUT", (-8.0, 0.84))}
+for i, (label, (name, (x, y))) in enumerate(TP.items()):
+    f = place("TestPoint", "TestPoint_Pad_D1.0mm", f"TP{i + 1}", x, y, 0, label)
+    connect(f, 1, name)
+connect(U1, 3, "OUT")
+track([xy(pad(C1, 1)[0]), TP["5V"][1]], "VCC", PWR_W)                 # straight up from C1
+track([c1g, TP["GND"][1]], "GND", PWR_W)
+t3 = TP["3V3"][1]
+track([C2_TOP, (C2_TOP[0], t3[1] + 0.9), (t3[0], t3[1] + 0.3), t3], "VDD3V3", PWR_W)   # up the left from C2
+track([SCL_VIA, TP["SCL"][1]], "SCL"); track([SDA_VIA, TP["SDA"][1]], "SDA")
+track([P[3], (-3.6, P[3][1]), (-3.8, TP["OUT"][1][1]), TP["OUT"][1]], "OUT")   # under C2's body, between its pads
 
 # ---- ground pours, both sides -------------------------------------------------------------------------------------
 for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
@@ -144,7 +161,11 @@ def text(s, x, y, back=False, size=0.8, just=0):
     if back: t.SetMirrored(True)
     b.Add(t)
 text("AS5600 Rev 1.0", 0, 7.2)
-text("UH1-Collective", 0, -8.7, size=0.8)
+for label, (_, (x, y)) in TP.items():                                    # each test pad's name
+    if y == TP_Y: text(label, x, TP_Y - 1.6)                              # over the top row
+    elif label == "OUT": text(label, x, y + 1.5)                          # under OUT
+    else: text(label, x + 2.3, y)                                         # right of SCL, SDA
+text("UH1-Collective", 0, -7.0, back=True)
 for n, sig in J1_PIN.items():                                             # on the back, past the SDA/SCL vias
     text(f"{n} {sig}", JP[n][0] + 5.9, JP[n][1], back=True, size=0.8)
 text("1:N SR CABLE", 0, 6.4, back=True)

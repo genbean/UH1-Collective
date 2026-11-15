@@ -18,14 +18,16 @@ The AS5600 runs in 5 V mode, wired as its datasheet asks (ams v1-06, page 3, Pin
 |---|---|---|
 | 1 | VDD5V | VCC (5 V from the HeliSR), with C1 100 nF to GND |
 | 2 | VDD3V3 | C2 1 µF to GND only: in 5 V mode it's the chip's own regulator output |
-| 3 | OUT | not connected |
+| 3 | OUT | the OUT test pad only |
 | 4 | GND | GND |
 | 5 | PGO | not connected: the chip's internal pull-up holds it high, so OUT can't burn anything into the chip |
 | 6 | SDA | J1 pin 4 |
 | 7 | SCL | J1 pin 1 |
 | 8 | DIR | GND: the angle rises clockwise, seen from the chip's face |
 
-There are no pull-ups on this board: each HeliSR port has its own 2.2 kΩ pair. Nothing is burnt into the chip; the HeliSR writes the start and stop angles every time it starts.
+There are no pull-ups on this board: each HeliSR port has its own 2.2 kΩ pair.
+
+**Test pads** on the front, bare 1.0 mm pads labelled on the silkscreen, for a meter or a scope probe: **5V**, **GND** and **3V3** (the chip's regulator, about 3.3 V when it's running) along the top, **SCL** and **SDA** on the right, and **OUT** on the left (the AS5600's analog output, a voltage that follows the angle, unless something sets it to PWM). Nothing is burnt into the chip; the HeliSR writes the start and stop angles every time it starts.
 
 ## Connector and cable
 
@@ -48,7 +50,7 @@ That's the HeliSR port's order (1 SDA, 2 GND, 3 VCC, 4 SCL) turned end for end, 
 
 ## How it fits
 
-- **Front:** U1 sits on the board's centre, where the module's chip was, so it stays centred over the magnet. C1 and C2 sit within 7 mm of the centre, clear of the head's rails (the outer 1.5 mm of two edges) and the base's M2 screw heads (at the corners). The tallest part is the AS5600 itself, the same chip as on the module; C2 is 1.15 mm and C1 0.85 mm. The base's cover is 2.0 mm off the board face, and the head's way in is 1.9 mm deep under the board.
+- **Front:** U1 sits on the board's centre, where the module's chip was, so it stays centred over the magnet. The test pads are flat. C1 and C2 sit within 7 mm of the centre, clear of the head's rails (the outer 1.5 mm of two edges) and the base's M2 screw heads (at the corners). The tallest part is the AS5600 itself, the same chip as on the module; C2 is 1.15 mm and C1 0.85 mm. The base's cover is 2.0 mm off the board face, and the head's way in is 1.9 mm deep under the board.
 - **Back:** only J1 (a 7.9 × 5.3 mm footprint), in the middle.
   - **In the base**, J1 and the plug sit in the 13 mm axial bore behind the pocket, and the lead runs on down the bore. The pocket's four posts and two ledges bear on the board's corners and edges, well away from J1.
   - **In the head**, the board goes in chip down, so J1 faces up into the pod's open top. Plug the jumper in after the board is in its grooves.
@@ -87,7 +89,7 @@ DIR is tied to GND, so the angle rises clockwise as seen from the chip's face. T
 ## Checks done
 
 - **KiCad DRC:** 0 violations, 0 unconnected (0.2 mm clearance, 0.25 mm signal and 0.4 mm power tracks, 0.6 / 0.3 mm vias).
-- **Netlist:** `tools/verify_as5600.py` checks every pad against tables written out by hand from the AS5600 datasheet and the HeliSR port's pinout through a 1:N cable, not from the generator. It also checks the outline (23.24 mm), the holes, U1 and J1 on the centre, and C1, C2 within 7 mm of it.
+- **Netlist:** `tools/verify_as5600.py` checks every pad, the test pads included, against tables written out by hand from the AS5600 datasheet and the HeliSR port's pinout through a 1:N cable, not from the generator. It also checks the outline (23.24 mm), the holes, U1 and J1 on the centre, and C1, C2 within 7 mm of it.
 
 ## Rebuilding
 
