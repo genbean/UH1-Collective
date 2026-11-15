@@ -110,15 +110,17 @@ for i, (hx, hy) in enumerate(HOLES):
 # together, each at least 1 mm clear of every other via, pad and courtyard, and none under a part
 # (verify_as5600.py checks). Everything else stays on the front: U1's ground pins (4, and 8 = DIR), C1, C2 and the GND
 # pad join the front pour directly.
-# Test pads: one row across the front under U1, TP_PITCH apart, labelled underneath (bare 1.0 mm pads, nothing to
-# fit). OUT is the AS5600's analog / PWM output, otherwise unused. The row sits high enough that the end pads'
-# courtyards clear the bottom holes'.
+# Test points: one row under U1, TP_PITCH apart, plated through-holes (1.5 mm pads, 0.7 mm holes: a probe or a wire
+# from either side), labelled underneath on both sides. OUT is the AS5600's analog / PWM output, otherwise unused. The
+# row sits high enough that the end pads' courtyards clear the bottom holes'.
 BK = pcbnew.B_Cu
-TP_Y, TP_PITCH = 4.85, 2.6
+TP_Y, TP_PITCH = 4.6, 2.6
 ORDER = [("5V", "VCC"), ("3V3", "VDD3V3"), ("OUT", "OUT"), ("GND", "GND"), ("SDA", "SDA"), ("SCL", "SCL")]
 TP = {label: (name, ((i - 2.5) * TP_PITCH, TP_Y)) for i, (label, name) in enumerate(ORDER)}
 for i, (label, (name, (x, y))) in enumerate(TP.items()):
-    f = place("TestPoint", "TestPoint_Pad_D1.0mm", f"TP{i + 1}", x, y, 0, label)
+    f = place("TestPoint", "TestPoint_THTPad_D1.5mm_Drill0.7mm", f"TP{i + 1}", x, y, 0, label)
+    for g in [g for g in f.GraphicalItems() if g.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS)]:
+        f.Remove(g)                                                       # its silk ring: the labels mark them
     connect(f, 1, name)
 connect(U1, 3, "OUT")
 x5, x3, xo, xg, xd, xc = (TP[k][1][0] for k, _ in ORDER)
@@ -171,13 +173,13 @@ def text(s, x, y, back=False, size=0.8, just=0):
     if back: t.SetMirrored(True)
     b.Add(t)
 text("AS5600 Rev 1.0", 0, -8.7)
-for label, (_, (x, y)) in TP.items():                                    # each test pad's name, under it
-    text(label, x, y + 1.4)
-text("UH1-Collective", 0, -7.0, back=True)
+for label, (_, (x, y)) in TP.items():                                    # each test point's name, under it, both sides
+    text(label, x, y + 1.4); text(label, x, y + 1.4, back=True)
 for n, sig in J1_PIN.items():                                             # on the back, level with each pin, on the
     text(f"{n} {sig}", JP[n][0] - 5.9, JP[n][1], back=True, size=0.8)    # mounting pads' side (vias on the other)
-text("1:N SR CABLE", 0, 6.4, back=True)
-text("TO HeliSR AX PORT", 0, 7.6, back=True, size=0.8)
+text("UH1-Collective", 0, -8.8, back=True)                               # the back's top, over J1
+text("1:N SR CABLE", 0, -7.4, back=True)
+text("TO HeliSR AX PORT", 0, -6.2, back=True)
 
 # ---- rules --------------------------------------------------------------------------------------------------------
 ds = b.GetDesignSettings()

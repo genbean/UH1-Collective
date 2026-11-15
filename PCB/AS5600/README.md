@@ -18,7 +18,7 @@ The AS5600 runs in 5 V mode, wired as its datasheet asks (ams v1-06, page 3, Pin
 |---|---|---|
 | 1 | VDD5V | VCC (5 V from the HeliSR), with C1 100 nF to GND |
 | 2 | VDD3V3 | C2 1 µF to GND only: in 5 V mode it's the chip's own regulator output |
-| 3 | OUT | the OUT test pad only |
+| 3 | OUT | the OUT test point only |
 | 4 | GND | GND |
 | 5 | PGO | not connected: the chip's internal pull-up holds it high, so OUT can't burn anything into the chip |
 | 6 | SDA | J1 pin 4 |
@@ -27,7 +27,7 @@ The AS5600 runs in 5 V mode, wired as its datasheet asks (ams v1-06, page 3, Pin
 
 There are no pull-ups on this board: each HeliSR port has its own 2.2 kΩ pair.
 
-**Test pads:** one row across the front under the chip, bare 1.0 mm pads 2.6 mm apart, labelled underneath, for a meter or a scope probe. Left to right:
+**Test points:** one row under the chip, 2.6 mm apart: plated through-holes (1.5 mm pads, 0.7 mm holes), so a meter or scope probe, or a wire, reaches them from either side. Each is labelled underneath on both sides. Left to right, seen from the front:
 - **3V3:** the chip's own regulator output. The board runs on 5 V; this reads about 3.3 V when the chip is powered and working.
 - **OUT:** the AS5600's analog output, a voltage that follows the angle, unless something sets it to PWM.
 - **GND**, **5V**, **SDA**, **SCL**. Nothing is burnt into the chip; the HeliSR writes the start and stop angles every time it starts.
@@ -53,7 +53,7 @@ That's the HeliSR port's order (1 SDA, 2 GND, 3 VCC, 4 SCL) turned end for end, 
 
 ## How it fits
 
-- **Front:** U1 sits on the board's centre, where the module's chip was, so it stays centred over the magnet. The test pads are flat. C1 and C2 sit within 7 mm of the centre, clear of the head's rails (the outer 1.5 mm of two edges) and the base's M2 screw heads (at the corners). The tallest part is the AS5600 itself, the same chip as on the module; C2 is 1.15 mm and C1 0.85 mm. The base's cover is 2.0 mm off the board face, and the head's way in is 1.9 mm deep under the board.
+- **Front:** U1 sits on the board's centre, where the module's chip was, so it stays centred over the magnet. The test points are flush with the board; leave them empty (no wires or pins) when it goes in, as the base's cover is close. C1 and C2 sit within 7 mm of the centre, clear of the head's rails (the outer 1.5 mm of two edges) and the base's M2 screw heads (at the corners). The tallest part is the AS5600 itself, the same chip as on the module; C2 is 1.15 mm and C1 0.85 mm. The base's cover is 2.0 mm off the board face, and the head's way in is 1.9 mm deep under the board.
 - **Back:** only J1 (a 7.9 × 5.3 mm footprint), in the middle.
   - **In the base**, J1 and the plug sit in the 13 mm axial bore behind the pocket, and the lead runs on down the bore. The pocket's four posts and two ledges bear on the board's corners and edges, well away from J1.
   - **In the head**, the board goes in chip down, so J1 faces up into the pod's open top. Plug the jumper in after the board is in its grooves.
@@ -93,7 +93,7 @@ DIR is tied to GND, so the angle rises clockwise as seen from the chip's face. T
 
 - **KiCad DRC:** 0 violations, 0 unconnected (0.2 mm clearance, 0.25 mm signal and 0.4 mm power tracks, 0.6 / 0.3 mm vias).
 - **Vias:** seven, only where a net has to change sides (SCL, SDA and VCC to J1) and four to tie the ground pours together. Each is at least 1 mm clear, edge to edge, of every other via, every pad and every part's courtyard on both sides, and none is under a part. `tools/verify_as5600.py` checks this on every build.
-- **Netlist:** `tools/verify_as5600.py` checks every pad, the test pads included, against tables written out by hand from the AS5600 datasheet and the HeliSR port's pinout through a 1:N cable, not from the generator. It also checks the outline (23.24 mm), the holes, U1 and J1 on the centre, and C1, C2 within 7 mm of it.
+- **Netlist:** `tools/verify_as5600.py` checks every pad, the test points included, against tables written out by hand from the AS5600 datasheet and the HeliSR port's pinout through a 1:N cable, not from the generator. It also checks the outline (23.24 mm), the holes, U1 and J1 on the centre, and C1, C2 within 7 mm of it.
 
 ## Rebuilding
 
