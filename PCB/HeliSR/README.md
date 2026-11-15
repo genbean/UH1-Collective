@@ -231,6 +231,10 @@ the collective's BOM, [`../../BOM`](../../BOM).
    it put a PTS810 between AX1 and the bottom-right hole, where the RST track already ran on the back, cut that track
    there with two vias, removed its run to the far end, moved the RST and J7 labels and refilled the pours.
    `gen_v4.py` now places the PTS810 there itself, so a fresh rebuild doesn't need that step.
+   `r11_vias_v4.py` then took the three vias out from under R11 (the AX4_SCL via there is the likely cause of the first
+   board's short), added a no-via rule area over R11's courtyard, re-routed what they had joined with Freerouting, and
+   added GND stitching vias where pour pieces were cut off. The one AX4_SCL link it left open (R8 to J14 pin 4) was
+   joined by one via at 36.26, 13.25, inside J14's outline, clear of every resistor, capacitor and the switch.
 4. `verify_netlist_v4.py` checks the netlist against the reference board and input map kept in `tools/` for it, and
    against the PCA9546A datasheet's pinout, and writes the input map.
 5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders. `tools/make_bom.py` (at the repo root) then rewrites the
@@ -246,7 +250,8 @@ the collective's BOM, [`../../BOM`](../../BOM).
 - **Clearance:** the cheap-fab rules above. All copper is at least 0.5 mm from the edge, and every track and via at
   least 3.7 mm from a hole centre (every pad 4.1 mm). No neck-downs: every signal track is 0.2 mm and every VCC/GND
   track 0.3 mm.
-- **Routing:** 983 mm of track, 79 vias: 45 routed (two of them RST's, beside the button) and 34 GND stitching vias.
+- **Routing:** 992 mm of track, 79 vias: 41 signal (two of them RST's, beside the button) and 38 GND. No via is
+  under R11.
   The I²C lines from U3 to the ports are 6–29 mm long.
 - **RST button:** nothing under the PTS810 but its own pads and a GND track; the two RST vias beside it touch its
   outline by 0.1 mm at the RST pads' side. Every via is tented.

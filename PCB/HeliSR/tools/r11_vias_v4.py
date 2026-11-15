@@ -1,7 +1,6 @@
-# HeliSR Rev 4.0, on the routed board: no via under any resistor, capacitor or the RST switch, and the GND pours
-# stitched where they were cut off.
+# HeliSR Rev 4.0, on the routed board: no via under R11, and the GND pours stitched where they were cut off.
 # On the first board built, solder paste ran along R11's underside onto the AX4 SCL via between its pads. This takes
-# out every via under a resistor's, capacitor's or RST's courtyard (R11's two: AX4_SCL and VCC), and only the tracks
+# out every via under the courtyards of PARTS (R11's three: two AX4_SCL and one VCC), and only the tracks
 # left dangling after that; everything else stays as routed, locked, while Freerouting reconnects the gaps. The
 # courtyards stay in the board as via-only rule areas, so KiCad's DRC keeps vias out of them. Then the pours are
 # refilled and stitch_v4.py adds GND vias wherever a patch of pour has none, under its rules (no SMD courtyards,
@@ -19,6 +18,7 @@ mm, MM = pcbnew.ToMM, pcbnew.FromMM
 V = lambda x, y: pcbnew.VECTOR2I(MM(x), MM(y))
 HERE = os.path.dirname(os.path.abspath(__file__))
 NAME = "HeliSR_Rev4.0"
+PARTS = ("R11",)                               # the parts whose courtyards get no vias (every R/C/SW was unroutable)
 
 def box(r, grow=0.0):
     return (mm(r.GetLeft()) - grow, mm(r.GetTop()) - grow, mm(r.GetRight()) + grow, mm(r.GetBottom()) + grow)
@@ -39,9 +39,7 @@ def zone(b, name, rect, tracks=False):
 def prep(src, dst):
     b = pcbnew.LoadBoard(src)
     fps = list(b.GetFootprints())
-    rules = [(f.GetReference(), courtyard(f)) for f in fps
-             if (f.GetReference()[0] in "RC" or f.GetReference().startswith("SW")) and courtyard(f)
-             and not all(p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH for p in f.Pads())]
+    rules = [(f.GetReference(), courtyard(f)) for f in fps if f.GetReference() in PARTS and courtyard(f)]
     items, pads = [], []
     for t in b.GetTracks():
         if t.Type() == pcbnew.PCB_VIA_T:
@@ -78,7 +76,7 @@ def prep(src, dst):
                 if not ok: dang.append(id(s["o"])); break
         if not dang: break
         gone |= set(dang)
-    print(f"  {len(bad)} vias under resistors, capacitors or RST; {len(gone)} tracks and vias out")
+    print(f"  {len(bad)} vias under {', '.join(PARTS)}; {len(gone)} tracks and vias out")
     for n, rc in rules: zone(b, "NO_VIA_" + n, rc)
     edge = box(b.GetBoardEdgesBoundingBox())
     for r in ((edge[0], edge[1], edge[2], edge[1] + 0.5), (edge[0], edge[3] - 0.5, edge[2], edge[3]),
