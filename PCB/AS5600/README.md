@@ -48,7 +48,7 @@ That's the HeliSR port's order (1 SDA, 2 GND, 3 VCC, 4 SCL) turned end for end, 
 
 ## How it fits
 
-- **Front:** U1 sits on the board's centre, where the module's chip was, so it stays centred over the magnet. C1 and C2 sit within 7 mm of the centre, clear of the head's rails (the outer 1.5 mm of two edges) and the base's M2 screw heads (at the corners). The tallest part is the AS5600 itself, the same chip as on the module; C2 is 1.25 mm at most. The base's cover is 2.0 mm off the board face, and the head's way in is 1.9 mm deep under the board.
+- **Front:** U1 sits on the board's centre, where the module's chip was, so it stays centred over the magnet. C1 and C2 sit within 7 mm of the centre, clear of the head's rails (the outer 1.5 mm of two edges) and the base's M2 screw heads (at the corners). The tallest part is the AS5600 itself, the same chip as on the module; C2 is 1.15 mm and C1 0.85 mm. The base's cover is 2.0 mm off the board face, and the head's way in is 1.9 mm deep under the board.
 - **Back:** only J1 (a 7.9 × 5.3 mm footprint), in the middle.
   - **In the base**, J1 and the plug sit in the 13 mm axial bore behind the pocket, and the lead runs on down the bore. The pocket's four posts and two ledges bear on the board's corners and edges, well away from J1.
   - **In the head**, the board goes in chip down, so J1 faces up into the pod's open top. Plug the jumper in after the board is in its grooves.
@@ -56,16 +56,16 @@ That's the HeliSR port's order (1 SDA, 2 GND, 3 VCC, 4 SCL) turned end for end, 
 
 ## Parts
 
-Per board. The AS5600 and the magnet come off a WWZMDiB module: lift the chip off with hot air.
+Per board. The AS5600 and the magnet come off a WWZMDiB module: lift the chip off with hot air. Mouser stock checked 2026-11-14.
 
-| Ref | Part | Manufacturer part | Notes |
-|---|---|---|---|
-| U1 | AS5600, SOIC-8 | AS5600-ASOM | From a module, or new |
-| C1 | 100 nF, 50 V, X7R, 1206 | Samsung CL31B104KBCNNNC | The HeliSR's C1/C2/C4 part (0.95 mm max) |
-| C2 | 1 µF, 16 V, X7R, 1206, low profile | Samsung CL31B105KOFNNNE | 1.25 mm thick ("F" in Samsung's code). Any 1 µF X7R 1206, 10 V or more, no taller than 1.25 mm will do |
-| J1 | JST SH header, 4 pins, 1.0 mm, top entry | BM04B-SRSS-G-TB(LF)(SN) or BM04B-SRSS-TB(LF)(SN) | The HeliSR's AX port part; either fits the footprint |
-| | JST SR jumper, 4 positions, 10 in, **1:N** | A04SR04SR30K254B | One per sensor |
-| | Bare PCB, 2 layers, 1.6 mm, 23.24 mm square | | Upload `AS5600_Rev1.0_Gerbers.zip` (OSH Park makes 3) |
+| Ref | Part | Manufacturer part | Mouser | Notes |
+|---|---|---|---|---|
+| U1 | AS5600, SOIC-8 | AS5600-ASOM | | From a module |
+| C1 | 100 nF, 50 V, X7R, 1206 | Samsung CL31B104KBCNNNC | 187-CL31B104KBCNNNC | The HeliSR's C1/C2/C4 part, 0.85 mm thick |
+| C2 | 1 µF, 16 V, X7R, 1206, low profile | Walsin 1206B105J160CT | 791-1206B105J160CT | 1.15 mm thick. Any 1 µF X7R 1206, 10 V or more, no taller than 1.25 mm will do |
+| J1 | JST SH header, 4 pins, 1.0 mm, top entry | BM04B-SRSS-G-TB(LF)(SN) | 306-4BSRSSGTBLP | The HeliSR's AX port part. The tin-plated BM04B-SRSS-TB fits too but was backordered to mid-2027 |
+| | JST SR jumper, 4 positions, 10 in, **1:N** | A04SR04SR30K254B | 306-A04SR04SR30K254B | One per sensor |
+| | Bare PCB, 2 layers, 1.6 mm, 23.24 mm square | | | Upload `AS5600_Rev1.0_Gerbers.zip` to a board maker (OSH Park makes 3) |
 
 `AS5600_Rev1.0_BOM.csv` has the same list.
 
