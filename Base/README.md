@@ -183,8 +183,8 @@ The AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) sits in a squa
 
 - **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges.
 - **Behind the board:** 3.5 mm of space, opening into the 13 mm axial bore. The board's socket and the lead's plug sit in the bore, and the lead runs on down it to the tube.
-- **Orientation:** set it in with its writing horizontal. It fits either way up.
-- **Holding it:** four M2 × 8 countersunk screws through the board's corner holes (16.26 mm apart across, 16.0 mm up and down, as measured on the module it replaces). They thread into 1.6 mm pilots in four round posts that stand up from the floor behind the board to its back, each joined to the nearest ledge. Tap the pilots M2 by hand, or let the screws cut their own thread. The heads sit about 0.6 mm proud of the board, 1.4 mm short of the cover.
+- **Orientation:** any way round.
+- **Holding it:** four M2 × 8 countersunk screws through the board's corner holes, which are on a 16.0 mm square. The posts are 16.26 mm apart across and 16.0 mm up and down (the module the pocket was drawn for, as measured); the board's 2.4 mm holes take the difference. They thread into 1.6 mm pilots in four round posts that stand up from the floor behind the board to its back, each joined to the nearest ledge. Tap the pilots M2 by hand, or let the screws cut their own thread. The heads sit about 0.6 mm proud of the board, 1.4 mm short of the cover.
 
   ![The sensor pocket's four M2 posts](renders/rev4_sensor_pocket.png)
 
@@ -363,7 +363,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
    - **Cables:** poke the USB cable through the cable half's axial bore from its joint face, and the sensor lead through the sensor half's. Lay both along the radial channel.
    - **Close:** close the halves on the dowels. Drop an M4 nut into each of the four hex pockets, two in each end face. Fit the four M4 × 35 cap screws, two from each end, and tighten them evenly.
    - **Bearings:** press the bearings onto the trunnions. They cover the screws, so to split the lever again, pull a bearing first.
-3. **Sensor:** plug the lead into the back of the AS5600 sensor board (see [Sensor](#sensor)), and set the board in the trunnion's pocket, chip out, writing horizontal, the plug going down the bore. Screw it down with four M2 × 8 countersunk screws, snug, not tight: the posts are plastic.
+3. **Sensor:** plug the lead into the back of the AS5600 sensor board (see [Sensor](#sensor)), and set the board in the trunnion's pocket, chip out, the plug going down the bore. Screw it down with four M2 × 8 countersunk screws, snug, not tight: the posts are plastic.
 4. **Brake strap in:** stick the felt (16 × 51 mm) on the strap's face, and drop the M5 nut into the slot in its head. Set the strap down into the frame, its cheeks either side of the strut clevis's rib and its arm in the up-stop pad's slot. Push an M4 × 50 socket head through from the USB (+y) side: the pillow block, the web, a cheek, the rib, the other cheek, the other web, and into an M4 nut in the sensor side's hex pocket. Tighten it: the strap still swings freely on it. Let the strap lean back onto its bay's back wall.
 5. **Lever in:** lower the lever's bearings straight down into the frame's seats. The hub drops past the top of the leaning strap's felt 1.6 mm clear, and ends 3.0 mm off the felt's bottom end; the strap itself stays 2.0 mm clear. Tip the strap forward onto the hub.
 

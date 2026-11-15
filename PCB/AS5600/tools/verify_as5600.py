@@ -52,7 +52,7 @@ jc = b.FindFootprintByReference("J1").GetCourtyard(pcbnew.B_CrtYd).BBox().Centre
 if abs(mm(jc.x) - cx) > 0.001 or abs(mm(jc.y) - cy) > 0.001: bad.append("J1 not centred")
 holes = sorted((round(mm(p.GetPosition().x) - cx, 3), round(mm(p.GetPosition().y) - cy, 3), round(mm(p.GetDrillSize().x), 2))
                for f in b.GetFootprints() if f.GetReference().startswith("H") for p in f.Pads())
-want_holes = sorted((sx * 8.128, sy * 8.001, 2.4) for sx in (-1, 1) for sy in (-1, 1))
+want_holes = sorted((sx * 8.0, sy * 8.0, 2.4) for sx in (-1, 1) for sy in (-1, 1))      # a 16 mm square
 if holes != want_holes: bad.append(f"holes {holes}")
 print(f"{len(P)} pads checked")
 if bad:

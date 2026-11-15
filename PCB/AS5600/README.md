@@ -52,7 +52,7 @@ That's the HeliSR port's order (1 SDA, 2 GND, 3 VCC, 4 SCL) turned end for end, 
 - **Back:** only J1 (a 7.9 × 5.3 mm footprint), in the middle.
   - **In the base**, J1 and the plug sit in the 13 mm axial bore behind the pocket, and the lead runs on down the bore. The pocket's four posts and two ledges bear on the board's corners and edges, well away from J1.
   - **In the head**, the board goes in chip down, so J1 faces up into the pod's open top. Plug the jumper in after the board is in its grooves.
-- **Holes:** four 2.4 mm holes for the base's M2 × 8 screws, 16.26 mm apart along the board's width (the way the writing runs) and 16.00 mm along its height, as measured on the module. Turned a quarter turn, each hole moves 0.13 mm each way, inside the M2's clearance, so the board fits either way round.
+- **Holes:** four 2.4 mm holes on a 16.00 mm square, centre to centre, for the base's M2 × 8 screws, so the board goes in any way round. The base's posts are 16.26 mm apart one way (the module's spacing); the 2.4 mm holes take the 0.13 mm each side, with 0.07 mm to spare round an M2.
 
 ## Parts
 
