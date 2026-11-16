@@ -156,16 +156,19 @@ CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top (31.0)
 MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (32.0)
 POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (24.4)
 # The board is screwed down: four M2 x 8 flat heads through the module's four corner holes (the user
-# measured them 0.64 in apart along the pad columns' edges, x here, and 0.63 in across, z), into 1.6 mm pilots (tap M2
+# measured them 0.64 in apart along the pad columns' edges, x here, and 0.63 in across, z), into 1.8 mm pilots 11.9 mm deep (tap M2
 # by hand, or let the screw cut it) in round posts that stand up from the pocket's floor to the board's back, each
 # joined to the nearest ledge. The posts stay 0.5 mm off the pad columns' ends. The heads sit on the board's face, about
 # 0.6 mm proud of it, 1.4 mm short of the cover
 AS_HOLES = [(sx * 0.64 * 25.4 / 2, sz * 0.63 * 25.4 / 2) for sx in (-1, 1) for sz in (-1, 1)]   # (x, z): +-8.13, +-8.0
-AS_POST_R, AS_PILOT_D, AS_SCREW_L = 2.0, 1.6, 8.0
+AS_POST_R, AS_PILOT_D, AS_SCREW_L = 2.0, 1.8, 8.0     # 1.6 printed too tight to thread an M2 into
 AS_HEAD_TOP = TRUN_OUT + 0.6                     # |y| 30.1: the head's top
 m.CSK.setdefault(2, (4.1, 2.2))                  # M2 countersunk: a 3.8 mm head (csk_screw draws it 0.3 under this)
 AS_HOLE_D = 2.4                                  # the module's holes (reference)
-AS_PILOT_END = AS_HEAD_TOP - AS_SCREW_L - 0.5    # |y| 21.6: 0.5 past the tip
+AS_PILOT_END = 16.0                              # |y| 16.0: 11.9 mm deep from the post's top, 6.1 past an M2 x 8's
+                                                 # tip (6.3 deep, 0.5 past the tip, was too shallow on the print); takes
+                                                 # up to an M2 x 12. Through the hub's solid core: 4.1 mm off the axial
+                                                 # bore, 15 mm short of the split
 # USB cable: along the axis, then an 18 mm bend (about 4x its 4.6 mm across) toward the front, then straight forward at
 # USB_Y in a round tunnel USB_TUNNEL_R round, half in the pillow block's outer face (frame and shell) and half in the
 # cable cover, out through the cover's front bevel. It leaves 1.1 mm of block to the shell screw's hole and 1.2 mm of

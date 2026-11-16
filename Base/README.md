@@ -388,7 +388,7 @@ All from [MonsterBolts](https://monsterbolts.com/), in packs of 10: black-oxide 
 | Tube lock | M4 × 35 socket head cap, across the lever through the bosses over the down-stop pads and the tube's centre line, head in a 7.5 mm counterbore on the left (−y) side, 0.5 mm under the face | M4 nut in a hex pocket in the right (+y) boss, 0.5 mm under the face | 1 |
 | Shell | M4 × 50 socket head cap, from the top, down 13 mm counterbores, centred on the joint | M4 nut slid into a slot in the block's outer face, under the side cover | 4 |
 | Side covers | M3 × 12 countersunk, from the cover's outer face | M3 thread tapped through the block or the shell's side wall | 8 |
-| AS5600 sensor board | M2 × 8 Phillips flat head (DIN 965), through the board's corner holes | 1.6 mm pilot in a post in the sensor pocket, tapped M2 or self-tapped | 4 |
+| AS5600 sensor board | M2 × 8 Phillips flat head (DIN 965), through the board's corner holes | 1.8 mm pilot, 11.9 mm deep, in a post in the sensor pocket, tapped M2 or self-tapped | 4 |
 | Brake | **M5 × 35 hex-head bolt**, head on the floor of the knob's hex pocket | M5 nut in the slot in the brake strap's head | 1 |
 | Brake strap's hinge | M4 × 50 socket head cap, from the +y side, head in a counterbore | M4 nut in a hex pocket on the −y side | 1 |
 | Strut eyes | M4 × 16 countersunk: the anchor's head on the +y side, the collar's on the left (−y), where it also clamps the collar | M4 nut in the far cheek's pocket | 2 |
