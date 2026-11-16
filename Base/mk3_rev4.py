@@ -1063,6 +1063,23 @@ def cover_sensor():
     return chamfer_edges(c.clean(), exclude=cover_seat_edge)
 
 
+MAGNET6_D, MAGNET6_H = 6.0, 2.5                  # Radial Magnets 9049 (Digi-Key 469-1075-ND): 6 x 2.5 mm diametric
+                                                 # N35SH, the AS5600 datasheet's reference magnet
+MAGNET6_POCKET = MAGNET6_D + 0.2                 # 6.2: the same 0.2 over the magnet as the 4 mm's locked-in 4.2
+
+
+def cover_sensor_6mm():
+    """cover_sensor() for the 6 x 2.5 mm magnet: the same cover, its pocket 6.2 across and 2.6 deep, so the magnet's
+    face stays 0.5 mm below the inside face and 1 mm off the chip, with 1.9 mm of cover behind it (2.4 for the 4 x 2).
+    Prints outside face down"""
+    c = _cover(-1).cut(cyl(MAGNET6_POCKET / 2, (0, -BLOCK_Y1 + 0.5, 0), (0, -(MAGNET_Y + MAGNET6_H + 0.1), 0)))
+    return chamfer_edges(c.clean(), exclude=cover_seat_edge)
+
+
+def magnet_6mm():
+    return cyl(MAGNET6_D / 2, (0, -MAGNET_Y, 0), (0, -(MAGNET_Y + MAGNET6_H), 0))
+
+
 def cover_cable():
     """the cable's half of its tunnel in its inside face, round the bend and straight back out through the back bevel,
     so the cover goes on over a cable that's already fitted. Prints outside face down"""
@@ -1729,6 +1746,15 @@ def export():
         sub = os.path.join(HERE, "stl") if name in PRINTED else os.path.join(HERE, "stl", "ref")
         os.makedirs(sub, exist_ok=True)
         cq.exporters.export(cq.Workplane().add(shp), os.path.join(sub, f"{name}.stl"), tolerance=0.04, angularTolerance=0.12)
+    c6, m6 = cover_sensor_6mm(), magnet_6mm()                  # the 6 x 2.5 mm magnet's version (not in the assembly)
+    ov = c6.intersect(m6).Volume()
+    near = [p.distance(m6) for p in (P["sensor_chip"], P["sensor_pcb"], P["sensor_screws"])]
+    print(f"{'cover_sensor_6mm':16s} valid={c6.isValid()} vol={c6.Volume():9.1f}  magnet overlap {ov:.3f} mm3, "
+          f"to the chip {near[0]:.2f}, board {near[1]:.2f}, screws {near[2]:.2f} mm")
+    cq.exporters.export(cq.Workplane().add(c6), os.path.join(HERE, "stl", "cover_sensor_6mm.stl"), tolerance=0.04,
+                        angularTolerance=0.12)
+    cq.exporters.export(cq.Workplane().add(m6), os.path.join(HERE, "stl", "ref", "magnet_6mm.stl"), tolerance=0.04,
+                        angularTolerance=0.12)
     os.makedirs(os.path.join(HERE, "step"), exist_ok=True)
     asm = cq.Assembly(name="MkIII_Rev4")
     for name, shp in P.items():

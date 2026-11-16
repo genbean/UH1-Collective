@@ -362,6 +362,18 @@ def magnet_shaft():
     return s.cut(cyl(MAGNET_BORE / 2, h.CAP[1] + h.CAP_UP - t - 0.1, h.CAP[1] + h.CAP_UP + 1, h.PX, h.PY)).clean()
 
 
+MAGNET6 = (6.0, 2.5)             # Radial Magnets 9049 (Digi-Key 469-1075-ND): 6 x 2.5 mm diametric N35SH
+MAGNET6_BORE = MAGNET6[0] + 0.2  # 6.2: the same 0.2 over the magnet as the 4 mm's locked-in 4.2
+
+
+def magnet_shaft_6mm():
+    """magnet_shaft() for the 6 x 2.5 mm magnet: the same shaft and 10 mm cap, its bore 6.2 across and 2.6 deep, the
+    magnet flush with the cap's top (1.0 mm under the chip, as the 4 x 2), 1.9 mm of cap wall round it and 1.9 under it"""
+    s = magnet_shaft().fuse(cyl(5.0, h.CAP[0] + 1.0, h.CAP[1] + h.CAP_UP, h.PX, h.PY))   # the 4 mm's bore filled
+    d, t = MAGNET6
+    return s.cut(cyl(MAGNET6_BORE / 2, h.CAP[1] + h.CAP_UP - t - 0.1, h.CAP[1] + h.CAP_UP + 1, h.PX, h.PY)).clean()
+
+
 
 def refs():
     m = h.MODULE / 2
@@ -374,6 +386,7 @@ def refs():
         "module": rot(box(h.PX - m, h.PX + m, h.PY - m, h.PY + m, h.BOARD_Z, h.BOARD_Z + 1.6)),
         "chip": rot(box(h.PX - 2.5, h.PX + 2.5, h.PY - 3.1, h.PY + 3.1, h.CHIP_FACE, h.BOARD_Z)),
         "magnet": cyl(d / 2, h.CAP[1] + h.CAP_UP - t, h.CAP[1] + h.CAP_UP, h.PX, h.PY),
+        "magnet_6mm": cyl(MAGNET6[0] / 2, h.CAP[1] + h.CAP_UP - MAGNET6[1], h.CAP[1] + h.CAP_UP, h.PX, h.PY),
         "m5_grub": cq.Solid.makeCylinder(2.1, h.GRUB_L, V(h.TX - (h.TY - h.GRUB_TIP + h.GRUB_L) * SA, h.TY - (h.TY - h.GRUB_TIP + h.GRUB_L) * CA, h.BOLT_Z), V(SA, CA, 0)),
     }
 
@@ -383,6 +396,7 @@ if __name__ == "__main__":
     os.makedirs(os.path.join(out, "ref"), exist_ok=True)
     parts = {"HueyHeadR5-ThrottleGrip": grip(src), "HueyHeadR5-FrictionCollar": to_mesh(friction_collar()),
              "HueyHeadR5-Pinion": to_mesh(pinion_print()), "HueyHeadR5-MagnetShaft": to_mesh(magnet_shaft()),
+             "HueyHeadR5-MagnetShaft-6mm": to_mesh(magnet_shaft_6mm()),
              "HueyHeadR5-GripBearingCoupons": T(bearing_coupons()), "HueyHeadR5-ORingCoupon": T(oring_coupon())}
     for name, m in parts.items():
         m.export(os.path.join(out, name + ".stl"))

@@ -251,7 +251,7 @@ All STLs except the hat's cap are in the head's own frame, so they open assemble
 | Throttle grip | `HueyHeadR5-ThrottleGrip.stl` | upright, bottom end down (gear and lug up) | Built from Gazmac52's MkII grip (`source/MkII-Grip-bore-relieved-25mm.stl`, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). 25.8 mm bore, clear of the tube, with two O-ring grooves inside. Their roofs are 45°, so it needs no supports |
 | Friction collar | `HueyHeadR5-FrictionCollar.stl` | bottom face down (O-ring groove up) | |
 | Pinion | `HueyHeadR5-Pinion.stl` | shoulder up, toothed face on the bed, as it comes | See [The pinion goes in one way up](#the-pinion-goes-in-one-way-up). The magnet shaft slides into its hex (4.6 mm across flats, 0.15 over the shaft) |
-| Magnet shaft | `HueyHeadR5-MagnetShaft.stl` | cap face down | |
+| Magnet shaft | `HueyHeadR5-MagnetShaft.stl`, or `HueyHeadR5-MagnetShaft-6mm.stl` | cap face down | The first takes the ~4 × 2 mm magnet in a 4.2 mm bore. The `-6mm` one takes a 6 × 2.5 mm diametric magnet (Radial Magnets 9049, Digi-Key 469-1075-ND) in a 6.2 × 2.6 mm bore: the same shaft and 10 mm cap, the magnet flush with the cap's top and 1.0 mm under the chip, with 1.9 mm of cap round it |
 | Sensor seat coupon | `HueyHeadR5-SensorSeatCoupon.stl` | the same way round as it sits in the head printed on its rear wall | Optional: try your AS5600 module in it first |
 | Grip bearing coupons | `HueyHeadR5-GripBearingCoupons.stl` | flat, labels up | Optional: the 25.2 ring checks the head's tube bore on the carbon tube |
 | O-ring coupon | `HueyHeadR5-ORingCoupon.stl` | upright, like the grip | A 7 mm slice of the grip's bore with one O-ring groove, cut exactly as the grip's (about 2 g). Fit a greased O-ring and slide it on the carbon tube before printing the grip: it should turn with a light, even drag, with no plastic touching the tube |
@@ -334,7 +334,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | O-ring, 24 mm ID × 2 mm (28 mm OD), nitrile (FOCMKEAS, [Amazon B0BWWBTL4N](https://www.amazon.com/dp/B0BWWBTL4N), 50 for $6.89) | 4 | Two in the grip's bore, one in the friction collar, one in the ceiling's groove. See [The grip floats on O-rings](#the-grip-floats-on-o-rings) |
 | Bivar SRS-4-4MM spacers (Mouser 749-SRS-4-4MM) | 4 | Between the rear wall and the HeliSR board |
 | Pen spring, up to 4 mm across | 1 | The trigger return (cut to about 13 mm) |
-| AS5600 sensor board ([`../PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K254B) | 1 | The throttle's; a ~4 × 2 mm diametric magnet from an AS5600 module pack goes in the shaft's cap |
+| AS5600 sensor board ([`../PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K254B) | 1 | The throttle's; a ~4 × 2 mm diametric magnet from an AS5600 module pack, or a 6 × 2.5 mm one (Radial Magnets 9049) with the `-6mm` shaft, goes in the shaft's cap |
 | APEM 639H/2 toggle, ON-OFF-ON (Mouser 642-639H2) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
 | APEM 637H/2 toggle, (ON)-OFF-(ON) (Mouser 642-637H2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
 | APEM 636H/2 toggle, ON-ON (Mouser 642-636H2) | 1 | LDG LT ON (IN7) |
