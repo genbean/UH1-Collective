@@ -254,12 +254,13 @@ the collective's BOM, [`../../BOM`](../../BOM).
   least 3.7 mm from a hole centre (every pad 4.1 mm). No neck-downs: every signal track is 0.2 mm and every VCC/GND
   track 0.3 mm.
 - **Routing:** 992 mm of track, 85 vias: 41 signal (two of them RST's, beside the button) and 44 GND.
-- **Vias and solder paste:** `via_danger_v4.py` finds 15 vias under a resistor, capacitor or the switch, or closer
-  than 0.5 mm (copper to copper) to another net's SMD pad: under R5 (AX3_SDA), R6 (AX3_SCL, VCC) and R8 (AX4_SCL,
-  also 0.40 mm from J14's VCC pad); IN10 0.20 mm from U2.12 (IN11); AX3_SDA 0.25 from U2.1 (SR_LOAD); GND 0.26 from
-  U2.9 (SR_DATA); GND 0.33 from R8's VCC pad; AX4_SCL 0.37 from U3.6 (AX2_SDA); SR_LOAD 0.38 from U1.9 (SR_CHAIN);
-  GND 0.44 from SW1's RST pad; MUX_RST 0.45 from U2.1; GND 0.47 from C2's VCC pad; and IN10 and IN15 at 0.49–0.50
-  from their J2 neighbours. Through-hole pads take no paste and aren't counted.
+- **Vias and solder paste:** no via sits under a resistor, capacitor or the switch between its pads. The vias on
+  R5, R6 and R8 sit on those resistors' own pads (same net) and carry them through to the other side.
+  `via_danger_v4.py` finds 12 vias closer than 0.5 mm (copper to copper) to another net's SMD pad: IN10 0.20 mm
+  from U2.12 (IN11); AX3_SDA 0.25 from U2.1 (SR_LOAD); GND 0.26 from U2.9 (SR_DATA); GND 0.33 from R8's VCC pad;
+  AX4_SCL 0.37 from U3.6 (AX2_SDA) and 0.40 from J14.3 (VCC); SR_LOAD 0.38 from U1.9 (SR_CHAIN); GND 0.44 from
+  SW1's RST pad; MUX_RST 0.45 from U2.1; GND 0.47 from C2's VCC pad; and IN10 and IN15 at 0.49–0.50 from their J2
+  neighbours. Through-hole pads take no paste and aren't counted.
   The I²C lines from U3 to the ports are 6–29 mm long.
 - **RST button:** nothing under the PTS810 but its own pads and a GND track; the two RST vias beside it touch its
   outline by 0.1 mm at the RST pads' side. Every via is tented.

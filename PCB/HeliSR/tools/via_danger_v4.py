@@ -35,8 +35,10 @@ for v in b.GetTracks():
         if p[1] == net or p[2]: continue                     # same net, or through-hole (no paste)
         d = math.hypot(max(p[5] - x, 0, x - p[7]), max(p[6] - y, 0, y - p[8])) - 0.3
         if d < 0.5: why.append(f"{p[0]}({p[1]}) {d:.2f}")
+    on_own_pad = any(p[1] == net and not p[2] and p[5] - 0.3 <= x <= p[7] + 0.3 and p[6] - 0.3 <= y <= p[8] + 0.3
+                     for p in pads)                       # via in (or touching) a same-net pad: it carries that pad through
     for r, x0, y0, x1, y1 in bodies:
-        if x0 < x < x1 and y0 < y < y1: why.append(f"under {r}")
+        if x0 < x < x1 and y0 < y < y1 and not on_own_pad: why.append(f"under {r}")
     if not why: continue
     n += 1
     own = [t for t in tracks if t.GetNetname() == net and
