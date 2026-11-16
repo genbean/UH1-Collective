@@ -32,17 +32,9 @@ at 20 deg), about 125 g at the grip centre 275 mm out; the friction knob holds t
 must be FIXED against the far wall (stick-on wheel weights or shot set in epoxy): loose shot would slide
 to the pivot end whenever the bucket tilts up.
 
-Sensor (-Y side): WWZMDiB AS5600 module (23 x 23 mm) in a carrier that plugs into the trunnion bore
-and turns with the lever; its 4 x 2 mm diametric magnet sits on the axis in the fixed cover, ~1.0 mm
-from the chip. The module has its pads in two columns, VCC/OUT/GND along one edge and DIR/SCL/SDA/GPO along
-the other; the wires are soldered in from the back, and the carrier's channel under the board spans both columns.
-HeliSR Rev 4.0 (I2C): four wires, VCC, GND, SDA and SCL, run through the carrier and up the tube to its AX1 port.
-HeliSR Rev 3.0 (analog): three wires, VCC, OUT and GND, to AX1, with the range programmed once through the OUT pin
-(datasheet Option B) with the PROG1 button. Either way, run at 5 V: remove the module's 0 ohm R1 (it ties VDD3V3
-to VDD5V; the 3V3 pin is rated 4 V max), and jumper DIR to VCC across the back of the board, in the channel (it
-floats on this module): the chip turns with the lever and the magnet is fixed, so DIR = VCC makes the angle rise
-as the lever lifts. PGO (labelled GPO on the module) has 1 k to GND (R4): keep it for Rev 3.0's OUT-pin
-programming, remove it for I2C so the chip's own pull-up holds PGO high.
+Sensor (-Y side): the AS5600 sensor board (PCB/AS5600) turns with the lever; its 6 x 2.5 mm diametric magnet
+(Radial Magnets 9049) sits on the axis in the fixed cover, 1.0 mm from the chip. The board plugs into the
+HeliSR's AX1 port through a 1:N JST SR lead (VCC, GND, SDA, SCL) up the tube.
 
 Gussets: wedge ribs above and below the socket boss tie it into the hub; on the frame a web ties both
 shoe hinge lugs into the quadrant stem, and a corner gusset ties the knob tower to the +y pillow block.
@@ -139,7 +131,7 @@ BKT_LID_BOSSES = [(37, 1.5), (95, 1.5), (154, 1.5), (154, -56), (95, -56), (60, 
 BALANCE_AT = 20.0                     # travel angle where tube and bucket are mirror images (mid of 0-40)
 
 # AS5600 sensor (carrier and cover on the -Y side)
-AS5600_BOARD = 23.0              # WWZMDiB module (Amazon B0CM3C8KFT), 23 x 23 mm; measure yours
+AS5600_BOARD = 23.0              # AS5600 sensor board, about 23 mm square
 AS5600_CHIP_OFS = (0.0, 0.0)     # chip centre relative to board centre (x, z); shift if yours is off-centre
 AS5600_PAD_X = 4.7               # VCC/OUT/GND through-hole pads: this far in from the board's +x edge (measured off the
 AS5600_PAD_PITCH = 2.54          #   product photo, +-0.3 mm; centred on the board's z). No header: wires soldered through
@@ -147,8 +139,9 @@ AS5600_PAD4_ZOFS = 0.9           # DIR/SCL/SDA/GPO pads: the same distance in fr
                                  #   this far toward the DIR end (VCC's end), measured off the listing's drawing, +-0.3 mm
 CARRIER_FLANGE_T = 6.0           # board pocket on the outer face, wire channel underneath
 MAGNET_GAP = 1.0                 # chip face to magnet face (datasheet: 0.5-3 mm); 1.5 at first, closed up 0.5 on 2026-10-23 to match the head
-MAGNET_D, MAGNET_H = 4.0, 2.0    # diametric magnet supplied with the module (about 4 mm across, as measured)
-MAGNET_POCKET = 4.2              # the cover's magnet pocket, the same as the head axle's. LOCKED IN: 4.2 fits the magnet, printed 2026-10-24 (4.0 was too small)
+MAGNET_D, MAGNET_H = 6.0, 2.5    # Radial Magnets 9049 (Digi-Key 469-1075-ND): 6 x 2.5 mm diametric N35SH
+MAGNET_POCKET = 6.2              # the cover's magnet pocket, the same as the head's: 0.2 over the magnet, the clearance
+                                 # printed pockets proved out on 2026-10-24 (0.0 over was too small)
 BALLAST_L = 42.0                 # fixed ballast depth against the far wall, ~0.95 kg at 6.8 g/cm3 (README)
 
 # Fasteners: countersunk hex-socket screws with 90 degree heads (DIN 7991 / ISO 10642), DIN 934 hex nuts and

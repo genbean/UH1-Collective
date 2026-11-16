@@ -240,7 +240,7 @@ def lever_views(C):
          "rev4_lever_under.png")
     save(title(R.render({"lever_sensor": P["lever_sensor"]}, (0.15, -1.0, 0.25), size=(1200, 1000),
                         focus=((-15, -32, -15), (15, -20, 15)), zoom=1.0)[0], "Rev 4 sensor pocket",
-               "Four M2 posts for the AS5600 module, each joined to a ledge, 1.6 mm pilots"), "rev4_sensor_pocket.png")
+               "Four M2 posts for the AS5600 sensor board, each joined to a ledge, 1.8 mm pilots"), "rev4_sensor_pocket.png")
     tube_lock_views(C)
     collar_views(C)
     drill_guide_views(C)
@@ -620,7 +620,7 @@ def exploded(C):
               ["dowel0", "dowel2"]),
              ("6808-2RS bearings  (x2)", "pressed onto the trunnions", ["bearing_outer-1", "bearing_outer1"]),
              ("AS5600 board", "in the sensor trunnion's end, chip out", ["sensor_pcb"]),
-             ("Sensor cover", "with the magnet in a pocket in its inside face", ["cover_sensor"]),
+             ("Sensor cover", "with the 6 x 2.5 mm magnet in a pocket in its inside face", ["cover_sensor"]),
              ("Cable cover", "goes on over the USB cable", ["cover_cable"]),
              ("Brake strap + felt", "on its hinge pin before the lever goes in; its nut drops into the head's slot",
               ["strap"]),
@@ -665,7 +665,7 @@ def screw_chart():
             (d.screw_tile("csk", 4, 16), "M4 x 16 countersunk", 3,
              "The strut's two eyes, and the collar's front clamp screw, into nuts in the far cheeks."),
             (d.screw_tile("csk", 2, 8), "M2 x 8 countersunk", 4,
-             "The AS5600 board, into 1.6 mm pilots in the sensor pocket's posts."),
+             "The AS5600 board, into 1.8 mm pilots in the sensor pocket's posts."),
             (d.nut_tile(7.0, 3.2, 4.0), "M4 nut", 13,
              "Lever (4), tube lock (1), shell (4), strut eyes (2), collar clamp (1), the strap's hinge pin (1)."),
             (d.nut_tile(8.0, 4.0, 5.0), "M5 nut", 1, "In the slot in the brake strap's head.")]
@@ -692,14 +692,14 @@ HEAD_PARTS = [
     ("Magnet shaft", "HueyHeadR5-MagnetShaft.stl", (232, 118, 44)),
     ("Magnet", "ref/magnet.stl", (154, 163, 173)),
     ("AS5600 chip", "ref/chip.stl", (17, 17, 17)),
-    ("AS5600 module", "ref/module.stl", (91, 47, 145)),
+    ("AS5600 sensor board", "ref/module.stl", (91, 47, 145)),
     ("Tube set screw M5 x 8", "ref/m5_grub.stl", (141, 148, 156)),
 ]
 # the search hat, from the head's hat script (through make_diagrams.hat_meshes(), in the same frame): (node, its key, colour)
 HAT_PARTS = [("Search hat cap", "cap", (43, 47, 52)), ("SearchHat board", "board", (31, 111, 67)),
              ("Hat stick switch", "switch", (17, 17, 17)), ("Hat board screws M2 x 8", "screws", (141, 148, 156))]
 # head parts in the collective's GLB that the head no longer has (hat 1)
-HEAD_GONE = ("4-way hat: bezel, rocker plate, set screw", "Hat tact switches")
+HEAD_GONE = ("4-way hat: bezel, rocker plate, set screw", "Hat tact switches", "AS5600 module")
 
 
 def head_to_base():

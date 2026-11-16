@@ -1,7 +1,8 @@
 # Writes BOM/Heli_Collective_BOM.xlsx: the parts list for one Heli Collective (HeliSR Rev 4.0 board, SearchHat
 # Rev 1.0 board, Huey head Rev 5, MkIII base Rev 4) and the print list.
 # The board's parts are checked against PCB/HeliSR/HeliSR_Rev4.0.kicad_pcb (the script stops if they disagree).
-# Prices: Mouser, Amazon and OSH Park listings checked 2026-11-11, USD, before shipping. Tariff is the estimate Mouser
+# Prices: Mouser, Amazon and OSH Park listings checked 2026-11-11, USD, before shipping; Digi-Key's (the AS5600
+# boards, magnets and sensor leads) from the order placed 2026-11-15. Tariff is the estimate Mouser
 # shows for delivery to the US. Buy is the cheapest quantity at the listed price breaks: 10 can cost less than 8.
 # usage: python tools/make_bom.py [out.xlsx]     (any Python 3 with openpyxl)
 import os, re, shutil, sys, zipfile
@@ -20,9 +21,12 @@ CHECKED = "2026-11-13"
 # part(where, qty used, description, manufacturer, mfr part, supplier, supplier part, price breaks, tariff, notes)
 # Price breaks: [(qty, unit price)]. For Amazon and OSH Park the unit is the pack or order the listing sells (named in
 # the description); pack says how many pieces it holds.
-def part(where, qty, desc, mfr, mpn, sup, spn, breaks, tariff=0.0, notes="", pack=1, url=None):
+def part(where, qty, desc, mfr, mpn, sup, spn, breaks, tariff=0.0, notes="", pack=1, url=None, order=None):
     return dict(where=where, qty=qty, desc=desc, mfr=mfr, mpn=mpn, sup=sup, spn=spn, breaks=breaks, tariff=tariff,
-                notes=notes, pack=pack, url=url)
+                notes=notes, pack=pack, url=url, order=order)
+def dk(where, qty, desc, mfr, mpn, spn, order, unit, notes=""):
+    """a Digi-Key line, as ordered on 2026-11-15: order pieces at unit each (the price at that quantity)"""
+    return part(where, qty, desc, mfr, mpn, "Digi-Key", spn, [(order, unit)], 0, notes, order=order)
 def mb(where, qty, desc, handle, variant, sku, price, notes=""):
     """a MonsterBolts pack of 10"""
     return part(where, qty, desc, "", "", "MonsterBolts", sku, [(1, price)], 0, notes, pack=10,
@@ -89,12 +93,11 @@ SECTIONS = [
     ("Wiring", [
         part("J1, J2", 1, "JST SR jumper, 10 positions, 12 in (305 mm)", "JST", "A10SR10SR30K305A", "Mouser",
              "306-A10SR10SR30K305A", [(1, 3.45), (10, 3.03)], 0, "Cut in half: one pigtail for J1, one for J2"),
-        part("AX1, AX4", 2, "JST SR jumper, 4 positions, 10 in (254 mm), 1:N", "JST", "A04SR04SR30K254B", "Mouser",
-             "306-A04SR04SR30K254B", [(1, 1.63), (10, 1.39)], 0,
-             "Must be 1:N (the B part), not 1:1. AX4: whole, sensor board to port. AX1: cut in half for the base's lead"),
-        part("AX1 lead", 1, "Flat ribbon cable, 4 conductors, 24 AWG, 1 m", "KYOCERA AVX", "902220736004000", "Mouser",
-             "581-902220736004000", [(1, 3.35), (5, 2.99)], 0.26,
-             "Spliced between the two halves of the AX1 jumper, each wire to the wire in the same position"),
+        dk("AX1, AX4", 2, "JST SR jumper, 4 positions, 6 in (152 mm), 1:N", "JST", "A04SR04SR30K152B", "455-3014-ND",
+           2, 1.53, "Must be 1:N (the B part), not 1:1. AX4: whole, sensor board to port. AX1: cut in half for the "
+           "base's lead"),
+        dk("AX1 lead", 1, "Flat ribbon cable, 4 conductors, black, 1 m (3.28 ft)", "Adafruit", "3889", "1528-2692-ND",
+           1, 1.95, "Spliced between the two halves of the AX1 jumper, each wire to the wire in the same position"),
         part("SearchHat J1", 1, "JST SR jumper, 6 positions, 8 in (203 mm)", "JST", "A06SR06SR30K203A", "Mouser",
              "306-A06SR06SR30K203A", [(1, 1.85), (10, 1.57)], 0, "Cut in half; one end to J1, the wires to J2's loom"),
         part("USB", 1, "USB 2.0 cable, USB-A to USB-C, 2 m", "Stewart Connector", "SC-2CAK020M", "Mouser",
@@ -102,15 +105,15 @@ SECTIONS = [
              "Cut about 15 cm from the C plug; splice it back on inside the head"),
     ]),
     ("AS5600 sensor boards (2: AX1 in the base, AX4 in the head)", [
-        part("U1", 2, "AS5600 magnetic encoder module with magnet, pack of 4", "WWZMDiB", "", "Amazon",
-             "B0CM3C8KFT", [(1, 9.99)], 0, "For the AS5600 chips (lift them off with hot air) and the magnets", pack=4),
-        part("C1", 2, "Capacitor, 100 nF, 50 V, X7R, 1206", "Samsung", "CL31B104KBCNNNC", "Mouser",
-             "187-CL31B104KBCNNNC", [(1, 0.14), (10, 0.08)], 0.12, "The HeliSR's part: buy them together"),
-        part("C2", 2, "Capacitor, 1 uF, 16 V, X7R, 1206, 1.15 mm thick", "Walsin", "1206B105J160CT", "Mouser",
-             "791-1206B105J160CT", [(1, 0.18), (10, 0.103), (100, 0.062)], 0,
-             "Any 1 uF X7R 1206, 10 V up, no taller than 1.25 mm"),
-        part("J1", 2, "JST SH header, 4 pins, 1.0 mm, SMD, top entry", "JST", "BM04B-SRSS-G-TB(LF)(SN)", "Mouser",
-             "306-4BSRSSGTBLP", [(1, 0.63), (10, 0.546)], 0.30, "The HeliSR's J11-J14 part: buy them together"),
+        dk("U1", 2, "Magnetic angle sensor, AS5600, SOIC-8", "ams OSRAM", "AS5600-ASOM", "AS5600-ASOMCT-ND", 2, 3.03),
+        dk("C1", 2, "Capacitor, 100 nF, 50 V, X7R, 1206", "Samsung", "CL31B104KBCNNNC", "1276-1017-1-ND", 10, 0.08,
+           "10 cost less than 2"),
+        dk("C2", 2, "Capacitor, 1 uF, 16 V, X7R, 1206, about 1.15 mm thick", "YAGEO", "CC1206JKX7R7BB105",
+           "311-1924-1-ND", 10, 0.285, "Any 1 uF X7R 1206, 10 V up, no taller than 1.25 mm"),
+        dk("J1", 2, "JST SH header, 4 pins, 1.0 mm, SMD, top entry", "JST", "BM04B-SRSS-TB", "455-BM04B-SRSS-TBCT-ND",
+           2, 0.53, "On the back, for the 1:N jumper"),
+        dk("Magnets", 2, "Magnet, 6 x 2.5 mm, diametric, NdFeB N35SH", "Radial Magnets", "9049", "469-1075-ND", 2, 0.78,
+           "One in the base's sensor cover, one in the head's magnet shaft. Diametric: an axial one won't work"),
         part("PCB", 1, "AS5600 Rev 1.0 bare PCB, 2 layers, 1.6 mm, 23.24 mm square (OSH Park makes 3)", "", "",
              "OSH Park", "", [(1, 4.19)], 0, "Upload PCB/AS5600/AS5600_Rev1.0_Gerbers.zip"),
     ]),
@@ -256,6 +259,7 @@ for (refs, value, fpname), p in BOARD:
 # ---- how many to buy: the cheapest quantity at the price breaks ---------------------------------------------------
 def buy(p):
     if not p["breaks"]: return None, None
+    if p["order"]: return p["order"], p["breaks"][0][1]                              # as ordered
     if p["sup"] != "Mouser": return -(-p["qty"] // p["pack"]), p["breaks"][0][1]     # whole packs
     unit = lambda n: [u for q, u in p["breaks"] if q <= n][-1]
     best = min([p["qty"]] + [q for q, _ in p["breaks"] if q > p["qty"]], key=lambda n: (n * unit(n), n))
@@ -268,7 +272,7 @@ wrap, centre = Alignment(wrap_text=True, vertical="top"), Alignment(horizontal="
 USD, USD3, PCT = '"$"#,##0.00', '"$"#,##0.00#', "0%"
 NAVY, SECT = "1F3864", "D9E1F2"
 LINKS = {"Mouser": "https://www.mouser.com/ProductDetail/", "Amazon": "https://www.amazon.com/dp/",
-         "OSH Park": "https://oshpark.com/"}
+         "OSH Park": "https://oshpark.com/", "Digi-Key": "https://www.digikey.com/en/products/result?keywords="}
 
 def header(ws, cols, widths, row):
     for c, (h, w) in enumerate(zip(cols, widths), 1):
@@ -351,7 +355,7 @@ COLS = ["Done", "Where", "Qty used", "Part", "Manufacturer", "Mfr part number", 
         "Buy", "Unit price", "Tariff", "Total", "Notes"]
 NC = len(COLS)
 title(ws, "Heli Collective - bill of materials",
-      f"Everything to buy for one collective. Prices checked {CHECKED}, USD, before shipping; Amazon, MonsterBolts and OSH Park "
+      f"Everything to buy for one collective. Prices checked {CHECKED} (Digi-Key's from the 2026-11-15 order), USD, before shipping; Amazon, MonsterBolts and OSH Park "
       "prices are per pack or order (Buy counts packs). Buy is the cheapest quantity (10 can cost less than 8). Tariff is Mouser's estimate for "
       "US delivery; Total includes it. Tick Done to strike a line through.", NC)
 HR = 4; header(ws, COLS, [6, 18, 7, 44, 15, 22, 13, 22, 6, 9, 7, 10, 40], HR)

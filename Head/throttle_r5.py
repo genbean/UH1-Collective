@@ -12,7 +12,7 @@
 # return: the grip stays where it is left. The gear drives a
 # 20-tooth pinion beside the boss (1.6:1, so the grip's 180 degrees are 288 degrees at the magnet). The magnet shaft drops through
 # the bearing web over the pinion and presses into the pinion's hex hole; its cap rests on the web and holds the
-# magnet 1.0 mm under the AS5600 module's chip (cap 0.5 mm taller than the first print).
+# magnet 1.0 mm under the AS5600 sensor board's chip (cap 0.5 mm taller than the first print).
 #
 # Below the grip, a split friction collar clamps to the tube. The O-ring in its top face presses the grip up against the
 # ceiling's O-ring: slide it up for more friction and tighten its M4 x 12 countersunk pinch screw.
@@ -345,7 +345,7 @@ def pinion_print():
     return pinion().rotate(V(h.PX, h.PY, zm), V(h.PX + 1, h.PY, zm), 180)
 
 
-MAGNET_BORE = 4.2                # the magnet is about 4 mm. LOCKED IN: 4.2 fits, printed 2026-10-24 (4.0 printed too small; 4.6 was for a 5 mm magnet)
+MAGNET_BORE = h.MAGNET[0] + 0.2  # 6.2 for the 6 mm magnet: 0.2 over, the clearance printed bores proved out on 2026-10-24
 
 
 def magnet_shaft():
@@ -362,18 +362,6 @@ def magnet_shaft():
     return s.cut(cyl(MAGNET_BORE / 2, h.CAP[1] + h.CAP_UP - t - 0.1, h.CAP[1] + h.CAP_UP + 1, h.PX, h.PY)).clean()
 
 
-MAGNET6 = (6.0, 2.5)             # Radial Magnets 9049 (Digi-Key 469-1075-ND): 6 x 2.5 mm diametric N35SH
-MAGNET6_BORE = MAGNET6[0] + 0.2  # 6.2: the same 0.2 over the magnet as the 4 mm's locked-in 4.2
-
-
-def magnet_shaft_6mm():
-    """magnet_shaft() for the 6 x 2.5 mm magnet: the same shaft and 10 mm cap, its bore 6.2 across and 2.6 deep, the
-    magnet flush with the cap's top (1.0 mm under the chip, as the 4 x 2), 1.9 mm of cap wall round it and 1.9 under it"""
-    s = magnet_shaft().fuse(cyl(5.0, h.CAP[0] + 1.0, h.CAP[1] + h.CAP_UP, h.PX, h.PY))   # the 4 mm's bore filled
-    d, t = MAGNET6
-    return s.cut(cyl(MAGNET6_BORE / 2, h.CAP[1] + h.CAP_UP - t - 0.1, h.CAP[1] + h.CAP_UP + 1, h.PX, h.PY)).clean()
-
-
 
 def refs():
     m = h.MODULE / 2
@@ -385,9 +373,7 @@ def refs():
                 .cut(cq.Solid.makeCylinder(2.6, 40, V(h.TX - 20 * SA, h.TY - 20 * CA, h.BOLT_Z), V(SA, CA, 0))),
         "module": rot(box(h.PX - m, h.PX + m, h.PY - m, h.PY + m, h.BOARD_Z, h.BOARD_Z + 1.6)),
         "chip": rot(box(h.PX - 2.5, h.PX + 2.5, h.PY - 3.1, h.PY + 3.1, h.CHIP_FACE, h.BOARD_Z)),
-        "magnet": cyl(d / 2, h.CAP[1] + h.CAP_UP - t, h.CAP[1] + h.CAP_UP, h.PX, h.PY),
-        "magnet_6mm": cyl(MAGNET6[0] / 2, h.CAP[1] + h.CAP_UP - MAGNET6[1], h.CAP[1] + h.CAP_UP, h.PX, h.PY),
-        "m5_grub": cq.Solid.makeCylinder(2.1, h.GRUB_L, V(h.TX - (h.TY - h.GRUB_TIP + h.GRUB_L) * SA, h.TY - (h.TY - h.GRUB_TIP + h.GRUB_L) * CA, h.BOLT_Z), V(SA, CA, 0)),
+        "magnet": cyl(d / 2, h.CAP[1] + h.CAP_UP - t, h.CAP[1] + h.CAP_UP, h.PX, h.PY),        "m5_grub": cq.Solid.makeCylinder(2.1, h.GRUB_L, V(h.TX - (h.TY - h.GRUB_TIP + h.GRUB_L) * SA, h.TY - (h.TY - h.GRUB_TIP + h.GRUB_L) * CA, h.BOLT_Z), V(SA, CA, 0)),
     }
 
 
@@ -395,9 +381,7 @@ if __name__ == "__main__":
     src, out = sys.argv[1:3]
     os.makedirs(os.path.join(out, "ref"), exist_ok=True)
     parts = {"HueyHeadR5-ThrottleGrip": grip(src), "HueyHeadR5-FrictionCollar": to_mesh(friction_collar()),
-             "HueyHeadR5-Pinion": to_mesh(pinion_print()), "HueyHeadR5-MagnetShaft": to_mesh(magnet_shaft()),
-             "HueyHeadR5-MagnetShaft-6mm": to_mesh(magnet_shaft_6mm()),
-             "HueyHeadR5-GripBearingCoupons": T(bearing_coupons()), "HueyHeadR5-ORingCoupon": T(oring_coupon())}
+             "HueyHeadR5-Pinion": to_mesh(pinion_print()), "HueyHeadR5-MagnetShaft": to_mesh(magnet_shaft()),             "HueyHeadR5-GripBearingCoupons": T(bearing_coupons()), "HueyHeadR5-ORingCoupon": T(oring_coupon())}
     for name, m in parts.items():
         m.export(os.path.join(out, name + ".stl"))
         back = trimesh.load(os.path.join(out, name + ".stl"))      # the float32 STL round trip can open edges

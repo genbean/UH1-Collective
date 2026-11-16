@@ -1,5 +1,5 @@
-# AS5600 sensor board Rev 1.0: a drop-in for the 23.24 mm square AS5600 module in the base's lever and the head's pod,
-# plugged straight into a HeliSR Rev 4.0 AX port with a JST SR 1:N jumper (A04SR04SR30K254B).
+# AS5600 sensor board Rev 1.0: 23.24 mm square, for the base's lever and the head's pod,
+# plugged straight into a HeliSR Rev 4.0 AX port with a JST SR 1:N jumper (A04SR04SR30K152B).
 #   Front (chip side, faces the magnet): the AS5600 (SOIC-8) on the board's centre, C1 100 nF on VDD5V and C2 1 uF on
 #     VDD3V3 (both 1206). Nothing over 1.75 mm tall, all inside +-7 mm of the centre (the head's rails and the base's
 #     M2 screw heads are outside that).

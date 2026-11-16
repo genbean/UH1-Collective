@@ -31,7 +31,7 @@ for label, name in {"5V": "VCC", "GND": "GND", "3V3": "VDD3V3", "SCL": "SCL", "S
     want(f.GetReference(), 1, name)
     if f.IsFlipped(): bad.append(f"test pad {label} on the back")
 if len(tp) != 6: bad.append(f"{len(tp)} test pads, want 6")
-# HeliSR AX port: 1 SDA, 2 GND, 3 VCC, 4 SCL; the A04SR04SR30K254B jumper is 1:N, so the far end sees pin n as 5 - n
+# HeliSR AX port: 1 SDA, 2 GND, 3 VCC, 4 SCL; the A04SR04SR30K152B jumper is 1:N, so the far end sees pin n as 5 - n
 port = {1: "SDA", 2: "GND", 3: "VCC", 4: "SCL"}
 for n in range(1, 5): want("J1", n, port[5 - n])
 want("J1", "MP", "GND")

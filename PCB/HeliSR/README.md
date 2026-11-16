@@ -121,8 +121,8 @@ Pro Micro "A1" ─────┴── R11 10k ── VCC   ──── SDA/SC
 ## AS5600 sensors
 
 Use the AS5600 sensor board, [`../AS5600`](../AS5600/README.md): an AS5600 wired for 5 V as its datasheet asks,
-with no pull-ups of its own, on a board the size of the WWZMDiB module it replaces. It plugs into any AX port with a
-**1:N** JST SR jumper (A04SR04SR30K254B); its connector's pins are in the port's order turned end for end to suit
+with no pull-ups of its own, and a 6 × 2.5 mm diametric magnet. It plugs into any AX port with a
+**1:N** JST SR jumper (A04SR04SR30K152B); its connector's pins are in the port's order turned end for end to suit
 that cable. Nothing on it needs removing, measuring or jumpering.
 
 Nothing is burnt into the chip: the firmware writes each sensor's start and stop angles (ZPOS, MPOS) to its
@@ -195,8 +195,8 @@ cables, the bus recovery and the sensors' behaviour all wait for one. `Software/
 ## Pro Micro RP2040 compatibility
 
 Every pin the board uses is also there on the **SparkFun Pro Micro RP2040**, whose VCC pin is 3.3 V:
-its pins 2 and 3 (GPIO2, GPIO3) can be the RP2040's I2C1 SDA and SCL, and the pull-ups then go to 3.3 V, which suits an AS5600 module
-run in its 3.3 V mode (R1 left fitted). There is no RP2040 build of the HeliSR firmware. Not tried.
+its pins 2 and 3 (GPIO2, GPIO3) can be the RP2040's I2C1 SDA and SCL, and the pull-ups then go to 3.3 V. The AS5600
+sensor board is wired for 5 V, so it would need its VDD5V and VDD3V3 joined to run there. There is no RP2040 build of the HeliSR firmware. Not tried.
 
 ## DRC rules
 

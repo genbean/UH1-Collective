@@ -57,15 +57,16 @@ for side, label in (("top", "Front"), ("bottom", "Back")):
         "--background", "opaque", "--zoom", "1", "-o", png, PCB])
     print("render", os.path.basename(png))
 
-rows = [["Ref", "Qty per board", "Part", "Manufacturer part", "Mouser part", "Package", "Notes"],
-        ["U1", 1, "AS5600 magnetic angle sensor", "AS5600-ASOM", "", "SOIC-8", "lift it off a WWZMDiB module, or buy new"],
-        ["C1", 1, "100 nF, 50 V, X7R", "Samsung CL31B104KBCNNNC", "187-CL31B104KBCNNNC", "1206",
-         "the HeliSR's C1/C2/C4 part; 0.85 mm thick"],
-        ["C2", 1, "1 uF, 16 V, X7R, low profile", "Walsin 1206B105J160CT", "791-1206B105J160CT", "1206",
-         "1.15 mm thick: the base's cover is 2.0 mm off the board"],
-        ["J1", 1, "JST SH 4-pin vertical header", "BM04B-SRSS-G-TB(LF)(SN)", "306-4BSRSSGTBLP", "SMD, 1.0 mm",
+rows = [["Ref", "Qty per board", "Part", "Manufacturer part", "Digi-Key part", "Package", "Notes"],
+        ["U1", 1, "AS5600 magnetic angle sensor", "ams OSRAM AS5600-ASOM", "AS5600-ASOMCT-ND", "SOIC-8", ""],
+        ["C1", 1, "100 nF, 50 V, X7R", "Samsung CL31B104KBCNNNC", "1276-1017-1-ND", "1206", "0.85 mm thick"],
+        ["C2", 1, "1 uF, 16 V, X7R", "YAGEO CC1206JKX7R7BB105", "311-1924-1-ND", "1206",
+         "about 1.15 mm thick: the base's cover is 2.0 mm off the board"],
+        ["J1", 1, "JST SH 4-pin vertical header", "JST BM04B-SRSS-TB", "455-BM04B-SRSS-TBCT-ND", "SMD, 1.0 mm",
          "the HeliSR's AX port part"],
-        ["Cable", 1, "JST SR jumper, 1:N, 10 in", "A04SR04SR30K254B", "306-A04SR04SR30K254B", "",
+        ["Magnet", 1, "Magnet, 6 x 2.5 mm, diametric, N35SH", "Radial Magnets 9049", "469-1075-ND", "",
+         "in the base's sensor cover or the head's magnet shaft"],
+        ["Cable", 1, "JST SR jumper, 1:N, 6 in", "JST A04SR04SR30K152B", "455-3014-ND", "",
          "1:N (pin n to pin 5-n); a 1:1 cable won't work"]]
 with open(os.path.join(OUT, NAME + "_BOM.csv"), "w", newline="") as f: csv.writer(f).writerows(rows)
 print("BOM written")

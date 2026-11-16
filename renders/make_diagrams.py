@@ -172,7 +172,7 @@ def head_items(src):
 
     for n in ("Body", "Upper panel", "Upper panel text", "Lower toggles and STOP REL",
               "Lower switch nuts", "Upper toggles", "Upper switch nuts",
-              "HeliSR board", "Pro Micro", "JST plugs + wires", "USB plug", "AS5600 module", "AS5600 chip", "Magnet",
+              "HeliSR board", "Pro Micro", "JST plugs + wires", "USB plug", "AS5600 sensor board", "AS5600 chip", "Magnet",
               "Magnet shaft", "Pinion", "Friction collar", "Throttle grip", "Trigger", "Trigger spring",
               "Starter tact switch"):
         m, col = get(n)
@@ -433,7 +433,7 @@ def head_views(src):
              "SearchHat board", "Hat stick switch"]
     upper = ["Upper panel", "Upper panel text", "Upper toggles", "Upper switch nuts"]
     board = ["HeliSR board", "Pro Micro", "JST plugs + wires", "USB plug"]
-    sensor = ["AS5600 module", "AS5600 chip"]
+    sensor = ["AS5600 sensor board", "AS5600 chip"]
     shaft = ["Magnet shaft", "Magnet"]
     trig = ["Trigger", "Trigger spring", "Starter tact switch"]
     grip = ["Throttle grip", "O-ring grip low", "O-ring grip high"]
@@ -521,7 +521,7 @@ def head_views(src):
               "behind it", ["Lower panel"]),
              ("Hat cap", "pushed onto the stick last", ["Search hat cap"]),
              ("HeliSR board + Pro Micro", "on four 4 mm spacers on the rear wall", ["HeliSR board"]),
-             ("AS5600 module", "chip down, slides into its grooves from the front", ["AS5600 module"]),
+             ("AS5600 sensor board", "chip down, slides into its grooves from the front", ["AS5600 sensor board"]),
              ("Magnet shaft + magnet", "down through the web into the pinion's hex", ["Magnet shaft"]),
              ("Pinion", "shoulder down: up through the neck, sideways into its pocket", ["Pinion"]),
              ("Body", "one print: box, neck, tube boss and trigger mount", ["Body"]),
@@ -675,7 +675,7 @@ def head_scenes(H):
           focus=[m("Lower panel"), m("Upper panel")], parallel=True, zoom=1.0)
     inside = [(m("Lower toggles and STOP REL"), ORANGE), (m("Upper toggles"), ORANGE), (m("SearchHat board"), YELLOW),
               (m("Hat stick switch"), YELLOW),
-              (m("HeliSR board"), GREEN), (m("Pro Micro"), BLUE), (m("AS5600 module"), PURPLE),
+              (m("HeliSR board"), GREEN), (m("Pro Micro"), BLUE), (m("AS5600 sensor board"), PURPLE),
               (m("AS5600 chip"), PURPLE)]
     scene(body + inside, n_out + 0.35 * side + 0.3 * up, up, os.path.join(HEAD_OUT, "HueyHeadR5_Inside.png"),
           focus=[m("Body")], zoom=1.05)

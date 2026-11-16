@@ -184,15 +184,13 @@ The AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) sits in a squa
 - **The pocket:** 23.54 mm square (the board is 0.915 in, 23.24 mm, plus 0.15 mm a side) and 1.6 mm deep for the board. The board rests on two 1.6 mm ledges along its top and bottom edges.
 - **Behind the board:** 3.5 mm of space, opening into the 13 mm axial bore. The board's socket and the lead's plug sit in the bore, and the lead runs on down it to the tube.
 - **Orientation:** any way round.
-- **Holding it:** four M2 × 8 countersunk screws through the board's corner holes, which are on a 16.0 mm square. The posts are 16.26 mm apart across and 16.0 mm up and down (the module the pocket was drawn for, as measured); the board's 2.4 mm holes take the difference. They thread into 1.8 mm pilots, 11.9 mm deep, in four round posts that stand up from the floor behind the board to its back, each joined to the nearest ledge. Tap the pilots M2 by hand, or let the screws cut their own thread. The heads sit about 0.6 mm proud of the board, 1.4 mm short of the cover.
+- **Holding it:** four M2 × 8 countersunk screws through the board's corner holes, which are on a 16.0 mm square. The posts are 16.26 mm apart across and 16.0 mm up and down; the board's 2.4 mm holes take the difference. They thread into 1.8 mm pilots, 11.9 mm deep, in four round posts that stand up from the floor behind the board to its back, each joined to the nearest ledge. Tap the pilots M2 by hand, or let the screws cut their own thread. The heads sit about 0.6 mm proud of the board, 1.4 mm short of the cover.
 
   ![The sensor pocket's four M2 posts](renders/rev4_sensor_pocket.png)
 
-The chip stands inside the bearing's retaining lip. The magnet (a diametric magnet from an AS5600 module pack, about 4 × 2 mm) sits in a 4.2 mm pocket in the sensor cover's inside face, the same as the head axle's, its face 0.5 mm below the cover's and 1.0 mm off the chip.
+The chip stands inside the bearing's retaining lip. The magnet, a 6 × 2.5 mm diametric N35SH disc (Radial Magnets 9049, Digi-Key 469-1075-ND: the AS5600 datasheet's reference size), sits in a pocket in the sensor cover's inside face, 6.2 mm across and 2.6 mm deep, the same as the head's magnet shaft. Its face is 0.5 mm below the cover's and 1.0 mm off the chip, with 1.9 mm of cover behind it. The lead runs from the back of the board through the axial bore and up the tube to **AX1** on the HeliSR board.
 
-**6 × 2.5 mm magnet:** `stl/cover_sensor_6mm.stl` is the same cover for a 6 × 2.5 mm diametric magnet (Radial Magnets 9049, Digi-Key 469-1075-ND, N35SH: the AS5600 datasheet's reference size). Its pocket is 6.2 mm across and 2.6 mm deep, with the same 0.2 mm over the magnet as the 4.2 pocket. The magnet's face is in the same place, 1.0 mm off the chip, and 1.9 mm of cover is left behind it. Print either cover; the head has a matching magnet shaft. The lead runs from the back of the board through the axial bore and up the tube to **AX1** on the HeliSR board.
-
-**The lead:** a 1:N JST SR jumper (A04SR04SR30K254B) cut in half, with the 4-wire ribbon spliced between the halves, each wire to the wire in the same position, so it stays 1:N. One plug goes on the sensor board, the other on AX1. The board needs nothing else: see its README.
+**The lead:** a 1:N JST SR jumper (A04SR04SR30K152B, 6 in) cut in half, with a 1 m 4-wire ribbon spliced between the halves, each wire to the wire in the same position, so it stays 1:N. One plug goes on the sensor board, the other on AX1. The board needs nothing else: see its README.
 
 **The range:** the chip turns with the lever and the magnet is fixed, and the board's DIR is tied to GND, so the angle falls as the lever lifts. When you set the range, the helper sets it the other way round; tick **Inverted** on the collective's axis ([AS5600 guide](../Software/docs/as5600.md)). The firmware writes the range over I²C at every start, so it can be changed at any time.
 
@@ -433,7 +431,7 @@ Between them, these label every screw and nut in the base:
 | Compression spring, 10 mm OD, 10–15 mm free length | 1 | optional, for the brake knob |
 | M5 × 35 hex-head bolt | 1 | stainless, from MonsterBolts with the screws |
 | Felt, 1.5 mm, 16 × 51 mm | 1 | on the brake strap |
-| AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K254B) | 1 | with a ~4 × 2 mm diametric magnet from an AS5600 module pack, or a 6 × 2.5 mm one (Radial Magnets 9049) with `cover_sensor_6mm.stl` |
+| AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K152B) | 1 | with a 6 × 2.5 mm diametric magnet (Radial Magnets 9049) |
 
 ## Notes
 

@@ -146,8 +146,8 @@ COVER_TOP_C = 0.8                                # the shell's top-edge chamfer:
 W_HALF = BLOCK_Y1 + COVER_T                      # 36.5: overall 73 mm
 # AS5600 in the sensor trunnion's end: the board (0.915 in = 23.24 mm square, measured; 1.6 thick) in a square pocket
 # 0.15 mm clear each side, its front face level with the trunnion's end (2.5 mm deeper than at first), on two ledges
-# along its top and bottom edges (clear of both pad columns), with 3.5 mm behind it for the wires soldered in from the
-# back and the DIR jumper. The chip sits inside the retaining lip; the magnet sits in a pocket in the sensor cover's
+# along its top and bottom edges, with 3.5 mm behind it for J1 (the JST SH socket in the middle of its back) and its
+# plug, which run on into the axial bore. The chip sits inside the retaining lip; the magnet sits in a pocket in the sensor cover's
 # inside face, 0.5 mm below it, 1 mm off the chip
 BOARD = 23.24
 BOARD_CLR, BOARD_T, LEDGE, BEHIND = 0.15, 1.6, 1.6, 3.5
@@ -155,16 +155,18 @@ BOARD_Y = (TRUN_OUT - BOARD_T, TRUN_OUT)         # |y| of the board's back and f
 CHIP_Y1 = TRUN_OUT + 1.5                         # SOIC-8 top (31.0)
 MAGNET_Y = CHIP_Y1 + m.MAGNET_GAP                # magnet face (32.0)
 POCKET_FLOOR = BOARD_Y[0] - BEHIND               # (24.4)
-# The board is screwed down: four M2 x 8 flat heads through the module's four corner holes (the user
-# measured them 0.64 in apart along the pad columns' edges, x here, and 0.63 in across, z), into 1.8 mm pilots 11.9 mm deep (tap M2
+# The board is screwed down: four M2 x 8 flat heads through its four corner holes (16.0 mm square; the posts are
+# 0.64 in apart in x and 0.63 in in z, and the 2.4 mm holes take the difference), into 1.8 mm pilots 11.9 mm deep (tap M2
 # by hand, or let the screw cut it) in round posts that stand up from the pocket's floor to the board's back, each
-# joined to the nearest ledge. The posts stay 0.5 mm off the pad columns' ends. The heads sit on the board's face, about
+# joined to the nearest ledge. The heads sit on the board's face, about
 # 0.6 mm proud of it, 1.4 mm short of the cover
 AS_HOLES = [(sx * 0.64 * 25.4 / 2, sz * 0.63 * 25.4 / 2) for sx in (-1, 1) for sz in (-1, 1)]   # (x, z): +-8.13, +-8.0
 AS_POST_R, AS_PILOT_D, AS_SCREW_L = 2.0, 1.8, 8.0     # 1.6 printed too tight to thread an M2 into
 AS_HEAD_TOP = TRUN_OUT + 0.6                     # |y| 30.1: the head's top
 m.CSK.setdefault(2, (4.1, 2.2))                  # M2 countersunk: a 3.8 mm head (csk_screw draws it 0.3 under this)
-AS_HOLE_D = 2.4                                  # the module's holes (reference)
+AS_HOLE_D = 2.4                                  # the board's holes (reference)
+J1_W, J1_D, J1_H = 6.0, 4.25, 2.95               # J1, BM04B-SRSS-TB: body across x, along z, and its height off the
+                                                 # board's back (reference)
 AS_PILOT_END = 16.0                              # |y| 16.0: 11.9 mm deep from the post's top, 6.1 past an M2 x 8's
                                                  # tip (6.3 deep, 0.5 past the tip, was too shallow on the print); takes
                                                  # up to an M2 x 12. Through the hub's solid core: 4.1 mm off the axial
@@ -1057,27 +1059,10 @@ def _cover(s):
 
 
 def cover_sensor():
-    """the magnet in a pocket in its inside face, its face 0.5 mm below it and 1 mm off the chip. Prints outside face
-    down"""
+    """the 6 x 2.5 mm magnet in a pocket in its inside face (6.2 across, 2.6 deep), its face 0.5 mm below it and 1 mm
+    off the chip, with 1.9 mm of cover behind it. Prints outside face down"""
     c = _cover(-1).cut(cyl(m.MAGNET_POCKET / 2, (0, -BLOCK_Y1 + 0.5, 0), (0, -(MAGNET_Y + m.MAGNET_H + 0.1), 0)))
     return chamfer_edges(c.clean(), exclude=cover_seat_edge)
-
-
-MAGNET6_D, MAGNET6_H = 6.0, 2.5                  # Radial Magnets 9049 (Digi-Key 469-1075-ND): 6 x 2.5 mm diametric
-                                                 # N35SH, the AS5600 datasheet's reference magnet
-MAGNET6_POCKET = MAGNET6_D + 0.2                 # 6.2: the same 0.2 over the magnet as the 4 mm's locked-in 4.2
-
-
-def cover_sensor_6mm():
-    """cover_sensor() for the 6 x 2.5 mm magnet: the same cover, its pocket 6.2 across and 2.6 deep, so the magnet's
-    face stays 0.5 mm below the inside face and 1 mm off the chip, with 1.9 mm of cover behind it (2.4 for the 4 x 2).
-    Prints outside face down"""
-    c = _cover(-1).cut(cyl(MAGNET6_POCKET / 2, (0, -BLOCK_Y1 + 0.5, 0), (0, -(MAGNET_Y + MAGNET6_H + 0.1), 0)))
-    return chamfer_edges(c.clean(), exclude=cover_seat_edge)
-
-
-def magnet_6mm():
-    return cyl(MAGNET6_D / 2, (0, -MAGNET_Y, 0), (0, -(MAGNET_Y + MAGNET6_H), 0))
 
 
 def cover_cable():
@@ -1312,12 +1297,10 @@ def sensor_board():
     h = BOARD / 2
     pcb = box(-h, h, -BOARD_Y[1], -BOARD_Y[0], -h, h)
     chip = box(-2.5, 2.5, -CHIP_Y1, -TRUN_OUT, -2.0, 2.0)
-    px = h - m.AS5600_PAD_X
-    pins = fuse(*[cyl(0.5, (sx * px, -BOARD_Y[0] + 2.5, z), (sx * px, -BOARD_Y[0] - 1.0, z))
-                  for sx in (-1, 1) for z in (-m.AS5600_PAD_PITCH, m.AS5600_PAD_PITCH)])
+    j1 = box(-J1_W / 2, J1_W / 2, -BOARD_Y[0], -BOARD_Y[0] + J1_H, -J1_D / 2, J1_D / 2)   # J1 on the back, centred
     for x, z in AS_HOLES:
         pcb = pcb.cut(cyl(AS_HOLE_D / 2, (x, -BOARD_Y[1] - 1, z), (x, -BOARD_Y[0] + 1, z)))
-    return pcb.fuse(pins).clean(), chip
+    return pcb.fuse(j1).clean(), chip
 
 
 def magnet():
@@ -1385,9 +1368,8 @@ def usb_cable(theta=0.0, x0=-190.0):
 
 
 def sensor_wires():
-    """from the board's back, along the axis, into the tube beside the USB cable"""
-    pts = [V(6.8, -BOARD_Y[0] + 1.5, 3.0), V(0, -POCKET_FLOOR - 0.5, 4.0), V(0, -6, 4.0), V(-6, -3, 4.0),
-           V(-190, -3, 4.0)]
+    """from J1's plug on the board's back, along the axis, into the tube beside the USB cable"""
+    pts = [V(0, -BOARD_Y[0] + J1_H, 1.0), V(0, -6, 4.0), V(-6, -3, 4.0), V(-190, -3, 4.0)]
     return m.sweep_circle(1.6, cq.Wire.makePolygon(pts), pts[0], (pts[1] - pts[0]).normalized())
 
 
@@ -1746,15 +1728,8 @@ def export():
         sub = os.path.join(HERE, "stl") if name in PRINTED else os.path.join(HERE, "stl", "ref")
         os.makedirs(sub, exist_ok=True)
         cq.exporters.export(cq.Workplane().add(shp), os.path.join(sub, f"{name}.stl"), tolerance=0.04, angularTolerance=0.12)
-    c6, m6 = cover_sensor_6mm(), magnet_6mm()                  # the 6 x 2.5 mm magnet's version (not in the assembly)
-    ov = c6.intersect(m6).Volume()
-    near = [p.distance(m6) for p in (P["sensor_chip"], P["sensor_pcb"], P["sensor_screws"])]
-    print(f"{'cover_sensor_6mm':16s} valid={c6.isValid()} vol={c6.Volume():9.1f}  magnet overlap {ov:.3f} mm3, "
-          f"to the chip {near[0]:.2f}, board {near[1]:.2f}, screws {near[2]:.2f} mm")
-    cq.exporters.export(cq.Workplane().add(c6), os.path.join(HERE, "stl", "cover_sensor_6mm.stl"), tolerance=0.04,
-                        angularTolerance=0.12)
-    cq.exporters.export(cq.Workplane().add(m6), os.path.join(HERE, "stl", "ref", "magnet_6mm.stl"), tolerance=0.04,
-                        angularTolerance=0.12)
+    near = [P["magnet"].distance(P[k]) for k in ("sensor_chip", "sensor_pcb", "sensor_screws")]
+    print(f"magnet: {near[0]:.2f} mm to the chip, {near[1]:.2f} to the board, {near[2]:.2f} to the screws")
     os.makedirs(os.path.join(HERE, "step"), exist_ok=True)
     asm = cq.Assembly(name="MkIII_Rev4")
     for name, shp in P.items():

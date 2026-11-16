@@ -8,7 +8,7 @@ Rev 5 grew out of head Rev 4 (no longer in the repository), which it compares it
 
 ![Rev 5's panels](renders/HueyHeadR5_Front.png)
 
-[![Exploded from the front: the panels, the HeliSR board, the AS5600 module, magnet shaft and pinion, the grip and the friction collar](renders/HueyHeadR5_Exploded.png)](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html)
+[![Exploded from the front: the panels, the HeliSR board, the AS5600 sensor board, magnet shaft and pinion, the grip and the friction collar](renders/HueyHeadR5_Exploded.png)](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html)
 
 **[▶ Open the interactive version](https://htmlpreview.github.io/?https://github.com/genbean/UH1-Collective/blob/main/Head/renders/HueyHeadR5_Exploded.html)** (click the picture too): point at any part to see what it is ([the page](renders/HueyHeadR5_Exploded.html), to download and open locally).
 
@@ -73,7 +73,7 @@ The lower panel's top two screws are 4 mm in from their corners (Rev 4: 4.5 mm),
 | **Printed threads** | Every hole a screw of M3 or larger threads into is printed with its ISO metric thread, opened 0.15 mm for FDM (`thread_cut`), so nothing needs tapping: the panel columns (M3), the tube's set screw (M5), the trigger pivot in the right lug and the pull stop in the trigger's arm (M3). The M2 holes (the SearchHat board's bosses, the pull stop's seat) are 1.6 mm pilots: the screw cuts its own thread, or tap them M2 by hand. The HeliSR's four M3 screws go through clearance holes into nuts. |
 | **No air behind the neck** | The head prints on its rear wall, so any air between the neck block and that wall would print on supports, which are weaker than infill. Every piece of the neck block (the boss, the AS5600 pod, the flare, the neck and the tube's column) is carried straight back to the rear wall and capped again at its own top, square to the tube, and only then are the switches' room, the AS5600's way in, the pinion pocket's window and the leads' hole cut out of it. The USB cable goes into the tube through the 20 mm round opening in the column's lip, which is the tube's stop. |
 | **HeliSR board** | The upper box is 38.5 mm tall inside, which is less than the board's 39.3 mm. The board's USB end sits 1.4 mm down in the wire slot through the floor. It is still centred across the upper box. |
-| **AS5600 module** | It is square to the box (Rev 4 turned it 15°, with the pinion). Turned, its way in from the front would come out through the narrower box's right wall. The chip is still centred over the magnet. |
+| **AS5600 sensor board** | It is square to the box (Rev 4 turned it 15°, with the pinion). Turned, its way in from the front would come out through the narrower box's right wall. The chip is still centred over the magnet. |
 | **Search hat** | An ALPS RKJXM1015004 8-way stick switch on a small board ([`PCB/SearchHat`](../PCB/SearchHat/README.md)) that screws to four bosses printed on the lower panel's back, behind a 13.5 mm hole. Nothing is glued, and the panel prints without supports. Its labels sit round the 28 mm cap: SEARCH CONT and EXT over it, the arrow and RETR under it. See [`Hat/README.md`](Hat/README.md). |
 | **Tube set screw** | Straight ahead, as in Rev 4: drill the tube's 5.2 mm hole through its front, 10 mm below its top end. The hat's recess in the neck opens in front of the screw's hole, so the screw goes in through it with the lower panel off. All 7.75 mm of its thread is in solid boss, with at least 2 mm of wall all round. |
 | **Slot between the boxes** | 37.6 × 40.5 mm: across the upper box between its screw columns, and from the rear wall forward to 1.5 mm behind the rib the upper panel bears on (Rev 4: 25 mm deep). |
@@ -85,11 +85,11 @@ The neck block is cut back behind each lower-panel switch, so its body clears an
 
 | Switch | Its body ends | Neck cut to | Room for the wires |
 |---|---|---|---|
-| GOV and LDG LT toggles | 26 mm (APEM 600H, lugs straight) | the rear wall: each cut runs straight back from the panel to the face the head prints on, 2.5 mm clear of the GOV toggle's sides and 1.5 mm of LDG LT's (`TOGGLE_CLR`) | all the way back. Behind LDG LT the cut starts 2 mm higher (`LDG_BACK_LIFT`), keeping 1.2 mm over the AS5600 module's hold-down tabs; at the front it takes the first 6 mm off those tabs, leaving 17 mm of their 23 |
+| GOV and LDG LT toggles | 26 mm (APEM 600H, lugs straight) | the rear wall: each cut runs straight back from the panel to the face the head prints on, 2.5 mm clear of the GOV toggle's sides and 1.5 mm of LDG LT's (`TOGGLE_CLR`) | all the way back. Behind LDG LT the cut starts 2 mm higher (`LDG_BACK_LIFT`), keeping 1.2 mm over the AS5600 sensor board's hold-down tabs; at the front it takes the first 6 mm off those tabs, leaving 17 mm of their 23 |
 | STOP REL (Same Sky PB4) | 15.6 mm (11.5 mm body, 4.1 mm terminals) | 17.0 mm (`PB4_DEPTH`) | 1.4 mm: any deeper comes within 1.2 mm of the pinion's pocket, right behind it. Bend the terminals over, or run the wires off them sideways |
 | Search hat | 8.5 mm (the SearchHat board's J1; the switch's pins end at 7.2) | 13.5 mm (`HAT_DEPTH`) | 5.0 mm, for J1's plug and lead |
 
-Every cut keeps at least 1.2 mm of wall to the tube bore, the set screw's hole and the AS5600 module.
+Every cut keeps at least 1.2 mm of wall to the tube bore, the set screw's hole and the AS5600 sensor board.
 
 **Window into the pinion pocket.** A 12 mm wide rectangular window (`POCKET_WINDOW_W`) runs from the bottom of the STOP REL recess back into the pinion's pocket, the pocket's full height. The head prints on its rear wall, so that wall is the pocket's roof on the bed. Through the window you can pick out the pocket's supports and see the pinion. It leaves the pocket's floor, its bearing hole and the web over the pinion untouched.
 
@@ -168,7 +168,7 @@ IN8, IN16, AX2 and AX3 are spare, and IN15 too if the hat's centre push isn't wi
 
 ### Wiring and programming
 
-The throttle's AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) goes on **AX4 (J14)** of the HeliSR Rev 4.0 board ([`PCB/HeliSR`](../PCB/HeliSR/README.md)), through one whole 1:N JST SR jumper (A04SR04SR30K254B). Its socket is in the middle of its back, which faces up into the pod's open top, so the plug goes straight in from above and the lead runs up out of the pod. The sensor board needs nothing else.
+The throttle's AS5600 sensor board ([`PCB/AS5600`](../PCB/AS5600/README.md)) goes on **AX4 (J14)** of the HeliSR Rev 4.0 board ([`PCB/HeliSR`](../PCB/HeliSR/README.md)), through one whole 1:N JST SR jumper (A04SR04SR30K152B). Its socket is in the middle of its back, which faces up into the pod's open top, so the plug goes straight in from above and the lead runs up out of the pod. The sensor board needs nothing else.
 
 The firmware sets the idle and full-open angles over I²C; nothing is burnt into the chip. The angle rises from idle to full open, so the axis isn't inverted.
 
@@ -191,7 +191,7 @@ Every groove is 2.1 mm wide: at this squeeze a 2 mm ring only spreads to about 2
 
 It also checks these:
 - no cut in the neck block breaks out through a wall (only the bores' open bottom and the AS5600's way in out of the open front leave the solid);
-- the AS5600 module board clears every switch by 1 mm;
+- the AS5600 sensor board clears every switch by 1 mm;
 - every label clears the screw heads, the switches' nuts, the hat's cap and the panel's edge;
 - the starter leads' 4 mm hole is open from the groove to the box, keeps 1.2 mm of wall all round, and comes out in the box's open inside;
 - **the cables into the tube.** The USB-C plug (a 12 × 7 × 25 mm overmold) hangs from the Pro Micro through the wire slot, and its end goes 5.4 mm into the carbon tube's top end, through the lip's 20 mm opening.
@@ -222,16 +222,16 @@ The throttle grip, friction collar, pinion and magnet shaft don't overlap the bo
 
 Closest clearances:
 - every toggle body to the box: at least 1.0 mm (to the panel screws' columns and the side walls); to the neck block: 2.5 mm for GOV, 1.5 mm for LDG LT, and 0.5 mm for the STOP REL button;
-- the LDG LT FWD / DOWN toggle to the AS5600 module board: 1 mm (the module's wires are soldered straight into its holes, with no pins);
+- the LDG LT FWD / DOWN toggle to the AS5600 sensor board: 1 mm (its socket and the jumper's plug, on its back, clear everything too: `PCB/AS5600/tools/check_head_fit.py`);
 - the upper toggles to the HeliSR board and Pro Micro: 1.5 mm;
 - the hat's J1 plug: its end 2.2 mm under the lower box's top wall.
 
 The trigger, the mount and the throttle are Rev 4's, where a full mock assembly checked them:
 - **The trigger's action**, turning it about its pivot: released, its tail rests on the mount and the button is clear of the arm; pulled, the arm meets the button after 0.5 mm and presses it 0.15, 0.25 and 0.45 mm at 4.0°, 4.6° and 5.6° of pull; the set screw stops it where the table under [Setting the stop](#starter-trigger) says; its top stays 1.1 mm or more under the sloping bottom up to the stop; even backed right off, it ends 5.9 mm short of the grip and the friction collar.
 - **The throttle through its travel**, from the idle stop to full open (181°): the grip and pinion mesh without touching, the filled part of the grip stays clear of the pinion, and nothing touches the head or the AS5600. The lug stays inside the groove and meets the hard stops at 0° and 181°.
-- **Each part goes in its own way without touching anything:** the pinion, up the neck and sideways into its pocket; the magnet shaft, in from the front and down into the pod; the AS5600 module, along its grooves; the tube's set screw, from the front; the tube, grip and collar; the trigger's pivot, from the left; the pull stop's set screw, out of the arm backward; the trigger with its spring, straight back out from between the lugs; the starter switch, back out of its pocket.
+- **Each part goes in its own way without touching anything:** the pinion, up the neck and sideways into its pocket; the magnet shaft, in from the front and down into the pod; the AS5600 sensor board, along its grooves; the tube's set screw, from the front; the tube, grip and collar; the trigger's pivot, from the left; the pull stop's set screw, out of the arm backward; the trigger with its spring, straight back out from between the lugs; the starter switch, back out of its pocket.
 
-![Inside, with the switches (orange), the hat's board and stick switch (yellow), the HeliSR board and Pro Micro (green, blue) and the AS5600 module (purple)](renders/HueyHeadR5_Inside.png)
+![Inside, with the switches (orange), the hat's board and stick switch (yellow), the HeliSR board and Pro Micro (green, blue) and the AS5600 sensor board (purple)](renders/HueyHeadR5_Inside.png)
 
 ![The body](renders/HueyHeadR5_Body.png)
 
@@ -251,12 +251,12 @@ All STLs except the hat's cap are in the head's own frame, so they open assemble
 | Throttle grip | `HueyHeadR5-ThrottleGrip.stl` | upright, bottom end down (gear and lug up) | Built from Gazmac52's MkII grip (`source/MkII-Grip-bore-relieved-25mm.stl`, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). 25.8 mm bore, clear of the tube, with two O-ring grooves inside. Their roofs are 45°, so it needs no supports |
 | Friction collar | `HueyHeadR5-FrictionCollar.stl` | bottom face down (O-ring groove up) | |
 | Pinion | `HueyHeadR5-Pinion.stl` | shoulder up, toothed face on the bed, as it comes | See [The pinion goes in one way up](#the-pinion-goes-in-one-way-up). The magnet shaft slides into its hex (4.6 mm across flats, 0.15 over the shaft) |
-| Magnet shaft | `HueyHeadR5-MagnetShaft.stl`, or `HueyHeadR5-MagnetShaft-6mm.stl` | cap face down | The first takes the ~4 × 2 mm magnet in a 4.2 mm bore. The `-6mm` one takes a 6 × 2.5 mm diametric magnet (Radial Magnets 9049, Digi-Key 469-1075-ND) in a 6.2 × 2.6 mm bore: the same shaft and 10 mm cap, the magnet flush with the cap's top and 1.0 mm under the chip, with 1.9 mm of cap round it |
-| Sensor seat coupon | `HueyHeadR5-SensorSeatCoupon.stl` | the same way round as it sits in the head printed on its rear wall | Optional: try your AS5600 module in it first |
+| Magnet shaft | `HueyHeadR5-MagnetShaft.stl` | cap face down | Takes the 6 × 2.5 mm diametric magnet (Radial Magnets 9049) in a 6.2 mm bore, 2.6 mm deep, flush with the cap's top and 1.0 mm under the chip, with 1.9 mm of cap round it |
+| Sensor seat coupon | `HueyHeadR5-SensorSeatCoupon.stl` | the same way round as it sits in the head printed on its rear wall | Optional: try your AS5600 sensor board in it first |
 | Grip bearing coupons | `HueyHeadR5-GripBearingCoupons.stl` | flat, labels up | Optional: the 25.2 ring checks the head's tube bore on the carbon tube |
 | O-ring coupon | `HueyHeadR5-ORingCoupon.stl` | upright, like the grip | A 7 mm slice of the grip's bore with one O-ring groove, cut exactly as the grip's (about 2 g). Fit a greased O-ring and slide it on the carbon tube before printing the grip: it should turn with a light, even drag, with no plastic touching the tube |
 
-`stl/ref/` holds stand-ins used by the scripts (tube, magnet, module, chip, M5 grub screw); they aren't printed.
+`stl/ref/` holds stand-ins used by the scripts (tube, magnet, sensor board (`module.stl`), chip, M5 grub screw); they aren't printed.
 
 ### White labels on a P1S with AMS
 
@@ -334,7 +334,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | O-ring, 24 mm ID × 2 mm (28 mm OD), nitrile (FOCMKEAS, [Amazon B0BWWBTL4N](https://www.amazon.com/dp/B0BWWBTL4N), 50 for $6.89) | 4 | Two in the grip's bore, one in the friction collar, one in the ceiling's groove. See [The grip floats on O-rings](#the-grip-floats-on-o-rings) |
 | Bivar SRS-4-4MM spacers (Mouser 749-SRS-4-4MM) | 4 | Between the rear wall and the HeliSR board |
 | Pen spring, up to 4 mm across | 1 | The trigger return (cut to about 13 mm) |
-| AS5600 sensor board ([`../PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K254B) | 1 | The throttle's; a ~4 × 2 mm diametric magnet from an AS5600 module pack, or a 6 × 2.5 mm one (Radial Magnets 9049) with the `-6mm` shaft, goes in the shaft's cap |
+| AS5600 sensor board ([`../PCB/AS5600`](../PCB/AS5600/README.md)) and a 1:N JST SR jumper (A04SR04SR30K152B) | 1 | The throttle's; a 6 × 2.5 mm diametric magnet (Radial Magnets 9049) goes in the shaft's cap |
 | APEM 639H/2 toggle, ON-OFF-ON (Mouser 642-639H2) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
 | APEM 637H/2 toggle, (ON)-OFF-(ON) (Mouser 642-637H2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
 | APEM 636H/2 toggle, ON-ON (Mouser 642-636H2) | 1 | LDG LT ON (IN7) |
@@ -342,7 +342,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | TE 1825910-6 tact switch, 6 × 6 mm (Mouser 650-1825910-6) | 1 | Starter trigger (IN14) |
 | ALPS RKJXM1015004 8-way stick switch (Mouser 688-RKJXM1015004) | 1 | SEARCH CONT hat (IN9–IN12, centre push IN15) |
 | SearchHat Rev 1.0 board, JST SM06B-SRSS-TB and a 6-pin JST SH lead | 1 | [`../PCB/SearchHat`](../PCB/SearchHat/README.md); see [`Hat/README.md`](Hat/README.md) |
-| HeliSR Rev 4.0 board with its Pro Micro and JST cables | 1 | [`../PCB/HeliSR`](../PCB/HeliSR/README.md); the throttle module goes on AX4 (J14) |
+| HeliSR Rev 4.0 board with its Pro Micro and JST cables | 1 | [`../PCB/HeliSR`](../PCB/HeliSR/README.md); the throttle's sensor board goes on AX4 (J14) |
 | Hot glue | a dab | Holds the AS5600 sensor board at the front of its grooves, and the starter switch in its pocket |
 | Ballast, steel or lead | ~50 g | Only if the base's gas strut lifts too much |
 
@@ -411,7 +411,7 @@ Settings you're likely to change in `huey_head_r5.py`:
 - the outline: `PANEL_W`, `PANEL_HR`, `PANEL_HL` and `DIAG_U`, and the upper box: `UX0`, `UX1`, `UZ1` and `UY`;
 - the switch positions: `GOV`, `SEARCH`, `LDG_EXT`, `STOP_REL`, `SL` and `LDG_ON`, and the labels in `lower_labels()` and `upper_labels()`;
 - the friction knob: `KNOB_*`;
-- the module's grooves: `GROOVE_H`, `BOARD_CLR`;
+- the sensor board's grooves: `GROOVE_H`, `BOARD_CLR`;
 - the tube bore: `TUBE_BORE`;
 - the starter trigger: `REST_GAP` (button to arm, released), `TACT_*`, `LEAD_*`.
 

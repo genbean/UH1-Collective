@@ -706,10 +706,10 @@ SHAFT_BORE = 6.3                 # the web's bore for it: 0.075 a side, like the
 SHAFT_HEX = 4.5                  # the magnet shaft's hex end (across flats) presses into the pinion
 CAP = (WEB[1], WEB[1] + 4.0)     # the magnet shaft's cap, resting on the web; magnet flush with its top
 CAP_UP = 0.5                     # the cap is this much taller than that (throttle_r5.py): the magnet sits this much closer to the chip
-MAGNET = (4.0, 2.0)              # about 4 x 2 mm diametric (supplied with the WWZMDiB module; the user measured it near 4 mm)
+MAGNET = (6.0, 2.5)              # Radial Magnets 9049 (Digi-Key 469-1075-ND): 6 x 2.5 mm diametric N35SH
 CHIP_FACE = CAP[1] + 1.5         # the chip's face: 1.5 mm over the cap's old top, so 1.0 mm over the magnet (datasheet 0.5-3 mm)
 BOARD_Z = CHIP_FACE + 1.5        # module underside (SOIC-8 body 1.5 mm)
-MODULE = 23.0                    # WWZMDiB AS5600 module, chip assumed centred
+MODULE = 23.0                    # the AS5600 sensor board (PCB/AS5600), chip centred
 MODULE_ROT = 0.0                # the module is square to the box (Rev 4: SPIN), so its way in runs straight to the front: turned
                                 # with the pinion, it would come out through the narrower box's right wall
 POD_IN, POD_WALL, SHELF = MODULE + 0.6, 2.5, 1.5   # module shaft, its walls, the width of the rails and tabs
