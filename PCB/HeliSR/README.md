@@ -235,12 +235,9 @@ the collective's BOM, [`../../BOM`](../../BOM).
    board's short), added a no-via rule area over R11's courtyard, re-routed what they had joined with Freerouting, and
    added GND stitching vias where pour pieces were cut off. The one AX4_SCL link it left open (R8 to J14 pin 4) was
    joined by one via at 36.26, 13.25, inside J14's outline, clear of every resistor, capacitor and the switch.
-   Then, by hand (`hand_vias_v4.py` lists every edit): every via that could pick up solder paste from another net's
-   pad was moved or removed. That's any via within 0.5 mm (copper to copper) of a different net's SMD pad, or under a
-   resistor, capacitor or the switch. Ten bare GND stitching vias went, and four GND vias were added in clear spots
-   to keep the pours joined. Eleven signal and power vias moved, with their short track ends and, where needed, a
-   neighbouring track (AX1_SDA by J11, IN9 by RN2, and SR_DATA and AX3_SDA, which swap sides under U2/U3). C3 moved
-   0.3 mm towards U2 (its pads stay 0.5 mm from U2's). `via_danger_v4.py` is the check.
+   Then the vias were placed again by hand in KiCad (commit "optimizing via placement" and the edits after it): GND
+   stitching redone, and the SR_LOAD, IN10, VCC and AX1_SCL vias moved. `via_danger_v4.py` lists every via that
+   could pick up solder paste from another net (see Checks).
 4. `verify_netlist_v4.py` checks the netlist against the reference board and input map kept in `tools/` for it, and
    against the PCA9546A datasheet's pinout, and writes the input map.
 5. `export_v4.py` writes `HeliSR_Rev4.0_Gerbers.zip` and the two renders. `tools/make_bom.py` (at the repo root) then rewrites the
@@ -256,11 +253,13 @@ the collective's BOM, [`../../BOM`](../../BOM).
 - **Clearance:** the cheap-fab rules above. All copper is at least 0.5 mm from the edge, and every track and via at
   least 3.7 mm from a hole centre (every pad 4.1 mm). No neck-downs: every signal track is 0.2 mm and every VCC/GND
   track 0.3 mm.
-- **Routing:** 981 mm of track, 72 vias: 41 signal (two of them RST's, beside the button) and 31 GND.
-- **Vias and solder paste:** no via sits under a resistor, capacitor or the switch, and every via is at least
-  0.5 mm (copper to copper) from any other net's SMD pad, except MUX_RST's at 30.40, 13.42: 0.45 mm from U2.1
-  (SR_LOAD). It sits in a 1.56 mm gap between U2.1 and U3's GND pin, which can't give 0.5 mm to both. Through-hole
-  pads take no paste and aren't counted.
+- **Routing:** 992 mm of track, 85 vias: 41 signal (two of them RST's, beside the button) and 44 GND.
+- **Vias and solder paste:** `via_danger_v4.py` finds 15 vias under a resistor, capacitor or the switch, or closer
+  than 0.5 mm (copper to copper) to another net's SMD pad: under R5 (AX3_SDA), R6 (AX3_SCL, VCC) and R8 (AX4_SCL,
+  also 0.40 mm from J14's VCC pad); IN10 0.20 mm from U2.12 (IN11); AX3_SDA 0.25 from U2.1 (SR_LOAD); GND 0.26 from
+  U2.9 (SR_DATA); GND 0.33 from R8's VCC pad; AX4_SCL 0.37 from U3.6 (AX2_SDA); SR_LOAD 0.38 from U1.9 (SR_CHAIN);
+  GND 0.44 from SW1's RST pad; MUX_RST 0.45 from U2.1; GND 0.47 from C2's VCC pad; and IN10 and IN15 at 0.49–0.50
+  from their J2 neighbours. Through-hole pads take no paste and aren't counted.
   The I²C lines from U3 to the ports are 6–29 mm long.
 - **RST button:** nothing under the PTS810 but its own pads and a GND track; the two RST vias beside it touch its
   outline by 0.1 mm at the RST pads' side. Every via is tented.
