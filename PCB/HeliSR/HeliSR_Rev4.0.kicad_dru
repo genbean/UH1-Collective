@@ -13,6 +13,13 @@
   (severity ignore)
   (condition "(A.Reference == 'RN1' && B.Reference == 'J8') || (A.Reference == 'J8' && B.Reference == 'RN1') || (A.Reference == 'RN2' && B.Reference == 'J7') || (A.Reference == 'J7' && B.Reference == 'RN2') || (A.Reference == 'RN1' && B.Reference == 'U1') || (A.Reference == 'U1' && B.Reference == 'RN1') || (A.Reference == 'RN1' && B.Reference == 'U2') || (A.Reference == 'U2' && B.Reference == 'RN1') || (A.Reference == 'RN2' && B.Reference == 'U1') || (A.Reference == 'U1' && B.Reference == 'RN2') || (A.Reference == 'RN2' && B.Reference == 'U2') || (A.Reference == 'U2' && B.Reference == 'RN2') || (A.Reference == 'C1' && B.Reference == 'U1') || (A.Reference == 'U1' && B.Reference == 'C1')"))
 
+# C3 (1206) sits 0.3 mm closer to U2 than its courtyard allows, to keep the SR_LOAD via 0.5 mm from its VCC pad;
+# its pads are still 0.5 mm from U2's.
+(rule "C3 beside U2: courtyards"
+  (constraint courtyard_clearance)
+  (severity ignore)
+  (condition "(A.Reference == 'C3' && B.Reference == 'U2') || (A.Reference == 'U2' && B.Reference == 'C3')"))
+
 # The connector rows: along each long side a 10-pin and a 4-pin JST SH header, 0.5 mm copper apart.
 # The courtyards overlap, but the housings are 1.2 mm apart along a row, and their pads are still checked by the
 # clearance rules.
