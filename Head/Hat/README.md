@@ -36,7 +36,7 @@ The board's outline, holes and parts come from `PCB/SearchHat/SearchHat_Rev1.0_m
 |---|---|
 | `HueyHeadR5-LowerPanel-Black` / `-WhiteText` | Face down, as the upper panel (Arachne, 0.42 mm first layer: see the head's [README](../README.md#white-labels-on-a-p1s-with-ams)); no supports |
 | `HueyHeadR5-Hat-Cap.stl` | Base down, as it comes: the stick's socket opens on the bed, with a lead-in for the first layer's squash |
-| `HueyHeadR5-Hat-SocketTest.stl` | As it comes, labels up. Five loose 12 × 15 mm test coupons in one print (`socket_test.py`), small enough to go over the stick with the hat installed, one round hole each: 2.35–2.55 in 0.05 steps, each labelled, for `SOCKET_D`. Print it the way you print the cap and push the stick through each one. D coupons (for `SOCKET_FLAT_W`) come next, built around the round size that fits |
+| `HueyHeadR5-Hat-SocketTest.stl` | As it comes, labels up. Six loose 12 × 15 mm test coupons in one print (`socket_test.py`), small enough to go over the stick with the hat installed, one round hole each: 2.45–2.50 in 0.01 steps (the 0.05 set found 2.50 fits), each labelled, for `SOCKET_D`. Print it the way you print the cap and push the stick through each one. D coupons (for `SOCKET_FLAT_W`) come next, built around the round size that fits |
 
 To buy:
 - **ALPS RKJXM1015004** (Mouser 688-RKJXM1015004).

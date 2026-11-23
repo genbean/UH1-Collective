@@ -1,4 +1,4 @@
-# Test coupons for the hat cap's socket: one hole each, loose but in one STL so they print together, in 0.05 mm steps,
+# Test coupons for the hat cap's socket: one hole each, loose but in one STL so they print together, in small steps,
 # so the cap's SOCKET_D and SOCKET_FLAT_W can be picked from one small print instead of a cap at a time.
 #
 # The stick (catalog, and measured 0.085" = 2.16 mm): 2.2 round, its last 3.5 mm cut to a D 1.4 from the flat to the
@@ -6,8 +6,8 @@
 # only the stick's D, and the stick pushes on through a round hole until its round part is in. Prints like the cap:
 # the holes open on the bed, with the same lead-in.
 #
-# Only the sizes still in question. Caps so far: round 2.4 too tight, 2.5 too loose; D 1.69 and 1.72 too tight.
-#   back row:  round holes 2.35 .. 2.55                                              -> SOCKET_D
+# Only the sizes still in question. The 0.05 coupons: 2.50 fits. Caps: D 1.69 and 1.72 too tight.
+#   back row:  round holes 2.45 .. 2.50, 0.01 steps                      -> SOCKET_D
 #   front row: D holes 1.70 .. 2.00 from the flat to the far side                     -> SOCKET_FLAT_W
 #              (off for now, WITH_D: they come next, their round part the round size that fits)
 #
@@ -21,11 +21,11 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 import huey_head_r5 as h
 
 
-def steps(a, b):
-    return [round(a + 0.05 * k, 2) for k in range(round((b - a) / 0.05) + 1)]
+def steps(a, b, s=0.05):
+    return [round(a + s * k, 2) for k in range(round((b - a) / s) + 1)]
 
 
-ROUND = steps(2.35, 2.55)
+ROUND = steps(2.45, 2.50, 0.01)                       # 0.05 coupons: 2.50 fits; this narrows it down
 DFLAT = steps(1.70, 2.00)
 D_ROUND = 2.5                                         # the D holes' round part: set it to the round coupon that fits
 WITH_D = False                                        # round coupons first; D coupons once the round size is picked
