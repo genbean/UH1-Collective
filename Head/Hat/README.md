@@ -21,11 +21,11 @@ Measured from the panel's back (its face is 2.5 mm in front):
 
 | | |
 |---|---|
-| Cap | A 28 mm terraced knob after the real one, its underside 4.0 mm in front of the panel's face. Its socket is 2.3 mm across and 4.5 mm deep, and the stick's tip bears on its end |
+| Cap | A 28 mm terraced knob after the real one, its underside 4.0 mm in front of the panel's face. Its socket is 2.5 mm across (the stick measures 0.085", 2.16 mm; 2.3 printed too small) and 4.5 mm deep, and the stick's tip bears on its end |
 | Stick | 2.2 mm, its tip 11.0 mm in front of the panel's back. The catalog gives 15 ± 0.4 mm from the switch's mounting face, so the cap sits 3.6–4.4 mm off the face |
 | Switch | Its 11 mm body comes through the panel's 13.5 mm hole, its front flush with the face (0.1 mm proud) |
 | Board | Its front on the four bosses, 4.0 mm behind the panel's back; its back at 5.6. J1 ends at 8.5 and the switch's pins at 7.2. The neck is cut to 13.5 there (`HAT_DEPTH` in `../huey_head_r5.py`) |
-| Bosses | Four, 5 mm across, on the board's 17 mm square, part of the panel. Each has a 1.6 mm pilot down to 1 mm short of the face |
+| Bosses | Four, 5 mm across, on the board's 17 mm square, part of the panel. Each has a 1.6 mm pilot down to 0.42 mm (the first layer) short of the face, 1.0 mm past an M2 × 8's tip |
 | Screws | M2 × 8 countersunk, from behind through the board. Each has 5.1 mm of thread in its boss and the panel |
 
 The board's outline, holes and parts come from `PCB/SearchHat/SearchHat_Rev1.0_mech.json`, which the board's generator writes, so the panel's bosses always match the board.
@@ -84,5 +84,5 @@ The switch stops at 12° at most, so the rim never reaches the panel: there's 1.
 Nothing is printed or built yet. Still to check:
 - the switch's real dimensions: everything here comes from the ALPS catalog's drawing, including the 0.8 mm collar in front of its body, which is read off the drawing;
 - that A is EXT, as the catalog's lever drawing reads. If not, swap the inputs in the profile;
-- the cap's socket on the stick: snug, loose or tight as printed;
-- the M2s in the bosses' pilots.
+- the 2.5 mm cap socket on the stick: snug, loose or tight as printed;
+- the M2 × 8s in the deeper pilots (the first pilots, 1 mm short of the face, let them bottom out).

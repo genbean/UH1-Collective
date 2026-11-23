@@ -51,7 +51,7 @@ CAP_GAP = 4.0                          # cap's underside in front of the panel's
                                        # toward the panel at 12 degrees, so 4.0 keeps it clear even with a 14.6 mm stick
 Y_CAPB = FACE - CAP_GAP                # -6.5
 SOCKET = 4.5                           # the stick goes this far into the cap, and its tip bears on the socket's end
-SOCKET_D = 2.3                         # for the 2.2 mm stick: snug as printed (open it with a 2.2 mm drill if it won't go)
+SOCKET_D = 2.5                         # the stick measures 0.085" (2.16 mm); a 2.3 mm socket printed too small for it
 Y_TIP = Y_CAPB - SOCKET                # -11.0
 Y_MF = Y_TIP + STICK_L                 # the switch's mounting face = the board's front                       4.0
 BOARD_T = MECH["thickness"]
@@ -60,7 +60,8 @@ Y_BB = Y_MF + BOARD_T                  # the board's back                       
 # ---- the panel
 HOLE_D = 13.5                          # the panel's hole: the body's corners are 11.9 mm across
 BOSS_D, PILOT_D = 5.0, 1.6             # M2 bosses, 1.6 mm pilots (tap M2 by hand, or let the screw cut it)
-PILOT_END = FACE + 1.0                 # the pilots stop 1 mm short of the face
+PILOT_END = FACE + 0.42                # the pilots stop one first layer (0.42) short of the face: an M2 x 8's tip
+                                       # reaches -1.1, so 1.0 mm to spare (1 mm short left 0.4, and the screws bottomed)
 M2_HEAD_D, M2_HEAD_H, M2_L = 3.8, 1.2, 8.0
 
 # ---- J1's housing and a mated plug (JST SH side entry), on the board's back
