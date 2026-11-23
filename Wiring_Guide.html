@@ -106,6 +106,38 @@ svg text { font-family: var(--mono); }
 .sw-lug { fill: var(--gold); stroke: var(--body-edge); stroke-width: 1; }
 .sw-on { stroke: var(--ok); stroke-width: 3; fill: none; stroke-linecap: round; }
 @media (prefers-reduced-motion: no-preference) { tr { transition: background .15s; } }
+
+/* Print: light theme whatever the screen uses, pale boards to save ink, drawings scaled to the page, nothing split */
+@page { size: letter; margin: 12mm 12mm 14mm; }
+@media print {
+  :root:not([data-x]), :root[data-theme] {
+    --bg: #ffffff; --surface: #ffffff; --fg: #000000; --muted: #3d3b45; --line: #b9b5c4; --accent: #4b2b7d;
+    --pcb: #f1ecf8; --pcb-edge: #4b2b7d; --gold: #c49a2c; --silk: #2c174d; --body: #ffffff; --body-edge: #5c5968;
+    --gnd: #000000; --vcc: #c42b2b; --sda: #1d68c9; --scl: #9a6a00; --in: #17805a; --spare: #6f6c7c;
+    --ok: #17805a; --tick-bg: #ffffff; color-scheme: light;
+  }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; box-shadow: none !important; }
+  body { font-size: 10.5pt; line-height: 1.4; }
+  .wrap { max-width: none; padding: 0; }
+  nav, #reset, .progress { display: none !important; }
+  header { padding-bottom: 8px; }
+  h1 { font-size: 24pt; }
+  h2 { font-size: 16pt; margin: 18px 0 4px; break-after: avoid; page-break-after: avoid; }
+  h3 { break-after: avoid; page-break-after: avoid; }
+  p, .lede { max-width: none; }
+  .fig, .tbl, .note, ol.steps { break-inside: avoid; page-break-inside: avoid; }
+  .fig, .tbl { border-color: var(--line); border-radius: 4px; }
+  .fig .scroll, .tbl { overflow: visible; }
+  .fig svg { width: 100% !important; max-height: 8.6in; }
+  .pair { grid-template-columns: 1fr 1fr; gap: 10px; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  th { background: #f0eef4; }
+  td.chk input { width: 13px; height: 13px; }
+  #helisr, #heli { break-before: auto; }
+  #j1 { break-before: page; page-break-before: always; }
+  #checks { break-before: avoid; }
+}
 </style>
 
 <div class="wrap">
