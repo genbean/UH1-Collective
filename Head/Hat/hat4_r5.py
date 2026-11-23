@@ -47,13 +47,15 @@ PINS = [(1.0, 5.35), (1.0, -4.95), (4.95, 1.0), (-1.0, 4.95), (-4.95, -1.0), (5.
         (-4.15, 2.7)]                  # (u, v), seen from the front; the locating peg is at (1, 3)
 
 # ---- placing it
-CAP_GAP = 4.0                          # cap's underside in front of the panel's face. A 28 mm cap's rim swings 3.0-3.2 mm
-                                       # toward the panel at 12 degrees, so 4.0 keeps it clear even with a 14.6 mm stick
-Y_CAPB = FACE - CAP_GAP                # -6.5
-SOCKET = 4.5                           # the stick goes this far into the cap, and its tip bears on the socket's end
-SOCKET_D = 2.5                         # the stick measures 0.085" (2.16 mm); a 2.3 mm socket printed too small for it
-Y_TIP = Y_CAPB - SOCKET                # -11.0
-Y_MF = Y_TIP + STICK_L                 # the switch's mounting face = the board's front                       4.0
+Y_MF = 4.0                             # the switch's mounting face = the board's front (the bosses' height)
+STICK_OUT = 0.320 * 25.4               # measured: the stick's tip stands 0.320" (8.13 mm) off the panel's face
+Y_TIP = FACE - STICK_OUT               # -10.63
+STICK_L = Y_MF - Y_TIP                 # 14.63 mounting face to tip, as built (catalog 15 +- 0.4)
+SOCKET = 5.5                           # the stick goes this far into the cap, and its tip bears on the socket's end.
+                                       # 4.5 left the rim 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer
+SOCKET_D = 2.4                         # the stick measures 0.085" (2.16 mm): 2.3 printed too tight, 2.5 far too loose
+Y_CAPB = Y_TIP + SOCKET                # cap's underside, -5.13
+CAP_GAP = FACE - Y_CAPB                # 2.63 in front of the panel's face
 BOARD_T = MECH["thickness"]
 Y_BB = Y_MF + BOARD_T                  # the board's back                                                      5.6
 
@@ -227,7 +229,7 @@ def check():
     worst = 99.0
     face = panel ^ h.box(-30, FACE - 0.5, -30, 30, FACE + 0.6, 30)
     for yp, pname in ((Y_MF - BODY_H, "body front"), (Y_MF - BODY_H / 2, "body middle"), (Y_MF, "mounting face")):
-        for dy, sname in ((0.0, "15.0"), (0.4, "14.6")):
+        for dy, sname in ((0.0, f"{STICK_L:.2f}"),):           # the stick's length is measured, not the catalog's range
             cc = cp.translate((0, dy, 0))
             row = []
             for k in range(8):
