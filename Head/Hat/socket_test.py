@@ -8,7 +8,8 @@
 #
 # Only the sizes still in question. Caps so far: round 2.4 too tight, 2.5 too loose; D 1.69 and 1.72 too tight.
 #   back row:  round holes 2.35 .. 2.55                                              -> SOCKET_D
-#   front row: D holes 1.70 .. 2.00 from the flat to the far side, round part 2.5     -> SOCKET_FLAT_W
+#   front row: D holes 1.70 .. 2.00 from the flat to the far side                     -> SOCKET_FLAT_W
+#              (off for now, WITH_D: they come next, their round part the round size that fits)
 #
 # usage: socket_test.py <out dir>
 import os
@@ -26,7 +27,8 @@ def steps(a, b):
 
 ROUND = steps(2.35, 2.55)
 DFLAT = steps(1.70, 2.00)
-D_ROUND = 2.5                                         # the D holes' round part: the cap's SOCKET_D
+D_ROUND = 2.5                                         # the D holes' round part: set it to the round coupon that fits
+WITH_D = False                                        # round coupons first; D coupons once the round size is picked
 T = 3.0                                               # coupon thickness
 CW, CL, GAP = 12.0, 15.0, 3.0                         # each coupon, small enough to go over the installed stick
 HOLE_Y = 4.0                                          # the hole's centre from the coupon's near end; the label above
@@ -58,8 +60,9 @@ def plug():
     m = mf.Manifold()
     for i, d in enumerate(ROUND):
         m += coupon(mf.CrossSection.circle(d / 2, 64), f"{d:.2f}", i * (CW + GAP), CL + GAP)
-    for i, w in enumerate(DFLAT):
-        m += coupon(d_hole(D_ROUND, w), f"{w:.2f}", i * (CW + GAP), 0)
+    if WITH_D:
+        for i, w in enumerate(DFLAT):
+            m += coupon(d_hole(D_ROUND, w), f"{w:.2f}", i * (CW + GAP), 0)
     return m
 
 
