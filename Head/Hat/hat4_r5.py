@@ -54,6 +54,10 @@ STICK_L = Y_MF - Y_TIP                 # 14.63 mounting face to tip, as built (c
 SOCKET = 5.5                           # the stick goes this far into the cap, and its tip bears on the socket's end.
                                        # 4.5 left the rim 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer
 SOCKET_D = 2.4                         # the stick measures 0.085" (2.16 mm): 2.3 printed too tight, 2.5 far too loose
+FLAT_L, FLAT_W = 3.5, 1.4              # catalog: the stick's last 3.5 mm is a D, 1.4 from its flat to the far side, the
+                                       # flat facing A (EXT, +v)
+SOCKET_FLAT_L = 3.3                    # the cap's D: just short of the flat's length, so the round stick clears its end
+SOCKET_FLAT_W = FLAT_W + (SOCKET_D - 2 * 1.08)   # 1.64: the same allowance over the stick as the round socket
 Y_CAPB = Y_TIP + SOCKET                # cap's underside, -5.13
 CAP_GAP = FACE - Y_CAPB                # 2.63 in front of the panel's face
 BOARD_T = MECH["thickness"]
@@ -115,8 +119,15 @@ def switch_body(pins=True):
     return b
 
 
+def d_section(d, w, y0, y1):
+    """A D along y: a d circle cut flat w from its far (-v) side, the flat facing A (+v)."""
+    c = mf.CrossSection.circle(d / 2, 64) ^ mf.CrossSection.square((d + 1, w)).translate((-(d + 1) / 2, -d / 2))
+    return prism(c, y0, y1)
+
+
 def stick():
-    return ycyl(0, 0, STICK_D, Y_TIP, Y_MF - BODY_H - COLLAR_L + 0.01)
+    y_round = Y_MF - BODY_H - COLLAR_L + 0.01
+    return d_section(STICK_D, FLAT_W, Y_TIP, Y_TIP + FLAT_L) + ycyl(0, 0, STICK_D, Y_TIP + FLAT_L - 0.01, y_round)
 
 
 def board():
@@ -174,7 +185,8 @@ def knob():
 
 def cap():
     c = knob()
-    c -= ycyl(0, 0, SOCKET_D, Y_TIP, Y_CAPB + 0.1)
+    c -= d_section(SOCKET_D, SOCKET_FLAT_W, Y_TIP, Y_TIP + SOCKET_FLAT_L)     # grips the stick's D
+    c -= ycyl(0, 0, SOCKET_D, Y_TIP + SOCKET_FLAT_L - 0.01, Y_CAPB + 0.1)
     c -= ycyl(0, 0, SOCKET_D, Y_CAPB - 0.4, Y_CAPB + 0.01, SOCKET_D + 0.82)   # lead-in, and room for the first layer's squash
     return c
 

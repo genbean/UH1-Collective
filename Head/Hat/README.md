@@ -21,7 +21,7 @@ Measured from the panel's back (its face is 2.5 mm in front):
 
 | | |
 |---|---|
-| Cap | A 28 mm terraced knob after the real one, its underside 2.6 mm in front of the panel's face. Its socket is 2.4 mm across (2.3 printed too tight, 2.5 far too loose) and 5.5 mm deep, and the stick's tip bears on its end. With a 4.5 mm socket the rim stopped 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer |
+| Cap | A 28 mm terraced knob after the real one, its underside 2.6 mm in front of the panel's face. Its socket is 2.4 mm across (2.3 printed too tight, 2.5 far too loose) and 5.5 mm deep, and the stick's tip bears on its end. Its innermost 3.3 mm is a D, 1.64 mm from the flat to the far side, to grip the stick's D (catalog: the last 3.5 mm is cut to 1.4 mm across, the flat facing A). With a 4.5 mm socket the rim stopped 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer |
 | Stick | Measured 0.085" (2.16 mm) across, its tip 0.320" (8.13 mm) off the panel's face: 14.63 mm from the switch's mounting face |
 | Switch | Its 11 mm body comes through the panel's 13.5 mm hole, its front flush with the face (0.1 mm proud) |
 | Board | Its front on the four bosses, 4.0 mm behind the panel's back; its back at 5.6. J1 ends at 8.5 and the switch's pins at 7.2. The neck is cut to 13.5 there (`HAT_DEPTH` in `../huey_head_r5.py`) |
@@ -60,7 +60,7 @@ Wiring: the same inputs as the head's earlier tact-switch hats, so the profiles 
 2. Run an M2 × 8 into each boss's pilot and back it out, to cut the thread.
 3. Plug the lead into J1. Lay the board on the bosses, switch first through the panel's hole, with the "EXT" arrow on its front pointing up toward the SEARCH CONT label. Put the four screws in, and tighten them gently: they're in plastic.
 4. With the panel on, route the lead straight back over the board's top edge and up into the slot to the upper box. The end of the plug is 2.2 mm below the lower box's top wall.
-5. Push the cap onto the stick until the stick bottoms in the socket. If it's too tight, open the socket with a 2.2 mm drill, by hand. If it's loose, use a drop of CA glue, but then the cap won't come off again.
+5. Push the cap onto the stick, turning it until its D finds the stick's flat, until the stick bottoms in the socket. If it's too tight, open the socket with a 2.2 mm drill, by hand. If it's loose, use a drop of CA glue, but then the cap won't come off again.
 6. In the Configurator, check each direction, each diagonal (two buttons at once) and the centre push.
 
 ## Checked in CAD
