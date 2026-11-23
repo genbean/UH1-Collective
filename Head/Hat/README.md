@@ -36,7 +36,7 @@ The board's outline, holes and parts come from `PCB/SearchHat/SearchHat_Rev1.0_m
 |---|---|
 | `HueyHeadR5-LowerPanel-Black` / `-WhiteText` | Face down, as the upper panel (Arachne, 0.42 mm first layer: see the head's [README](../README.md#white-labels-on-a-p1s-with-ams)); no supports |
 | `HueyHeadR5-Hat-Cap.stl` | Base down, as it comes: the stick's socket opens on the bed, with a lead-in for the first layer's squash |
-| `HueyHeadR5-Hat-SocketTest.stl` | As it comes, labels up. A test plug (`socket_test.py`): round holes 2.30–2.80 (row O, for `SOCKET_D`) and D holes 1.50–2.00 from the flat (row D, for `SOCKET_FLAT_W`), in 0.05 steps, each labelled. Print it the way you print the cap, push the stick into each hole, and set the cap from the ones that grip |
+| `HueyHeadR5-Hat-SocketTest.stl` | As it comes, labels up. A test plug (`socket_test.py`): round holes 2.35–2.55 (row O, for `SOCKET_D`) and D holes 1.70–2.00 from the flat (row D, for `SOCKET_FLAT_W`), in 0.05 steps, each labelled. Print it the way you print the cap, push the stick into each hole, and set the cap from the ones that grip |
 
 To buy:
 - **ALPS RKJXM1015004** (Mouser 688-RKJXM1015004).
