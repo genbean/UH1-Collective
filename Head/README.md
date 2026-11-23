@@ -157,14 +157,14 @@ The only bend in the route is in the open, where the leads turn from the groove 
 | Lower | LDG LT EXT / OFF / RETR | APEM 639H/2 toggle, ON-OFF-ON | IN3 / IN4 |
 | Lower | SEARCH CONT EXT / RETR / L / R | ALPS RKJXM1015004 8-way stick on the SearchHat board ([`Hat/README.md`](Hat/README.md)); a diagonal joins its two neighbours | IN9 – IN12 |
 | Lower | SEARCH CONT centre push (optional) | the same switch | IN15 |
-| Lower | STOP REL | Same Sky PB4-M-BK-D-67 push button | IN13 |
+| Lower | STOP REL | Same Sky PB4-M-BK-D-67 push button | IN8 |
 | Upper | SL ON / OFF / STOW | APEM 639H/2 toggle, ON-OFF-ON | IN5 / IN6 |
 | Upper | LDG LT ON / OFF | APEM 636H/2 toggle, ON-ON | IN7 |
 | Behind the grip | Starter trigger | TE 1825910-6 tact switch in the trigger mount | IN14 |
 | Throttle | Twist grip | AS5600 sensor board | AX4 |
 | Base | Collective | AS5600 sensor board in the MkIII base | AX1 |
 
-IN8, IN16, AX2 and AX3 are spare, and IN15 too if the hat's centre push isn't wired.
+IN13, IN16, AX2 and AX3 are spare, and IN15 too if the hat's centre push isn't wired.
 
 ### Wiring and programming
 
@@ -338,7 +338,7 @@ The list for the whole collective, with part numbers and prices for the board, h
 | APEM 639H/2 toggle, ON-OFF-ON (Mouser 642-639H2) | 2 | LDG LT EXT / RETR and SL ON / STOW (IN3–IN6) |
 | APEM 637H/2 toggle, (ON)-OFF-(ON) (Mouser 642-637H2) | 1 | GOV RPM INCR / DECR (IN1, IN2) |
 | APEM 636H/2 toggle, ON-ON (Mouser 642-636H2) | 1 | LDG LT ON (IN7) |
-| Same Sky PB4-M-BK-D-67 push button (Mouser 179-PB4-M-BK-D-67) | 1 | STOP REL (IN13) |
+| Same Sky PB4-M-BK-D-67 push button (Mouser 179-PB4-M-BK-D-67) | 1 | STOP REL (IN8) |
 | TE 1825910-6 tact switch, 6 × 6 mm (Mouser 650-1825910-6) | 1 | Starter trigger (IN14) |
 | ALPS RKJXM1015004 8-way stick switch (Mouser 688-RKJXM1015004) | 1 | SEARCH CONT hat (IN9–IN12, centre push IN15) |
 | SearchHat Rev 1.0 board, JST SM06B-SRSS-TB and a 6-pin JST SH lead | 1 | [`../PCB/SearchHat`](../PCB/SearchHat/README.md); see [`Hat/README.md`](Hat/README.md) |

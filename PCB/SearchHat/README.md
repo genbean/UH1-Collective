@@ -33,11 +33,11 @@ So the board ties PUSH and GND to ground. A–D are the four directions and COM 
 | R (right) | D | 1 | 1 | 5 | IN12 |
 | GND | PUSH ×3, GND | 2 (and the mounting tabs) | 3 | 1 or 10 | |
 | RETR (down) | C | 3 | 2 | 3 | IN10 |
-| CTR (centre push) | COM | 4 | 5 | 8 | IN15 (spare; leave it off if you don't want a centre button) |
+| CTR (centre push) | COM | 4 | 5 | 8 | IN15 (game button 17 in the UH-1 profile; leave it off if you don't want a centre button) |
 | EXT (up) | A | 5 | 4 | 2 | IN9 |
 | L (left) | B | 6 | 6 | 4 | IN11 |
 
-These are the inputs the tact-switch hats used (IN9–IN12 as EXT, RETR, L, R), so the existing profiles work as they are. The centre push is new. IN15 is spare, so bind it in a profile if you want it.
+These are the inputs the tact-switch hats used (IN9–IN12 as EXT, RETR, L, R), so the existing profiles work as they are. The centre push is on IN15, game button 17 in the UH-1 profile.
 
 The pin order isn't GND first. On J1 the signals follow the order their switch pins come round the ring, so every track on the back runs without a crossing; on J2 the same goes for the front. The silkscreen names them:
 - **J1:** "1" and "6" mark its ends on the back. Up the long edges, "J1: 1R 2GND 3RETR" and "J1: 4CTR 5EXT 6L". Seen from behind, pin 1 is on the right.

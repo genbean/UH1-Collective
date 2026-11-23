@@ -45,10 +45,11 @@ Filter level 1 on both. X, Y and Rx are off, so the spare AX2 and AX3 can't add 
 | 12 | IN10 | SEARCH CONT RETR |
 | 13 | IN11 | SEARCH CONT L |
 | 14 | IN12 | SEARCH CONT R |
-| 15 | IN13 | STOP REL |
+| 15 | IN8 | STOP REL |
 | 16 | IN14 | Starter trigger |
+| 17 | IN15 | SEARCH CONT centre push |
 
-Each switch position has its own button, so every position can be bound in a sim, middle positions included. The search light hat is wired as four buttons (IN9–IN12 in the order EXT, RETR, L, R); swap the inputs in the Physical column if yours differ. IN8, IN15, IN16, AX2 and AX3 are spare.
+Each switch position has its own button, so every position can be bound in a sim, middle positions included. The search light hat is wired as four buttons (IN9–IN12 in the order EXT, RETR, L, R); swap the inputs in the Physical column if yours differ. IN13, IN16, AX2 and AX3 are spare.
 
 ## Button box (switches, encoders, hat)
 

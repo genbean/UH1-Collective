@@ -138,8 +138,8 @@ svg text { font-family: var(--mono); }
 <div class="tbl"><table>
 <thead><tr><th>Connector</th><th>Type</th><th>Pins</th><th>Used for</th></tr></thead>
 <tbody>
-<tr><td class="pin">J1</td><td>JST SH 10-pin, top entry</td><td class="sig">1 GND · 2–9 IN1–IN8 · 10 GND</td><td>Toggles on both panels</td></tr>
-<tr><td class="pin">J2</td><td>JST SH 10-pin, top entry</td><td class="sig">1 GND · 2–9 IN9–IN16 · 10 GND</td><td>Hat, STOP REL, starter</td></tr>
+<tr><td class="pin">J1</td><td>JST SH 10-pin, top entry</td><td class="sig">1 GND · 2–9 IN1–IN8 · 10 GND</td><td>Toggles on both panels, STOP REL</td></tr>
+<tr><td class="pin">J2</td><td>JST SH 10-pin, top entry</td><td class="sig">1 GND · 2–9 IN9–IN16 · 10 GND</td><td>Hat, starter</td></tr>
 <tr><td class="pin">AX1 (J11)</td><td>JST SH 4-pin, top entry</td><td class="sig">1 SDA · 2 GND · 3 VCC · 4 SCL</td><td>Collective sensor, in the base</td></tr>
 <tr><td class="pin">AX4 (J14)</td><td>JST SH 4-pin, top entry</td><td class="sig">1 SDA · 2 GND · 3 VCC · 4 SCL</td><td>Throttle sensor, in the head</td></tr>
 <tr><td class="pin">AX2, AX3</td><td>JST SH 4-pin, top entry</td><td class="sig">as AX1</td><td>Spare</td></tr>
@@ -200,7 +200,7 @@ svg text { font-family: var(--mono); }
 <tr><td>LDG LT EXT / OFF / RETR</td><td>APEM 639H/2</td><td>ON-OFF-ON</td><td class="sig c-gnd">GND (J1-1)</td><td class="sig c-in">IN3 at EXT, IN4 at RETR</td></tr>
 <tr><td>SL ON / OFF / STOW (upper)</td><td>APEM 639H/2</td><td>ON-OFF-ON</td><td class="sig c-gnd">GND (J1-10)</td><td class="sig c-in">IN5 at ON, IN6 at STOW</td></tr>
 <tr><td>LDG LT ON / OFF (upper)</td><td>APEM 636H/2</td><td>ON-ON</td><td class="sig c-gnd">GND (J1-10)</td><td class="sig c-in">IN7 at ON; the other lug unused</td></tr>
-<tr><td>STOP REL</td><td>Same Sky PB4-M-BK-D-67</td><td>Push, momentary</td><td colspan="2" class="sig">one terminal <span class="c-gnd">GND (J2-10)</span>, the other <span class="c-in">IN13</span></td></tr>
+<tr><td>STOP REL</td><td>Same Sky PB4-M-BK-D-67</td><td>Push, momentary</td><td colspan="2" class="sig">one terminal <span class="c-gnd">GND (J1-1)</span>, the other <span class="c-in">IN8 (J1-9)</span></td></tr>
 <tr><td>Starter trigger</td><td>TE 1825910-6</td><td>Tact, momentary</td><td colspan="2" class="sig">legs 1 and 4 (or 2 and 3): one <span class="c-gnd">GND (J2-10)</span>, the other <span class="c-in">IN14</span></td></tr>
 <tr><td>SEARCH CONT hat</td><td>ALPS RKJXM1015004</td><td>8-way stick, centre push</td><td colspan="2">On the SearchHat board: wire the board, not the switch</td></tr>
 </tbody></table></div>
@@ -214,13 +214,13 @@ svg text { font-family: var(--mono); }
 </ol>
 <p>If a switch still reads the wrong way round once it's in, swap its two outer wires or swap the two inputs in the profile.</p>
 
-<h2 id="j1">J1 loom: the toggles (IN1–IN8)</h2>
+<h2 id="j1">J1 loom: the toggles and STOP REL (IN1–IN8)</h2>
 <p>Half of a 10-pin JST SR jumper, plugged into J1. The wires may all be one colour: before you cut the jumper, mark the pin 1 edge, then confirm each wire with a meter against the plug's pins. Run the lower panel's GND chain from pin 1 and the upper panel's from pin 10.</p>
 <div class="tbl"><table data-list="j1"><thead><tr><th></th><th>J1 pin</th><th>Signal</th><th>Goes to</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
 <p class="progress" data-for="j1"></p>
 
-<h2 id="j2">J2 loom: hat, STOP REL, starter (IN9–IN16)</h2>
-<p>The other half of the same jumper, plugged into J2. The hat's six wires (from its J1 lead or its J2 pads) splice into this loom wire for wire; STOP REL and the starter trigger's lead join it too.</p>
+<h2 id="j2">J2 loom: hat and starter (IN9–IN16)</h2>
+<p>The other half of the same jumper, plugged into J2. The hat's six wires (from its J1 lead or its J2 pads) splice into this loom wire for wire, and the starter trigger's lead joins it too.</p>
 <div class="tbl"><table data-list="j2"><thead><tr><th></th><th>J2 pin</th><th>Signal</th><th>Goes to</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
 <p class="progress" data-for="j2"></p>
 
@@ -293,10 +293,10 @@ svg text { font-family: var(--mono); }
     const conns = [
       { name: "J1", sub: "IN1–8", side: "top", hx: [7.55, 19.15], pins: [
         "GND", "IN1  GOV INCR", "IN2  GOV DECR", "IN3  LDG LT EXT", "IN4  LDG LT RETR", "IN5  SL ON", "IN6  SL STOW",
-        "IN7  LDG LT ON", "IN8  spare", "GND"], x0: 8.85, dx: 1 },
+        "IN7  LDG LT ON", "IN8  STOP REL", "GND"], x0: 8.85, dx: 1 },
       { name: "AX3", sub: "J13 spare", side: "top", hx: [20.85, 26.45], pins: ["SDA", "GND", "VCC 5V", "SCL"], x0: 22.15, dx: 1, spare: true },
       { name: "J2", sub: "IN9–16", side: "bottom", hx: [7.55, 19.15], pins: [
-        "GND", "IN9  HAT EXT", "IN10 HAT RETR", "IN11 HAT L", "IN12 HAT R", "IN13 STOP REL", "IN14 STARTER",
+        "GND", "IN9  HAT EXT", "IN10 HAT RETR", "IN11 HAT L", "IN12 HAT R", "IN13 spare", "IN14 STARTER",
         "IN15 HAT CTR", "IN16 spare", "GND"], x0: 17.85, dx: -1 },
       { name: "AX1", sub: "J11 collective", side: "bottom", hx: [20.85, 26.45], pins: ["SDA", "GND", "VCC 5V", "SCL"], x0: 25.15, dx: -1 },
       { name: "AX4", sub: "J14 throttle", side: "right", hy: [7.0, 13.8], pins: ["SDA", "GND", "VCC 5V", "SCL"], y0: 8.9, dy: 1 },
@@ -425,7 +425,7 @@ svg text { font-family: var(--mono); }
     el(b, "rect", { x: 72, y: 165, width: 14, height: 46, class: "sw-lug" });
     el(b, "rect", { x: 114, y: 165, width: 14, height: 46, class: "sw-lug" });
     el(b, "text", { x: 79, y: 232, class: "f-gnd", "font-size": 11, "text-anchor": "middle" }, "GND");
-    el(b, "text", { x: 121, y: 232, class: "f-in", "font-size": 11, "text-anchor": "middle" }, "IN13");
+    el(b, "text", { x: 121, y: 232, class: "f-in", "font-size": 11, "text-anchor": "middle" }, "IN8");
     el(b, "text", { x: 100, y: 262, class: "o-title", "text-anchor": "middle" }, "STOP REL");
     el(b, "text", { x: 100, y: 278, class: "o-sub", "text-anchor": "middle" }, "either way round");
     // tact switch from below: 6 x 6 mm, legs numbered as TE's drawing
@@ -462,12 +462,12 @@ svg text { font-family: var(--mono); }
     box(20, 20, 250, 64, "Lower panel toggles", ["GOV INCR/DECR · IN1, IN2", "LDG LT EXT/RETR · IN3, IN4"]);
     box(20, 100, 250, 64, "Upper panel toggles", ["SL ON/STOW · IN5, IN6", "LDG LT ON · IN7"]);
     box(20, 200, 250, 64, "SearchHat board", ["EXT RETR L R · IN9–IN12", "centre push · IN15 (optional)"]);
-    box(20, 280, 250, 48, "STOP REL button", "IN13");
+    box(20, 280, 250, 48, "STOP REL button", "IN8 · on J1");
     box(20, 344, 250, 48, "Starter trigger", "IN14 · lead up the trigger's hole");
     wire("M270 52 C 320 52, 330 120, 380 120", "in");
     wire("M270 132 C 320 132, 330 120, 380 120", "in");
     wire("M270 232 C 320 232, 330 320, 380 320", "in");
-    wire("M270 304 C 320 304, 330 320, 380 320", "in");
+    wire("M270 304 C 345 304, 320 120, 380 120", "in");
     wire("M270 368 C 320 368, 330 320, 380 320", "in");
     tab(380, 120, "J1"); tab(380, 320, "J2");
     el(s, "text", { x: 300, y: 112, class: "o-sub" }, "J1 loom");
@@ -481,13 +481,13 @@ svg text { font-family: var(--mono); }
     wire("M600 210 C 660 210, 660 210, 720 210", "scl");
     wire("M600 340 C 660 340, 660 352, 720 352", "gnd");
     tab(600, 110, "AX4"); tab(600, 210, "AX1"); tab(600, 340, "USB");
-    el(s, "text", { x: 490, y: 300, class: "s-silk-sm", "text-anchor": "middle" }, "AX2, AX3, IN8, IN16 spare");
+    el(s, "text", { x: 490, y: 300, class: "s-silk-sm", "text-anchor": "middle" }, "AX2, AX3, IN13, IN16 spare");
   })();
 
   /* ---------- Wire lists with ticks ---------- */
   const LISTS = {
     j1: [
-      ["1", "GND", "Centre lugs of GOV and LDG LT EXT/RETR (lower panel), daisy-chained", "One wire to the first, a link to the next"],
+      ["1", "GND", "Lower panel: centre lugs of GOV and LDG LT EXT/RETR, and one STOP REL terminal, daisy-chained", "One wire to the first, a link to each next"],
       ["2", "IN1", "GOV toggle: the lug that closes at INCR", ""],
       ["3", "IN2", "GOV toggle: the lug that closes at DECR", ""],
       ["4", "IN3", "LDG LT toggle: the lug that closes at EXT", ""],
@@ -495,7 +495,7 @@ svg text { font-family: var(--mono); }
       ["6", "IN5", "SL toggle (upper): the lug that closes at ON", ""],
       ["7", "IN6", "SL toggle (upper): the lug that closes at STOW", ""],
       ["8", "IN7", "LDG LT ON toggle (upper): the lug that closes at ON", "Its other outer lug stays empty"],
-      ["9", "IN8 spare", "Nothing", "Cut short and insulate"],
+      ["9", "IN8", "STOP REL button, its other terminal", "Either terminal: the button has no polarity"],
       ["10", "GND", "Centre lugs of SL and LDG LT ON (upper panel), daisy-chained", ""],
     ],
     j2: [
@@ -504,11 +504,11 @@ svg text { font-family: var(--mono); }
       ["3", "IN10", "SearchHat J1 pin 3 RETR (or J2 pad 2)", "Hat down"],
       ["4", "IN11", "SearchHat J1 pin 6 L (or J2 pad 6)", "Hat left"],
       ["5", "IN12", "SearchHat J1 pin 1 R (or J2 pad 1)", "Hat right"],
-      ["6", "IN13", "STOP REL button, one terminal", ""],
+      ["6", "IN13 spare", "Nothing", "Cut short and insulate"],
       ["7", "IN14", "Starter trigger, one lead", "From leg 1 or 4 (one diagonal pair)"],
-      ["8", "IN15", "SearchHat J1 pin 4 CTR (or J2 pad 5)", "Optional centre push"],
+      ["8", "IN15", "SearchHat J1 pin 4 CTR (or J2 pad 5)", "Centre push: game button 17 in the UH-1 profile"],
       ["9", "IN16 spare", "Nothing", "Cut short and insulate"],
-      ["10", "GND", "STOP REL's other terminal and the starter's other lead", "Join both to this wire"],
+      ["10", "GND", "Starter trigger, its other lead", ""],
     ],
     ax: [
       ["AX4", "HeliSR AX4 (J14)", "Throttle sensor J1", "AX pin 1 to sensor pin 4, 2–3, 3–2, 4–1"],

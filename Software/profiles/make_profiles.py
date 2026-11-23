@@ -96,8 +96,9 @@ button(c, 11, IN(9))                        # SEARCH CONT EXT
 button(c, 12, IN(10))                       # SEARCH CONT RETR
 button(c, 13, IN(11))                       # SEARCH CONT L
 button(c, 14, IN(12))                       # SEARCH CONT R
-button(c, 15, IN(13))                       # STOP REL
+button(c, 15, IN(8))                        # STOP REL (on J1, with the lower panel's toggles)
 button(c, 16, IN(14))                       # starter trigger
+button(c, 17, IN(15))                       # SEARCH CONT centre push
 save(c, "UH-1 collective (HeliSR head).cfg")
 
 # -------------------------------------------------------------- button box --

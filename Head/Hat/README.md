@@ -52,7 +52,7 @@ Wiring: the same inputs as the head's earlier tact-switch hats, so the profiles 
 | L | 6 | 4 | IN11 |
 | R | 1 | 5 | IN12 |
 | GND | 2 | 1 or 10 | |
-| CTR (centre push) | 4 | 8 | IN15 (spare; optional) |
+| CTR (centre push) | 4 | 8 | IN15 (game button 17 in the UH-1 profile; optional) |
 
 ## Fitting it
 
