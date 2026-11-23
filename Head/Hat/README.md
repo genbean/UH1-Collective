@@ -21,7 +21,7 @@ Measured from the panel's back (its face is 2.5 mm in front):
 
 | | |
 |---|---|
-| Cap | A 28 mm terraced knob after the real one, its underside 2.6 mm in front of the panel's face. Its socket is 2.5 mm across (picked with test coupons: 2.49 and 2.50 fit) and 5.5 mm deep, and the stick's tip bears on its end. Its innermost 3.3 mm is a D, 1.85 mm from the flat to the far side (picked with test coupons), to grip the stick's D (catalog: the last 3.5 mm is cut to 1.4 mm from the flat to the far side, the flat facing A). With a 4.5 mm socket the rim stopped 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer |
+| Cap | A 28 mm terraced knob after the real one, its underside 2.6 mm in front of the panel's face. Its socket is 2.5 mm across (picked with test coupons: 2.49 and 2.50 fit) and 5.5 mm deep, and the stick's tip bears on its end. Its innermost 3.3 mm is a D, 1.85 mm from the flat to the far side (picked with test coupons), to grip the stick's D (catalog: the last 3.5 mm is cut to 1.4 mm from the flat to the far side, the flat facing A). With a 4.5 mm socket the rim stopped 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer, and on the built hat it clears the panel by about 1 mm. The cap fits the stick snugly (confirmed) |
 | Stick | Measured 0.085" (2.16 mm) across, its tip 0.320" (8.13 mm) off the panel's face: 14.63 mm from the switch's mounting face |
 | Switch | Its 11 mm body comes through the panel's 13.5 mm hole, its front flush with the face (0.1 mm proud) |
 | Board | Its front on the four bosses, 4.0 mm behind the panel's back; its back at 5.6. J1 ends at 8.5 and the switch's pins at 7.2. The neck is cut to 13.5 there (`HAT_DEPTH` in `../huey_head_r5.py`) |
@@ -74,8 +74,7 @@ Wiring: the same inputs as the head's earlier tact-switch hats, so the profiles 
 
 ## Not checked
 
-Nothing is printed or built yet. Still to check:
+The hat is built: the cap fits and its rim clears the panel by about 1 mm at full deflection. Still to check:
 - the switch's real dimensions: everything here comes from the ALPS catalog's drawing, including the 0.8 mm collar in front of its body, which is read off the drawing;
 - that A is EXT, as the catalog's lever drawing reads. If not, swap the inputs in the profile;
-- about 1 mm left between the cap's rim and the panel at full deflection, with the 5.5 mm deep socket (the socket's fit, 2.5 round with a 1.85 D, is confirmed on the built hat);
 - the M2 × 8s in the deeper pilots (the first pilots, 1 mm short of the face, let them bottom out).
