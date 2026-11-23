@@ -6,10 +6,9 @@
 # only the stick's D, and the stick pushes on through a round hole until its round part is in. Prints like the cap:
 # the holes open on the bed, with the same lead-in.
 #
-# Only the sizes still in question. The 0.05 coupons: 2.50 fits. Caps: D 1.69 and 1.72 too tight.
-#   back row:  round holes 2.45 .. 2.50, 0.01 steps                      -> SOCKET_D
-#   front row: D holes 1.70 .. 2.00 from the flat to the far side                     -> SOCKET_FLAT_W
-#              (off for now, WITH_D: they come next, their round part the round size that fits)
+# Done: round coupons. 0.05 steps found 2.50 fits; 0.01 steps found 2.49 and 2.50 fit. SOCKET_D = 2.50.
+# Now:  D coupons, round part 2.50, from the flat to the far side 1.75 .. 2.00 in 0.05 steps (caps with a 1.69 and a
+#       1.72 D were too tight)                                                           -> SOCKET_FLAT_W
 #
 # usage: socket_test.py <out dir>
 import os
@@ -25,10 +24,9 @@ def steps(a, b, s=0.05):
     return [round(a + s * k, 2) for k in range(round((b - a) / s) + 1)]
 
 
-ROUND = steps(2.45, 2.50, 0.01)                       # 0.05 coupons: 2.50 fits; this narrows it down
-DFLAT = steps(1.70, 2.00)
-D_ROUND = 2.5                                         # the D holes' round part: set it to the round coupon that fits
-WITH_D = False                                        # round coupons first; D coupons once the round size is picked
+ROUND = []                                            # done: 2.50 (and 2.49) fit
+DFLAT = steps(1.75, 2.00)
+D_ROUND = 2.50                                        # the D holes' round part: the round coupon that fits
 T = 3.0                                               # coupon thickness
 CW, CL, GAP = 12.0, 15.0, 3.0                         # each coupon, small enough to go over the installed stick
 HOLE_Y = 4.0                                          # the hole's centre from the coupon's near end; the label above
@@ -36,12 +34,13 @@ TEXT_H, RAISE = 3.0, 0.6                              # labels stand 0.6 proud o
 
 
 def d_hole(d, w):
+    """A d circle cut flat w from its far side."""
     return (mf.CrossSection.circle(d / 2, 64)
             ^ mf.CrossSection.square((d + 1, w)).translate((-(d + 1) / 2, -d / 2)))
 
 
 def hole(cs, x, y):
-    """Through the plug, with a 0.3 mm lead-in on the bed side (the cap's, for the first layer's squash)."""
+    """Through the coupon, with a 0.3 mm lead-in on the bed side (the cap's, for the first layer's squash)."""
     c = cs.translate((x, y))
     return (h.zprism(c, -0.1, T + 0.1)
             + h.zprism(c.offset(0.3, mf.JoinType.Round), -0.1, 0.3))
@@ -56,13 +55,12 @@ def coupon(hole_cs, label, x0, y0):
 
 
 def plug():
-    """All the coupons, apart, in one STL: row O (round) behind row D."""
+    """All the coupons, apart, in one STL: a row of round ones behind a row of D ones (either row may be empty)."""
     m = mf.Manifold()
     for i, d in enumerate(ROUND):
         m += coupon(mf.CrossSection.circle(d / 2, 64), f"{d:.2f}", i * (CW + GAP), CL + GAP)
-    if WITH_D:
-        for i, w in enumerate(DFLAT):
-            m += coupon(d_hole(D_ROUND, w), f"{w:.2f}", i * (CW + GAP), 0)
+    for i, w in enumerate(DFLAT):
+        m += coupon(d_hole(D_ROUND, w), f"{w:.2f}", i * (CW + GAP), 0)
     return m
 
 

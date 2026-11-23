@@ -21,7 +21,7 @@ Measured from the panel's back (its face is 2.5 mm in front):
 
 | | |
 |---|---|
-| Cap | A 28 mm terraced knob after the real one, its underside 2.6 mm in front of the panel's face. Its socket is 2.5 mm across and 5.5 mm deep, and the stick's tip bears on its end. Its innermost 3.3 mm is a D, 1.72 mm from the flat, which is what grips (round sockets: 2.3 and 2.4 too tight, 2.5 far too loose; 2.45 with a 1.69 D, too tight) to the far side, to grip the stick's D (catalog: the last 3.5 mm is cut to 1.4 mm across, the flat facing A). With a 4.5 mm socket the rim stopped 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer |
+| Cap | A 28 mm terraced knob after the real one, its underside 2.6 mm in front of the panel's face. Its socket is 2.5 mm across (picked with test coupons: 2.49 and 2.50 fit) and 5.5 mm deep, and the stick's tip bears on its end. Its innermost 3.3 mm is a D, to grip the stick's D (catalog: the last 3.5 mm is cut to 1.4 mm from the flat to the far side, the flat facing A). The D's size is still being picked with coupons: caps with a 1.69 and a 1.72 D were too tight. With a 4.5 mm socket the rim stopped 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer |
 | Stick | Measured 0.085" (2.16 mm) across, its tip 0.320" (8.13 mm) off the panel's face: 14.63 mm from the switch's mounting face |
 | Switch | Its 11 mm body comes through the panel's 13.5 mm hole, its front flush with the face (0.1 mm proud) |
 | Board | Its front on the four bosses, 4.0 mm behind the panel's back; its back at 5.6. J1 ends at 8.5 and the switch's pins at 7.2. The neck is cut to 13.5 there (`HAT_DEPTH` in `../huey_head_r5.py`) |
@@ -36,7 +36,7 @@ The board's outline, holes and parts come from `PCB/SearchHat/SearchHat_Rev1.0_m
 |---|---|
 | `HueyHeadR5-LowerPanel-Black` / `-WhiteText` | Face down, as the upper panel (Arachne, 0.42 mm first layer: see the head's [README](../README.md#white-labels-on-a-p1s-with-ams)); no supports |
 | `HueyHeadR5-Hat-Cap.stl` | Base down, as it comes: the stick's socket opens on the bed, with a lead-in for the first layer's squash |
-| `HueyHeadR5-Hat-SocketTest.stl` | As it comes, labels up. Six loose 12 × 15 mm test coupons in one print (`socket_test.py`), small enough to go over the stick with the hat installed, one round hole each: 2.45–2.50 in 0.01 steps (the 0.05 set found 2.50 fits), each labelled, for `SOCKET_D`. Print it the way you print the cap and push the stick through each one. D coupons (for `SOCKET_FLAT_W`) come next, built around the round size that fits |
+| `HueyHeadR5-Hat-SocketTest.stl` | As it comes, labels up. Six loose 12 × 15 mm test coupons in one print (`socket_test.py`), small enough to go over the stick with the hat installed, one D hole each: 2.5 mm round, cut flat 1.75–2.00 mm from the far side in 0.05 steps, each labelled, for `SOCKET_FLAT_W`. Print it the way you print the cap, turn each one until it drops onto the stick's flat, and push. (The round coupons before them settled `SOCKET_D` at 2.5.) |
 
 To buy:
 - **ALPS RKJXM1015004** (Mouser 688-RKJXM1015004).
