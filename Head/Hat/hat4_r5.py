@@ -53,7 +53,7 @@ Y_TIP = FACE - STICK_OUT               # -10.63
 STICK_L = Y_MF - Y_TIP                 # 14.63 mounting face to tip, as built (catalog 15 +- 0.4)
 SOCKET = 5.5                           # the stick goes this far into the cap, and its tip bears on the socket's end.
                                        # 4.5 left the rim 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer
-SOCKET_D = 2.4                         # the stick measures 0.085" (2.16 mm): 2.3 printed too tight, 2.5 far too loose
+SOCKET_D = 2.45                        # the stick measures 0.085" (2.16 mm): 2.3 and 2.4 printed too tight, 2.5 far too loose
 FLAT_L, FLAT_W = 3.5, 1.4              # catalog: the stick's last 3.5 mm is a D, 1.4 from its flat to the far side, the
                                        # flat facing A (EXT, +v)
 SOCKET_FLAT_L = 3.3                    # the cap's D: just short of the flat's length, so the round stick clears its end
