@@ -60,7 +60,7 @@ The full list, with quantities, part numbers, links and prices, is the [BOM spre
 
 ## Build order
 
-Each step points to the README that covers it.
+Each step points to the README that covers it. [`Wiring_Guide.html`](Wiring_Guide.html) has every connector's pins and where each wire goes, with drawings of the three boards and the switches.
 
 1. **Order the parts** from the [BOM](BOM/Heli_Collective_BOM.xlsx), and the PCBs from the Gerbers.
 2. **Print the fit-test coupons first**, with the filament and settings you'll use, and try them on your carbon tube, bearings, sensor boards and printed lever dowels: [the base's coupons](Base/README.md#fit-test-coupons) (the 6808 bearing fits, the lever's dowel holes and the tube socket), and the head's O-ring and sensor seat coupons (printed as in [Head, Printing](Head/README.md#printing)). If a fit is off, change its setting in the script and rebuild the STLs.

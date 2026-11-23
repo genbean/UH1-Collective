@@ -1,0 +1,562 @@
+<title>Heli Collective Wiring</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: one reading column of board drawings and wire lists; drawings in their own scroll boxes.
+   Colour: OSH Park purple boards with gold pads, and one colour per kind of signal, the same in every drawing and table. */
+:root {
+  --bg: #f5f4f8; --surface: #ffffff; --fg: #1c1a24; --muted: #5c5968; --line: #dcd9e4;
+  --accent: #5a3ea3;
+  --pcb: #4b2b7d; --pcb-edge: #2c174d; --gold: #d8b24a; --silk: #f4f1fa; --body: #e9e7ee; --body-edge: #8d8a99;
+  --gnd: #34323d; --vcc: #c42b2b; --sda: #1d68c9; --scl: #b07a00; --in: #17805a; --spare: #8b8898;
+  --ok: #17805a; --tick-bg: #eef7f2;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --text: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #16141c; --surface: #1f1c27; --fg: #ebe8f2; --muted: #a29fae; --line: #34303f;
+  --accent: #b39cf0; --body: #3a3746; --body-edge: #8d8a99;
+  --gnd: #b9b6c6; --vcc: #ff7a7a; --sda: #6eaaff; --scl: #f2b632; --in: #52c993; --spare: #8f8c9c;
+  --ok: #52c993; --tick-bg: #1b2a23; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #16141c; --surface: #1f1c27; --fg: #ebe8f2; --muted: #a29fae; --line: #34303f;
+  --accent: #b39cf0; --body: #3a3746; --body-edge: #8d8a99;
+  --gnd: #b9b6c6; --vcc: #ff7a7a; --sda: #6eaaff; --scl: #f2b632; --in: #52c993; --spare: #8f8c9c;
+  --ok: #52c993; --tick-bg: #1b2a23; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--text); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+header { display: grid; gap: 6px; padding-bottom: 18px; border-bottom: 2px solid var(--accent); }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 26px; margin: 44px 0 6px; text-wrap: balance; }
+h3 { font-size: 17px; font-weight: 600; margin: 26px 0 6px; }
+p { max-width: 70ch; margin: 8px 0; }
+.lede { color: var(--muted); max-width: 72ch; }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+nav { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 14px; }
+nav a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
+nav a:hover, nav a:focus-visible { border-bottom-color: var(--accent); outline: none; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 22px; height: 4px; border-radius: 2px; display: inline-block; }
+.c-gnd { color: var(--gnd); } .c-vcc { color: var(--vcc); } .c-sda { color: var(--sda); } .c-scl { color: var(--scl); }
+.c-in { color: var(--in); } .c-spare { color: var(--spare); }
+.b-gnd { background: var(--gnd); } .b-vcc { background: var(--vcc); } .b-sda { background: var(--sda); }
+.b-scl { background: var(--scl); } .b-in { background: var(--in); } .b-spare { background: var(--spare); }
+
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin: 14px 0; }
+.fig .scroll { overflow-x: auto; padding: 10px; }
+.fig svg { display: block; margin: 0 auto; height: auto; }
+.fig figcaption { padding: 10px 14px 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.pair > * { min-width: 0; }
+
+.note { border-left: 3px solid var(--vcc); padding: 8px 12px; background: var(--surface); border-radius: 0 8px 8px 0; margin: 12px 0; max-width: 78ch; }
+.note b { color: var(--vcc); }
+.tip { border-left-color: var(--accent); } .tip b { color: var(--accent); }
+
+.tbl { overflow-x: auto; margin: 10px 0 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.pin { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+td.sig { font-family: var(--mono); white-space: nowrap; }
+tr.done { background: var(--tick-bg); }
+tr.done td:not(.chk) { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ok); }
+td.chk { width: 34px; }
+td.chk input { width: 18px; height: 18px; accent-color: var(--ok); cursor: pointer; }
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.progress { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+button.reset { font: inherit; font-size: 13px; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+button.reset:focus-visible { outline: 2px solid var(--accent); }
+ol.steps { max-width: 76ch; padding-left: 22px; } ol.steps li { margin: 6px 0; }
+
+/* SVG styling: every colour from the tokens */
+svg text { font-family: var(--mono); }
+.s-board { fill: var(--pcb); stroke: var(--pcb-edge); stroke-width: 2; }
+.s-hole { fill: var(--bg); stroke: var(--gold); stroke-width: 3; }
+.s-house { fill: var(--body); stroke: var(--body-edge); stroke-width: 1; }
+.s-pad { fill: var(--gold); }
+.s-pad1 { fill: var(--gold); stroke: var(--silk); stroke-width: 1.5; }
+.s-silk { fill: var(--silk); font-size: 11px; font-weight: 600; }
+.s-silk-sm { fill: var(--silk); font-size: 9.5px; }
+.s-ghost { fill: none; stroke: var(--silk); stroke-width: 1; stroke-dasharray: 4 3; opacity: .75; }
+.s-lbl { font-size: 10.5px; }
+.s-lead { stroke-width: 1; fill: none; opacity: .7; }
+.f-gnd { fill: var(--gnd); } .f-vcc { fill: var(--vcc); } .f-sda { fill: var(--sda); } .f-scl { fill: var(--scl); }
+.f-in { fill: var(--in); } .f-spare { fill: var(--spare); } .f-fg { fill: var(--fg); } .f-muted { fill: var(--muted); }
+.k-gnd { stroke: var(--gnd); } .k-vcc { stroke: var(--vcc); } .k-sda { stroke: var(--sda); } .k-scl { stroke: var(--scl); }
+.k-in { stroke: var(--in); } .k-spare { stroke: var(--spare); } .k-fg { stroke: var(--fg); } .k-muted { stroke: var(--muted); }
+.k-accent { stroke: var(--accent); }
+.o-box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.o-board { fill: var(--pcb); stroke: var(--pcb-edge); stroke-width: 2; }
+.o-title { font-family: var(--text); font-size: 13px; font-weight: 600; fill: var(--fg); }
+.o-sub { font-family: var(--text); font-size: 11.5px; fill: var(--muted); }
+.o-wire { fill: none; stroke-width: 3; stroke-linecap: round; }
+.o-tab { fill: var(--gold); }
+.o-tabtxt { font-size: 10.5px; font-weight: 600; fill: var(--pcb-edge); }
+.sw-body { fill: var(--body); stroke: var(--body-edge); stroke-width: 1.2; }
+.sw-metal { fill: var(--body-edge); }
+.sw-lug { fill: var(--gold); stroke: var(--body-edge); stroke-width: 1; }
+.sw-on { stroke: var(--ok); stroke-width: 3; fill: none; stroke-linecap: round; }
+@media (prefers-reduced-motion: no-preference) { tr { transition: background .15s; } }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Heli Collective · HeliSR Rev 4.0 · SearchHat Rev 1.0 · AS5600 Rev 1.0</div>
+  <h1>Wiring the collective</h1>
+  <p class="lede">Every connector on the three boards, pin by pin, and where each wire goes: the switches in the Huey head, the hat, the two AS5600 sensors and the USB cable. The pin positions are taken from the KiCad board files. Tick each wire off as you make it; the ticks stay in this browser.</p>
+  <nav aria-label="Sections">
+    <a href="#overview">Overview</a><a href="#helisr">HeliSR board</a><a href="#searchhat">SearchHat</a>
+    <a href="#as5600">AS5600 boards</a><a href="#switches">Switches</a><a href="#j1">J1 loom</a><a href="#j2">J2 loom</a>
+    <a href="#sensors">Sensor leads</a><a href="#usb">USB</a><a href="#checks">Checks</a>
+  </nav>
+  <div class="legend" aria-label="Signal colours">
+    <span><i class="sw b-gnd"></i>GND</span><span><i class="sw b-vcc"></i>VCC 5 V</span>
+    <span><i class="sw b-sda"></i>SDA</span><span><i class="sw b-scl"></i>SCL</span>
+    <span><i class="sw b-in"></i>Switch input</span><span><i class="sw b-spare"></i>Spare</span>
+  </div>
+</header>
+
+<h2 id="overview">Overview</h2>
+<p>The HeliSR board sits upright in the head's upper box. Two 10-pin looms carry the switches, two AX ports carry the sensors, and the USB cable comes up the tube from the base. Every switch input is pulled up to 5 V on the board, so each switch only joins its input to GND.</p>
+<figure class="fig"><div class="scroll"><svg id="ov" viewBox="0 0 980 470" width="980" role="img" aria-label="Block diagram of every connection to the HeliSR board"></svg></div>
+<figcaption>Wires are coloured by what they carry. The J1 and J2 looms are each one half of a 10-pin JST SR jumper (A10SR10SR30K305A), cut in the middle.</figcaption></figure>
+
+<h2 id="helisr">HeliSR Rev 4.0 board</h2>
+<p>Seen from the front, with the USB end of the Pro Micro on the left; this is how it reads on the bench. In the head the board stands with that end down. The silkscreen names every connector. Pin 1 is ringed in white.</p>
+<figure class="fig"><div class="scroll"><svg id="heli" width="820" role="img" aria-label="HeliSR board, front, with every connector pin labelled"></svg></div>
+<figcaption>J1 and AX3 count from left to right; J2 and AX1 face the other way and count from right to left. AX4 and AX2 count from the top. The Pro Micro plugs into the two 12-pin sockets and needs no wires.</figcaption></figure>
+
+<div class="tbl"><table>
+<thead><tr><th>Connector</th><th>Type</th><th>Pins</th><th>Used for</th></tr></thead>
+<tbody>
+<tr><td class="pin">J1</td><td>JST SH 10-pin, top entry</td><td class="sig">1 GND · 2–9 IN1–IN8 · 10 GND</td><td>Toggles on both panels</td></tr>
+<tr><td class="pin">J2</td><td>JST SH 10-pin, top entry</td><td class="sig">1 GND · 2–9 IN9–IN16 · 10 GND</td><td>Hat, STOP REL, starter</td></tr>
+<tr><td class="pin">AX1 (J11)</td><td>JST SH 4-pin, top entry</td><td class="sig">1 SDA · 2 GND · 3 VCC · 4 SCL</td><td>Collective sensor, in the base</td></tr>
+<tr><td class="pin">AX4 (J14)</td><td>JST SH 4-pin, top entry</td><td class="sig">1 SDA · 2 GND · 3 VCC · 4 SCL</td><td>Throttle sensor, in the head</td></tr>
+<tr><td class="pin">AX2, AX3</td><td>JST SH 4-pin, top entry</td><td class="sig">as AX1</td><td>Spare</td></tr>
+<tr><td class="pin">J7, J8</td><td>12-pin sockets, 2.54 mm</td><td class="sig">Pro Micro pins 1–12, 13–24</td><td>The Pro Micro, USB end at the board's edge</td></tr>
+</tbody></table></div>
+
+<h2 id="searchhat">SearchHat Rev 1.0</h2>
+<div class="pair">
+<figure class="fig"><div class="scroll"><svg id="hat" width="420" role="img" aria-label="SearchHat board seen from behind, with J1 and J2 pins labelled"></svg></div>
+<figcaption>Seen from behind, as it sits on the lower panel's bosses with you working inside the box. Pin 1 of J1 and pad 1 of J2 are on the right. J1 is a side-entry socket: the plug goes in from the top edge.</figcaption></figure>
+<div>
+<p>The stick switch is soldered to the board, so the board is the whole hat. Use <b>either</b> J1, with half of a 6-pin JST SR jumper (A06SR06SR30K203A), <b>or</b> solder wires straight to the J2 pads. J1 and J2 carry the same signals in a different order.</p>
+<div class="tbl"><table>
+<thead><tr><th>Signal</th><th>J1</th><th>J2</th><th>To HeliSR</th></tr></thead>
+<tbody>
+<tr><td class="sig c-in">R (right)</td><td class="pin">1</td><td class="pin">1</td><td class="sig">J2-5 IN12</td></tr>
+<tr><td class="sig c-gnd">GND</td><td class="pin">2</td><td class="pin">3</td><td class="sig">J2-1 GND</td></tr>
+<tr><td class="sig c-in">RETR (down)</td><td class="pin">3</td><td class="pin">2</td><td class="sig">J2-3 IN10</td></tr>
+<tr><td class="sig c-in">CTR (push)</td><td class="pin">4</td><td class="pin">5</td><td class="sig">J2-8 IN15</td></tr>
+<tr><td class="sig c-in">EXT (up)</td><td class="pin">5</td><td class="pin">4</td><td class="sig">J2-2 IN9</td></tr>
+<tr><td class="sig c-in">L (left)</td><td class="pin">6</td><td class="pin">6</td><td class="sig">J2-4 IN11</td></tr>
+</tbody></table></div>
+<p class="lede">The centre push is optional: leave CTR off if you don't want it. If a direction comes out wrong on the real switch, swap its two wires or swap the inputs in the profile.</p>
+</div>
+</div>
+
+<h2 id="as5600">AS5600 sensor boards</h2>
+<div class="pair">
+<figure class="fig"><div class="scroll"><svg id="as" width="420" role="img" aria-label="AS5600 board seen from the back, with J1 pins and test points labelled"></svg></div>
+<figcaption>Seen from the back, where J1 is. The chip is on the other side, centred. The six test points go right through the board and are labelled on both sides.</figcaption></figure>
+<div>
+<p>Two identical boards: one in the base's lever (on AX1), one in the head's pod (on AX4). Each plugs in with a <b>1:N</b> JST SR jumper, A04SR04SR30K152B. J1's pins are the AX port's order turned end for end, so through a 1:N jumper every signal lands on its own pin.</p>
+<div class="tbl"><table>
+<thead><tr><th>HeliSR AX pin</th><th></th><th>Sensor J1 pin</th></tr></thead>
+<tbody>
+<tr><td class="sig c-sda">1 SDA</td><td>→</td><td class="sig c-sda">4 SDA</td></tr>
+<tr><td class="sig c-gnd">2 GND</td><td>→</td><td class="sig c-gnd">3 GND</td></tr>
+<tr><td class="sig c-vcc">3 VCC</td><td>→</td><td class="sig c-vcc">2 VCC</td></tr>
+<tr><td class="sig c-scl">4 SCL</td><td>→</td><td class="sig c-scl">1 SCL</td></tr>
+</tbody></table></div>
+<div class="note"><b>Never a 1:1 jumper.</b> A part number ending in <span class="mono">A</span> is 1:1 and puts 5 V on the sensor's ground. Only the <span class="mono">…152B</span> (1:N) goes on the sensors.</div>
+</div>
+</div>
+
+<h2 id="switches">The switches</h2>
+<p>Every switch goes between its input and GND; polarity doesn't matter. The toggles are single-pole, double-throw: three lugs in a row, the centre lug common.</p>
+<div class="pair">
+<figure class="fig"><div class="scroll"><svg id="tog" viewBox="0 0 400 300" width="400" role="img" aria-label="Toggle switch from the side, three lugs"></svg></div>
+<figcaption>APEM 600H toggle (636H/2, 637H/2, 639H/2). As with most toggles, the lever closes the lug at the <b>opposite</b> end to the way it points. APEM's numbering wasn't checked, so confirm each one with a meter before you solder.</figcaption></figure>
+<figure class="fig"><div class="scroll"><svg id="btn" viewBox="0 0 400 300" width="400" role="img" aria-label="Push button and tact switch terminals"></svg></div>
+<figcaption>Left: STOP REL push button (Same Sky PB4), two terminals, either way round. Right: the starter's TE 1825910-6 tact switch from below; a diagonal pair is the switch.</figcaption></figure>
+</div>
+
+<div class="tbl"><table>
+<thead><tr><th>Switch</th><th>Part</th><th>Action</th><th>Centre lug</th><th>Outer lugs</th></tr></thead>
+<tbody>
+<tr><td>GOV RPM INCR / DECR</td><td>APEM 637H/2</td><td>(ON)-OFF-(ON), springs back</td><td class="sig c-gnd">GND (J1-1)</td><td class="sig c-in">IN1 at INCR, IN2 at DECR</td></tr>
+<tr><td>LDG LT EXT / OFF / RETR</td><td>APEM 639H/2</td><td>ON-OFF-ON</td><td class="sig c-gnd">GND (J1-1)</td><td class="sig c-in">IN3 at EXT, IN4 at RETR</td></tr>
+<tr><td>SL ON / OFF / STOW (upper)</td><td>APEM 639H/2</td><td>ON-OFF-ON</td><td class="sig c-gnd">GND (J1-10)</td><td class="sig c-in">IN5 at ON, IN6 at STOW</td></tr>
+<tr><td>LDG LT ON / OFF (upper)</td><td>APEM 636H/2</td><td>ON-ON</td><td class="sig c-gnd">GND (J1-10)</td><td class="sig c-in">IN7 at ON; the other lug unused</td></tr>
+<tr><td>STOP REL</td><td>Same Sky PB4-M-BK-D-67</td><td>Push, momentary</td><td colspan="2" class="sig">one terminal <span class="c-gnd">GND (J2-10)</span>, the other <span class="c-in">IN13</span></td></tr>
+<tr><td>Starter trigger</td><td>TE 1825910-6</td><td>Tact, momentary</td><td colspan="2" class="sig">legs 1 and 4 (or 2 and 3): one <span class="c-gnd">GND (J2-10)</span>, the other <span class="c-in">IN14</span></td></tr>
+<tr><td>SEARCH CONT hat</td><td>ALPS RKJXM1015004</td><td>8-way stick, centre push</td><td colspan="2">On the SearchHat board: wire the board, not the switch</td></tr>
+</tbody></table></div>
+
+<h3>Finding a toggle's lugs with a meter</h3>
+<ol class="steps">
+  <li>Set the meter to continuity. Put one probe on the centre lug.</li>
+  <li>Push the lever to one position, for example INCR on the GOV switch. Touch the two outer lugs: the one that beeps is that position's lug. Mark it.</li>
+  <li>Repeat for the other position. In the middle (OFF) neither should beep.</li>
+  <li>Solder the centre lug to the GND chain and each marked lug to its input.</li>
+</ol>
+<p>If a switch still reads the wrong way round once it's in, swap its two outer wires or swap the two inputs in the profile.</p>
+
+<h2 id="j1">J1 loom: the toggles (IN1–IN8)</h2>
+<p>Half of a 10-pin JST SR jumper, plugged into J1. The wires may all be one colour: before you cut the jumper, mark the pin 1 edge, then confirm each wire with a meter against the plug's pins. Run the lower panel's GND chain from pin 1 and the upper panel's from pin 10.</p>
+<div class="tbl"><table data-list="j1"><thead><tr><th></th><th>J1 pin</th><th>Signal</th><th>Goes to</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+<p class="progress" data-for="j1"></p>
+
+<h2 id="j2">J2 loom: hat, STOP REL, starter (IN9–IN16)</h2>
+<p>The other half of the same jumper, plugged into J2. The hat's six wires (from its J1 lead or its J2 pads) splice into this loom wire for wire; STOP REL and the starter trigger's lead join it too.</p>
+<div class="tbl"><table data-list="j2"><thead><tr><th></th><th>J2 pin</th><th>Signal</th><th>Goes to</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+<p class="progress" data-for="j2"></p>
+
+<h2 id="sensors">Sensor leads: AX4 and AX1</h2>
+<h3>Throttle: AX4 (J14) to the head's sensor</h3>
+<p>One whole 1:N jumper, no cutting. The sensor board's J1 faces up out of the pod; plug the jumper in from above once the board is in its grooves, and the other end into AX4.</p>
+<h3>Collective: AX1 (J11) to the base's sensor</h3>
+<p>Too long for one jumper: cut a 1:N jumper in half and splice the 1 m 4-wire ribbon (Adafruit 3889) between the halves. Join each wire to the wire in the same position on both sides, so the lead stays 1:N end to end.</p>
+<ol class="steps">
+  <li>Before cutting, mark one edge wire of the jumper with a pen on both sides of where you'll cut. Mark one edge of the ribbon the same way.</li>
+  <li>Cut the jumper in the middle. Strip and tin all eight ends and the ribbon's.</li>
+  <li>At each end, join marked to marked, then the rest in order. Heat-shrink each joint on its own, then the bundle.</li>
+  <li>Feed the sensor end down the tube and through the lever's axial bore before closing the lever halves; plug it into the sensor board's J1 in the pocket.</li>
+</ol>
+<div class="tbl"><table data-list="ax"><thead><tr><th></th><th>Lead</th><th>From</th><th>To</th><th>Check with a meter</th></tr></thead><tbody></tbody></table></div>
+<p class="progress" data-for="ax"></p>
+
+<h2 id="usb">USB cable</h2>
+<p>The USB-A to USB-C cable runs up through the base and the tube, and is cut about 15 cm from the C plug and spliced inside the head (the plug won't pass through the tube). USB 2.0 cables use the standard colours below; check yours with a meter from the plug's pins before cutting.</p>
+<div class="tbl"><table data-list="usb"><thead><tr><th></th><th>Wire</th><th>Signal</th><th>Join to</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+<p class="progress" data-for="usb"></p>
+
+<h2 id="checks">Before you power it</h2>
+<ol class="steps">
+  <li><b>Sensor boards:</b> with nothing plugged in, VCC to GND (J1 pin 2 to pin 3) is not a short, and U1's pins 1 and 2 aren't joined.</li>
+  <li><b>Each sensor lead:</b> AX-end pin 1 to sensor-end pin 4, 2 to 3, 3 to 2, 4 to 1, and no two wires joined.</li>
+  <li><b>Each loom:</b> with every switch released or OFF, no input pin reads continuity to GND (pins 1 and 10). Then work each switch: only its own input joins GND.</li>
+  <li><b>Hat:</b> tilt each way and press the middle; each joins its own input to GND, a diagonal joins two.</li>
+  <li><b>Then</b> plug in the USB and use HeliSR Configurator's input page: every switch should light its own input, and the AS5600 helper should find a sensor on AX1 and AX4.</li>
+</ol>
+<p class="lede">Taken from the KiCad files for HeliSR Rev 4.0, SearchHat Rev 1.0 and AS5600 Rev 1.0, and from the boards' and head's READMEs in the repository.</p>
+<p><button class="reset" type="button" id="reset">Clear all ticks</button></p>
+</div>
+
+<script>
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  function el(parent, tag, attrs, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  const kind = s => /GND/.test(s) ? "gnd" : /VCC|5V/.test(s) ? "vcc" : /SDA/.test(s) ? "sda" : /SCL/.test(s) ? "scl" :
+    /spare/i.test(s) ? "spare" : "in";
+
+  /* ---------- HeliSR board, front, USB end left (mm from the board's top-left corner, from the KiCad file) ---------- */
+  (function () {
+    const svg = document.getElementById("heli");
+    const S = 14, ox = 70, oy = 150, W = 39.3, H = 33.64;
+    const X = x => ox + x * S, Y = y => oy + y * S;
+    const vbW = X(W) + 175, vbH = Y(H) + 150;
+    svg.setAttribute("viewBox", `0 0 ${vbW} ${vbH}`);
+    el(svg, "rect", { x: X(0), y: Y(0), width: W * S, height: H * S, rx: 8, class: "s-board" });
+    for (const [x, y] of [[3.2, 3.2], [36.1, 3.2], [3.2, 30.44], [36.1, 30.44]]) el(svg, "circle", { cx: X(x), cy: Y(y), r: 1.6 * S, class: "s-hole" });
+    // Pro Micro outline and sockets
+    el(svg, "rect", { x: X(1.6), y: Y(7.6), width: 31.0 * S, height: 18.4 * S, rx: 4, class: "s-ghost" });
+    for (const y of [9.2, 24.44]) for (let i = 0; i < 12; i++) el(svg, "circle", { cx: X(3.14 + 2.54 * i), cy: Y(y), r: 4, class: "s-pad" });
+    el(svg, "rect", { x: X(-0.9), y: Y(14.3), width: 4.4 * S, height: 5.0 * S, rx: 4, class: "s-house" });
+    el(svg, "text", { x: X(1.3), y: Y(17.25), class: "f-fg", "font-size": 10, "text-anchor": "middle" }, "USB");
+    el(svg, "text", { x: X(17), y: Y(16.2), class: "s-silk", "text-anchor": "middle" }, "Pro Micro 5 V / 16 MHz");
+    el(svg, "text", { x: X(17), y: Y(18.2), class: "s-silk-sm", "text-anchor": "middle" }, "plugs into J7 / J8, USB end to the left");
+    el(svg, "text", { x: X(17), y: Y(10.9), class: "s-silk-sm", "text-anchor": "middle" }, "J8: pins 24 … 13");
+    el(svg, "text", { x: X(17), y: Y(23.3), class: "s-silk-sm", "text-anchor": "middle" }, "J7: pins 1 … 12");
+    // RST button
+    el(svg, "rect", { x: X(29.8 - 1.6), y: Y(29.5 - 2.1), width: 3.2 * S, height: 4.2 * S, rx: 3, class: "s-house" });
+    el(svg, "text", { x: X(29.8), y: Y(27.0), class: "s-silk-sm", "text-anchor": "middle" }, "RST");
+
+    const conns = [
+      { name: "J1", sub: "IN1–8", side: "top", hx: [7.55, 19.15], pins: [
+        "GND", "IN1  GOV INCR", "IN2  GOV DECR", "IN3  LDG LT EXT", "IN4  LDG LT RETR", "IN5  SL ON", "IN6  SL STOW",
+        "IN7  LDG LT ON", "IN8  spare", "GND"], x0: 8.85, dx: 1 },
+      { name: "AX3", sub: "J13 spare", side: "top", hx: [20.85, 26.45], pins: ["SDA", "GND", "VCC 5V", "SCL"], x0: 22.15, dx: 1, spare: true },
+      { name: "J2", sub: "IN9–16", side: "bottom", hx: [7.55, 19.15], pins: [
+        "GND", "IN9  HAT EXT", "IN10 HAT RETR", "IN11 HAT L", "IN12 HAT R", "IN13 STOP REL", "IN14 STARTER",
+        "IN15 HAT CTR", "IN16 spare", "GND"], x0: 17.85, dx: -1 },
+      { name: "AX1", sub: "J11 collective", side: "bottom", hx: [20.85, 26.45], pins: ["SDA", "GND", "VCC 5V", "SCL"], x0: 25.15, dx: -1 },
+      { name: "AX4", sub: "J14 throttle", side: "right", hy: [7.0, 13.8], pins: ["SDA", "GND", "VCC 5V", "SCL"], y0: 8.9, dy: 1 },
+      { name: "AX2", sub: "J12 spare", side: "right", hy: [19.84, 26.64], pins: ["SDA", "GND", "VCC 5V", "SCL"], y0: 21.74, dy: 1, spare: true },
+    ];
+    for (const c of conns) {
+      if (c.side === "top" || c.side === "bottom") {
+        const top = c.side === "top";
+        const hy = top ? [0.5, 4.9] : [28.74, 33.14], py = top ? 4.03 : 29.62;
+        el(svg, "rect", { x: X(c.hx[0]), y: Y(hy[0]), width: (c.hx[1] - c.hx[0]) * S, height: (hy[1] - hy[0]) * S, rx: 2, class: "s-house" });
+        el(svg, "text", { x: X((c.hx[0] + c.hx[1]) / 2), y: top ? Y(7.2) : Y(27.4), class: "s-silk", "text-anchor": "middle" }, `${c.name}  ${c.sub}`);
+        c.pins.forEach((p, i) => {
+          const x = c.x0 + c.dx * i, k = c.spare && !/GND|VCC/.test(p) ? "spare" : kind(p);
+          el(svg, "rect", { x: X(x) - 4.2, y: Y(py) - 10, width: 8.4, height: 20, rx: 1.5, class: i === 0 ? "s-pad1" : "s-pad" });
+          const ty = top ? Y(0) - 10 : Y(H) + 10;
+          el(svg, "line", { x1: X(x), y1: top ? Y(py) - 11 : Y(py) + 11, x2: X(x), y2: ty, class: `s-lead k-${k}` });
+          el(svg, "text", { x: X(x) + 3.8, y: ty, transform: `rotate(-90 ${X(x) + 3.8} ${ty})`, "text-anchor": top ? "start" : "end",
+            class: `s-lbl f-${k}` }, `${i + 1}  ${p}`);
+        });
+      } else {
+        const px = 35.27;
+        el(svg, "rect", { x: X(34.3), y: Y(c.hy[0]), width: 4.6 * S, height: (c.hy[1] - c.hy[0]) * S, rx: 2, class: "s-house" });
+        el(svg, "text", { x: X(31.0), y: Y((c.hy[0] + c.hy[1]) / 2) + 4, class: "s-silk", "text-anchor": "end" }, c.name);
+        c.pins.forEach((p, i) => {
+          const y = c.y0 + c.dy * i, k = c.spare && !/GND|VCC/.test(p) ? "spare" : kind(p);
+          el(svg, "rect", { x: X(px) - 10, y: Y(y) - 4.2, width: 20, height: 8.4, rx: 1.5, class: i === 0 ? "s-pad1" : "s-pad" });
+          el(svg, "line", { x1: X(px) + 11, y1: Y(y), x2: X(W) + 12, y2: Y(y), class: `s-lead k-${k}` });
+          el(svg, "text", { x: X(W) + 16, y: Y(y) + 3.8, class: `s-lbl f-${k}` }, `${i + 1}  ${p}`);
+        });
+        el(svg, "text", { x: X(W) + 16, y: Y(c.y0) - 12, class: "s-lbl f-muted" }, c.sub);
+      }
+    }
+  })();
+
+  /* ---------- SearchHat, seen from behind (mirrored left-right) ---------- */
+  (function () {
+    const svg = document.getElementById("hat");
+    const S = 12, W = 22, H = 29, ox = 78, oy = 128;
+    const X = x => ox + (W - x) * S, Y = y => oy + y * S;
+    svg.setAttribute("viewBox", `0 0 ${W * S + 2 * ox} ${Y(H) + 120}`);
+    el(svg, "rect", { x: ox, y: Y(0), width: W * S, height: H * S, rx: 2 * S, class: "s-board" });
+    for (const [x, y] of [[2.5, 5.5], [19.5, 5.5], [2.5, 22.5], [19.5, 22.5]]) el(svg, "circle", { cx: X(x), cy: Y(y), r: 1.1 * S, class: "s-hole" });
+    el(svg, "circle", { cx: X(11), cy: Y(14), r: 5.6 * S, class: "s-ghost" });
+    el(svg, "text", { x: X(11), y: Y(14) - 4, class: "s-silk-sm", "text-anchor": "middle" }, "stick switch");
+    el(svg, "text", { x: X(11), y: Y(14) + 9, class: "s-silk-sm", "text-anchor": "middle" }, "on the front");
+    // J1, side entry, opening at the top edge
+    el(svg, "rect", { x: X(15.3), y: Y(0.2), width: 8.6 * S, height: 4.4 * S, rx: 2, class: "s-house" });
+    el(svg, "text", { x: X(11), y: Y(7.6), class: "s-silk", "text-anchor": "middle" }, "J1 (plug in from the top)");
+    const j1 = ["R", "GND", "RETR", "CTR", "EXT", "L"];
+    j1.forEach((p, i) => {
+      const x = 8.5 + i, k = kind(p);
+      el(svg, "rect", { x: X(x) - 3.6, y: Y(5.28) - 8, width: 7.2, height: 16, rx: 1.5, class: i === 0 ? "s-pad1" : "s-pad" });
+      el(svg, "line", { x1: X(x), y1: Y(5.28) - 9, x2: X(x), y2: Y(0) - 10, class: `s-lead k-${k}` });
+      el(svg, "text", { x: X(x) + 3.6, y: Y(0) - 10, transform: `rotate(-90 ${X(x) + 3.6} ${Y(0) - 10})`, class: `s-lbl f-${k}` }, `${i + 1}  ${p}`);
+    });
+    // J2 wire pads along the bottom
+    const j2 = ["R", "RETR", "GND", "EXT", "CTR", "L"];
+    el(svg, "text", { x: X(11), y: Y(26.6) + 3, class: "s-silk", "text-anchor": "middle" }, "J2 wire pads");
+    j2.forEach((p, i) => {
+      const x = 6 + 2 * i, k = kind(p);
+      el(svg, "circle", { cx: X(x), cy: Y(23.5), r: 8, class: i === 0 ? "s-pad1" : "s-pad" });
+      el(svg, "circle", { cx: X(x), cy: Y(23.5), r: 3.5, class: "s-hole", "stroke-width": 0 });
+      el(svg, "line", { x1: X(x), y1: Y(23.5) + 9, x2: X(x), y2: Y(H) + 10, class: `s-lead k-${k}` });
+      el(svg, "text", { x: X(x) + 3.6, y: Y(H) + 10, transform: `rotate(-90 ${X(x) + 3.6} ${Y(H) + 10})`, "text-anchor": "end", class: `s-lbl f-${k}` }, `${i + 1}  ${p}`);
+    });
+    el(svg, "text", { x: X(11), y: 18, class: "s-lbl f-muted", "text-anchor": "middle" }, "BACK VIEW · EXT is up");
+  })();
+
+  /* ---------- AS5600 board, back view (mirrored left-right) ---------- */
+  (function () {
+    const svg = document.getElementById("as");
+    const S = 12, W = 23.24, ox = 150, oy = 40;
+    const X = x => ox + (W - x) * S, Y = y => oy + y * S;
+    svg.setAttribute("viewBox", `0 0 ${W * S + ox + 20} ${Y(W) + 112}`);
+    el(svg, "rect", { x: ox, y: Y(0), width: W * S, height: W * S, rx: 3, class: "s-board" });
+    for (const [x, y] of [[3.62, 3.62], [19.62, 3.62], [3.62, 19.62], [19.62, 19.62]]) el(svg, "circle", { cx: X(x), cy: Y(y), r: 1.2 * S, class: "s-hole" });
+    el(svg, "rect", { x: X(11.62 + 2.45), y: Y(11.62 - 1.95), width: 4.9 * S, height: 3.9 * S, class: "s-ghost" });
+    // J1 on the back (vertical socket)
+    el(svg, "rect", { x: X(14.0), y: Y(8.3), width: 4.6 * S, height: 6.6 * S, rx: 2, class: "s-house" });
+    el(svg, "text", { x: X(11.4), y: Y(6.9), class: "s-silk", "text-anchor": "middle" }, "J1");
+    const pins = ["SCL", "VCC 5V", "GND", "SDA"];
+    pins.forEach((p, i) => {
+      const y = 10.12 + i, k = kind(p);
+      el(svg, "rect", { x: X(12.95) - 9, y: Y(y) - 3.6, width: 18, height: 7.2, rx: 1.5, class: i === 0 ? "s-pad1" : "s-pad" });
+      el(svg, "line", { x1: X(12.95) - 10, y1: Y(y), x2: ox - 8, y2: Y(y), class: `s-lead k-${k}` });
+      el(svg, "text", { x: ox - 12, y: Y(y) + 3.8, "text-anchor": "end", class: `s-lbl f-${k}` }, `${i + 1}  ${p}`);
+    });
+    el(svg, "text", { x: ox - 12, y: Y(10.12) - 14, "text-anchor": "end", class: "s-lbl f-muted" }, "J1 → 1:N lead");
+    // test points (through-hole), mirrored order from the back
+    const tps = [[5.12, "5V"], [7.72, "3V3"], [10.32, "OUT"], [12.92, "GND"], [15.52, "SDA"], [18.12, "SCL"]];
+    for (const [x, n] of tps) {
+      const k = n === "3V3" || n === "OUT" ? "spare" : kind(n === "5V" ? "VCC" : n);
+      el(svg, "circle", { cx: X(x), cy: Y(16.22), r: 9, class: "s-pad" });
+      el(svg, "circle", { cx: X(x), cy: Y(16.22), r: 4.2, class: "s-hole", "stroke-width": 0 });
+      el(svg, "line", { x1: X(x), y1: Y(16.22) + 10, x2: X(x), y2: Y(W) + 10, class: `s-lead k-${k}` });
+      el(svg, "text", { x: X(x) + 3.6, y: Y(W) + 10, transform: `rotate(-90 ${X(x) + 3.6} ${Y(W) + 10})`, "text-anchor": "end", class: `s-lbl f-${k}` }, n);
+    }
+    el(svg, "text", { x: X(11.62), y: Y(19.4), class: "s-silk-sm", "text-anchor": "middle" }, "test points");
+    el(svg, "text", { x: X(11.62), y: Y(4.6), class: "s-silk-sm", "text-anchor": "middle" }, "chip on the front");
+  })();
+
+  /* ---------- Toggle and buttons ---------- */
+  (function () {
+    const t = document.getElementById("tog");
+    el(t, "rect", { x: 140, y: 95, width: 120, height: 110, rx: 6, class: "sw-body" });
+    el(t, "rect", { x: 172, y: 62, width: 56, height: 33, class: "sw-metal" });
+    el(t, "rect", { x: 162, y: 80, width: 76, height: 10, class: "sw-body" });
+    el(t, "line", { x1: 200, y1: 62, x2: 140, y2: 10, class: "k-muted", "stroke-width": 9, "stroke-linecap": "round" });
+    el(t, "text", { x: 98, y: 24, class: "o-sub", "text-anchor": "end" }, "lever toward lug 1");
+    const lx = [158, 200, 242];
+    lx.forEach((x, i) => {
+      el(t, "rect", { x: x - 7, y: 205, width: 14, height: 40, class: "sw-lug" });
+      el(t, "text", { x, y: 265, class: "f-fg", "font-size": 12, "text-anchor": "middle", "font-weight": 600 }, ["lug 1", "centre", "lug 3"][i]);
+    });
+    el(t, "text", { x: 200, y: 285, class: "f-gnd", "font-size": 11, "text-anchor": "middle" }, "to GND");
+    el(t, "path", { d: "M200 228 C 215 180, 230 180, 242 228", class: "sw-on" });
+    el(t, "text", { x: 300, y: 165, class: "o-sub" }, "closed: centre");
+    el(t, "text", { x: 300, y: 181, class: "o-sub" }, "to lug 3");
+    el(t, "text", { x: 200, y: 150, class: "o-title", "text-anchor": "middle" }, "APEM 600H");
+    el(t, "text", { x: 200, y: 168, class: "o-sub", "text-anchor": "middle" }, "seen from the side");
+
+    const b = document.getElementById("btn");
+    // push button: round bezel, two lugs
+    el(b, "circle", { cx: 100, cy: 110, r: 52, class: "sw-body" });
+    el(b, "circle", { cx: 100, cy: 110, r: 30, class: "sw-metal" });
+    el(b, "rect", { x: 72, y: 165, width: 14, height: 46, class: "sw-lug" });
+    el(b, "rect", { x: 114, y: 165, width: 14, height: 46, class: "sw-lug" });
+    el(b, "text", { x: 79, y: 232, class: "f-gnd", "font-size": 11, "text-anchor": "middle" }, "GND");
+    el(b, "text", { x: 121, y: 232, class: "f-in", "font-size": 11, "text-anchor": "middle" }, "IN13");
+    el(b, "text", { x: 100, y: 262, class: "o-title", "text-anchor": "middle" }, "STOP REL");
+    el(b, "text", { x: 100, y: 278, class: "o-sub", "text-anchor": "middle" }, "either way round");
+    // tact switch from below: 6 x 6 mm, legs numbered as TE's drawing
+    el(b, "rect", { x: 245, y: 70, width: 90, height: 90, rx: 4, class: "sw-body" });
+    el(b, "circle", { cx: 290, cy: 115, r: 22, class: "sw-metal" });
+    const legs = [[245, 80, "1"], [335, 80, "2"], [245, 150, "3"], [335, 150, "4"]];
+    for (const [x, y, n] of legs) {
+      el(b, "rect", { x: x - 9, y: y - 5, width: 18, height: 10, class: "sw-lug" });
+      el(b, "text", { x: x < 290 ? x - 16 : x + 16, y: y + 4, class: "f-fg", "font-size": 12, "font-weight": 600, "text-anchor": x < 290 ? "end" : "start" }, n);
+    }
+    el(b, "line", { x1: 252, y1: 84, x2: 328, y2: 146, class: "sw-on" });
+    el(b, "text", { x: 226, y: 196, class: "f-gnd", "font-size": 11 }, "1 → GND");
+    el(b, "text", { x: 300, y: 196, class: "f-in", "font-size": 11 }, "4 → IN14");
+    el(b, "text", { x: 290, y: 262, class: "o-title", "text-anchor": "middle" }, "Starter trigger");
+    el(b, "text", { x: 290, y: 278, class: "o-sub", "text-anchor": "middle" }, "a diagonal pair switches");
+  })();
+
+  /* ---------- Overview ---------- */
+  (function () {
+    const s = document.getElementById("ov");
+    const box = (x, y, w, h, title, sub) => {
+      el(s, "rect", { x, y, width: w, height: h, rx: 8, class: "o-box" });
+      el(s, "text", { x: x + 12, y: y + 22, class: "o-title" }, title);
+      (Array.isArray(sub) ? sub : [sub]).forEach((t, i) => el(s, "text", { x: x + 12, y: y + 40 + 15 * i, class: "o-sub" }, t));
+    };
+    const wire = (d, k) => el(s, "path", { d, class: `o-wire k-${k}` });
+    // HeliSR
+    el(s, "rect", { x: 380, y: 70, width: 220, height: 320, rx: 10, class: "o-board" });
+    el(s, "text", { x: 490, y: 215, class: "s-silk", "text-anchor": "middle", "font-size": 14 }, "HeliSR Rev 4.0");
+    el(s, "text", { x: 490, y: 234, class: "s-silk-sm", "text-anchor": "middle" }, "+ Pro Micro");
+    const tab = (x, y, t) => { el(s, "rect", { x: x - 22, y: y - 11, width: 44, height: 22, rx: 3, class: "o-tab" });
+      el(s, "text", { x, y: y + 4, class: "o-tabtxt", "text-anchor": "middle" }, t); };
+    // switches, left
+    box(20, 20, 250, 64, "Lower panel toggles", ["GOV INCR/DECR · IN1, IN2", "LDG LT EXT/RETR · IN3, IN4"]);
+    box(20, 100, 250, 64, "Upper panel toggles", ["SL ON/STOW · IN5, IN6", "LDG LT ON · IN7"]);
+    box(20, 200, 250, 64, "SearchHat board", ["EXT RETR L R · IN9–IN12", "centre push · IN15 (optional)"]);
+    box(20, 280, 250, 48, "STOP REL button", "IN13");
+    box(20, 344, 250, 48, "Starter trigger", "IN14 · lead up the trigger's hole");
+    wire("M270 52 C 320 52, 330 120, 380 120", "in");
+    wire("M270 132 C 320 132, 330 120, 380 120", "in");
+    wire("M270 232 C 320 232, 330 320, 380 320", "in");
+    wire("M270 304 C 320 304, 330 320, 380 320", "in");
+    wire("M270 368 C 320 368, 330 320, 380 320", "in");
+    tab(380, 120, "J1"); tab(380, 320, "J2");
+    el(s, "text", { x: 300, y: 112, class: "o-sub" }, "J1 loom");
+    el(s, "text", { x: 300, y: 412, class: "o-sub" }, "J2 loom");
+    el(s, "text", { x: 282, y: 222, class: "o-sub" }, "6-pin lead");
+    // sensors and USB, right
+    box(720, 40, 240, 64, "Throttle AS5600 board", ["in the head's pod", "1:N jumper, 6 in, whole"]);
+    box(720, 170, 240, 80, "Collective AS5600 board", ["in the base's lever", "1:N jumper cut in half", "+ 1 m ribbon, down the tube"]);
+    box(720, 320, 240, 64, "PC", ["USB-A to USB-C cable,", "spliced in the head"]);
+    wire("M600 110 C 660 110, 660 72, 720 72", "sda");
+    wire("M600 210 C 660 210, 660 210, 720 210", "scl");
+    wire("M600 340 C 660 340, 660 352, 720 352", "gnd");
+    tab(600, 110, "AX4"); tab(600, 210, "AX1"); tab(600, 340, "USB");
+    el(s, "text", { x: 490, y: 300, class: "s-silk-sm", "text-anchor": "middle" }, "AX2, AX3, IN8, IN16 spare");
+  })();
+
+  /* ---------- Wire lists with ticks ---------- */
+  const LISTS = {
+    j1: [
+      ["1", "GND", "Centre lugs of GOV and LDG LT EXT/RETR (lower panel), daisy-chained", "One wire to the first, a link to the next"],
+      ["2", "IN1", "GOV toggle: the lug that closes at INCR", ""],
+      ["3", "IN2", "GOV toggle: the lug that closes at DECR", ""],
+      ["4", "IN3", "LDG LT toggle: the lug that closes at EXT", ""],
+      ["5", "IN4", "LDG LT toggle: the lug that closes at RETR", ""],
+      ["6", "IN5", "SL toggle (upper): the lug that closes at ON", ""],
+      ["7", "IN6", "SL toggle (upper): the lug that closes at STOW", ""],
+      ["8", "IN7", "LDG LT ON toggle (upper): the lug that closes at ON", "Its other outer lug stays empty"],
+      ["9", "IN8 spare", "Nothing", "Cut short and insulate"],
+      ["10", "GND", "Centre lugs of SL and LDG LT ON (upper panel), daisy-chained", ""],
+    ],
+    j2: [
+      ["1", "GND", "SearchHat J1 pin 2 (or J2 pad 3)", "The hat's ground"],
+      ["2", "IN9", "SearchHat J1 pin 5 EXT (or J2 pad 4)", "Hat up"],
+      ["3", "IN10", "SearchHat J1 pin 3 RETR (or J2 pad 2)", "Hat down"],
+      ["4", "IN11", "SearchHat J1 pin 6 L (or J2 pad 6)", "Hat left"],
+      ["5", "IN12", "SearchHat J1 pin 1 R (or J2 pad 1)", "Hat right"],
+      ["6", "IN13", "STOP REL button, one terminal", ""],
+      ["7", "IN14", "Starter trigger, one lead", "From leg 1 or 4 (one diagonal pair)"],
+      ["8", "IN15", "SearchHat J1 pin 4 CTR (or J2 pad 5)", "Optional centre push"],
+      ["9", "IN16 spare", "Nothing", "Cut short and insulate"],
+      ["10", "GND", "STOP REL's other terminal and the starter's other lead", "Join both to this wire"],
+    ],
+    ax: [
+      ["AX4", "HeliSR AX4 (J14)", "Throttle sensor J1", "AX pin 1 to sensor pin 4, 2–3, 3–2, 4–1"],
+      ["AX1, AX end", "HeliSR AX1 (J11)", "Half jumper → ribbon", "Marked wire is the same at both splices"],
+      ["AX1, sensor end", "Ribbon → half jumper", "Collective sensor J1", "AX1 pin 1 reaches sensor pin 4, and so on"],
+    ],
+    usb: [
+      ["Red", "VBUS 5 V", "Red", ""],
+      ["Black", "GND", "Black", ""],
+      ["Green", "D+", "Green", "Keep D+ and D− twisted right up to the joint"],
+      ["White", "D−", "White", ""],
+      ["Bare / foil", "Shield", "Bare / foil", "Join and insulate; keep it off the other joints"],
+    ],
+  };
+  const KEY = "heli-wiring-ticks";
+  let ticks = {};
+  try { ticks = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { ticks = {}; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ticks)); } catch (e) {} };
+  function progress(name) {
+    const rows = LISTS[name].length, done = LISTS[name].filter((_, i) => ticks[`${name}-${i}`]).length;
+    const p = document.querySelector(`.progress[data-for="${name}"]`);
+    if (p) p.textContent = `${done} of ${rows} done`;
+  }
+  for (const name in LISTS) {
+    const tb = document.querySelector(`table[data-list="${name}"] tbody`);
+    LISTS[name].forEach((r, i) => {
+      const id = `${name}-${i}`, tr = document.createElement("tr");
+      const td0 = document.createElement("td"); td0.className = "chk";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = `tick-${id}`;
+      cb.setAttribute("aria-label", `Done: ${r[0]} ${r[1]}`); cb.checked = !!ticks[id];
+      td0.appendChild(cb); tr.appendChild(td0);
+      r.forEach((v, j) => {
+        const td = document.createElement("td"); td.textContent = v;
+        if (j === 0) td.className = "pin";
+        if (j === 1 && (name === "j1" || name === "j2")) td.className = `sig c-${kind(v)}`;
+        if (name === "usb" && j === 1) td.className = `sig c-${/VBUS/.test(v) ? "vcc" : /GND/.test(v) ? "gnd" : /D\+/.test(v) ? "sda" : /D−/.test(v) ? "scl" : "spare"}`;
+        tr.appendChild(td);
+      });
+      tr.classList.toggle("done", cb.checked);
+      cb.addEventListener("change", () => { ticks[id] = cb.checked; tr.classList.toggle("done", cb.checked); save(); progress(name); });
+      tb.appendChild(tr);
+    });
+    progress(name);
+  }
+  document.getElementById("reset").addEventListener("click", () => {
+    ticks = {}; save();
+    document.querySelectorAll("td.chk input").forEach(cb => { cb.checked = false; cb.closest("tr").classList.remove("done"); });
+    for (const name in LISTS) progress(name);
+  });
+})();
+</script>
