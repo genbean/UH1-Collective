@@ -53,12 +53,11 @@ Y_TIP = FACE - STICK_OUT               # -10.63
 STICK_L = Y_MF - Y_TIP                 # 14.63 mounting face to tip, as built (catalog 15 +- 0.4)
 SOCKET = 5.5                           # the stick goes this far into the cap, and its tip bears on the socket's end.
                                        # 4.5 left the rim 2 mm off the panel at full deflection; 5.5 brings it 1 mm nearer
-SOCKET_D = 2.5                         # the stick measures 0.085" (2.16 mm). Round sockets: 2.3 and 2.4 printed too tight,
-                                       # 2.5 far too loose; the D below is what grips. 2.45 with a 1.69 D: too tight
+SOCKET_D = 2.5                         # picked with socket_test.py's coupons: 2.49 and 2.50 fit the 0.085" (2.16 mm) stick
 FLAT_L, FLAT_W = 3.5, 1.4              # catalog: the stick's last 3.5 mm is a D, 1.4 from its flat to the far side, the
                                        # flat facing A (EXT, +v)
 SOCKET_FLAT_L = 3.3                    # the cap's D: just short of the flat's length, so the round stick clears its end
-SOCKET_FLAT_W = 1.72                   # flat to the far side, over the stick's 1.4 (1.69 printed too tight)
+SOCKET_FLAT_W = 1.85                   # flat to the far side, over the stick's 1.4: picked with socket_test.py's coupons
 Y_CAPB = Y_TIP + SOCKET                # cap's underside, -5.13
 CAP_GAP = FACE - Y_CAPB                # 2.63 in front of the panel's face
 BOARD_T = MECH["thickness"]

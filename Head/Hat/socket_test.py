@@ -8,7 +8,7 @@
 #
 # Done: round coupons. 0.05 steps found 2.50 fits; 0.01 steps found 2.49 and 2.50 fit. SOCKET_D = 2.50.
 # Now:  D coupons, round part 2.50, from the flat to the far side 1.75 .. 2.00 in 0.05 steps (caps with a 1.69 and a
-#       1.72 D were too tight)                                                           -> SOCKET_FLAT_W
+#       1.72 D were too tight). 1.85 fits                                               -> SOCKET_FLAT_W = 1.85
 #
 # usage: socket_test.py <out dir>
 import os
