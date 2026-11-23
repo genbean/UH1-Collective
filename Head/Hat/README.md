@@ -77,5 +77,5 @@ Wiring: the same inputs as the head's earlier tact-switch hats, so the profiles 
 Nothing is printed or built yet. Still to check:
 - the switch's real dimensions: everything here comes from the ALPS catalog's drawing, including the 0.8 mm collar in front of its body, which is read off the drawing;
 - that A is EXT, as the catalog's lever drawing reads. If not, swap the inputs in the profile;
-- the 2.4 mm, 5.5 mm deep cap socket: its fit on the stick, and about 1 mm left between the rim and the panel at full deflection;
+- about 1 mm left between the cap's rim and the panel at full deflection, with the 5.5 mm deep socket (the socket's fit, 2.5 round with a 1.85 D, is confirmed on the built hat);
 - the M2 × 8s in the deeper pilots (the first pilots, 1 mm short of the face, let them bottom out).
