@@ -1699,7 +1699,7 @@ GUIDE_HW = m.SOCK_BORE_R + GUIDE_WALL            # 25.4: 50.8 mm square
 GUIDE_END_T = 5.0                                # the closed end
 GUIDE_HOLE_AT = TL_X + m.SOCK_BOTTOM             # the hole from the tube's end: -43.3 (46 from the pivot, 2.7 to the end)
 GUIDE_PAST = 8.0                                 # beyond the hole
-GUIDE_DRILL_D = 4.6                              # for a 4.5 mm bit (FDM holes print a little small)
+GUIDE_DRILL_D = 4.07                             # for a 5/32 in (3.97 mm) bit (FDM holes print a little small)
 GUIDE_CH = 1.0
 
 

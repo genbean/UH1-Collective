@@ -328,7 +328,7 @@ The collar still fine-tunes: 8 mm toward the pivot adds about 21 g of lift at th
 
 ### Drilling the tube: the drill guide
 
-`drill_guide.stl` is a one-piece block that slides over the tube's lever end, the tube's end against its closed end, and guides a 4.5 mm bit for the tube lock's hole. The lever's own holes are never drilled.
+`drill_guide.stl` is a one-piece block that slides over the tube's lever end, the tube's end against its closed end, and guides a 5/32 in (3.97 mm) bit for the tube lock's hole, a snug fit on the M4 bolt. The lever's own holes are never drilled.
 
 - **Depth:** the hole is 43.3 mm from the tube's end, where the lever's bolt crosses it (the tube's end sits 2.7 mm from the pivot axis, the bolt 46 mm).
 - **Size:** 50.8 mm square, 56.3 mm long: 1/2 in of wall all round the tube, so each drill hole is guided 1/2 in before it reaches the tube. Solid but for the tube's bore and the two drill holes.
